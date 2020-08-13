@@ -1,0 +1,2 @@
+# stakez
+Zilliqa Staking App
