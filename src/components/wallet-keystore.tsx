@@ -43,6 +43,7 @@ class WalletKeystore extends Component<any, any> {
                 console.log(account);
 
                 // no error call parent function to redirect to staking manager app
+                this.props.onSuccess();
             }
 
             reader.onerror = (e) => {

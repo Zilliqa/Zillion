@@ -1,39 +1,26 @@
-import React, { useState } from 'react';
-import WalletKeystore from './components/wallet-keystore'
-import './app.css';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
+import Home from './components/home';
+import Dashboard from './components/dashboard';
+import { AuthContext, AuthProvider } from './contexts/authContext';
 
 function App() {
-  const [isKeystoreClicked, setIsKeystoreClicked] = useState(false);
-
-  const resetWalletsClicked = () => {
-    setIsKeystoreClicked(false);
-  }
-
+  // authContext is passed to other components as props so that they can be accessible
+  // without re-importing and specifying the Consumer tags
   return (
-    <div className="cover">
-      <div className="container-fluid h-100">
-        <div className="row h-100 align-items-center">
-          <div className="col-12 text-center text-light">
-            {
-              !isKeystoreClicked ?
-              <>
-              <h1 className="font-weight-light display-1">StakeZ</h1>
-              <p className="lead">Staking in Zilliqa</p>
-              <p>Connect your wallet to begin</p>
-              <div id="wallet-access">
-                <button type="button" className="btn btn-primary" onClick={() => setIsKeystoreClicked(true)}>Keystore</button>
-                <button type="button" className="btn btn-primary">ZilPay</button>
-                <button type="button" className="btn btn-primary">Moonlet</button>
-                <button type="button" className="btn btn-primary">Ledger</button>
-              </div>
-              </>
-            :
-              <WalletKeystore returnToMain={resetWalletsClicked}/>
-            }
-          </div>
-        </div>
-      </div>
-    </div>
+    <AuthProvider>
+      <AuthContext.Consumer>
+        {(authContext) => {
+          return (
+            <Switch>
+              <Route exact path="/" render={(props) => <Home {...props} authContext={authContext}/>} />
+              <Route path="/dashboard" render={(props) => <Dashboard {...props} authContext={authContext}/>} />
+            </Switch>
+          );
+        }}
+      </AuthContext.Consumer>
+    </AuthProvider>
+
   );
 }
 
