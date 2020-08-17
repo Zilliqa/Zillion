@@ -37,14 +37,14 @@ function MnemonicWallet(props: any) {
             <h2>Load Wallet using Mnemonic Phrase</h2>
             <p className="lead">Simple implmentation without password</p>
             { error ? <p>There is something wrong in decrypting. Please ensure there are no carriage returns.</p> : null }
-            <div>
+            <div className="form-group">
                 <label>
-                    Mnemonic Phrase:
-                    <textarea value={mnemonic} onChange={handleMnemonic} />
+                    Mnemonic Phrase
+                    <textarea id="mnemonic-phrase" value={mnemonic} className="form-control" onChange={handleMnemonic} />
                 </label>
             </div>
-            <button type="button" className="btn btn-success" onClick={unlockWallet}>Unlock Wallet</button>
-            <button type="button" className="btn btn-primary" onClick={props.onReturnCallback}>Back</button>
+            <button type="button" className="btn btn-success mx-2" onClick={unlockWallet}>Unlock Wallet</button>
+            <button type="button" className="btn btn-primary mx-2" onClick={props.onReturnCallback}>Back</button>
         </div>
     );
 }

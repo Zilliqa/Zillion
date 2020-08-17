@@ -12,6 +12,7 @@ class WalletKeystore extends Component<any, any> {
     constructor(props: any) {
         super(props);
         this.state = {
+            filename: "",
             passphrase: "",
             keystore: "",
             error: ""
@@ -24,6 +25,7 @@ class WalletKeystore extends Component<any, any> {
 
     handleFile = (e: any) => {
         let keystoreFile = e.target.files[0];
+        this.setState({filename: keystoreFile.name});
         this.setState({keystore: keystoreFile});
     }
 
@@ -69,13 +71,16 @@ class WalletKeystore extends Component<any, any> {
                 <h2>Load Wallet using Keystore</h2>
                 { this.state.error ? <p>There is something wrong in decrypting</p> : null }
                 <div>
-                    <input type="file" onChange={this.handleFile} />
+                    <div id="keystore">
+                        <p>{this.state.filename}</p>
+                        <label htmlFor="browsekeystore">{this.state.filename ? this.state.filename : "Select wallet file"}</label>
+                        <input type="file" id="browsekeystore" onChange={this.handleFile} />
+                    </div>
+                    <input id="keystore-passphrase" type="password" name="password" placeholder="Enter your passphrase" value={this.state.passphrase} onChange={this.handlePassword}/>
                 </div>
-                <div>
-                    <input type="password" name="password" value={this.state.passphrase} onChange={this.handlePassword}/>
-                </div>
-                <button type="button" className="btn btn-success" onClick={this.unlockWallet}>Unlock Wallet</button>
-                <button type="button" className="btn btn-primary" onClick={this.props.onReturnCallback}>Back</button>
+                <br/>
+                <button type="button" className="btn btn-success mx-2" onClick={this.unlockWallet}>Unlock Wallet</button>
+                <button type="button" className="btn btn-primary mx-2" onClick={this.props.onReturnCallback}>Back</button>
             </div>
         );
     }

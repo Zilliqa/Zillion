@@ -49,3 +49,31 @@
   font-weight: bold;
   text-transform: uppercase;
 }
+
+#keystore label {
+  background-color: #4caf50;
+  border-radius: 4px;
+  border: 0;
+  font-size: 0.9em;
+  padding: 10px;
+  width: 450px;
+}
+
+#keystore label:hover {
+  cursor: pointer;
+  background-color: #43a047;
+}
+
+#keystore input {
+  display: none;
+}
+
+#keystore-passphrase {
+  font-size: 0.9em;
+  width: 450px;
+}
+
+#mnemonic-phrase {
+  height: 140px;
+  width: 520px;
+}
