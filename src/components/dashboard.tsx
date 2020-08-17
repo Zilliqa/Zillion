@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from "../contexts/authContext";
-import * as StakezAccount from "../stakez-account";
+import * as Account from "../account";
 
 function Dashboard(props: any) {
 
@@ -12,10 +12,10 @@ function Dashboard(props: any) {
         console.log("dashboard use effect running");
         console.log("address: %o", address);
         (async () => {
-            const balance = await StakezAccount.getBalance(address);
+            const balance = await Account.getBalance(address);
             setBalance(balance);
         })();
-    });
+    }, [address]);
 
     return (
         <>

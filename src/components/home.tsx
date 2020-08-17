@@ -2,21 +2,41 @@ import React, { useState, useContext } from 'react';
 import { withRouter } from "react-router-dom";
 import { AuthContext } from '../contexts/authContext';
 import WalletKeystore from './wallet-keystore';
+import WalletMnemonic from './wallet-mnemonic';
+import { AccessMethod } from '../util/enum';
 import '../app.css';
 
 
 function Home(props: any) {
 
   const authContext = useContext(AuthContext);
-  const [isKeystoreClicked, setIsKeystoreClicked] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+  const [accessMethod, setAccessMethod] = useState('');
 
   const resetWalletsClicked = () => {
-    setIsKeystoreClicked(false);
+    setAccessMethod('');
+    setIsClicked(false);
   }
 
   const redirectToDashboard = () => {
     console.log("dashboard");
     props.history.push("/dashboard");
+  }
+
+  const handleAccessMethod = (access: string) => {
+    setIsClicked(true);
+    setAccessMethod(access);
+  }
+
+  const DisplayAccessMethod = () => {
+    switch (accessMethod) {
+      case AccessMethod.KEYSTORE: 
+        return <WalletKeystore onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
+      case AccessMethod.MNEMONIC:
+        return <WalletMnemonic onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
+      default:
+        return null;
+    }
   }
 
   return (
@@ -25,20 +45,23 @@ function Home(props: any) {
         <div className="row h-100 align-items-center">
           <div className="col-12 text-center text-light">
             {
-              !isKeystoreClicked ?
+              !isClicked ?
               <>
               <h1 className="font-weight-light display-1">StakeZ</h1>
               <p className="lead">Staking in Zilliqa</p>
               <p>Connect your wallet to begin</p>
               <div id="wallet-access">
-                <button type="button" className="btn btn-primary" onClick={() => setIsKeystoreClicked(true)}>Keystore</button>
-                <button type="button" className="btn btn-primary">ZilPay</button>
-                <button type="button" className="btn btn-primary">Moonlet</button>
-                <button type="button" className="btn btn-primary">Ledger</button>
+                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}>Keystore</button>
+                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}>Mnemonic</button>
+                <button type="button" className="btn btn-primary">ZilPay [WIP]</button>
+                <button type="button" className="btn btn-primary">Moonlet [WIP]</button>
+                <button type="button" className="btn btn-primary">Ledger [WIP]</button>
               </div>
               </>
             :
-              <WalletKeystore returnToMain={resetWalletsClicked} onSuccess={redirectToDashboard} />
+              <>
+              {DisplayAccessMethod()}
+              </>
             }
           </div>
         </div>

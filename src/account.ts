@@ -34,6 +34,19 @@ export const addWalletByKeystore = async (keystore: string, passphrase: string) 
     }
 };
 
+export const addWalletByMnemonic = async (phrase: string) => {
+    try {
+        // TODO
+        // default to index 0
+        // add support for password and ledger mnemonic
+        const address = await zilliqa.wallet.addByMnemonic(phrase);
+        return address;
+    } catch (err) {
+        console.error("error: addWalletByMnemonic - %o", err);
+        return "error";
+    }
+};
+
 export const getBalance = async (address: string) => {
     try {
         const balance = await zilliqa.blockchain.getBalance(address);
