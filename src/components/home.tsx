@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { useHistory } from "react-router-dom";
+import React, { useState, useContext } from 'react';
+import { withRouter } from "react-router-dom";
+import { AuthContext } from '../contexts/authContext';
 import WalletKeystore from './wallet-keystore';
 import '../app.css';
 
 
 function Home(props: any) {
 
-  let history = useHistory();
-  const {authContext} = props;
+  const authContext = useContext(AuthContext);
   const [isKeystoreClicked, setIsKeystoreClicked] = useState(false);
 
   const resetWalletsClicked = () => {
@@ -16,8 +16,7 @@ function Home(props: any) {
 
   const redirectToDashboard = () => {
     console.log("dashboard");
-    authContext.toggleAuthentication();
-    history.push("/dashboard");
+    props.history.push("/dashboard");
   }
 
   return (
@@ -39,7 +38,7 @@ function Home(props: any) {
               </div>
               </>
             :
-              <WalletKeystore returnToMain={resetWalletsClicked} onSuccess={redirectToDashboard}/>
+              <WalletKeystore returnToMain={resetWalletsClicked} onSuccess={redirectToDashboard} />
             }
           </div>
         </div>
@@ -48,4 +47,4 @@ function Home(props: any) {
   );
 }
 
-export default Home;
+export default withRouter(Home);

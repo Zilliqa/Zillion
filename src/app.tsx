@@ -13,8 +13,8 @@ function App() {
         {(authContext) => {
           return (
             <Switch>
-              <Route exact path="/" render={(props) => <Home {...props} authContext={authContext}/>} />
-              <Route path="/dashboard" render={(props) => <Dashboard {...props} authContext={authContext}/>} />
+              <Route exact path="/" render={(props) => <Home {...props} />} />
+              <Route path="/dashboard" render={(props) => <Dashboard {...props}/>} />
             </Switch>
           );
         }}

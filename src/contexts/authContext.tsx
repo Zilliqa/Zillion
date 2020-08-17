@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+// const { Zilliqa } = require("@zilliqa-js/zilliqa");
 
 // Consumer
 // list of react context to share with other components
@@ -6,7 +7,8 @@ import React, { useState } from 'react';
 export const AuthContext = React.createContext(
     {
         isAuthenticated: false,
-        toggleAuthentication: () => {},
+        address: '',
+        toggleAuthentication: (address: string) => {},
     }
 );
 
@@ -14,14 +16,16 @@ export const AuthContext = React.createContext(
 // track the objects via states
 function AuthProvider(props: any) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [address, setAddress] = useState('');
 
-    const toggleAuthentication = () => {
+    const toggleAuthentication = (address: string) => {
+        setAddress(address);
         setIsAuthenticated(true);
     };
 
     // props.children allows the browser to render the switch routes in app.tsx
     return (
-        <AuthContext.Provider value={{isAuthenticated, toggleAuthentication, }}>
+        <AuthContext.Provider value={{isAuthenticated, address, toggleAuthentication}}>
             {props.children}
         </AuthContext.Provider>
     );

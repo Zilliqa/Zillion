@@ -1,23 +1,25 @@
 import React, { Component } from 'react';
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+import { AuthContext } from '../contexts/authContext';
+import * as StakezAccount from '../stakez-account';
 
 // TODO
 // error handling decrypt error
 
 class WalletKeystore extends Component<any, any> {
+
+    static contextType = AuthContext;
+
     constructor(props: any) {
         super(props);
         this.state = {
-            account: "",
             passphrase: "",
-            keystore: ""
+            keystore: "",
+            error: ""
         }
     }
 
-    async componentDidMount() {
-        // const account = await zilliqa.wallet.addByKeystore('jsonfile', 'passphrase');
-        // this.setState({account: account})
+    componentDidMount() {
+        // may need to load the account first?
     }
 
     handleFile = (e: any) => {
@@ -29,6 +31,10 @@ class WalletKeystore extends Component<any, any> {
         this.setState({passphrase: e.target.value})
     }
 
+    handleError = () => {
+        this.setState({error: "error"});
+    }
+
     unlockWallet = () => {
         if (this.state.keystore !== "") {
             const reader = new FileReader();
@@ -37,13 +43,18 @@ class WalletKeystore extends Component<any, any> {
 
             reader.onload = async () => {
                 // have to try catch the add wallet error
-                const keystoreJSON = reader.result;
-                const account = await zilliqa.wallet.addByKeystore(keystoreJSON, this.state.passphrase);
-                console.log(keystoreJSON);
-                console.log(account);
+                const keystoreJSON = reader.result as string;
+                const address = await StakezAccount.addWalletByKeystore(keystoreJSON, this.state.passphrase);
 
-                // no error call parent function to redirect to staking manager app
-                this.props.onSuccess();
+                if (address !== "error") {
+                    console.log("wallet add success: %o", address);
+                    this.context.toggleAuthentication(address);
+                    // no error
+                    // call parent function to redirect to dashboard
+                    this.props.onSuccess();
+                } else {
+                    this.handleError();
+                }
             }
 
             reader.onerror = (e) => {
@@ -56,6 +67,7 @@ class WalletKeystore extends Component<any, any> {
         return (
             <div>
                 <h2>Load Wallet using Keystore</h2>
+                { this.state.error ? <p>There is something wrong in decrypting</p> : null }
                 <div>
                     <input type="file" onChange={this.handleFile} />
                 </div>
