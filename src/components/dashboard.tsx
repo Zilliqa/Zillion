@@ -31,9 +31,9 @@ function Dashboard(props: any) {
                     <hr className="sidebar-divider"/>
                     <div id="navigation">
                         <ul>
-                            <li><a href="#">Staking</a></li>
-                            <li><a href="#">Transactions</a></li>
-                            <li><a href="#">FAQ</a></li>
+                            <li><a href="/#">Staking</a></li>
+                            <li><a href="/#">Transactions</a></li>
+                            <li><a href="/#">FAQ</a></li>
                         </ul>
                     </div>
                 </div>
