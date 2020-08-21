@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toBech32Address } from '@zilliqa-js/crypto';
 // const { Zilliqa } = require("@zilliqa-js/zilliqa");
 
 // Consumer
@@ -19,7 +20,7 @@ function AuthProvider(props: any) {
     const [address, setAddress] = useState('');
 
     const toggleAuthentication = (address: string) => {
-        setAddress(address);
+        setAddress(toBech32Address(address));
         setIsAuthenticated(true);
     };
 

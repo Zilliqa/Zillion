@@ -43,11 +43,33 @@
   background-color: #18191a;
 }
 
+.logo {
+  width: 24px;
+  height: auto;
+}
+
+.sidebar-divider {
+  background-color:#3f4b5a;
+  width: 90%;
+}
+
 #wallet-access button {
   margin: 0 0.5rem;
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
+}
+
+#content {
+  background-color: #fafbfe;
+}
+
+#content h1 {
+  font-size: 1.2em;
+}
+
+#dashboard {
+  font-family: 'Noto Sans SC', sans-serif;
 }
 
 #keystore label {
@@ -73,7 +95,29 @@
   width: 450px;
 }
 
+#navigation ul {
+  font-weight: bold;
+  list-style: none;
+  text-transform: uppercase;
+}
+
 #mnemonic-phrase {
   height: 140px;
   width: 520px;
+}
+
+#sidebar {
+  background-color: #313A46;
+  background-image: linear-gradient(to bottom, #313a46, #2e3843, #2b363f, #28343c, #263238);
+  color: #ffffff;
+  font-size: 0.85em;
+  min-height: 100vh;
+}
+
+#sidebar h1 {
+  font-size: 1.4em;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
 }
