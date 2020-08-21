@@ -3,8 +3,11 @@ import { withRouter } from "react-router-dom";
 import { AuthContext } from '../contexts/authContext';
 import WalletKeystore from './wallet-keystore';
 import WalletMnemonic from './wallet-mnemonic';
+import WalletMoonlet from './wallet-moonlet';
+import WalletLedger from './wallet-ledger';
 import { AccessMethod } from '../util/enum';
 import '../app.css';
+import WalletZilPay from './wallet-zilpay';
 
 
 function Home(props: any) {
@@ -34,6 +37,12 @@ function Home(props: any) {
         return <WalletKeystore onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
       case AccessMethod.MNEMONIC:
         return <WalletMnemonic onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
+      case AccessMethod.ZILPAY:
+        return <WalletZilPay onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />
+      case AccessMethod.MOONLET:
+        return <WalletMoonlet onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
+      case AccessMethod.LEDGER:
+        return <WalletLedger onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />
       default:
         return null;
     }
@@ -53,9 +62,9 @@ function Home(props: any) {
               <div id="wallet-access">
                 <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}>Keystore</button>
                 <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}>Mnemonic</button>
-                <button type="button" className="btn btn-primary">ZilPay [WIP]</button>
-                <button type="button" className="btn btn-primary">Moonlet [WIP]</button>
-                <button type="button" className="btn btn-primary">Ledger [WIP]</button>
+                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}>ZilPay [WIP]</button>
+                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.MOONLET)}>Moonlet [WIP]</button>
+                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}>Ledger [WIP]</button>
               </div>
               </>
             :
