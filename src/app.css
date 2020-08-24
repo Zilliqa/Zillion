@@ -49,6 +49,12 @@
   background-color: #18191a;
 }
 
+.dashboard-card {
+  border: none;
+	-webkit-box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
+	box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
+}
+
 .logo {
   width: 24px;
   height: auto;

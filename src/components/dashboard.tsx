@@ -47,12 +47,12 @@ function Dashboard(props: any) {
                         </ul>
                     </div>
                 </div>
-                <div id="content" className="col-md-9 col-lg-10 px-4 pt-4 bg-light">
+                <div id="content" className="col-md-9 col-lg-10 px-4 pt-4">
                     <div className="container-fluid">
                         <div className="row">
                             <div className="col-12">
                                 <h1>StakeZ Dashboard</h1>
-                                <div className="my-4 p-4 bg-white rounded">
+                                <div className="my-4 p-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Account</h5>
                                     <div className="form-group">
                                         <label htmlFor="network">Network</label>
@@ -65,7 +65,7 @@ function Dashboard(props: any) {
                                     <p>Address: {address}</p>
                                     <p>Balance: {balance} ZIL</p>
                                 </div>
-                                <div className="p-4 bg-white rounded">
+                                <div className="p-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Node Operator Actions</h5>
                                     <button type="button" className="btn btn-primary mx-2">Update Commission</button>
                                     <button type="button" className="btn btn-primary mx-2">Update Received Address</button>
