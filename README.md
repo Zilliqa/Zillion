@@ -1,5 +1,13 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## TLDR
+
+1. yarn
+2. yarn start
+3. Choose one of the method to connect to your operator wallet
+4. Switch the network of your choice
+5. Enter the respective proxy contract address; the node statistics should then be generated
+
 ## Available Scripts
 
 In the project directory, you can run:
