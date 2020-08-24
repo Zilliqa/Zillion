@@ -18,7 +18,7 @@ function WalletPrivatekey(props: any) {
 
     const unlockWallet = async () => {
         console.log("unlock by privatekey");
-        if (privateKey != "") {
+        if (privateKey !== "") {
             const address = await Account.addWalletByPrivatekey(privateKey);
 
             if (address !== "error") {

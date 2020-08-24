@@ -12,12 +12,6 @@ function Dashboard(props: any) {
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('')
 
-    useEffect(() => {
-        console.log("dashboard use effect running");
-        console.log("address: %o", address);
-        refreshStats();
-    }, [address]);
-
     const handleChangeNetwork = (e: any) => {
         setSelectedNetwork(e.target.value);
         Account.changeNetwork(e.target.value);
@@ -29,6 +23,12 @@ function Dashboard(props: any) {
         const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
         setBalance(zilBalance);
     }
+
+    useEffect(() => {
+        console.log("dashboard use effect running");
+        console.log("address: %o", address);
+        refreshStats();
+    }, [address, refreshStats]);
 
     return (
         <div id="dashboard" className="container-fluid h-100">
