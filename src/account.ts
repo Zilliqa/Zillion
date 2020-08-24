@@ -74,6 +74,20 @@ export const getBalance = async (address: string) => {
     }
 };
 
+// get implementation contract state from the proxy contract
+export const getSsnImplContract = async (proxyAddr: string) => {
+    try {
+        const proxyContract = await zilliqa.blockchain.getSmartContractState(proxyAddr);
+        console.log("get proxy contract state: %o", proxyContract.result);
+        const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
+        console.log("get implementation contract state: %o", implContract.result);
+        return implContract.result;
+    } catch (err) {
+        console.error("error: getSsnImplContract - o%", err);
+        return "error"
+    }
+};
+
 export const ZilliqaAccount = () => {
     return zilliqa;
 };
