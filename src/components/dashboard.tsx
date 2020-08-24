@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import Select from 'react-select';
 import { AuthContext } from "../contexts/authContext";
 import * as Account from "../account";
 import logo from "../static/logo.png";
@@ -25,7 +26,7 @@ function Dashboard(props: any) {
             <div className="row h-100">
                 <div id="sidebar" className="col-md-2">
                     <div className="mt-4 pb-4">
-                        <img className="logo mx-auto d-block" src={logo} alt="zilliqa_logo" />
+                        <a href="/dashboard"><img className="logo mx-auto d-block" src={logo} alt="zilliqa_logo" /></a>
                         <h1 className="mt-4">Zilliqa Staking</h1>
                     </div>
                     <hr className="sidebar-divider"/>
@@ -44,6 +45,7 @@ function Dashboard(props: any) {
                                 <h1>StakeZ Dashboard</h1>
                                 <div className="my-4 p-4 bg-white rounded">
                                     <h5 className="card-title mb-4">Account</h5>
+
                                     <p>Network: {network}</p>
                                     <p>Address: {address}</p>
                                     <p>Balance: {balance} ZIL</p>
