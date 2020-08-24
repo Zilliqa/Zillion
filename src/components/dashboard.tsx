@@ -7,7 +7,7 @@ import { BN, units } from '@zilliqa-js/util';
 function Dashboard(props: any) {
 
     const authContext = useContext(AuthContext);
-    const { isAuthenticated, address } = authContext;
+    const { isAuthenticated, address, network } = authContext;
     const [balance, setBalance] = useState("");
 
     useEffect(() => {
@@ -42,9 +42,14 @@ function Dashboard(props: any) {
                         <div className="row">
                             <div className="col-12">
                                 <h1>StakeZ Dashboard</h1>
-                                <div className="p-4 bg-white rounded">
+                                <div className="my-4 p-4 bg-white rounded">
+                                    <h5 className="card-title">Account</h5>
+                                    <p>Network: {network}</p>
                                     <p>Address: {address}</p>
                                     <p>Balance: {balance} ZIL</p>
+                                </div>
+                                <div className="p-4 bg-white rounded">
+                                    <h5 className="card-title">Actions</h5>
                                     <button type="button" className="btn btn-primary mx-2">Delegate Stake</button>
                                     <button type="button" className="btn btn-primary mx-2">Withdraw Commission</button>
                                     <button type="button" className="btn btn-primary mx-2">Withdraw Stake</button>
@@ -53,7 +58,6 @@ function Dashboard(props: any) {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

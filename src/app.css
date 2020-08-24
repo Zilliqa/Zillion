@@ -37,6 +37,12 @@
   }
 }
 
+.card-title {
+  color: #313A46;
+  font-size: 0.85em;
+  text-transform: uppercase;
+}
+
 .cover {
   height: 100vh;
   min-height: 550px;
@@ -65,7 +71,7 @@
 }
 
 #content h1 {
-  font-size: 1.2em;
+  font-size: 1.1em;
 }
 
 #dashboard {

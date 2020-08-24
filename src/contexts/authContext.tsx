@@ -9,6 +9,7 @@ export const AuthContext = React.createContext(
     {
         isAuthenticated: false,
         address: '',
+        network: '',
         toggleAuthentication: (address: string) => {},
     }
 );
@@ -18,6 +19,7 @@ export const AuthContext = React.createContext(
 function AuthProvider(props: any) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [address, setAddress] = useState('');
+    const [network, setNetwork] = useState('testnet');
 
     const toggleAuthentication = (address: string) => {
         setAddress(toBech32Address(address));
@@ -26,7 +28,7 @@ function AuthProvider(props: any) {
 
     // props.children allows the browser to render the switch routes in app.tsx
     return (
-        <AuthContext.Provider value={{isAuthenticated, address, toggleAuthentication}}>
+        <AuthContext.Provider value={{isAuthenticated, address, network, toggleAuthentication}}>
             {props.children}
         </AuthContext.Provider>
     );
