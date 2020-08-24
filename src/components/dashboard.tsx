@@ -1,25 +1,34 @@
 import React, { useContext, useEffect, useState } from 'react';
-import Select from 'react-select';
 import { AuthContext } from "../contexts/authContext";
 import * as Account from "../account";
 import logo from "../static/logo.png";
 import { BN, units } from '@zilliqa-js/util';
+import { Network } from '../util/enum';
 
 function Dashboard(props: any) {
 
     const authContext = useContext(AuthContext);
     const { isAuthenticated, address, network } = authContext;
     const [balance, setBalance] = useState("");
+    const [selectedNetwork, setSelectedNetwork] = useState('')
 
     useEffect(() => {
         console.log("dashboard use effect running");
         console.log("address: %o", address);
-        (async () => {
-            const balance = await Account.getBalance(address);
-            const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
-            setBalance(zilBalance);
-        })();
+        refreshStats();
     }, [address]);
+
+    const handleChangeNetwork = (e: any) => {
+        setSelectedNetwork(e.target.value);
+        Account.changeNetwork(e.target.value);
+        refreshStats();
+    }
+
+    const refreshStats = async () => {
+        const balance = await Account.getBalance(address);
+        const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
+        setBalance(zilBalance);
+    }
 
     return (
         <div id="dashboard" className="container-fluid h-100">
@@ -45,17 +54,22 @@ function Dashboard(props: any) {
                                 <h1>StakeZ Dashboard</h1>
                                 <div className="my-4 p-4 bg-white rounded">
                                     <h5 className="card-title mb-4">Account</h5>
-
-                                    <p>Network: {network}</p>
+                                    <div className="form-group">
+                                        <label htmlFor="network">Network</label>
+                                        <select id="network" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control">
+                                            <option value={Network.TESTNET}>Testnet ({Network.TESTNET})</option>
+                                            <option value={Network.MAINNET}>Mainnet ({Network.MAINNET})</option>
+                                            <option value={Network.ISOLATED_SERVER}>Isolated Server ({Network.ISOLATED_SERVER})</option>
+                                        </select>
+                                    </div>
                                     <p>Address: {address}</p>
                                     <p>Balance: {balance} ZIL</p>
                                 </div>
                                 <div className="p-4 bg-white rounded">
-                                    <h5 className="card-title mb-4">Actions</h5>
-                                    <button type="button" className="btn btn-primary mx-2">Delegate Stake</button>
+                                    <h5 className="card-title mb-4">Node Operator Actions</h5>
+                                    <button type="button" className="btn btn-primary mx-2">Update Commission</button>
+                                    <button type="button" className="btn btn-primary mx-2">Update Received Address</button>
                                     <button type="button" className="btn btn-primary mx-2">Withdraw Commission</button>
-                                    <button type="button" className="btn btn-primary mx-2">Withdraw Stake</button>
-                                    <button type="button" className="btn btn-primary mx-2">Withdraw Stake Rewards</button>
                                 </div>
                             </div>
                         </div>
