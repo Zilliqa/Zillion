@@ -8,6 +8,7 @@ import WalletLedger from './wallet-ledger';
 import { AccessMethod } from '../util/enum';
 import '../app.css';
 import WalletZilPay from './wallet-zilpay';
+import WalletPrivatekey from './wallet-privatekey';
 
 
 function Home(props: any) {
@@ -33,6 +34,8 @@ function Home(props: any) {
 
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
+      case AccessMethod.PRIVATEKEY:
+        return <WalletPrivatekey onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
       case AccessMethod.KEYSTORE: 
         return <WalletKeystore onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
       case AccessMethod.MNEMONIC:
@@ -60,6 +63,7 @@ function Home(props: any) {
               <p className="lead">Staking in Zilliqa</p>
               <p>Connect your wallet to begin</p>
               <div id="wallet-access">
+                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.PRIVATEKEY)}>Private Key</button>
                 <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}>Keystore</button>
                 <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}>Mnemonic</button>
                 <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}>ZilPay [WIP]</button>

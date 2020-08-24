@@ -2,6 +2,7 @@
  * Modified for StakeZ
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
+import { HTTPProvider } from '@zilliqa-js/core';
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
@@ -24,6 +25,11 @@ Zilliqa.prototype.clearAccount = function() {
     this.wallet.defaultAccount = undefined;
 };
 
+export const changeNetwork = function(networkURL: string) {
+    zilliqa.setProvider(new HTTPProvider(networkURL));
+    console.log("network changed: %o", networkURL);
+}
+
 export const addWalletByKeystore = async (keystore: string, passphrase: string) => {
     try {
         const address = await zilliqa.wallet.addByKeystore(keystore, passphrase);
@@ -43,6 +49,16 @@ export const addWalletByMnemonic = async (phrase: string) => {
         return address;
     } catch (err) {
         console.error("error: addWalletByMnemonic - %o", err);
+        return "error";
+    }
+};
+
+export const addWalletByPrivatekey = async (privatekey: string) => {
+    try {
+        const address = await zilliqa.wallet.addByPrivateKey(privatekey);
+        return address;
+    } catch (err) {
+        console.error("error: addWalletByPrivatekey - %o", err);
         return "error";
     }
 };

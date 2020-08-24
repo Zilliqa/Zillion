@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toBech32Address } from '@zilliqa-js/crypto';
+import { Network } from '../util/enum';
 // const { Zilliqa } = require("@zilliqa-js/zilliqa");
 
 // Consumer
@@ -19,7 +20,7 @@ export const AuthContext = React.createContext(
 function AuthProvider(props: any) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [address, setAddress] = useState('');
-    const [network, setNetwork] = useState('testnet');
+    const [network, setNetwork] = useState(Network.TESTNET);
 
     const toggleAuthentication = (address: string) => {
         setAddress(toBech32Address(address));
