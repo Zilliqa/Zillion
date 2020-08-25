@@ -68,6 +68,11 @@ function Dashboard(props: any) {
         }
     }
 
+    const withdrawComm = async () => {
+        const result = await Account.withdrawComm(proxyAddr);
+        console.log(result);
+    }
+
     // when selected network is changed
     // useEffect is executed again
     useEffect(() => {
@@ -132,11 +137,11 @@ function Dashboard(props: any) {
                                     ) }
                                 </div>
 
-                                <div className="p-4 bg-white rounded dashboard-card">
+                                <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Node Operator Actions</h5>
                                     <button type="button" className="btn btn-primary mx-2">Update Commission</button>
                                     <button type="button" className="btn btn-primary mx-2">Update Received Address</button>
-                                    <button type="button" className="btn btn-primary mx-2">Withdraw Commission</button>
+                                    <button type="button" className="btn btn-primary mx-2" onClick={withdrawComm}>Withdraw Commission</button>
                                 </div>
                             </div>
                         </div>

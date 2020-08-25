@@ -12,3 +12,9 @@ export enum Network {
     MAINNET = "https://api.zilliqa.com",
     ISOLATED_SERVER = "https://zilliqa-isolated-server.zilliqa.com"
 }
+
+export enum OperationStatus {
+    ERROR = "ERROR",
+    SUCCESS = "SUCCESS",
+    LOADING = "LOADING",
+}
