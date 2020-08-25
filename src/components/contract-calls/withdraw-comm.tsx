@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { OperationStatus } from "../util/enum";
-import * as Account from "../account";
+import { OperationStatus } from "../../util/enum";
+import * as Account from "../../account";
 
 function WithdrawCommModal(props: any) {
     const { proxy } = props;
@@ -40,7 +40,7 @@ function WithdrawCommModal(props: any) {
                             ) :
                             <>
                             <p>Are you sure you want to withdraw commission rewards?</p>
-                            <button type="button" className="btn btn-primary mx-2" onClick={withdrawComm}>Withdraw</button>
+                            <button type="button" className="btn btn-success mr-2" onClick={withdrawComm}>Withdraw</button>
                             <button type="button" className="btn btn-danger mx-2" data-dismiss="modal">Cancel</button>
                             </>
                         }

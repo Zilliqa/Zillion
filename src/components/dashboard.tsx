@@ -5,7 +5,8 @@ import logo from "../static/logo.png";
 import { BN, units } from '@zilliqa-js/util';
 import { Network } from '../util/enum';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
-import WithdrawCommModal from '../components/withdraw-comm';
+import WithdrawCommModal from './contract-calls/withdraw-comm';
+import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 
 function Dashboard(props: any) {
 
@@ -15,7 +16,7 @@ function Dashboard(props: any) {
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
     const [proxyAddr, setProxyAddr] = useState('');
-    
+
     const [nodeDetails, setNodeDetails] = useState({
         name: '',
         stakeAmt: '',
@@ -69,6 +70,11 @@ function Dashboard(props: any) {
         }
     }
 
+    const updateRecvAddress = async () => {
+        const result = await Account.updateReceiverAddress(proxyAddr, "zil1dcyphrx2grzct4kkn7ty87h354zaz0trvnkuuj");
+        console.log(result);
+    };
+
     const withdrawComm = async () => {
         const result = await Account.withdrawComm(proxyAddr);
         console.log(result);
@@ -104,7 +110,7 @@ function Dashboard(props: any) {
                         <div className="row">
                             <div className="col-12">
                                 <h1>StakeZ Dashboard</h1>
-                                
+                                <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={() => refreshStats()}>Refresh</button>
                                 <div className="my-4 p-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Account</h5>
                                     <div className="form-group">
@@ -141,7 +147,7 @@ function Dashboard(props: any) {
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Node Operator Actions</h5>
                                     <button type="button" className="btn btn-primary mx-2">Update Commission</button>
-                                    <button type="button" className="btn btn-primary mx-2">Update Received Address</button>
+                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal">Update Received Address</button>
                                     <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal">Withdraw Commission</button>
                                 </div>
                             </div>
@@ -149,6 +155,7 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
+            <UpdateReceiverAddress proxy={proxyAddr}/>
             <WithdrawCommModal proxy={proxyAddr}/>
         </div>
     );

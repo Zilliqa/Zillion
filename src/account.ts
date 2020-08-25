@@ -4,6 +4,8 @@
  */
 import { HTTPProvider } from '@zilliqa-js/core';
 import { Network as NetworkOptions, OperationStatus } from './util/enum';
+import { fromBech32Address } from '@zilliqa-js/crypto';
+import { validation } from '@zilliqa-js/util';
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
@@ -165,6 +167,45 @@ export const updateCommissionRate = async (proxy: string, newRate: string) => {
 // @return a json with the transaction id and a success boolean
 export const updateReceiverAddress = async (proxy: string, address: string) => {
     // check address format and convert to ByStr20
+    if (validation.isBech32(address)) {
+        address = fromBech32Address(address);
+    } else if (!validation.isAddress(address)) {
+        return OperationStatus.ERROR
+    }
+
+    console.log("updateReceiverAddress - new_addr: %o", address);
+    try {
+        const contract = zilliqa.contracts.at(proxy);
+        const txn = await contract.call(
+            'UpdateReceivedAddr',
+            [
+                {
+                    vname: 'new_addr',
+                    type: 'ByStr20',
+                    value: address
+                }
+            ],
+            {
+                version: bytes.pack(CHAIN_ID, MSG_VERSION),
+                amount: new BN(0),
+                gasPrice: GAS_PRICE,
+                gasLimit: Long.fromNumber(GAS_LIMIT)
+            },
+            33,
+            1000,
+            true
+        );
+        console.log("transaction: %o", txn.id);
+        console.log(JSON.stringify(txn.receipt, null, 4));
+        let result = {
+            txn_id: txn.id,
+            success: txn.receipt.success
+        }
+        return JSON.stringify(result);
+    } catch (err) {
+        console.error("error: updateReceiverAddress: %o", err);
+        return OperationStatus.ERROR;
+    }
 };
 
 export const ZilliqaAccount = () => {
