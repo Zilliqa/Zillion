@@ -116,7 +116,8 @@ export const getSsnImplContract = async (proxyAddr: string) => {
     }
 };
 
-// withdrawComm - withdraw commission (ssn operator)
+// withdrawComm - withdraw commission
+// @ssn operator
 // @param proxy: contract address of the ssn proxy
 // @return a json with the transaction id and a success boolean
 export const withdrawComm = async (proxy: string) => {
@@ -146,6 +147,24 @@ export const withdrawComm = async (proxy: string) => {
         console.error("error: withdrawComm: %o", err);
         return OperationStatus.ERROR;
     }
+};
+
+// updateCommissionRate - update the commission rate of a ssn
+// @ssn operator
+// @param proxy:   contract address of the ssn proxy
+// @param newRate: the new commission rate 
+// @return a json with the transaction id and a success boolean
+export const updateCommissionRate = async (proxy: string, newRate: string) => {
+
+}
+
+// updateReceiverAddress - update the address which would received the commission
+// @ssn operator
+// @param proxy:   contract address of the ssn proxy
+// @param address: receiver address
+// @return a json with the transaction id and a success boolean
+export const updateReceiverAddress = async (proxy: string, address: string) => {
+    // check address format and convert to ByStr20
 };
 
 export const ZilliqaAccount = () => {
