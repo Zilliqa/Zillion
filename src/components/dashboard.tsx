@@ -5,6 +5,7 @@ import logo from "../static/logo.png";
 import { BN, units } from '@zilliqa-js/util';
 import { Network } from '../util/enum';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
+import WithdrawCommModal from '../components/withdraw-comm';
 
 function Dashboard(props: any) {
 
@@ -14,7 +15,7 @@ function Dashboard(props: any) {
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
     const [proxyAddr, setProxyAddr] = useState('');
-
+    
     const [nodeDetails, setNodeDetails] = useState({
         name: '',
         stakeAmt: '',
@@ -141,13 +142,14 @@ function Dashboard(props: any) {
                                     <h5 className="card-title mb-4">Node Operator Actions</h5>
                                     <button type="button" className="btn btn-primary mx-2">Update Commission</button>
                                     <button type="button" className="btn btn-primary mx-2">Update Received Address</button>
-                                    <button type="button" className="btn btn-primary mx-2" onClick={withdrawComm}>Withdraw Commission</button>
+                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal">Withdraw Commission</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <WithdrawCommModal proxy={proxyAddr}/>
         </div>
     );
 }
