@@ -7,6 +7,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 3. Choose one of the method to connect to your operator wallet
 4. Switch the network of your choice
 5. Enter the respective proxy contract address; the node statistics should then be generated
+6. Execute any ssn operator action; click on "Refresh" button
 
 ## Available Scripts
 
