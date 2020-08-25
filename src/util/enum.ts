@@ -16,5 +16,5 @@ export enum Network {
 export enum OperationStatus {
     ERROR = "ERROR",
     SUCCESS = "SUCCESS",
-    LOADING = "LOADING",
+    PENDING = "PENDING",
 }
