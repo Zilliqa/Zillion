@@ -3,7 +3,7 @@ import { OperationStatus } from "../../util/enum";
 import * as Account from "../../account";
 
 function UpdateCommRateModal(props: any) {
-    const { proxy } = props;
+    const { proxy, currentRate } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [error, setError] = useState('');
@@ -40,6 +40,7 @@ function UpdateCommRateModal(props: any) {
                                 </>
                             ) :
                             <>
+                            <p>Current Commission Rate: {currentRate ? currentRate : '0'} &#37;</p>
                             <input type="text" className="form-control mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" />
                             <button type="button" className="btn btn-success mr-2" onClick={updateCommRate}>Update</button>
                             <button type="button" className="btn btn-danger mx-2" data-dismiss="modal">Cancel</button>

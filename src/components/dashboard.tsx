@@ -156,9 +156,9 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={proxyAddr}/>
-            <UpdateReceiverAddress proxy={proxyAddr}/>
-            <WithdrawCommModal proxy={proxyAddr}/>
+            <UpdateCommRateModal proxy={proxyAddr} currentRate={nodeDetails.commRate}/>
+            <UpdateReceiverAddress proxy={proxyAddr} currentReceiver={nodeDetails.receiver}/>
+            <WithdrawCommModal proxy={proxyAddr} currentRewards={nodeDetails.commReward}/>
         </div>
     );
 }

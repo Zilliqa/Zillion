@@ -3,7 +3,7 @@ import { OperationStatus } from "../../util/enum";
 import * as Account from "../../account";
 
 function UpdateReceiverAddress(props: any) {
-    const { proxy } = props;
+    const { proxy, currentReceiver } = props;
     const [newAddress, setNewAddress] = useState('');
     const [txnId, setTxnId] = useState('');
     const [error, setError] = useState('');
@@ -40,6 +40,7 @@ function UpdateReceiverAddress(props: any) {
                                 </>
                             ) :
                             <>
+                            <p>Current Received Address: {currentReceiver ? currentReceiver : 'none'}</p>
                             <input type="text" className="form-control mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in ByStr20" />
                             <button type="button" className="btn btn-success mr-2" onClick={updateAddress}>Update</button>
                             <button type="button" className="btn btn-danger mx-2" data-dismiss="modal">Cancel</button>

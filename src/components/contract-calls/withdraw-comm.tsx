@@ -3,7 +3,7 @@ import { OperationStatus } from "../../util/enum";
 import * as Account from "../../account";
 
 function WithdrawCommModal(props: any) {
-    const { proxy } = props;
+    const { proxy, currentRewards } = props;
     const [txnId, setTxnId] = useState('')
     const [error, setError] = useState('');
 
@@ -39,7 +39,8 @@ function WithdrawCommModal(props: any) {
                                 </>
                             ) :
                             <>
-                            <p>Are you sure you want to withdraw commission rewards?</p>
+                            <p>Current Commission Reward: {currentRewards ? currentRewards : '0'} ZIL</p>
+                            <p>Are you sure you want to withdraw the commission rewards?</p>
                             <button type="button" className="btn btn-success mr-2" onClick={withdrawComm}>Withdraw</button>
                             <button type="button" className="btn btn-danger mx-2" data-dismiss="modal">Cancel</button>
                             </>
