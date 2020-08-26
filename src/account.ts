@@ -157,7 +157,39 @@ export const withdrawComm = async (proxy: string) => {
 // @param newRate: the new commission rate 
 // @return a json with the transaction id and a success boolean
 export const updateCommissionRate = async (proxy: string, newRate: string) => {
-
+    console.log("update commission rate - new_rate %o", newRate);
+    try {
+        const contract = zilliqa.contracts.at(proxy);
+        const txn = await contract.call(
+            'UpdateComm',
+            [
+                {
+                    vname: 'new_rate',
+                    type: 'Uint128',
+                    value: newRate
+                }
+            ],
+            {
+                version: bytes.pack(CHAIN_ID, MSG_VERSION),
+                amount: new BN(0),
+                gasPrice: GAS_PRICE,
+                gasLimit: Long.fromNumber(GAS_LIMIT)
+            },
+            33,
+            1000,
+            true
+        );
+        console.log("transaction: %o", txn.id);
+        console.log(JSON.stringify(txn.receipt, null, 4));
+        let result = {
+            txn_id: txn.id,
+            success: txn.receipt.success
+        }
+        return JSON.stringify(result);
+    } catch (err) {
+        console.error("error: updateCommissionRate: %o", err);
+        return OperationStatus.ERROR;
+    }
 }
 
 // updateReceiverAddress - update the address which would received the commission

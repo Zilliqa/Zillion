@@ -7,6 +7,7 @@ import { Network } from '../util/enum';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
+import UpdateCommRateModal from './contract-calls/update-commission-rate';
 
 function Dashboard(props: any) {
 
@@ -146,7 +147,7 @@ function Dashboard(props: any) {
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Node Operator Actions</h5>
-                                    <button type="button" className="btn btn-primary mx-2">Update Commission</button>
+                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal">Update Commission</button>
                                     <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal">Update Received Address</button>
                                     <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal">Withdraw Commission</button>
                                 </div>
@@ -155,6 +156,7 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
+            <UpdateCommRateModal proxy={proxyAddr}/>
             <UpdateReceiverAddress proxy={proxyAddr}/>
             <WithdrawCommModal proxy={proxyAddr}/>
         </div>
