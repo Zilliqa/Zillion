@@ -76,6 +76,10 @@
   background-color: rgba(43, 46, 56, 0.7); /* Black w/ opacity */
 }
 
+.modal-dialog {
+  top: 20%;
+}
+
 .sidebar-divider {
   background-color:#3f4b5a;
   width: 90%;

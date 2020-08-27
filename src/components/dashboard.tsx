@@ -93,17 +93,22 @@ function Dashboard(props: any) {
         <div id="dashboard" className="container-fluid h-100">
             <div className="row h-100">
                 <div id="sidebar" className="col-md-2">
-                    <div className="mt-4 pb-4">
+                    <div className="mt-4 pb-2">
                         <a href="/dashboard"><img className="logo mx-auto d-block" src={logo} alt="zilliqa_logo" /></a>
                         <h1 className="mt-4">Zilliqa Staking</h1>
                     </div>
                     <hr className="sidebar-divider"/>
+                    <div>
+                        <span>{address}</span>
+                        <span>{balance}</span>
+                    </div>
                     <div id="navigation">
                         <ul>
                             <li><a href="/#">Staking</a></li>
                             <li><a href="/#">Transactions</a></li>
                             <li><a href="/#">FAQ</a></li>
                         </ul>
+                        <button type="button" className="btn btn-secondary">test</button>
                     </div>
                 </div>
                 <div id="content" className="col-md-9 col-lg-10 px-4 pt-4">
@@ -140,16 +145,16 @@ function Dashboard(props: any) {
                                             <p>Buffered deposit: {nodeDetails.bufferedDeposit} ZIL</p>
                                             <p>Commission rate: {nodeDetails.commRate} %</p>
                                             <p>Commission rewards: {nodeDetails.commReward} ZIL</p>
-                                            <p>Receiver: {nodeDetails.receiver} </p>
+                                            <p>Receiver: {nodeDetails.receiver}</p>
                                         </>
                                     ) }
                                 </div>
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Node Operator Actions</h5>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal">Update Commission</button>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal">Update Received Address</button>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal">Withdraw Commission</button>
+                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
+                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Received Address</button>
+                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
                                 </div>
                             </div>
                         </div>
