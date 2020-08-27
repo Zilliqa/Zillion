@@ -82,11 +82,20 @@
 
 .navbar {
   font-family: 'Poppins', sans-serif;
+  background-color: #263238;
+  background-image: linear-gradient(to left, #12171c, #171d23, #1c242a, #212b31, #263238);
 }
 
 .navbar-right li {
+  color: #bfd7ff;
+  font-size: 0.9em;
   font-weight: 500;
+  margin-top: 4px;
   margin-bottom: -10px;
+}
+
+.navbar-right li p {
+  padding-top: 0.9em;
 }
 
 .navbar-title {
@@ -149,6 +158,23 @@
   font-weight: bold;
   list-style: none;
   text-transform: uppercase;
+}
+
+#network {
+  background-color: #263238;
+  border: 1px solid #263238;
+  color: #dddddd;
+  font-weight: 500;
+  font-size: 1em;
+  line-height: 1em;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+#network:hover {
+  cursor: pointer;
+  border: 1px solid #555555;
 }
 
 #mnemonic-phrase {

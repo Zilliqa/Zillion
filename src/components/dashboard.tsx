@@ -91,7 +91,7 @@ function Dashboard(props: any) {
 
     return (
         <>
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav className="navbar navbar-expand-lg navbar-dark">
             <a className="navbar-brand" href="" onClick={refreshStats}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
@@ -105,10 +105,10 @@ function Dashboard(props: any) {
                 </ul>
                 <ul className="navbar-nav navbar-right">
                     <li className="nav-item">
-                        <p className="nav-link">{address ? address : 'No wallet detected'}</p>
+                        <p className="px-1">{address ? address : 'No wallet detected'}</p>
                     </li>
                     <li className="nav-item">
-                        <p className="nav-link">{balance ? balance : '0.000'} ZIL</p>
+                        <p className="px-1">{balance ? balance : '0.000'} ZIL</p>
                     </li>
                     <li className="nav-item">
                         <div className="form-group mt-1 ml-2">
