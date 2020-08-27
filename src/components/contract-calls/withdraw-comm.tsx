@@ -7,6 +7,16 @@ function WithdrawCommModal(props: any) {
     const [txnId, setTxnId] = useState('')
     const [error, setError] = useState('');
 
+    const handleClose = () => {
+        // reset state
+        // timeout to wait for modal to fade out before clearing
+        // so that the animation is smoother
+        setTimeout(() => {
+            setTxnId('');
+            setError('');
+        }, 150);
+    }
+
     const withdrawComm = async () => {
         const result = await Account.withdrawComm(proxy);
         console.log(result);
@@ -42,7 +52,7 @@ function WithdrawCommModal(props: any) {
                             <p>Current Commission Reward: {currentRewards ? currentRewards : '0'} ZIL</p>
                             <p>Are you sure you want to withdraw the commission rewards?</p>
                             <button type="button" className="btn btn-success mr-2" onClick={withdrawComm}>Withdraw</button>
-                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal">Cancel</button>
+                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                             </>
                         }
                     </div>

@@ -8,6 +8,17 @@ function UpdateCommRateModal(props: any) {
     const [txnId, setTxnId] = useState('')
     const [error, setError] = useState('');
 
+    const handleClose = () => {
+        // reset state
+        // timeout to wait for modal to fade out before clearing
+        // so that the animation is smoother
+        setTimeout(() => {
+            setNewRate('');
+            setTxnId('');
+            setError('');
+        }, 150);
+    }
+
     const updateCommRate = async () => {
         const result = await Account.updateCommissionRate(proxy, newRate);
         console.log(result);
@@ -43,7 +54,7 @@ function UpdateCommRateModal(props: any) {
                             <p>Current Commission Rate: {currentRate ? currentRate : '0'} &#37;</p>
                             <input type="text" className="form-control mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" />
                             <button type="button" className="btn btn-success mr-2" onClick={updateCommRate}>Update</button>
-                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal">Cancel</button>
+                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                             </>
                         }
                     </div>

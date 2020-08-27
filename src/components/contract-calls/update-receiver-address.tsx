@@ -8,6 +8,17 @@ function UpdateReceiverAddress(props: any) {
     const [txnId, setTxnId] = useState('');
     const [error, setError] = useState('');
 
+    const handleClose = () => {
+        // reset state
+        // timeout to wait for modal to fade out before clearing
+        // so that the animation is smoother
+        setTimeout(() => {
+            setNewAddress('');
+            setTxnId('');
+            setError('');
+        }, 150);
+    }
+
     const updateAddress = async () => {
         const result = await Account.updateReceiverAddress(proxy, newAddress);
         console.log(result);
@@ -25,7 +36,7 @@ function UpdateReceiverAddress(props: any) {
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title" id="updateRecvAddrModalLabel">Update Received Address</h5>
-                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -43,7 +54,7 @@ function UpdateReceiverAddress(props: any) {
                             <p>Current Received Address: {currentReceiver ? currentReceiver : 'none'}</p>
                             <input type="text" className="form-control mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in ByStr20" />
                             <button type="button" className="btn btn-success mr-2" onClick={updateAddress}>Update</button>
-                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal">Cancel</button>
+                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                             </>
                         }
                     </div>
