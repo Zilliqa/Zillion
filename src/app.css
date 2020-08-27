@@ -49,8 +49,9 @@
 }
 
 .card-title {
-  color: #264653;
+  color: #263238;
   font-size: 1em;
+  font-weight: 500;
   text-transform: capitalize;
 }
 
@@ -119,8 +120,8 @@
 }
 
 #content {
-  background-color: #fafbfe;
-  min-height: 90vh;
+  background-color: #f6f8fb;
+  min-height: calc( 100vh - 66px);
 }
 
 #content h1 {

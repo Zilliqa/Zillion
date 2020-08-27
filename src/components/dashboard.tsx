@@ -152,7 +152,7 @@ function Dashboard(props: any) {
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">What would you like to do today?</h5>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
+                                    <button type="button" className="btn btn-primary btn-user-action mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
                                     <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Received Address</button>
                                     <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
                                 </div>
