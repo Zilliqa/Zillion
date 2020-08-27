@@ -111,6 +111,7 @@
 
 #content {
   background-color: #fafbfe;
+  min-height: 90vh;
 }
 
 #content h1 {

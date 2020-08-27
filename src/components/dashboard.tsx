@@ -124,7 +124,7 @@ function Dashboard(props: any) {
         </nav>
         <div id="dashboard" className="container-fluid h-100">
             <div className="row h-100">
-                <div id="content" className="col px-4 pt-4">
+                <div id="content" className="col pt-4">
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
