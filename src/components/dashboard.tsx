@@ -130,21 +130,8 @@ function Dashboard(props: any) {
                             <div className="col-12">
                                 <h1>StakeZ Dashboard</h1>
                                 <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={() => refreshStats()}>Refresh</button>
-                                <div className="my-4 p-4 bg-white rounded dashboard-card">
-                                    <h5 className="card-title mb-4">Account</h5>
-                                    <div className="form-group">
-                                        <label htmlFor="network">Network</label>
-                                        <select id="network" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control">
-                                            <option value={Network.TESTNET}>Testnet ({Network.TESTNET})</option>
-                                            <option value={Network.MAINNET}>Mainnet ({Network.MAINNET})</option>
-                                            <option value={Network.ISOLATED_SERVER}>Isolated Server ({Network.ISOLATED_SERVER})</option>
-                                        </select>
-                                    </div>
-                                    <p>Address: {address}</p>
-                                    <p>Balance: {balance} ZIL</p>
-                                </div>
 
-                                <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                <div className="p-4 my-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Proxy Contract</h5>
                                     <input className="form-control" type="text" value={proxyAddr} onChange={handleProxyAddr} placeholder="Enter the proxy contract address" />
                                 </div>
