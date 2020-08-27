@@ -90,29 +90,42 @@ function Dashboard(props: any) {
     }, [selectedNetwork, proxyAddr]);
 
     return (
+        <>
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a className="navbar-brand" href="" onClick={refreshStats}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
+            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span className="navbar-toggler-icon"></span>
+            </button>
+
+            <div className="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul className="navbar-nav mr-auto">
+                    <li className="nav-item active">
+                        <button type="button" className="nav-link btn" onClick={refreshStats}>Dashboard <span className="sr-only">(current)</span></button>
+                    </li>
+                </ul>
+                <ul className="navbar-nav navbar-right">
+                    <li className="nav-item">
+                        <p className="nav-link">{address ? address : 'No wallet detected'}</p>
+                    </li>
+                    <li className="nav-item">
+                        <p className="nav-link">{balance ? balance : '0.000'} ZIL</p>
+                    </li>
+                    <li className="nav-item">
+                        <div className="form-group mt-1 ml-2">
+                            <select id="network" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control">
+                                <option value={Network.TESTNET}>Testnet</option>
+                                <option value={Network.MAINNET}>Mainnet</option>
+                                <option value={Network.ISOLATED_SERVER}>Isolated Server</option>
+                            </select>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
         <div id="dashboard" className="container-fluid h-100">
             <div className="row h-100">
-                <div id="sidebar" className="col-md-2">
-                    <div className="mt-4 pb-2">
-                        <a href="/dashboard"><img className="logo mx-auto d-block" src={logo} alt="zilliqa_logo" /></a>
-                        <h1 className="mt-4">Zilliqa Staking</h1>
-                    </div>
-                    <hr className="sidebar-divider"/>
-                    <div>
-                        <span>{address}</span>
-                        <span>{balance}</span>
-                    </div>
-                    <div id="navigation">
-                        <ul>
-                            <li><a href="/#">Staking</a></li>
-                            <li><a href="/#">Transactions</a></li>
-                            <li><a href="/#">FAQ</a></li>
-                        </ul>
-                        <button type="button" className="btn btn-secondary">test</button>
-                    </div>
-                </div>
-                <div id="content" className="col-md-9 col-lg-10 px-4 pt-4">
-                    <div className="container-fluid">
+                <div id="content" className="col px-4 pt-4">
+                    <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
                                 <h1>StakeZ Dashboard</h1>
@@ -165,6 +178,7 @@ function Dashboard(props: any) {
             <UpdateReceiverAddress proxy={proxyAddr} currentReceiver={nodeDetails.receiver}/>
             <WithdrawCommModal proxy={proxyAddr} currentRewards={nodeDetails.commReward}/>
         </div>
+        </>
     );
 }
 

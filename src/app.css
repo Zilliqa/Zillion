@@ -80,6 +80,23 @@
   top: 20%;
 }
 
+.navbar {
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar-right li {
+  font-weight: 500;
+  margin-bottom: -10px;
+}
+
+.navbar-title {
+  color: #19d1ad;
+  font-family: 'Alata', sans-serif;
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+  margin-left: 0.5em;
+}
+
 .sidebar-divider {
   background-color:#3f4b5a;
   width: 90%;
@@ -101,7 +118,7 @@
 }
 
 #dashboard {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
 #keystore label {
