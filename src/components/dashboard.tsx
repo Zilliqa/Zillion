@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useMemo } from 'react';
+import { useTable } from 'react-table';
 import { AuthContext } from "../contexts/authContext";
 import * as Account from "../account";
 import logo from "../static/logo.png";
@@ -8,6 +9,42 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
+
+function Table({ columns, data }: any) {
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        rows,
+        prepareRow,
+    } = useTable({columns, data});
+    
+    return (
+        <table className="table" {...getTableProps()}>
+            <thead>
+                {headerGroups.map(headerGroup => (
+                    <tr {...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers.map(column => (
+                            <th scope="col" {...column.getHeaderProps()}>{column.render('Header')}</th>
+                        ))}
+                    </tr>
+                ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+                {rows.map((row, i) => {
+                    prepareRow(row)
+                    return (
+                        <tr {...row.getRowProps()}>
+                            {row.cells.map(cell => {
+                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                            })}
+                        </tr>
+                    )
+                })}
+            </tbody>
+        </table>
+    );
+}
 
 function Dashboard(props: any) {
 
@@ -26,6 +63,57 @@ function Dashboard(props: any) {
         commReward: '',
         receiver: ''
     });
+
+    const columns = useMemo(
+        () => [
+            {
+                Header: 'address',
+                accessor: 'ssnAddress'
+            },
+            {
+                Header: 'name',
+                accessor: 'ssnName'
+            },
+            {
+                Header: 'stake amount',
+                accessor: 'ssnStakeAmt'
+            },
+            {
+                Header: 'buffered deposit',
+                accessor: 'ssnBufferedDeposit'
+            },
+            {
+                Header: 'Comm. Rate',
+                accessor: 'ssnCommRate'
+            },
+            {
+                Header: 'Comm. Reward',
+                accessor: 'ssnCommReward'
+            },
+            {
+                Header: 'Delegators',
+                accessor: 'ssnDeleg'
+            }
+        ],[]
+    )
+
+    const data = [{
+        ssnAddress: 'zil1wqewqeqweqweqweqweqfdssadasdasdasweqwe',
+        ssnName: 'hello',
+        ssnStakeAmt: '9999999',
+        ssnBufferedDeposit: '123456',
+        ssnCommRate: '10',
+        ssnCommReward: '2',
+        ssnDeleg: '5'
+    }, {
+        ssnAddress: 'zil1wqewqeqweqweqweqweqfdssadasdasdasweqwe',
+        ssnName: 'hello',
+        ssnStakeAmt: '1112121212121',
+        ssnBufferedDeposit: '123456',
+        ssnCommRate: '10',
+        ssnCommReward: '2',
+        ssnDeleg: '3'
+    }]
 
     const handleChangeNetwork = (e: any) => {
         setSelectedNetwork(e.target.value);
@@ -135,6 +223,11 @@ function Dashboard(props: any) {
                                     <h5 className="card-title mb-4">Proxy Contract</h5>
                                     <input className="form-control" type="text" value={proxyAddr} onChange={handleProxyAddr} placeholder="Enter the proxy contract address" />
                                 </div>
+
+                                <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                    <h5 className="card-title mb-4">Staking Details</h5>
+                                    <Table columns={columns} data={data}></Table>
+                                </div>                                
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Node Statistics</h5>
