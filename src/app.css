@@ -49,9 +49,9 @@
 }
 
 .card-title {
-  color: #313A46;
-  font-size: 0.85em;
-  text-transform: uppercase;
+  color: #264653;
+  font-size: 1em;
+  text-transform: capitalize;
 }
 
 .cover {
@@ -124,7 +124,7 @@
 }
 
 #content h1 {
-  font-size: 1.1em;
+  font-size: 1.3em;
 }
 
 #dashboard {
