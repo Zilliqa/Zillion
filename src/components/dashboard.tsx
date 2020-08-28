@@ -20,7 +20,7 @@ function Table({ columns, data }: any) {
     } = useTable({columns, data});
     
     return (
-        <table className="table" {...getTableProps()}>
+        <table id="staking-table" className="table" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -54,6 +54,7 @@ function Dashboard(props: any) {
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
     const [proxyAddr, setProxyAddr] = useState('');
+    const [data, setData] = useState([] as any);
 
     const [nodeDetails, setNodeDetails] = useState({
         name: '',
@@ -68,7 +69,8 @@ function Dashboard(props: any) {
         () => [
             {
                 Header: 'address',
-                accessor: 'ssnAddress'
+                accessor: 'ssnAddress',
+                className: 'ssn-address'
             },
             {
                 Header: 'name',
@@ -96,24 +98,6 @@ function Dashboard(props: any) {
             }
         ],[]
     )
-
-    const data = [{
-        ssnAddress: 'zil1wqewqeqweqweqweqweqfdssadasdasdasweqwe',
-        ssnName: 'hello',
-        ssnStakeAmt: '9999999',
-        ssnBufferedDeposit: '123456',
-        ssnCommRate: '10',
-        ssnCommReward: '2',
-        ssnDeleg: '5'
-    }, {
-        ssnAddress: 'zil1wqewqeqweqweqweqweqfdssadasdasdasweqwe',
-        ssnName: 'hello',
-        ssnStakeAmt: '1112121212121',
-        ssnBufferedDeposit: '123456',
-        ssnCommRate: '10',
-        ssnCommReward: '2',
-        ssnDeleg: '3'
-    }]
 
     const handleChangeNetwork = (e: any) => {
         setSelectedNetwork(e.target.value);
@@ -157,16 +141,29 @@ function Dashboard(props: any) {
                 handleError();
             }
         }
-    }
 
-    const updateRecvAddress = async () => {
-        const result = await Account.updateReceiverAddress(proxyAddr, "zil1dcyphrx2grzct4kkn7ty87h354zaz0trvnkuuj");
-        console.log(result);
-    };
+        let outputResult = [];
 
-    const withdrawComm = async () => {
-        const result = await Account.withdrawComm(proxyAddr);
-        console.log(result);
+        // get ssn contract info for table generation
+        if (implContract !== 'error') {
+            for (const key in implContract.ssnlist) {
+                if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
+                    const ssnArgs = implContract.ssnlist[key].arguments;
+                    const nodeJson = {
+                        ssnAddress: toBech32Address(key),
+                        ssnName: ssnArgs[3],
+                        ssnStakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
+                        ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
+                        ssnCommRate: ssnArgs[7],
+                        ssnCommReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
+                        ssnDeleg: 'WIP',
+                    }
+                    outputResult.push(nodeJson);
+                }
+            }
+        }
+        setData([...outputResult]);
+        console.log("data: %o", data);
     }
 
     // when selected network is changed
@@ -226,10 +223,10 @@ function Dashboard(props: any) {
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Staking Details</h5>
-                                    <Table columns={columns} data={data}></Table>
+                                    { data.length > 0 ? <Table columns={columns} data={data}></Table> : <p>No contract loaded.</p> }
                                 </div>                                
 
-                                <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                {/* <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Node Statistics</h5>
                                     { error ? <p>There is an error retrieving the ssn contract</p> : (
                                         <>
@@ -241,7 +238,7 @@ function Dashboard(props: any) {
                                             <p>Receiver: {nodeDetails.receiver}</p>
                                         </>
                                     ) }
-                                </div>
+                                </div> */}
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">What would you like to do today?</h5>

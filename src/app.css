@@ -77,7 +77,7 @@
 
 .btn-user-action {
   color: #ffffff;
-  border: 2px solid #3b76ef;
+  border: 1px solid #3b76ef;
   border-radius: 18px;
   background-color: #3b76ef;
   font-size: 0.85em;
@@ -87,7 +87,7 @@
 
 .btn-user-action-cancel {
   color: #3b76ef;
-  border: 2px solid #3b76ef;
+  border: 1px solid #3b76ef;
   border-radius: 18px;
   background-color: #ffffff;
   font-size: 0.85em;
@@ -102,7 +102,8 @@
 
 .btn-user-action-cancel:hover {
   color: #135bec;
-  border: 2px solid #135bec;
+  border: 1px solid #135bec;
+  background-color: #fafafa;
 }
 
 .card-title {
@@ -160,7 +161,7 @@
 }
 
 .navbar-right li {
-  color: #3b76ef;
+  color: #89adf5;
   font-size: 0.9em;
   font-weight: 500;
   margin-top: 4px;
@@ -270,3 +271,19 @@
   text-align: center;
   text-transform: uppercase;
 }
+
+#staking-table {
+  font-size: 0.85em;
+}
+
+#staking-table th {
+  border-top: #ffffff;
+  color: #3b76ef;
+  font-size: 0.9em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#staking-table tbody > tr > :nth-child(1){
+  color:#3b76ef;
+ }

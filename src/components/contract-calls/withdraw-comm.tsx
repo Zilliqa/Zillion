@@ -34,7 +34,7 @@ function WithdrawCommModal(props: any) {
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title" id="withdrawCommModalLabel">Withdraw Commission</h5>
-                        <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
