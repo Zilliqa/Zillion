@@ -48,6 +48,31 @@
   }
 }
 
+.btn-primary {
+  color: #2ec4b6 !important;
+  border: 1px solid #eceff1 !important;
+  border-radius: 18px;
+  background-color: #eceff1 !important;
+  font-size: 0.85em;
+  font-weight: 600;
+  padding: 0.6em 1em;
+}
+
+.btn-primary:hover {
+  color: #fafafa !important;
+  background-color: #2ec4b6 !important;
+}
+.btn-primary:active {
+  color: #fafafa;
+  background-color: #2ec4b6 !important;
+}
+
+.btn-primary.active {
+  color: #fafafa;
+  background-color: #2ec4b6 !important;
+  outline-color: #2ec4b6 !important;
+}
+
 .card-title {
   color: #263238;
   font-size: 1em;

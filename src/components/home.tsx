@@ -5,7 +5,6 @@ import WalletKeystore from './wallet-keystore';
 import WalletMnemonic from './wallet-mnemonic';
 import WalletLedger from './wallet-ledger';
 import { AccessMethod } from '../util/enum';
-import '../app.css';
 import WalletZilPay from './wallet-zilpay';
 import WalletPrivatekey from './wallet-privatekey';
 
