@@ -55,12 +55,14 @@
   background-color: #eceff1 !important;
   font-size: 0.85em;
   font-weight: 600;
-  padding: 0.6em 1em;
+  padding: 0.6em 1.2em;
 }
 
 .btn-primary:hover {
   color: #fafafa !important;
   background-color: #2ec4b6 !important;
+  border: 1px solid #2ec4b6 !important;
+  background-image: linear-gradient(to left, #00d18a, #00ce99, #00cba5, #0ec8af, #2ec4b6);
 }
 .btn-primary:active {
   color: #fafafa;
@@ -75,17 +77,17 @@
 
 .btn-user-action {
   color: #ffffff;
-  border: 2px solid #2e3843;
+  border: 2px solid #3b76ef;
   border-radius: 18px;
-  background-color: #2e3843;
+  background-color: #3b76ef;
   font-size: 0.85em;
   font-weight: 500;
   padding: 0.4em 1em;
 }
 
 .btn-user-action-cancel {
-  color: #2e3843;
-  border: 2px solid #2e3843;
+  color: #3b76ef;
+  border: 2px solid #3b76ef;
   border-radius: 18px;
   background-color: #ffffff;
   font-size: 0.85em;
@@ -93,8 +95,14 @@
   padding: 0.4em 1em;
 }
 
-.btn-user-action:hover, .btn-user-action-cancel:hover {
-  color: #fca311;
+.btn-user-action:hover {
+  color: #ffffff;
+  background-color: #135bec;
+}
+
+.btn-user-action-cancel:hover {
+  color: #135bec;
+  border: 2px solid #135bec;
 }
 
 .card-title {
@@ -152,7 +160,7 @@
 }
 
 .navbar-right li {
-  color: #bfd7ff;
+  color: #3b76ef;
   font-size: 0.9em;
   font-weight: 500;
   margin-top: 4px;
