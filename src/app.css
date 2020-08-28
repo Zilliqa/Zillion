@@ -73,6 +73,30 @@
   outline-color: #2ec4b6 !important;
 }
 
+.btn-user-action {
+  color: #ffffff;
+  border: 2px solid #2e3843;
+  border-radius: 18px;
+  background-color: #2e3843;
+  font-size: 0.85em;
+  font-weight: 500;
+  padding: 0.4em 1em;
+}
+
+.btn-user-action-cancel {
+  color: #2e3843;
+  border: 2px solid #2e3843;
+  border-radius: 18px;
+  background-color: #ffffff;
+  font-size: 0.85em;
+  font-weight: 500;
+  padding: 0.4em 1em;
+}
+
+.btn-user-action:hover, .btn-user-action-cancel:hover {
+  color: #fca311;
+}
+
 .card-title {
   color: #263238;
   font-size: 1em;
@@ -104,6 +128,21 @@
 
 .modal-dialog {
   top: 20%;
+}
+
+.modal-title {
+  color: #263238;
+  font-size: 1em;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.modal-body {
+  font-size: 0.9em;
+}
+
+.modal-body input {
+  font-size: 1em;
 }
 
 .navbar {

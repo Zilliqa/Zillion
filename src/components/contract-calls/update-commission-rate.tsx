@@ -53,8 +53,8 @@ function UpdateCommRateModal(props: any) {
                             <>
                             <p>Current Commission Rate: {currentRate ? currentRate : '0'} &#37;</p>
                             <input type="text" className="form-control mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" />
-                            <button type="button" className="btn btn-success mr-2" onClick={updateCommRate}>Update</button>
-                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <button type="button" className="btn btn-user-action mr-2" onClick={updateCommRate}>Update</button>
+                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                             </>
                         }
                     </div>

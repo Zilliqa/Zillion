@@ -51,8 +51,8 @@ function WithdrawCommModal(props: any) {
                             <>
                             <p>Current Commission Reward: {currentRewards ? currentRewards : '0'} ZIL</p>
                             <p>Are you sure you want to withdraw the commission rewards?</p>
-                            <button type="button" className="btn btn-success mr-2" onClick={withdrawComm}>Withdraw</button>
-                            <button type="button" className="btn btn-danger mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <button type="button" className="btn btn-user-action mr-2" onClick={withdrawComm}>Withdraw</button>
+                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                             </>
                         }
                     </div>
