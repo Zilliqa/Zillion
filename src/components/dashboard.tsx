@@ -10,6 +10,8 @@ import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
 
+import IconErrorWarning from './icons/error-warning';
+
 function Table({ columns, data }: any) {
     const {
         getTableProps,
@@ -223,7 +225,7 @@ function Dashboard(props: any) {
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Staking Details</h5>
-                                    { data.length > 0 ? <Table columns={columns} data={data}></Table> : <p>No contract loaded.</p> }
+                                    { data.length > 0 ? <Table columns={columns} data={data}></Table> : <p><IconErrorWarning className="dashboard-icon" />No contract loaded.</p> }
                                 </div>                                
 
                                 {/* <div className="p-4 mb-4 bg-white rounded dashboard-card">

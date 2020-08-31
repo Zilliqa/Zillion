@@ -125,6 +125,12 @@
 	box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
 }
 
+.dashboard-icon {
+  width: 1.2em;
+  margin-top: -2px;
+  margin-right: 2px;
+}
+
 .logo {
   width: 24px;
   height: auto;
