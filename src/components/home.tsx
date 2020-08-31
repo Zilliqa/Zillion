@@ -8,6 +8,10 @@ import { AccessMethod } from '../util/enum';
 import WalletZilPay from './wallet-zilpay';
 import WalletPrivatekey from './wallet-privatekey';
 
+import IconKey from './icons/key';
+import IconFileCode from './icons/filecode';
+import IconFileList from './icons/filelist';
+
 
 function Home(props: any) {
 
@@ -55,15 +59,13 @@ function Home(props: any) {
             {
               !isClicked ?
               <>
-              <h1 className="font-weight-light display-1">StakeZ</h1>
-              <p className="lead">Staking in Zilliqa</p>
-              <p>Connect your wallet to begin</p>
-              <div id="wallet-access">
-                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.PRIVATEKEY)}>Private Key</button>
-                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}>Keystore</button>
-                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}>Mnemonic</button>
-                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}>ZilPay [WIP]</button>
-                <button type="button" className="btn btn-primary" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}>Ledger [WIP]</button>
+              <h1 className="font-weight-light display-1">Stake$ZIL</h1>
+              <p className="lead">Staking with Zilliqa. Revolutionize.</p>
+              <p className="mt-4">Connect your wallet to begin</p>
+              <div id="wallet-access" className="row align-items-center justify-content-center">
+                <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.PRIVATEKEY)}><IconKey className="home-icon" /><span className="d-block mt-0.5">Private Key</span></div>
+                <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
+                <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}><IconFileList className="home-icon" /><span className="d-block mt-0.5">Mnemonic</span></div>
               </div>
               </>
             :
