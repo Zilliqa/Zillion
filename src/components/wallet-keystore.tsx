@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import { ToastContainer } from 'react-toastify';
 import { AuthContext } from '../contexts/authContext';
+import Alert from './alert';
 import * as Account from '../account';
 
-// TODO
-// error handling decrypt error
+import 'react-toastify/dist/ReactToastify.css';
 
 class WalletKeystore extends Component<any, any> {
 
@@ -15,7 +16,6 @@ class WalletKeystore extends Component<any, any> {
             filename: "",
             passphrase: "",
             keystore: "",
-            error: ""
         }
     }
 
@@ -34,7 +34,7 @@ class WalletKeystore extends Component<any, any> {
     }
 
     handleError = () => {
-        this.setState({error: "error"});
+        Alert('error', 'There is something wrong in decrypting. Ensure your passphrase is correct.')
     }
 
     unlockWallet = () => {
@@ -69,7 +69,6 @@ class WalletKeystore extends Component<any, any> {
         return (
             <div>
                 <h2 className="mb-4">Access Wallet via Keystore</h2>
-                { this.state.error ? <p>There is something wrong in decrypting</p> : null }
                 <div>
                     <div id="keystore">
                         <p><strong>{this.state.filename}</strong></p>
@@ -81,6 +80,7 @@ class WalletKeystore extends Component<any, any> {
                 <br/>
                 <button type="button" className="btn btn-user-action mx-2" onClick={this.unlockWallet}>Unlock Wallet</button>
                 <button type="button" className="btn btn-user-action-cancel mx-2" onClick={this.props.onReturnCallback}>Back</button>
+                <ToastContainer hideProgressBar={true} />
             </div>
         );
     }

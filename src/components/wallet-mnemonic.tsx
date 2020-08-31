@@ -1,15 +1,18 @@
 import React, { useState, useContext } from 'react';
+import { ToastContainer } from 'react-toastify';
 import { AuthContext } from '../contexts/authContext';
+import Alert from './alert';
 import * as Account from '../account';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 function MnemonicWallet(props: any) {
 
     const authContext = useContext(AuthContext);
     const [mnemonic, setMnemonic] = useState('');
-    const [error, setError] = useState('');
 
     const handleError = () => {
-        setError('error');
+        Alert('error', 'There is something wrong in decrypting. Please ensure there are no carriage returns.');
     }
 
     const handleMnemonic = (e: any) => {
@@ -33,10 +36,9 @@ function MnemonicWallet(props: any) {
     };
 
     return (
-        <div className="wallet-section">
+        <div>
             <h2 className="mb-4">Access Wallet via Mnemonic Phrase</h2>
             <p className="lead">Simple implementation without password</p>
-            { error ? <p>There is something wrong in decrypting. Please ensure there are no carriage returns.</p> : null }
             <div className="form-group">
                 <label>
                     <strong>Mnemonic Phrase</strong>
@@ -45,6 +47,7 @@ function MnemonicWallet(props: any) {
             </div>
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
+            <ToastContainer hideProgressBar={true} />
         </div>
     );
 }

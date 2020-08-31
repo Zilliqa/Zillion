@@ -185,8 +185,9 @@
   width: 90%;
 }
 
-.wallet-section {
-  /* background-color: #2ec4b6; */
+.Toastify__toast--error {
+  color: #ffffff;
+  font-size: 0.9em;
 }
 
 #content {
