@@ -61,7 +61,7 @@ function Home(props: any) {
               <>
               <h1 className="font-weight-light display-1">Stake$ZIL</h1>
               <p className="lead">Staking with Zilliqa. Revolutionize.</p>
-              <p className="mt-4">Connect your wallet to begin</p>
+              <p className="mt-4"><strong>Connect your wallet to start</strong></p>
               <div id="wallet-access" className="row align-items-center justify-content-center">
                 <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.PRIVATEKEY)}><IconKey className="home-icon" /><span className="d-block mt-0.5">Private Key</span></div>
                 <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
