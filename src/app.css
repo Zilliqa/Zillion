@@ -79,6 +79,11 @@
   color: #ffffff;
 }
 
+.test {
+  top: 0;
+  right: 0;
+}
+
 .btn-wallet-access:hover {
   cursor: pointer;
   border: 2px solid #eceff1;

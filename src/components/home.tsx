@@ -17,16 +17,21 @@ function Home(props: any) {
 
   const authContext = useContext(AuthContext);
   const [isClicked, setIsClicked] = useState(false);
+  const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [accessMethod, setAccessMethod] = useState('');
 
   const resetWalletsClicked = () => {
     setAccessMethod('');
     setIsClicked(false);
+    setIsDirectDashboard(false);
   }
 
   const redirectToDashboard = () => {
     console.log("dashboard");
-    props.history.push("/dashboard");
+    setIsDirectDashboard(true);
+    setTimeout(() => {
+      props.history.push("/dashboard");
+    }, 1000);
   }
 
   const handleAccessMethod = (access: string) => {
@@ -51,6 +56,17 @@ function Home(props: any) {
     }
   }
 
+  const DisplayLoader = () => {
+    return (
+      <div>
+        <h2 className="mb-4">Connecting...</h2>
+        <div className="spinner-border" role="status">
+          <span className="sr-only">Connecting...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="cover">
       <div className="container-fluid h-100">
@@ -70,7 +86,7 @@ function Home(props: any) {
               </>
             :
               <>
-              {DisplayAccessMethod()}
+              { isDirectDashboard ? <>{DisplayLoader()}</> : <>{DisplayAccessMethod()}</> }
               </>
             }
           </div>
