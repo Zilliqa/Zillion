@@ -33,15 +33,15 @@ function WalletPrivatekey(props: any) {
 
     return (
         <div>
-            <h2>Load Wallet using Privatekey</h2>
+            <h2 className="mb-4">Access Wallet via Private Key</h2>
             { error ? <p>There is something wrong in decrypting. Please ensure there is no additional spaces at the end.</p> : null }
             <div className="form-group row justify-content-center">
                 <div className="col-md-4">
-                    <input id="privatekey" type="password" name="password" className="form-control" placeholder="Enter your private key" value={privateKey} onChange={handlePrivatekey}/>
+                    <input id="privatekey" type="password" name="password" className="form-control p-4" placeholder="Enter your private key" value={privateKey} onChange={handlePrivatekey}/>
                 </div>
             </div>
-            <button type="button" className="btn btn-success mx-2" onClick={unlockWallet}>Unlock Wallet</button>
-            <button type="button" className="btn btn-primary mx-2" onClick={props.onReturnCallback}>Back</button>
+            <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
+            <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
         </div>
     );
 

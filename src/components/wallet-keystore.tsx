@@ -68,19 +68,19 @@ class WalletKeystore extends Component<any, any> {
     render() {
         return (
             <div>
-                <h2>Load Wallet using Keystore</h2>
+                <h2 className="mb-4">Access Wallet via Keystore</h2>
                 { this.state.error ? <p>There is something wrong in decrypting</p> : null }
                 <div>
                     <div id="keystore">
-                        <p>{this.state.filename}</p>
-                        <label htmlFor="browsekeystore">{this.state.filename ? this.state.filename : "Select wallet file"}</label>
+                        <p><strong>{this.state.filename}</strong></p>
+                        <label htmlFor="browsekeystore">{this.state.filename ? "Select wallet file" : "Select wallet file"}</label>
                         <input type="file" id="browsekeystore" onChange={this.handleFile} />
                     </div>
-                    <input id="keystore-passphrase" type="password" name="password" placeholder="Enter your passphrase" value={this.state.passphrase} onChange={this.handlePassword}/>
+                    <input id="keystore-passphrase" type="password" name="password" className="p-2" placeholder="Enter your passphrase" value={this.state.passphrase} onChange={this.handlePassword}/>
                 </div>
                 <br/>
-                <button type="button" className="btn btn-success mx-2" onClick={this.unlockWallet}>Unlock Wallet</button>
-                <button type="button" className="btn btn-primary mx-2" onClick={this.props.onReturnCallback}>Back</button>
+                <button type="button" className="btn btn-user-action mx-2" onClick={this.unlockWallet}>Unlock Wallet</button>
+                <button type="button" className="btn btn-user-action-cancel mx-2" onClick={this.props.onReturnCallback}>Back</button>
             </div>
         );
     }
