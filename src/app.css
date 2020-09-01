@@ -81,11 +81,6 @@
   transition: 0.3s;
 }
 
-.test {
-  top: 0;
-  right: 0;
-}
-
 .btn-wallet-access:hover {
   cursor: pointer;
   border: 2px solid #eceff1;
@@ -169,6 +164,15 @@
 
 .modal-body input {
   font-size: 1em;
+}
+
+.modal-body span.txn-id {
+  font-size: 0.85em;
+  word-break: keep-all;
+}
+
+.modal-icon-success {
+  fill: #0ec8af;
 }
 
 .navbar {

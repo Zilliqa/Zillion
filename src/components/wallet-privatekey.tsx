@@ -4,7 +4,6 @@ import { AuthContext } from '../contexts/authContext';
 import Alert from './alert';
 import * as Account from '../account';
 
-import 'react-toastify/dist/ReactToastify.css';
 
 function WalletPrivatekey(props: any) {
 

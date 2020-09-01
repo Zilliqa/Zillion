@@ -1,7 +1,9 @@
 import React from 'react'
 import { toast } from 'react-toastify';
 
-const Alert = (type: string, message: string) => {
+import 'react-toastify/dist/ReactToastify.css';
+
+function Alert(type: string, message: string) {
     switch (type) {
         case 'error':
             return toast.error(
