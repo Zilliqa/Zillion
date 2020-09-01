@@ -133,6 +133,11 @@
   margin-right: 2px;
 }
 
+.dashboard-spinner {
+  color: #00cba5;
+}
+
+
 .close {
   font-weight: 400;
 }

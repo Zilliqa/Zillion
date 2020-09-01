@@ -1,11 +1,14 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { useTable } from 'react-table';
+import { trackPromise, usePromiseTracker } from 'react-promise-tracker';
 import { AuthContext } from "../contexts/authContext";
 import * as Account from "../account";
 import logo from "../static/logo.png";
 import { BN, units } from '@zilliqa-js/util';
-import { Network } from '../util/enum';
+import { Network, PromiseArea } from '../util/enum';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
+import Spinner from './spinner';
+
 import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
@@ -118,36 +121,19 @@ function Dashboard(props: any) {
         setError('');
 
         // get account balance
-        const balance = await Account.getBalance(address);
-        const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
-        setBalance(zilBalance);
+        trackPromise(Account.getBalance(address).then((balance) => {
+            const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
+            setBalance(zilBalance);
+        }), PromiseArea.PROMISE_GET_BALANCE);
 
-        // get ssn contract info
-        const implContract = await Account.getSsnImplContract(proxyAddr);
-        if (implContract === 'error') {
-            handleError();
-        } else {
-            const userBase16Addr = fromBech32Address(address).toLowerCase();
-            console.log("user base 16 addrress: %o", userBase16Addr);
-            if (userBase16Addr in implContract.ssnlist) {
-                const ssnArgs = implContract.ssnlist[userBase16Addr].arguments;
-                setNodeDetails({
-                    name: ssnArgs[3],
-                    stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
-                    bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                    commRate: ssnArgs[7],
-                    commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
-                    receiver: toBech32Address(ssnArgs[9])
-                });
-            } else {
+        trackPromise(Account.getSsnImplContract(proxyAddr).then((implContract) => {
+            if (implContract === 'error') {
                 handleError();
+                return
             }
-        }
 
-        let outputResult = [];
+            let outputResult = [];
 
-        // get ssn contract info for table generation
-        if (implContract !== 'error') {
             for (const key in implContract.ssnlist) {
                 if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
                     const ssnArgs = implContract.ssnlist[key].arguments;
@@ -163,9 +149,11 @@ function Dashboard(props: any) {
                     outputResult.push(nodeJson);
                 }
             }
-        }
-        setData([...outputResult]);
-        console.log("data: %o", data);
+
+            setData([...outputResult]);
+            console.log("data: %o", data);
+
+        }), PromiseArea.PROMISE_GET_CONTRACT);
     }
 
     // when selected network is changed
@@ -225,22 +213,13 @@ function Dashboard(props: any) {
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Staking Details</h5>
-                                    { data.length > 0 ? <Table columns={columns} data={data}></Table> : <p><IconErrorWarning className="dashboard-icon" />No contract loaded.</p> }
-                                </div>                                
-
-                                {/* <div className="p-4 mb-4 bg-white rounded dashboard-card">
-                                    <h5 className="card-title mb-4">Node Statistics</h5>
-                                    { error ? <p>There is an error retrieving the ssn contract</p> : (
-                                        <>
-                                            <p>Name: {nodeDetails.name}</p>
-                                            <p>Stake amount: {nodeDetails.stakeAmt} ZIL</p>
-                                            <p>Buffered deposit: {nodeDetails.bufferedDeposit} ZIL</p>
-                                            <p>Commission rate: {nodeDetails.commRate} %</p>
-                                            <p>Commission rewards: {nodeDetails.commReward} ZIL</p>
-                                            <p>Receiver: {nodeDetails.receiver}</p>
-                                        </>
-                                    ) }
-                                </div> */}
+                                        <Spinner class="spinner-border dashboard-spinner" area={PromiseArea.PROMISE_GET_CONTRACT} />
+                                        { data.length > 0 ? 
+                                            <Table columns={columns} data={data}></Table> 
+                                            : 
+                                            <p><IconErrorWarning className="dashboard-icon" />No contract loaded.</p> 
+                                        }
+                                </div>
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">What would you like to do today?</h5>
