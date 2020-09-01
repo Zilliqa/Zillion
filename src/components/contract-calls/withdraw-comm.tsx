@@ -4,15 +4,15 @@ import { trackPromise } from 'react-promise-tracker';
 import { OperationStatus } from "../../util/enum";
 import * as Account from "../../account";
 import Alert from '../alert';
-import ModalSpinner from '../modal-spinner';
 
-import IconCheckboxCircle from '../icons/checkbox-circle';
+import ModalPending from '../contract-calls-modal/modal-pending';
+import ModalSent from '../contract-calls-modal/modal-sent';
 
 function WithdrawCommModal(props: any) {
     const { proxy, currentRewards } = props;
     const [txnId, setTxnId] = useState('')
     const [error, setError] = useState('');
-    const [isPending, setIsPending] = useState('')
+    const [isPending, setIsPending] = useState('');
 
     const handleClose = () => {
         // reset state
@@ -30,6 +30,7 @@ function WithdrawCommModal(props: any) {
         setIsPending(OperationStatus.PENDING);
         trackPromise(Account.withdrawComm(proxy)
             .then((result) => {
+                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     setError(OperationStatus.ERROR);
                     Alert('error', "There is an error. Please try again.");
@@ -49,26 +50,13 @@ function WithdrawCommModal(props: any) {
                         {
                             isPending ?
 
-                            <>
-                            <div className="modal-body modal-processing text-center">
-                                <h2>Processing...</h2>
-                                <p className="mt-4">Please wait 1 - 2 minutes while we process on the blockchain.</p>
-                                <ModalSpinner class="spinner-border dashboard-spinner" />
-                            </div>
-                            </>
+                            <ModalPending />
 
                             :
                             
                             txnId ?
                             
-                            <>
-                            <div className="modal-body text-center">
-                                <IconCheckboxCircle className="modal-icon-success" width="80" height="80" />
-                                <p className="mt-2"><strong>Transaction Sent</strong><br/><span className="txn-id">{txnId}</span></p>
-                                <p>Please check the status on Devex</p>
-                                <button type="button" className="btn btn-user-action mx-2" data-dismiss="modal" onClick={handleClose}>Done</button>
-                            </div>
-                            </>
+                            <ModalSent txnId={txnId} handleClose={handleClose} />
 
                             :
 
