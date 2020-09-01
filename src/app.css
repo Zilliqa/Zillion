@@ -68,15 +68,17 @@
 }
 
 .btn-wallet-access {
-  border: 2px solid #0a2e76;
+  border: 2px solid #006644;
   border-radius: 6px;
   background-color: #000000;
   background-color: rgba(0, 0, 0, 0.7);
+  transition: 0.3s;
   width: 160px;
 }
 
 .btn-wallet-access span {
   color: #ffffff;
+  transition: 0.3s;
 }
 
 .test {
@@ -95,7 +97,7 @@
 }
 
 .btn-wallet-access .home-icon {
-  fill: #3b76ef;
+  fill: #00d18a;
   width: 40px;
 }
 
