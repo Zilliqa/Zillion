@@ -70,8 +70,8 @@
 .btn-wallet-access {
   border: 2px solid #006644;
   border-radius: 6px;
-  background-color: #000000;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: #536dfe;
+  background-color: transparent;
   transition: 0.3s;
   width: 160px;
 }
@@ -108,7 +108,7 @@
   height: 100vh;
   min-height: 550px;
   background-color: #18191a;
-  background-image: url('./static/front_bg.jpg');
+  background-image: url('./static/bg2.jpg');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
