@@ -156,6 +156,12 @@
   top: 20%;
 }
 
+.modal-processing h2 {
+  color: #263238;
+  font-size: 1.4em;
+  font-weight: 500;
+}
+
 .modal-title {
   color: #263238;
   font-size: 1em;

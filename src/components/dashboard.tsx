@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { useTable } from 'react-table';
-import { trackPromise, usePromiseTracker } from 'react-promise-tracker';
+import { trackPromise } from 'react-promise-tracker';
 import { AuthContext } from "../contexts/authContext";
 import * as Account from "../account";
 import logo from "../static/logo.png";

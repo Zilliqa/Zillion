@@ -1,6 +1,8 @@
 import React from 'react';
 import { usePromiseTracker } from "react-promise-tracker";
 
+// for use with a promise tracker
+// see @ModalSpinner for an implementation without promise
 const Spinner = (props: any) => {
     const { promiseInProgress } = usePromiseTracker({ area: props.area, delay: 0 });
 
