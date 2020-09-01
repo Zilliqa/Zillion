@@ -6,8 +6,9 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 2. yarn start
 3. Choose one of the method to connect to your operator wallet
 4. Switch the network of your choice
-5. Enter the respective proxy contract address; the node statistics should then be generated
-6. Execute any ssn operator action; click on "Refresh" button
+5. Enter the respective proxy contract address; the node statistics should then be generated, e.g. 0x9cd7b53c2d2e111ac8c5d37af522302028e1c79e
+6. Execute any ssn operator action
+7. If the contract details doesn't get update, click on the "Dashboard" wordings on the navigation bar to manually refresh
 
 ## Available Scripts
 
