@@ -110,6 +110,7 @@ function Dashboard(props: any) {
     }
 
     const handleError = () => {
+        setData([]);
         setError('error');
     }
 
@@ -136,7 +137,14 @@ function Dashboard(props: any) {
 
             for (const key in implContract.ssnlist) {
                 if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
+                    let delegAmt = 0;
                     const ssnArgs = implContract.ssnlist[key].arguments;
+
+                    // get number of delegators
+                    if (implContract.hasOwnProperty("ssn_deleg_amt") && implContract.ssn_deleg_amt.hasOwnProperty(key)) {
+                        delegAmt = Object.keys(implContract.ssn_deleg_amt[key]).length;
+                    }
+
                     const nodeJson = {
                         ssnAddress: toBech32Address(key),
                         ssnName: ssnArgs[3],
@@ -144,7 +152,7 @@ function Dashboard(props: any) {
                         ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
                         ssnCommRate: ssnArgs[7],
                         ssnCommReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
-                        ssnDeleg: 'WIP',
+                        ssnDeleg: delegAmt,
                     }
                     outputResult.push(nodeJson);
                 }
@@ -203,8 +211,7 @@ function Dashboard(props: any) {
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
-                                <h1>StakeZ Dashboard</h1>
-                                <button type="button" className="btn btn-secondary btn-sm mt-2" onClick={() => refreshStats()}>Refresh</button>
+                                <h1>Stake$ZIL Dashboard</h1>
 
                                 <div className="p-4 my-4 bg-white rounded dashboard-card">
                                     <h5 className="card-title mb-4">Proxy Contract</h5>
