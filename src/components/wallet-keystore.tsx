@@ -66,7 +66,7 @@ class WalletKeystore extends Component<any, any> {
 
     render() {
         return (
-            <div>
+            <div className="wallet-access">
                 <h2 className="mb-4">Access Wallet via Keystore</h2>
                 <div>
                     <div id="keystore">

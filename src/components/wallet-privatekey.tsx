@@ -34,7 +34,7 @@ function WalletPrivatekey(props: any) {
     }
 
     return (
-        <div>
+        <div className="wallet-access">
             <h2 className="mb-4">Access Wallet via Private Key</h2>
             <div className="form-group row justify-content-center">
                 <div className="col-md-4">

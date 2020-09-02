@@ -58,7 +58,7 @@ function Home(props: any) {
 
   const DisplayLoader = () => {
     return (
-      <div>
+      <div className="animate__animated animate__fadeIn">
         <h2 className="mb-4">Connecting...</h2>
         <div className="spinner-border" role="status">
           <span className="sr-only">Connecting...</span>
@@ -71,7 +71,7 @@ function Home(props: any) {
     <div className="cover">
       <div className="container-fluid h-100">
         <div className="row h-100 align-items-center">
-          <div className="col-12 text-center text-light">
+          <div className="col-12 text-center text-light animate__animated animate__fadeInUp">
             {
               !isClicked ?
               <>

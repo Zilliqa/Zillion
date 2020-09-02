@@ -124,7 +124,11 @@
 .dashboard-card {
   border: none;
 	-webkit-box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
-	box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
+  box-shadow: 0 0 35px 0 rgba(154,161,171,.15);
+  
+  /* referring to animate.css */
+  animation: fadeIn;
+  animation-duration: 0.8s;
 }
 
 .dashboard-icon {
@@ -215,6 +219,12 @@
 .sidebar-divider {
   background-color:#3f4b5a;
   width: 90%;
+}
+
+.wallet-access {
+  /* referring to animate.css */
+  animation: fadeIn;
+  animation-duration: 0.8s;
 }
 
 .Toastify__toast--error {
