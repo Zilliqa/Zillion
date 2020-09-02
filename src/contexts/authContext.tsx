@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toBech32Address } from '@zilliqa-js/crypto';
+import { validation } from '@zilliqa-js/util';
 import { Network } from '../util/enum';
 // const { Zilliqa } = require("@zilliqa-js/zilliqa");
 
@@ -23,7 +24,11 @@ function AuthProvider(props: any) {
     const [network, setNetwork] = useState(Network.TESTNET);
 
     const toggleAuthentication = (address: string) => {
-        setAddress(toBech32Address(address));
+        let walletAddr = address;
+        if (!validation.isBech32(address)) {
+            walletAddr = toBech32Address(address);
+        }
+        setAddress(walletAddr);
         setIsAuthenticated(true);
     };
 

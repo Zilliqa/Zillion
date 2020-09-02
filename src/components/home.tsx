@@ -72,7 +72,7 @@ function Home(props: any) {
     <div className="cover">
       <div className="container-fluid h-100">
         <div className="row h-100 align-items-center">
-          <div className="col-12 text-center text-light animate__animated animate__fadeInUp">
+          <div className="col-12 text-center text-light">
             {
               !isClicked ?
               <>

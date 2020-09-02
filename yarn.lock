@@ -1285,6 +1285,44 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
+"@ledgerhq/devices@^5.22.0":
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.22.0.tgz#18595f3545b57cf60e50d6e9d83095dda21f575f"
+  integrity sha512-oJxhee/zlHmIx66zvQQTSpIsHOiiLjALemTX9oUtB4xQwFvoiptPnBCeTDTM9teode7wzk7oE9qdUAZuat+nCg==
+  dependencies:
+    "@ledgerhq/errors" "^5.22.0"
+    "@ledgerhq/logs" "^5.22.0"
+    rxjs "^6.6.2"
+
+"@ledgerhq/errors@^5.22.0":
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-5.22.0.tgz#7327fc152d4896ddc26aada0943065db21c14880"
+  integrity sha512-XDT0meBn39+q+JWzUFXmiFbVYLTy+uHRFMb9napcxyZ0Q/MdKkle9/vkgtvRHjPIkGobklXpyefsgH3BZQHukA==
+
+"@ledgerhq/hw-transport-u2f@^5.22.0":
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-u2f/-/hw-transport-u2f-5.22.0.tgz#c39d2da6965310c44460376d643b9ad873e76228"
+  integrity sha512-ooSqdeFcW8Oo9BOVYfPNT4NX7IQlffVX9lZMqy2HBpHAjTW/iIViGtZOyKr5ehHrwugAw/hWNH5TqUqs7zgoyA==
+  dependencies:
+    "@ledgerhq/errors" "^5.22.0"
+    "@ledgerhq/hw-transport" "^5.22.0"
+    "@ledgerhq/logs" "^5.22.0"
+    u2f-api "0.2.7"
+
+"@ledgerhq/hw-transport@^5.22.0":
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-5.22.0.tgz#d627948b43005ec9e7dfe85adf9aa01e130de280"
+  integrity sha512-MFfkVGYMYnr6fI4XGnJQNLd36JIrRpvd5WBmVSDhCO3UKUER2fJ9koVBGc97o7yXtE5IAlJKF+nR9HZJIa0lRQ==
+  dependencies:
+    "@ledgerhq/devices" "^5.22.0"
+    "@ledgerhq/errors" "^5.22.0"
+    events "^3.2.0"
+
+"@ledgerhq/logs@^5.22.0":
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.22.0.tgz#a54d6b5b391cdb4c2eacc9500feb04b90475c361"
+  integrity sha512-jV4mJxD1aieORm+sK9bYakQd9GMLd7KAxgt2IaxhrTU+QD5Ne47mxQOTys9p7f5w25ujs3R+Px2t3KiMRASHtg==
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"
@@ -1643,6 +1681,21 @@
   version "7.0.5"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.5.tgz#dcce4430e64b443ba8945f0290fb564ad5bac6dd"
   integrity sha512-7+2BITlgjgDhH0vvwZU/HZJVyk+2XUlvxXe8dFMedNX/aMkaOq++rMAFXc0tM7ij15QaWlbdQASBR9dihi+bDQ==
+
+"@types/ledgerhq__hw-transport-u2f@^4.21.1":
+  version "4.21.1"
+  resolved "https://registry.yarnpkg.com/@types/ledgerhq__hw-transport-u2f/-/ledgerhq__hw-transport-u2f-4.21.1.tgz#8193aa3199cc5ba6cf7f9d880a88f2993a6c6c3b"
+  integrity sha512-8mVUb2/Oj3VtP/ERpm//HL/JOLxKFZycMeFjKxkRMp3283Vz0slBkeHxSdjxRQjiZi7zRu9amQ8dPXnr1B5nIg==
+  dependencies:
+    "@types/ledgerhq__hw-transport" "*"
+    "@types/node" "*"
+
+"@types/ledgerhq__hw-transport@*", "@types/ledgerhq__hw-transport@^4.21.2":
+  version "4.21.2"
+  resolved "https://registry.yarnpkg.com/@types/ledgerhq__hw-transport/-/ledgerhq__hw-transport-4.21.2.tgz#92eaea9e4669df2c8ec5292b694097d1629b05c1"
+  integrity sha512-NhJwkdxdsqj/ZTq9KuBYtN+rDYOVYrlR3ByYNfK78iUOIlmXcXFBtfkhBUpX8c7dbE5uJZOjDdM3EC7Kf3Fakg==
+  dependencies:
+    "@types/node" "*"
 
 "@types/long@^4.0.0", "@types/long@^4.0.1":
   version "4.0.1"
@@ -4597,6 +4650,11 @@ events@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/events/-/events-3.1.0.tgz#84279af1b34cb75aa88bf5ff291f6d0bd9b31a59"
   integrity sha512-Rv+u8MLHNOdMjTAFeT3nCjHn2aGlx435FP/sDHNaRhDEMwyI/aB22Kj2qIN8R0cw3z28psEQLYwxVKLsKrMgWg==
+
+events@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.2.0.tgz#93b87c18f8efcd4202a461aec4dfc0556b639379"
+  integrity sha512-/46HWwbfCX2xTawVfkKLGxMifJYQBWMwY1mjywRtb4c9x8l5NP3KoJtnIOiL1hfdRkIuYhETxQlo62IF8tcnlg==
 
 eventsource@^1.0.7:
   version "1.0.7"
@@ -9593,6 +9651,13 @@ rxjs@^6.5.3:
   dependencies:
     tslib "^1.9.0"
 
+rxjs@^6.6.2:
+  version "6.6.2"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.6.2.tgz#8096a7ac03f2cc4fe5860ef6e572810d9e01c0d2"
+  integrity sha512-BHdBMVoWC2sL26w//BCu3YzKT4s2jip/WhwsGEDmeKYBhKDZeYezVUnHatYB7L85v5xs0BAQmg6BEYJEKxBabg==
+  dependencies:
+    tslib "^1.9.0"
+
 safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
@@ -10708,6 +10773,11 @@ typescript@^3.9.7:
   version "3.9.7"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
   integrity sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
+
+u2f-api@0.2.7:
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/u2f-api/-/u2f-api-0.2.7.tgz#17bf196b242f6bf72353d9858e6a7566cc192720"
+  integrity sha512-fqLNg8vpvLOD5J/z4B6wpPg4Lvowz1nJ9xdHcCzdUPKcFE/qNCceV2gNZxSJd5vhAZemHr/K/hbzVA0zxB5mkg==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"

@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ledgerhq/hw-transport": "^5.22.0",
+    "@ledgerhq/hw-transport-u2f": "^5.22.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@types/jquery": "^3.5.1",
+    "@types/ledgerhq__hw-transport": "^4.21.2",
+    "@types/ledgerhq__hw-transport-u2f": "^4.21.1",
     "@types/react-table": "^7.0.22",
     "@zilliqa-js/zilliqa": "^0.11.0",
     "bn.js": "^5.1.2",
@@ -24,6 +28,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "export HTTPS=true&&react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
