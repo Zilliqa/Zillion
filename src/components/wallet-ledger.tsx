@@ -14,10 +14,10 @@ function LedgerWallet(props: any) {
     }
 
     return (
-        <div>
-            <h2>Load Wallet using Hardware Ledger</h2>
-            <button type="button" className="btn btn-success mx-2" onClick={unlockWallet}>Unlock Wallet</button>
-            <button type="button" className="btn btn-primary mx-2" onClick={props.onReturnCallback}>Back</button>
+        <div className="wallet-access">
+            <h2 className="mb-4">Access Wallet using Hardware Ledger</h2>
+            <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
+            <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
         </div>
     );
 }
