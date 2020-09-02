@@ -114,6 +114,11 @@
   background-size: cover;
 }
 
+.cover .container-fluid {
+  animation: fadeInUp;
+  animation-duration: 1s;
+}
+
 /* front page title */
 .cover h1 {
   font-family: 'Alata', sans-serif;
