@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import { AuthContext } from '../contexts/authContext';
 import Alert from './alert';
 import * as Account from '../account';
-
+import { AccessMethod } from '../util/enum';
 
 function WalletPrivatekey(props: any) {
 
@@ -25,7 +25,7 @@ function WalletPrivatekey(props: any) {
 
             if (address !== "error") {
                 console.log("wallet add success: %o", address);
-                authContext.toggleAuthentication(address);
+                authContext.toggleAuthentication(address, AccessMethod.PRIVATEKEY);
                 props.onSuccessCallback();
             } else {
                 handleError();

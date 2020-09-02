@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
-import { OperationStatus } from "../../util/enum";
+import { AuthContext } from '../../contexts/authContext';
+import { OperationStatus, AccessMethod } from "../../util/enum";
 import * as Account from "../../account";
 import Alert from '../alert';
 
@@ -9,6 +10,7 @@ import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
 function UpdateCommRateModal(props: any) {
+    const authContext = useContext(AuthContext);
     const { proxy, currentRate } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
@@ -43,6 +45,12 @@ function UpdateCommRateModal(props: any) {
             }).finally(() => {
                 setIsPending('');
             }));
+    }
+
+    const ledgerUpdateCommRate = async () => {
+        if (authContext.accountType === AccessMethod.LEDGER) {
+            console.log("access method is ledger!");
+        }
     }
 
     return (

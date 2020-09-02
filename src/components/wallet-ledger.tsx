@@ -5,6 +5,7 @@ import Alert from './alert';
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import TransportWebAuthn from "@ledgerhq/hw-transport-webauthn";
 import ZilliqaLedger from '../ledger';
+import { AccessMethod } from '../util/enum';
 
 function LedgerWallet(props: any) {
 
@@ -28,7 +29,7 @@ function LedgerWallet(props: any) {
 
             const result = await ledger.getPublicAddress(0);
             console.log("unlock ledger success - public address...: %o", result.pubAddr);
-            authContext.toggleAuthentication(result.pubAddr);
+            authContext.toggleAuthentication(result.pubAddr, AccessMethod.LEDGER);
             // no error
             // call parent function to redirect to dashboard
             props.onSuccessCallback();

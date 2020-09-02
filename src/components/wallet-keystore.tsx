@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import { AuthContext } from '../contexts/authContext';
 import Alert from './alert';
 import * as Account from '../account';
+import { AccessMethod } from '../util/enum';
 
 
 class WalletKeystore extends Component<any, any> {
@@ -49,7 +50,7 @@ class WalletKeystore extends Component<any, any> {
 
                 if (address !== "error") {
                     console.log("wallet add success: %o", address);
-                    this.context.toggleAuthentication(address);
+                    this.context.toggleAuthentication(address, AccessMethod.KEYSTORE);
                     // no error
                     // call parent function to redirect to dashboard
                     this.props.onSuccessCallback();
