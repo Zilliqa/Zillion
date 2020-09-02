@@ -1309,6 +1309,16 @@
     "@ledgerhq/logs" "^5.22.0"
     u2f-api "0.2.7"
 
+"@ledgerhq/hw-transport-webauthn@^5.22.0":
+  version "5.22.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-webauthn/-/hw-transport-webauthn-5.22.0.tgz#e2750a5a8f05a5f2728b22811043d192a6f9a33b"
+  integrity sha512-nM0e0vvxBpp25TvK6QetCq31Q5kEweZSTvRIvUxFtzWh2Yg+lRuvKIYMeNdkxd+6jvKtd2jzV4BsEuqqtG0l3A==
+  dependencies:
+    "@ledgerhq/devices" "^5.22.0"
+    "@ledgerhq/errors" "^5.22.0"
+    "@ledgerhq/hw-transport" "^5.22.0"
+    "@ledgerhq/logs" "^5.22.0"
+
 "@ledgerhq/hw-transport@^5.22.0":
   version "5.22.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-5.22.0.tgz#d627948b43005ec9e7dfe85adf9aa01e130de280"
