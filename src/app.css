@@ -36,6 +36,16 @@
   outline-color: #2ec4b6 !important;
 }
 
+.btn-test {
+  color: #ffffff;
+  border: 1px solid #3b76ef;
+  border-radius: 6px;
+  background-color: #3b76ef;
+  font-size: 0.85em;
+  font-weight: 500;
+  padding: 0.4em 1em;
+}
+
 .btn-user-action {
   color: #ffffff;
   border: 1px solid #3b76ef;
@@ -146,7 +156,6 @@
   color: #00cba5;
 }
 
-
 .close {
   font-weight: 400;
 }
@@ -248,6 +257,62 @@
 
 #dashboard {
   font-family: 'Poppins', sans-serif;
+}
+
+#home-mini-navbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+#home-network-selector {
+  background-color: transparent;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  color: #dddddd;
+  font-weight: 500;
+  font-size: 1em;
+  line-height: 1em;
+  padding: 0.6em 1em;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+#home-network-selector:hover {
+  cursor: pointer;
+  border: 1px solid #555555;
+}
+
+#home-ssn-details {
+  color: #000000;
+  font-size: 0.85em;
+  margin-top: 4em;
+}
+
+#home-ssn-details h2 {
+  color: #263238;
+  font-size: 1em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#home-ssn-details > .row {
+  background-color: #ffffff;
+  background-color: rgba(255,255,255, 0.95);
+}
+
+#home-ssn-details th {
+  border-top: #ffffff;
+  color: #263238;
+  font-size: 0.9em;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+#home-ssn-details tbody > tr > :nth-child(1){
+  color:#3b76ef;
+  font-weight: 500;
 }
 
 #keystore label {

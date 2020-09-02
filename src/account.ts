@@ -105,7 +105,10 @@ export const getBalance = async (address: string) => {
 };
 
 // getSsnImplContract - get implementation contract state from the proxy contract
-export const getSsnImplContract = async (proxyAddr: string) => {
+export const getSsnImplContract = async (proxyAddr: string, networkURL?: string) => {
+    if (networkURL) {
+        changeNetwork(networkURL);
+    }
     try {
         const proxyContract = await zilliqa.blockchain.getSmartContractState(proxyAddr);
         console.log("get proxy contract state: %o", proxyContract.result);

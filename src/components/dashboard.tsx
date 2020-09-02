@@ -1,19 +1,22 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
 import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
+
 import { AuthContext } from "../contexts/authContext";
-import * as Account from "../account";
-import logo from "../static/logo.png";
-import { BN, units } from '@zilliqa-js/util';
 import { Network, PromiseArea } from '../util/enum';
+import * as Account from "../account";
+
+import { BN, units } from '@zilliqa-js/util';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
-import Spinner from './spinner';
 
 import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
 
 import IconErrorWarning from './icons/error-warning';
+import Spinner from './spinner';
+import logo from "../static/logo.png";
+
 
 function Table({ columns, data }: any) {
     const {
