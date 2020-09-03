@@ -36,14 +36,20 @@
   outline-color: #2ec4b6 !important;
 }
 
-.btn-test {
+.btn-sign-in {
   color: #ffffff;
-  border: 1px solid #3b76ef;
+  border: 1px solid #5e60ce;
   border-radius: 6px;
-  background-color: #3b76ef;
+  background-color: #5e60ce;
   font-size: 0.85em;
   font-weight: 500;
-  padding: 0.4em 1em;
+  padding: 0.6em 1em;
+}
+
+.btn-sign-in:hover {
+  color: #ffffff;
+  border: 1px solid #3c3ec3;
+  background-color: #3c3ec3;
 }
 
 .btn-user-action {
@@ -266,14 +272,16 @@
 }
 
 #home-network-selector {
-  background-color: transparent;
-  border: 1px solid #dddddd;
-  border-radius: 4px;
+  background-color: #28343c;
+  background: transparent url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'><path fill='none' d='M0 0h24v24H0z'/><path d='M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z' fill='rgba(255,255,255,1)'/></svg>") no-repeat;
+  background-position: right 20px top 50%;
+  border: 1px;  
+  border-radius: 6px;
   color: #dddddd;
   font-weight: 500;
-  font-size: 1em;
+  font-size: 0.9em;
   line-height: 1em;
-  padding: 0.6em 1em;
+  padding: 0.8em 1em;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -281,13 +289,15 @@
 
 #home-network-selector:hover {
   cursor: pointer;
-  border: 1px solid #555555;
+  color: #00d18a;
+  background: transparent url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'><path fill='none' d='M0 0h24v24H0z'/><path d='M12 15l-4.243-4.243 1.415-1.414L12 12.172l2.828-2.829 1.415 1.414z' fill='rgba(0,209,138,1)'/></svg>") no-repeat;
+  background-position: right 20px top 50%;
 }
 
 #home-ssn-details {
   color: #000000;
   font-size: 0.85em;
-  margin-top: 4em;
+  margin-top: 2em;
 }
 
 #home-ssn-details h2 {

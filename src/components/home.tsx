@@ -93,17 +93,17 @@ function Home(props: any) {
                         <option value={Network.ISOLATED_SERVER}>Isolated Server</option>
                     </select>
                 </div>
-                <div className="btn-test mx-2">Sign in with Wallet</div>
               </div>
 
               <h1 className="font-weight-light display-1">Stake$ZIL</h1>
               <p className="lead">Staking with Zilliqa. Revolutionize.</p>
-
+              <div className="btn btn-sign-in mt-4 mx-2">Sign in for Delegators</div>
+              <div className="btn btn-sign-in mt-4 mx-2">Sign in for Operators</div>
               <div id="home-ssn-details" className="container">
                 <div className="row rounded p-4">
                   <h2 className="mb-4">Staked Seed Nodes</h2>
                   <div className="col-12">
-                    <SsnTable proxy={process.env.REACT_APP_PROXY} network={selectedNetwork} />
+                    <SsnTable proxy={process.env.REACT_APP_PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
                   </div>
                 </div>
               </div>

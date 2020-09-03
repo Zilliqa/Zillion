@@ -49,6 +49,7 @@ function Table({ columns, data, tableId }: any) {
 function SsnTable(props: any) {
     const proxy = props.proxy;
     const network = props.network;
+    const refresh = props.refresh ? props.refresh : 3000;
     const [data, setData] = useState([] as any);
     const [showSpinner, setShowSpinner] = useState(false);
 
@@ -133,7 +134,7 @@ function SsnTable(props: any) {
             console.log("refreshing home page ssn table");
             setShowSpinner(false);
             getData();
-        }, 3000);
+        }, refresh);
         return () => {
             clearInterval(intervalId);
         }
