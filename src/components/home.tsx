@@ -22,7 +22,7 @@ function Home(props: any) {
   const authContext = useContext(AuthContext);
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
-  const [role, setRole] = useState(Role.DELEGATOR);
+  const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('');
 
@@ -54,7 +54,7 @@ function Home(props: any) {
   }
 
   const resetView = () => {
-    setRole(Role.DELEGATOR);
+    setRole('');
     setShowAccessMethod(false);
     setAccessMethod('');
   }

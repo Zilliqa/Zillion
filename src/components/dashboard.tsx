@@ -5,6 +5,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { AuthContext } from "../contexts/authContext";
 import { Network, PromiseArea } from '../util/enum';
 import * as Account from "../account";
+import SsnTable from './ssn-table';
 
 import { BN, units } from '@zilliqa-js/util';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
@@ -61,8 +62,6 @@ function Dashboard(props: any) {
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
-    const [proxyAddr, setProxyAddr] = useState('');
-    const [data, setData] = useState([] as any);
 
     const [nodeDetails, setNodeDetails] = useState({
         name: '',
@@ -73,52 +72,13 @@ function Dashboard(props: any) {
         receiver: ''
     });
 
-    const columns = useMemo(
-        () => [
-            {
-                Header: 'address',
-                accessor: 'ssnAddress',
-                className: 'ssn-address'
-            },
-            {
-                Header: 'name',
-                accessor: 'ssnName'
-            },
-            {
-                Header: 'stake amount',
-                accessor: 'ssnStakeAmt'
-            },
-            {
-                Header: 'buffered deposit',
-                accessor: 'ssnBufferedDeposit'
-            },
-            {
-                Header: 'Comm. Rate',
-                accessor: 'ssnCommRate'
-            },
-            {
-                Header: 'Comm. Reward',
-                accessor: 'ssnCommReward'
-            },
-            {
-                Header: 'Delegators',
-                accessor: 'ssnDeleg'
-            }
-        ],[]
-    )
-
     const handleChangeNetwork = (e: any) => {
         setSelectedNetwork(e.target.value);
         Account.changeNetwork(e.target.value);
     }
 
     const handleError = () => {
-        setData([]);
         setError('error');
-    }
-
-    const handleProxyAddr = (e: any) => {
-        setProxyAddr(e.target.value);
     }
 
     const refreshStats = async () => {
@@ -129,42 +89,6 @@ function Dashboard(props: any) {
             const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
             setBalance(zilBalance);
         }), PromiseArea.PROMISE_GET_BALANCE);
-
-        trackPromise(Account.getSsnImplContract(proxyAddr).then((implContract) => {
-            if (implContract === 'error') {
-                handleError();
-                return
-            }
-
-            let outputResult = [];
-
-            for (const key in implContract.ssnlist) {
-                if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
-                    let delegAmt = 0;
-                    const ssnArgs = implContract.ssnlist[key].arguments;
-
-                    // get number of delegators
-                    if (implContract.hasOwnProperty("ssn_deleg_amt") && implContract.ssn_deleg_amt.hasOwnProperty(key)) {
-                        delegAmt = Object.keys(implContract.ssn_deleg_amt[key]).length;
-                    }
-
-                    const nodeJson = {
-                        ssnAddress: toBech32Address(key),
-                        ssnName: ssnArgs[3],
-                        ssnStakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
-                        ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                        ssnCommRate: ssnArgs[7],
-                        ssnCommReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
-                        ssnDeleg: delegAmt,
-                    }
-                    outputResult.push(nodeJson);
-                }
-            }
-
-            setData([...outputResult]);
-            console.log("data: %o", data);
-
-        }), PromiseArea.PROMISE_GET_CONTRACT);
     }
 
     // when selected network is changed
@@ -173,7 +97,7 @@ function Dashboard(props: any) {
         console.log("dashboard use effect running");
         console.log("address: %o", address);
         refreshStats();
-    }, [selectedNetwork, proxyAddr]);
+    }, [selectedNetwork]);
 
     return (
         <>
@@ -216,19 +140,15 @@ function Dashboard(props: any) {
                             <div className="col-12">
                                 <h1>Stake$ZIL Dashboard</h1>
 
-                                <div className="p-4 my-4 bg-white rounded dashboard-card">
-                                    <h5 className="card-title mb-4">Proxy Contract</h5>
-                                    <input className="form-control" type="text" value={proxyAddr} onChange={handleProxyAddr} placeholder="Enter the proxy contract address" />
-                                </div>
-
-                                <div className="p-4 mb-4 bg-white rounded dashboard-card">
-                                    <h5 className="card-title mb-4">Staking Details</h5>
-                                        <Spinner class="spinner-border dashboard-spinner" area={PromiseArea.PROMISE_GET_CONTRACT} />
-                                        { data.length > 0 ? 
-                                            <Table columns={columns} data={data}></Table> 
-                                            : 
-                                            <p><IconErrorWarning className="dashboard-icon" />No contract loaded.</p> 
-                                        }
+                                <div id="dashboard-ssn-details" className="p-4 mb-4 bg-white rounded dashboard-card container-fluid">
+                                    <div className="row">
+                                        <div className="col">
+                                            <h5 className="card-title mb-4">Staking Details</h5>
+                                        </div>
+                                        <div className="col-12 text-center"> 
+                                            <SsnTable proxy={process.env.REACT_APP_PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="p-4 mb-4 bg-white rounded dashboard-card">
@@ -242,9 +162,9 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={proxyAddr} currentRate={nodeDetails.commRate}/>
-            <UpdateReceiverAddress proxy={proxyAddr} currentReceiver={nodeDetails.receiver}/>
-            <WithdrawCommModal proxy={proxyAddr} currentRewards={nodeDetails.commReward}/>
+            <UpdateCommRateModal proxy={process.env.REACT_APP_PROXY} currentRate={nodeDetails.commRate}/>
+            <UpdateReceiverAddress proxy={process.env.REACT_APP_PROXY} currentReceiver={nodeDetails.receiver}/>
+            <WithdrawCommModal proxy={process.env.REACT_APP_PROXY} currentRewards={nodeDetails.commReward}/>
         </div>
         </>
     );

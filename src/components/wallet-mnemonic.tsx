@@ -38,7 +38,6 @@ function MnemonicWallet(props: any) {
     return (
         <div className="wallet-access">
             <h2 className="mb-4">Access Wallet via Mnemonic Phrase</h2>
-            <p className="lead">Simple implementation without password</p>
             <div className="form-group">
                 <label>
                     <strong>Mnemonic Phrase</strong>
