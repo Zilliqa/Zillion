@@ -130,9 +130,14 @@
   background-size: cover;
 }
 
-.cover .container-fluid {
+.cover .heading {
   animation: fadeInUp;
   animation-duration: 1s;
+}
+
+.cover .initial-load {
+  animation: fadeIn;
+  animation-duration: 1.5s;
 }
 
 /* front page title */
@@ -242,6 +247,7 @@
 }
 
 .wallet-access {
+  margin-top: 3em;
   /* referring to animate.css */
   animation: fadeIn;
   animation-duration: 0.8s;
@@ -285,6 +291,10 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  
+  /* referring to animate.css */
+  animation: fadeIn;
+  animation-duration: 2.5s;
 }
 
 #home-network-selector:hover {

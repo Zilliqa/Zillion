@@ -24,3 +24,8 @@ export enum PromiseArea {
     PROMISE_GET_CONTRACT = "PROMISE_GET_CONTRACT",
     PROMISE_WITHDRAW_COMM = "PROMISE_WITHDRAW_COMM",
 }
+
+export enum Role {
+    DELEGATOR = "DELEGATOR",
+    OPERATOR = "OPERATOR"
+}

@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { withRouter } from "react-router-dom";
 
 import { AuthContext } from '../contexts/authContext';
-import { AccessMethod, Network } from '../util/enum';
+import { AccessMethod, Network, Role } from '../util/enum';
 import SsnTable from './ssn-table';
 
 import WalletKeystore from './wallet-keystore';
@@ -22,12 +22,13 @@ function Home(props: any) {
   const authContext = useContext(AuthContext);
   const [isClicked, setIsClicked] = useState(false);
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
+  const [isShowAccessMethod, setShowAccessMethod] = useState(false);
+  const [role, setRole] = useState(Role.DELEGATOR);
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('');
 
   const resetWalletsClicked = () => {
     setAccessMethod('');
-    setIsClicked(false);
     setIsDirectDashboard(false);
   }
 
@@ -40,12 +41,22 @@ function Home(props: any) {
   }
 
   const handleAccessMethod = (access: string) => {
-    setIsClicked(true);
     setAccessMethod(access);
   }
 
   const handleChangeNetwork = (e: any) => {
     setSelectedNetwork(e.target.value);
+  }
+
+  const handleShowAccessMethod = (selectedRole: Role) => {
+    setRole(selectedRole);
+    setShowAccessMethod(true);
+  }
+
+  const resetView = () => {
+    setRole(Role.DELEGATOR);
+    setShowAccessMethod(false);
+    setAccessMethod('');
   }
 
   const DisplayAccessMethod = () => {
@@ -81,9 +92,9 @@ function Home(props: any) {
       <div className="container-fluid h-100">
         <div className="row h-100 align-items-center">
           <div className="col-12 text-center text-light">
+
             {
-              !isClicked ?
-              <>
+              !isShowAccessMethod &&
 
               <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
                 <div className="form-group">
@@ -94,33 +105,56 @@ function Home(props: any) {
                     </select>
                 </div>
               </div>
+            }
 
+            <div className="heading">
               <h1 className="font-weight-light display-1">Stake$ZIL</h1>
               <p className="lead">Staking with Zilliqa. Revolutionize.</p>
-              <div className="btn btn-sign-in mt-4 mx-2">Sign in for Delegators</div>
-              <div className="btn btn-sign-in mt-4 mx-2">Sign in for Operators</div>
-              <div id="home-ssn-details" className="container">
-                <div className="row rounded p-4">
-                  <h2 className="mb-4">Staked Seed Nodes</h2>
-                  <div className="col-12">
-                    <SsnTable proxy={process.env.REACT_APP_PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
+            </div>
+
+            {
+              !isShowAccessMethod ?
+
+              
+              <div className="initial-load">
+                { /* sign in and seed node table */ }
+                <div className="btn btn-sign-in mt-4 mx-2" onClick={() => handleShowAccessMethod(Role.DELEGATOR)}>Sign in for Delegators</div>
+                <div className="btn btn-sign-in mt-4 mx-2" onClick={() => handleShowAccessMethod(Role.OPERATOR)}>Sign in for Operators</div>
+                <div id="home-ssn-details" className="container">
+                  <div className="row rounded p-4">
+                    <h2 className="mb-4">Staked Seed Nodes</h2>
+                    <div className="col-12">
+                      <SsnTable proxy={process.env.REACT_APP_PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
+                    </div>
                   </div>
                 </div>
               </div>
-        
-              {/* <p className="mt-5"><strong>Connect your wallet to start</strong></p>
-              <div id="wallet-access" className="row align-items-center justify-content-center">
-                <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.PRIVATEKEY)}><IconKey className="home-icon" /><span className="d-block mt-0.5">Private Key</span></div>
-                <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
-                <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}><IconFileList className="home-icon" /><span className="d-block mt-0.5">Mnemonic</span></div>
-                <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedger className="home-icon my-3" width="32" height="32" /><span className="d-block mt-0.5">Ledger</span></div>
-              </div> */}
-              </>
-            :
+
+              :
+
+              !accessMethod ?
+
               <>
-              { isDirectDashboard ? <>{DisplayLoader()}</> : <>{DisplayAccessMethod()}</> }
+                { /* no wallets selected - show wallets to connect */ }
+                <p className="mt-5 animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
+                <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn">
+                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.PRIVATEKEY)}><IconKey className="home-icon" /><span className="d-block mt-0.5">Private Key</span></div>
+                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
+                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}><IconFileList className="home-icon" /><span className="d-block mt-0.5">Mnemonic</span></div>
+                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedger className="home-icon my-3" width="32" height="32" /><span className="d-block mt-0.5">Ledger</span></div>
+                </div>
+                <button type="button" className="btn-user-action-cancel mt-4" onClick={() => resetView()}>Back to Main</button>
+              </>
+
+              :
+
+              <>
+              {/* wallet selected - show chosen wallet component */}
+              {DisplayAccessMethod()} 
               </>
             }
+
+            {/* { isDirectDashboard ? <>{DisplayLoader()}</> } */}
           </div>
         </div>
       </div>
