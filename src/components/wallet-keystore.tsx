@@ -50,7 +50,7 @@ class WalletKeystore extends Component<any, any> {
 
                 if (address !== "error") {
                     console.log("wallet add success: %o", address);
-                    this.context.toggleAuthentication(address, AccessMethod.KEYSTORE);
+                    this.context.toggleAuthentication(address, AccessMethod.KEYSTORE, this.props.role);
                     // no error
                     // call parent function to redirect to dashboard
                     this.props.onSuccessCallback();

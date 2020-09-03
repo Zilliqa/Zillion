@@ -27,5 +27,6 @@ export enum PromiseArea {
 
 export enum Role {
     DELEGATOR = "DELEGATOR",
-    OPERATOR = "OPERATOR"
+    OPERATOR = "OPERATOR",
+    NONE = "",
 }

@@ -133,6 +133,7 @@ function SsnTable(props: any) {
     useEffect(() => {
         setShowSpinner(true);
         getData();
+        // eslint-disable-next-line
     }, [proxy, network]);
 
     useEffect(() => {

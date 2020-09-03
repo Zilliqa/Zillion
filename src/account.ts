@@ -111,9 +111,9 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
     }
     try {
         const proxyContract = await zilliqa.blockchain.getSmartContractState(proxyAddr);
-        console.log("get proxy contract state: %o", proxyContract.result);
+        console.log("fetched proxy contract state");
         const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
-        console.log("get implementation contract state: %o", implContract.result);
+        console.log("fetched implementation contract state");
         return implContract.result;
     } catch (err) {
         console.error("error: getSsnImplContract - o%", err);

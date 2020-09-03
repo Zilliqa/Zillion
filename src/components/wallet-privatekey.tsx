@@ -8,6 +8,7 @@ import { AccessMethod } from '../util/enum';
 function WalletPrivatekey(props: any) {
 
     const authContext = useContext(AuthContext);
+    const role = props.role;
     const [privateKey, setPrivatekey] = useState('');
 
     const handleError = () => {
@@ -25,7 +26,7 @@ function WalletPrivatekey(props: any) {
 
             if (address !== "error") {
                 console.log("wallet add success: %o", address);
-                authContext.toggleAuthentication(address, AccessMethod.PRIVATEKEY);
+                authContext.toggleAuthentication(address, AccessMethod.PRIVATEKEY, role);
                 props.onSuccessCallback();
             } else {
                 handleError();

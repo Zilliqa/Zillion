@@ -29,7 +29,7 @@ function LedgerWallet(props: any) {
 
             const result = await ledger.getPublicAddress(0);
             console.log("unlock ledger success - public address...: %o", result.pubAddr);
-            authContext.toggleAuthentication(result.pubAddr, AccessMethod.LEDGER);
+            // authContext.toggleAuthentication(result.pubAddr, AccessMethod.LEDGER);
             // no error
             // call parent function to redirect to dashboard
             props.onSuccessCallback();

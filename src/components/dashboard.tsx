@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { useTable } from 'react-table';
+import React, { useContext, useEffect, useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import { AuthContext } from "../contexts/authContext";
-import { Network, PromiseArea } from '../util/enum';
+import { Network, PromiseArea, Role } from '../util/enum';
 import * as Account from "../account";
 import SsnTable from './ssn-table';
 
@@ -15,53 +14,19 @@ import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
 
 import IconErrorWarning from './icons/error-warning';
-import Spinner from './spinner';
 import logo from "../static/logo.png";
 
-
-function Table({ columns, data }: any) {
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = useTable({columns, data});
-    
-    return (
-        <table id="staking-table" className="table" {...getTableProps()}>
-            <thead>
-                {headerGroups.map(headerGroup => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                        {headerGroup.headers.map(column => (
-                            <th scope="col" {...column.getHeaderProps()}>{column.render('Header')}</th>
-                        ))}
-                    </tr>
-                ))}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-                {rows.map((row, i) => {
-                    prepareRow(row)
-                    return (
-                        <tr {...row.getRowProps()}>
-                            {row.cells.map(cell => {
-                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                            })}
-                        </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-    );
-}
+const PROXY = process.env.REACT_APP_PROXY ? process.env.REACT_APP_PROXY : '';
+const BLOCKCHAIN_NETWORK = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK : '';
 
 function Dashboard(props: any) {
 
     const authContext = useContext(AuthContext);
-    const { isAuthenticated, address, network } = authContext;
+    const { isAuthenticated, address, network, role } = authContext;
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
+    const [isOperator, setIsOperator] = useState(false);
 
     const [nodeDetails, setNodeDetails] = useState({
         name: '',
@@ -87,6 +52,7 @@ function Dashboard(props: any) {
         // get account balance
         trackPromise(Account.getBalance(address).then((balance) => {
             const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
+            console.log("retrieving balance: %o", zilBalance);
             setBalance(zilBalance);
         }), PromiseArea.PROMISE_GET_BALANCE);
     }
@@ -96,6 +62,39 @@ function Dashboard(props: any) {
     useEffect(() => {
         console.log("dashboard use effect running");
         console.log("address: %o", address);
+        console.log("role: %o", role);
+        console.log("proxy: %o", PROXY);
+        console.log("network :%o", BLOCKCHAIN_NETWORK);
+
+        // check operator is indeed operator
+        async function isOperator() {
+            // convert user wallet address to base16
+            // contract address is in base16
+            let userAddressBase16 = fromBech32Address(address).toLowerCase();
+
+            if (role === Role.OPERATOR) {
+                console.log("check operator...");
+                let isOperator = false;
+                const contract = await Account.getSsnImplContract(PROXY, BLOCKCHAIN_NETWORK);
+                if (contract === 'error') {
+                    isOperator = false;
+                }
+
+                if (contract.ssnlist && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
+                    console.log("operator exist! :%o", address);
+                    isOperator = true;
+                    setIsOperator(true)
+                } else {
+                    isOperator = false;
+                }
+                if (!isOperator) {
+                    console.error("wallet %o is not an operator!", address);
+                    setIsOperator(false);
+                }
+            }
+        }
+
+        // isOperator();
         refreshStats();
     }, [selectedNetwork]);
 
@@ -146,25 +145,34 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Staking Details</h5>
                                         </div>
                                         <div className="col-12 text-center"> 
-                                            <SsnTable proxy={process.env.REACT_APP_PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
+                                            <SsnTable proxy={PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="p-4 mb-4 bg-white rounded dashboard-card">
-                                    <h5 className="card-title mb-4">What would you like to do today?</h5>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Received Address</button>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
-                                </div>
+                                {
+                                    isOperator &&
+
+                                    <>
+                                    {/* node operator section */}
+
+                                    <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                        <h5 className="card-title mb-4">What would you like to do today?</h5>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Received Address</button>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
+                                    </div>
+                                    </>
+                                }
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={process.env.REACT_APP_PROXY} currentRate={nodeDetails.commRate}/>
-            <UpdateReceiverAddress proxy={process.env.REACT_APP_PROXY} currentReceiver={nodeDetails.receiver}/>
-            <WithdrawCommModal proxy={process.env.REACT_APP_PROXY} currentRewards={nodeDetails.commReward}/>
+            <UpdateCommRateModal proxy={PROXY} currentRate={nodeDetails.commRate}/>
+            <UpdateReceiverAddress proxy={PROXY} currentReceiver={nodeDetails.receiver}/>
+            <WithdrawCommModal proxy={PROXY} currentRewards={nodeDetails.commReward}/>
         </div>
         </>
     );

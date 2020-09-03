@@ -9,6 +9,7 @@ import { AccessMethod } from '../util/enum';
 function MnemonicWallet(props: any) {
 
     const authContext = useContext(AuthContext);
+    const role = props.role;
     const [mnemonic, setMnemonic] = useState('');
 
     const handleError = () => {
@@ -26,7 +27,7 @@ function MnemonicWallet(props: any) {
 
         if (address !== "error") {
             console.log("wallet add success: %o", address);
-            authContext.toggleAuthentication(address, AccessMethod.MNEMONIC);
+            authContext.toggleAuthentication(address, AccessMethod.MNEMONIC, role);
             // no error
             // call parent function to redirect to dashboard
             props.onSuccessCallback();
