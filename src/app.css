@@ -241,6 +241,22 @@
   margin-left: 0.5em;
 }
 
+.performance-stats {
+  border: 1px solid #e0e0e0;
+  background-color: #ffffff;
+}
+
+.performance-stats h4 {
+  color: #3b76ef;
+  font-size: 0.9em;
+  text-transform: capitalize;
+}
+
+.performance-stats p {
+  font-size: 1.4em;
+  margin-top: -0.5em;
+}
+
 .sidebar-divider {
   background-color:#3f4b5a;
   width: 90%;

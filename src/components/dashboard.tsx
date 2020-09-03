@@ -22,18 +22,18 @@ const BLOCKCHAIN_NETWORK = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? 
 function Dashboard(props: any) {
 
     const authContext = useContext(AuthContext);
-    const { isAuthenticated, address, network, role } = authContext;
+    const { isAuthenticated, address, role } = authContext;
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
     const [isOperator, setIsOperator] = useState(false);
 
     const [nodeDetails, setNodeDetails] = useState({
-        name: '',
         stakeAmt: '',
         bufferedDeposit: '',
         commRate: '',
         commReward: '',
+        numOfDeleg: 0,
         receiver: ''
     });
 
@@ -83,9 +83,33 @@ function Dashboard(props: any) {
                 if (contract.ssnlist && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
                     console.log("operator exist! :%o", address);
                     isOperator = true;
-                    setIsOperator(true)
+                    setIsOperator(true);
+
+                    // since user is node operator
+                    // compute the data for staking peformance section
+                    let tempNumOfDeleg = 0;
+                    const ssnArgs = contract.ssnlist[userAddressBase16].arguments;
+
+                    // get number of delegators
+                    if (contract.hasOwnProperty("ssn_deleg_amt") && contract.ssn_deleg_amt.hasOwnProperty(userAddressBase16)) {
+                        tempNumOfDeleg = Object.keys(contract.ssn_deleg_amt[userAddressBase16]).length;
+                    }
+
+                    console.log("updating node details");
+
+                    setNodeDetails(prevNodeDetails => ({
+                        ...prevNodeDetails,
+                        stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
+                        bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
+                        commRate: ssnArgs[7],
+                        commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
+                        numOfDeleg: tempNumOfDeleg,
+                        receiver: toBech32Address(ssnArgs[9])
+                    }));
+
                 } else {
                     isOperator = false;
+                    setIsOperator(false);
                 }
                 if (!isOperator) {
                     console.error("wallet %o is not an operator!", address);
@@ -94,7 +118,7 @@ function Dashboard(props: any) {
             }
         }
 
-        // isOperator();
+        isOperator();
         refreshStats();
     }, [selectedNetwork]);
 
@@ -139,10 +163,42 @@ function Dashboard(props: any) {
                             <div className="col-12">
                                 <h1>Stake$ZIL Dashboard</h1>
 
+                                {
+                                    isOperator &&
+
+                                    <div className="p-4 my-4 rounded bg-white dashboard-card container-fluid">
+                                        <h5 className="card-title mb-4">Staking Performance</h5>
+                                        <div className="row">
+                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
+                                                <h4>Stake Amount</h4>
+                                                <p>{nodeDetails.stakeAmt} ZIL</p>
+                                            </div>
+                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
+                                                <h4>Buffered Deposit</h4>
+                                                <p>{nodeDetails.bufferedDeposit} ZIL</p>
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
+                                                <h4>Delegators</h4>
+                                                <p>{nodeDetails.numOfDeleg}</p>
+                                            </div>
+                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
+                                                <h4>Commission Rate</h4>
+                                                <p>{nodeDetails.commRate}%</p>
+                                            </div>
+                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
+                                                <h4>Commission Reward</h4>
+                                                <p>{nodeDetails.commReward} ZIL</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
                                 <div id="dashboard-ssn-details" className="p-4 mb-4 bg-white rounded dashboard-card container-fluid">
                                     <div className="row">
                                         <div className="col">
-                                            <h5 className="card-title mb-4">Staking Details</h5>
+                                            <h5 className="card-title mb-4">Other Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center"> 
                                             <SsnTable proxy={PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
