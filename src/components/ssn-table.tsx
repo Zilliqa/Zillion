@@ -1,4 +1,4 @@
-import React, { useState, useEffect,  useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
@@ -52,6 +52,9 @@ function SsnTable(props: any) {
     const refresh = props.refresh ? props.refresh : 3000;
     const [data, setData] = useState([] as any);
     const [showSpinner, setShowSpinner] = useState(false);
+    
+    // prevent react update state on unmounted component 
+    const mountedRef = useRef(false);
 
     const columns = useMemo(
         () => [
@@ -88,13 +91,13 @@ function SsnTable(props: any) {
     )
     
     const getData = async () => {
+        let outputResult: { ssnAddress: string; ssnName: any; ssnStakeAmt: string; ssnBufferedDeposit: string; ssnCommRate: any; ssnCommReward: string; ssnDeleg: number; }[] = [];
+
         trackPromise(Account.getSsnImplContract(proxy, network).then((implContract) => {
             if (implContract === 'error') {
                 setData([]);
-                return
+                return null;
             }
-
-            let outputResult = [];
 
             for (const key in implContract.ssnlist) {
                 if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
@@ -119,7 +122,10 @@ function SsnTable(props: any) {
                 }
             }
 
-            setData([...outputResult]);
+            if (mountedRef.current) {
+                setData([...outputResult]);
+            }
+            
             // console.log("data: %o", data);
         }), PromiseArea.PROMISE_GET_CONTRACT);
     };
@@ -130,13 +136,15 @@ function SsnTable(props: any) {
     }, [proxy, network]);
 
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            console.log("refreshing home page ssn table");
+        mountedRef.current = true;
+        const intervalId = setInterval(async () => {
+            console.log("refreshing");
             setShowSpinner(false);
-            getData();
+            await getData();
         }, refresh);
         return () => {
             clearInterval(intervalId);
+            mountedRef.current = false;
         }
     });
 
