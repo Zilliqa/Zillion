@@ -20,13 +20,13 @@ import IconLedger from './icons/ledger';
 function Home(props: any) {
 
   const authContext = useContext(AuthContext);
-  const [isClicked, setIsClicked] = useState(false);
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
   const [role, setRole] = useState(Role.DELEGATOR);
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState('');
 
+  // trigger show wallets to choose
   const resetWalletsClicked = () => {
     setAccessMethod('');
     setIsDirectDashboard(false);
@@ -79,8 +79,8 @@ function Home(props: any) {
   const DisplayLoader = () => {
     return (
       <div className="animate__animated animate__fadeIn">
-        <h2 className="mb-4">Connecting...</h2>
-        <div className="spinner-border" role="status">
+        <h2 className="mt-5 mb-4">Connecting...</h2>
+        <div className="spinner-border dashboard-spinner" role="status">
           <span className="sr-only">Connecting...</span>
         </div>
       </div>
@@ -143,18 +143,23 @@ function Home(props: any) {
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}><IconFileList className="home-icon" /><span className="d-block mt-0.5">Mnemonic</span></div>
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedger className="home-icon my-3" width="32" height="32" /><span className="d-block mt-0.5">Ledger</span></div>
                 </div>
-                <button type="button" className="btn-user-action-cancel mt-4" onClick={() => resetView()}>Back to Main</button>
+                <button type="button" className="btn-user-action-cancel mt-4 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
               </>
 
               :
 
               <>
               {/* wallet selected - show chosen wallet component */}
-              {DisplayAccessMethod()} 
+              { isDirectDashboard ? 
+              
+              <>{DisplayLoader()}</> 
+              
+              :
+              
+              <>{DisplayAccessMethod()}</> }
+              
               </>
             }
-
-            {/* { isDirectDashboard ? <>{DisplayLoader()}</> } */}
           </div>
         </div>
       </div>
