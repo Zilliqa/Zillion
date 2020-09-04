@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
-import { AuthContext } from "../contexts/authContext";
+import AppContext from "../contexts/appContext";
 import { Network, PromiseArea, Role } from '../util/enum';
 import * as Account from "../account";
 import SsnTable from './ssn-table';
@@ -21,8 +21,8 @@ const BLOCKCHAIN_NETWORK = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? 
 
 function Dashboard(props: any) {
 
-    const authContext = useContext(AuthContext);
-    const { isAuthenticated, address, role } = authContext;
+    const appContext = useContext(AppContext);
+    const { address, role } = appContext;
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
@@ -147,12 +147,12 @@ function Dashboard(props: any) {
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
-                                <h1>Stake$ZIL Dashboard</h1>
+                                <h1 className="mb-4">Stake$ZIL Dashboard</h1>
 
                                 {
                                     (role === Role.OPERATOR) &&
 
-                                    <div className="p-4 my-4 rounded bg-white dashboard-card container-fluid">
+                                    <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
                                         <h5 className="card-title mb-4">Staking Performance</h5>
                                         <div className="row">
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">

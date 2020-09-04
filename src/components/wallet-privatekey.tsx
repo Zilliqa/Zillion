@@ -1,13 +1,15 @@
 import React, { useState, useContext} from 'react';
 import { ToastContainer } from 'react-toastify';
-import { AuthContext } from '../contexts/authContext';
+import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import * as Account from '../account';
-import { AccessMethod } from '../util/enum';
+
 
 function WalletPrivatekey(props: any) {
 
-    const authContext = useContext(AuthContext);
+    const appContext = useContext(AppContext);
+    const { initParams, updateAuth, updateRole } = appContext;
+    
     const role = props.role;
     const [privateKey, setPrivatekey] = useState('');
 
@@ -22,12 +24,19 @@ function WalletPrivatekey(props: any) {
     const unlockWallet = async () => {
         console.log("unlock by privatekey");
         if (privateKey !== "") {
-            const address = await Account.addWalletByPrivatekey(privateKey);
+            const walletAddress = await Account.addWalletByPrivatekey(privateKey);
 
-            if (address !== "error") {
-                console.log("wallet add success: %o", address);
-                authContext.toggleAuthentication(address, AccessMethod.PRIVATEKEY, role);
-                await authContext.checkRole(role);
+            if (walletAddress !== "error") {
+                console.log("wallet add success: %o", walletAddress);
+                // show loading state
+                props.onWalletLoadingCallback();
+
+                // update context
+                initParams(walletAddress, role);
+                await updateRole(walletAddress, role);
+                updateAuth();
+
+                // redirect to dashboard
                 props.onSuccessCallback();
             } else {
                 handleError();

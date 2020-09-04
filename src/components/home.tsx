@@ -1,7 +1,6 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { withRouter } from "react-router-dom";
 
-import { AuthContext } from '../contexts/authContext';
 import { AccessMethod, Network, Role } from '../util/enum';
 import SsnTable from './ssn-table';
 
@@ -19,7 +18,6 @@ import IconLedger from './icons/ledger';
 
 function Home(props: any) {
 
-  const authContext = useContext(AuthContext);
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
   const [role, setRole] = useState('');
@@ -33,11 +31,8 @@ function Home(props: any) {
   }
 
   const redirectToDashboard = () => {
-    console.log("dashboard");
-    setIsDirectDashboard(true);
-    setTimeout(() => {
-      props.history.push("/dashboard");
-    }, 1000);
+    console.log("directing to dashboard");
+    props.history.push("/dashboard");
   }
 
   const handleAccessMethod = (access: string) => {
@@ -53,6 +48,10 @@ function Home(props: any) {
     setShowAccessMethod(true);
   }
 
+  const toggleDirectToDashboard = () => {
+    setIsDirectDashboard(true);
+  }
+
   const resetView = () => {
     setRole('');
     setShowAccessMethod(false);
@@ -62,7 +61,7 @@ function Home(props: any) {
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
       case AccessMethod.PRIVATEKEY:
-        return <WalletPrivatekey onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} role={role} />;
+        return <WalletPrivatekey onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} onWalletLoadingCallback={toggleDirectToDashboard} role={role} />;
       case AccessMethod.KEYSTORE: 
         return <WalletKeystore onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} role={role} />;
       case AccessMethod.MNEMONIC:
@@ -79,7 +78,7 @@ function Home(props: any) {
   const DisplayLoader = () => {
     return (
       <div className="animate__animated animate__fadeIn">
-        <h2 className="mt-5 mb-4">Connecting...</h2>
+        <h2 className="mt-5 mb-4">Retrieving wallet info...</h2>
         <div className="spinner-border dashboard-spinner" role="status">
           <span className="sr-only">Connecting...</span>
         </div>

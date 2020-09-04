@@ -34,7 +34,7 @@ function AuthProvider(props: any) {
     const [role, setRole] = useState('');
     const [network, setNetwork] = useState(Network.TESTNET);
 
-
+    
     // if user selected operator
     // ensure that user is indeed operator
     // otherwise set user as delegator
@@ -55,10 +55,10 @@ function AuthProvider(props: any) {
         }
     };
 
-    const toggleAuthentication = (address: string, accType: string, selectedRole: string) => {
-        let walletAddr = address;
-        if (!validation.isBech32(address)) {
-            walletAddr = toBech32Address(address);
+    const toggleAuthentication = (inputAddress: string, accType: string, selectedRole: string) => {
+        let walletAddr = inputAddress;
+        if (!validation.isBech32(inputAddress)) {
+            walletAddr = toBech32Address(inputAddress);
         }
         console.log(walletAddr);
         setAddress(walletAddr);
