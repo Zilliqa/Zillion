@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ToastContainer } from 'react-toastify';
-import { AuthContext } from '../contexts/authContext';
+import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import * as Account from '../account';
 import { AccessMethod } from '../util/enum';
@@ -8,7 +8,7 @@ import { AccessMethod } from '../util/enum';
 
 class WalletKeystore extends Component<any, any> {
 
-    static contextType = AuthContext;
+    static contextType = AppContext;
 
     constructor(props: any) {
         super(props);
@@ -50,7 +50,14 @@ class WalletKeystore extends Component<any, any> {
 
                 if (address !== "error") {
                     console.log("wallet add success: %o", address);
-                    this.context.toggleAuthentication(address, AccessMethod.KEYSTORE, this.props.role);
+                    // show loading state
+                    this.props.onWalletLoadingCallback();
+
+                    // update context
+                    this.context.initParams(address, this.props.role);
+                    await this.context.updateRole(address, this.props.role);
+                    this.context.updateAuth();
+
                     // no error
                     // call parent function to redirect to dashboard
                     this.props.onSuccessCallback();

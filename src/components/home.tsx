@@ -61,11 +61,23 @@ function Home(props: any) {
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
       case AccessMethod.PRIVATEKEY:
-        return <WalletPrivatekey onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} onWalletLoadingCallback={toggleDirectToDashboard} role={role} />;
+        return <WalletPrivatekey 
+                  onReturnCallback={resetWalletsClicked} 
+                  onSuccessCallback={redirectToDashboard} 
+                  onWalletLoadingCallback={toggleDirectToDashboard} 
+                  role={role} />;
       case AccessMethod.KEYSTORE: 
-        return <WalletKeystore onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} role={role} />;
+        return <WalletKeystore 
+                  onReturnCallback={resetWalletsClicked} 
+                  onWalletLoadingCallback={toggleDirectToDashboard} 
+                  onSuccessCallback={redirectToDashboard} 
+                  role={role} />;
       case AccessMethod.MNEMONIC:
-        return <WalletMnemonic onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} role={role} />;
+        return <WalletMnemonic 
+                  onReturnCallback={resetWalletsClicked} 
+                  onWalletLoadingCallback={toggleDirectToDashboard}
+                  onSuccessCallback={redirectToDashboard} 
+                  role={role} />;
       case AccessMethod.ZILPAY:
         return <WalletZilPay onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />
       case AccessMethod.LEDGER:
