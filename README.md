@@ -3,12 +3,26 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## TLDR
 
 1. yarn
-2. yarn start
-3. Choose one of the method to connect to your operator wallet
-4. Switch the network of your choice
-5. Enter the respective proxy contract address; the node statistics should then be generated, e.g. 0x9cd7b53c2d2e111ac8c5d37af522302028e1c79e
-6. Execute any ssn operator action
+
+2. Create a .env file and configure the following settings:
+```
+REACT_APP_PROXY=0578b8e9d9c2493d4a2e98f364c7ed311f7a0d71
+REACT_APP_DATA_REFRESH_RATE=3000
+REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK=https://zilliqa-isolated-server.zilliqa.com/
+``` 
+
+3. yarn dev
+
+4. Select between Delegators and Operators
+
+5. An operator can see "Staking Performance", "Other Staked Seed Nodes" whereas delegators can only see "Other Staked Seed Nodes"
+
+6. Explore and execute any actions
+
 7. If the contract details doesn't get update, click on the "Dashboard" wordings on the navigation bar to manually refresh
+
+Note: There are might be some connection issues or bugs.
+
 
 ## Available Scripts
 
