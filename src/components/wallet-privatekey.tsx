@@ -27,6 +27,7 @@ function WalletPrivatekey(props: any) {
             if (address !== "error") {
                 console.log("wallet add success: %o", address);
                 authContext.toggleAuthentication(address, AccessMethod.PRIVATEKEY, role);
+                await authContext.checkRole(role);
                 props.onSuccessCallback();
             } else {
                 handleError();

@@ -26,7 +26,6 @@ function Dashboard(props: any) {
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
-    const [isOperator, setIsOperator] = useState(false);
 
     const [nodeDetails, setNodeDetails] = useState({
         stakeAmt: '',
@@ -61,30 +60,24 @@ function Dashboard(props: any) {
     // useEffect is executed again
     useEffect(() => {
         console.log("dashboard use effect running");
-        console.log("address: %o", address);
-        console.log("role: %o", role);
-        console.log("proxy: %o", PROXY);
-        console.log("network :%o", BLOCKCHAIN_NETWORK);
+        console.log("dashboard address: %o", address);
+        console.log("dashboard role: %o", role);
+        console.log("dashboard proxy: %o", PROXY);
+        console.log("dashboard network :%o", BLOCKCHAIN_NETWORK);
 
         // check operator is indeed operator
-        async function isOperator() {
+        async function getOperatorNodeDetails() {
             // convert user wallet address to base16
             // contract address is in base16
             let userAddressBase16 = fromBech32Address(address).toLowerCase();
 
             if (role === Role.OPERATOR) {
-                console.log("check operator...");
-                let isOperator = false;
                 const contract = await Account.getSsnImplContract(PROXY, BLOCKCHAIN_NETWORK);
                 if (contract === 'error') {
-                    isOperator = false;
+                    return;
                 }
 
                 if (contract.ssnlist && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
-                    console.log("operator exist! :%o", address);
-                    isOperator = true;
-                    setIsOperator(true);
-
                     // since user is node operator
                     // compute the data for staking peformance section
                     let tempNumOfDeleg = 0;
@@ -107,18 +100,11 @@ function Dashboard(props: any) {
                         receiver: toBech32Address(ssnArgs[9])
                     }));
 
-                } else {
-                    isOperator = false;
-                    setIsOperator(false);
-                }
-                if (!isOperator) {
-                    console.error("wallet %o is not an operator!", address);
-                    setIsOperator(false);
                 }
             }
         }
 
-        isOperator();
+        getOperatorNodeDetails();
         refreshStats();
     }, [selectedNetwork]);
 
@@ -164,7 +150,7 @@ function Dashboard(props: any) {
                                 <h1>Stake$ZIL Dashboard</h1>
 
                                 {
-                                    isOperator &&
+                                    (role === Role.OPERATOR) &&
 
                                     <div className="p-4 my-4 rounded bg-white dashboard-card container-fluid">
                                         <h5 className="card-title mb-4">Staking Performance</h5>
@@ -207,7 +193,7 @@ function Dashboard(props: any) {
                                 </div>
 
                                 {
-                                    isOperator &&
+                                    (role === Role.OPERATOR) &&
 
                                     <>
                                     {/* node operator section */}

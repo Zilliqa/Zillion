@@ -121,6 +121,24 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
     }
 };
 
+// isOperator - check if address is node operator
+// @param address: base16 address
+export const isOperator = async (proxy: string, address: string, networkURL: string) => {
+    const contract = await getSsnImplContract(proxy, networkURL);
+    if (contract === "error") {
+        return false;
+    }
+    console.log("account.ts check is operator: %o", address);
+    console.log("account.ts check is proxy: %o", proxy);
+    console.log("account.ts check is networkURL: %o", networkURL);
+    if (contract.ssnlist && contract.ssnlist.hasOwnProperty(address)) {
+        console.log("operator %o exist", address);
+        return true;
+    } else {
+        return false;
+    }
+};
+
 // withdrawComm - withdraw commission
 // @ssn operator
 // @param proxy: contract address of the ssn proxy
