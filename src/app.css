@@ -429,6 +429,12 @@
   border: 1px solid #555555;
 }
 
+#mnemonic-password-input {
+  color: #263238;
+  font-size: 0.9em;
+  width: 520px;
+}
+
 #mnemonic-phrase {
   height: 140px;
   width: 520px;

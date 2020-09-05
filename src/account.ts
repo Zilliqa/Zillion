@@ -13,6 +13,9 @@ const { Blockchain } = require('@zilliqa-js/blockchain');
 const { Contracts } = require('@zilliqa-js/contract');
 const { BN, units, bytes, Long } = require('@zilliqa-js/util');
 
+const bip39 = require('bip39');
+const hdkey = require('hdkey');
+
 let CHAIN_ID = 1;
 let MSG_VERSION = 1;
 
@@ -70,16 +73,29 @@ export const addWalletByKeystore = async (keystore: string, passphrase: string) 
     }
 };
 
-export const addWalletByMnemonic = async (phrase: string) => {
-    try {
-        // TODO
-        // default to index 0
-        // add support for password and ledger mnemonic
-        const address = await zilliqa.wallet.addByMnemonic(phrase);
-        return address;
-    } catch (err) {
-        console.error("error: addWalletByMnemonic - %o", err);
-        return "error";
+export const addWalletByMnemonic = async (mnemonicPhrase: string, index: number, passphrase?: string) => {
+    if (index === 1) {
+        try {
+            const seed = await bip39.mnemonicToSeedSync(mnemonicPhrase, passphrase);
+            const hdKey = hdkey.fromMasterSeed(seed);
+            const childKey = hdKey.derive(`m/44'/313'/0'/0/0`);
+            const privateKey = childKey.privateKey.toString('hex');
+            return await addWalletByPrivatekey(privateKey);
+        } catch (err) {
+            console.error("error: addWalletByMnemonic password based - %o", err);
+            return "error";
+        }
+    } else {
+        console.log("addWalletBuMnemonic default");
+        // default to zero index
+        // no passphrase
+        try {
+            const address = await zilliqa.wallet.addByMnemonic(mnemonicPhrase);
+            return address;
+        } catch (err) {
+            console.error("error: addWalletByMnemonic default - %o", err);
+            return "error";
+        }
     }
 };
 
