@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
@@ -22,10 +22,12 @@ const BLOCKCHAIN_NETWORK = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? 
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { address, role } = appContext;
+    const { address, isAuth, role } = appContext;
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('');
     const [error, setError] = useState('');
+
+    const mountedRef = useRef(false);
 
     const [nodeDetails, setNodeDetails] = useState({
         stakeAmt: '',
@@ -52,9 +54,23 @@ function Dashboard(props: any) {
         trackPromise(Account.getBalance(address).then((balance) => {
             const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
             console.log("retrieving balance: %o", zilBalance);
-            setBalance(zilBalance);
+            
+            if (mountedRef.current) {
+                setBalance(zilBalance);
+            }
+            
         }), PromiseArea.PROMISE_GET_BALANCE);
     }
+
+    useEffect(() => {
+        if (!isAuth) {
+            // redirect to ask to login
+            props.history.push("/notlogin");
+        }
+        return () => {
+            mountedRef.current = false;
+        }
+    });
 
     // when selected network is changed
     // useEffect is executed again
@@ -65,11 +81,19 @@ function Dashboard(props: any) {
         console.log("dashboard proxy: %o", PROXY);
         console.log("dashboard network :%o", BLOCKCHAIN_NETWORK);
 
+        mountedRef.current = true;
+
         // check operator is indeed operator
         async function getOperatorNodeDetails() {
             // convert user wallet address to base16
             // contract address is in base16
-            let userAddressBase16 = fromBech32Address(address).toLowerCase();
+            let userAddressBase16 = '';
+
+            if (!address) {
+                return;
+            }
+
+            userAddressBase16 = fromBech32Address(address).toLowerCase();
 
             if (role === Role.OPERATOR) {
                 const contract = await Account.getSsnImplContract(PROXY, BLOCKCHAIN_NETWORK);
@@ -88,17 +112,19 @@ function Dashboard(props: any) {
                         tempNumOfDeleg = Object.keys(contract.ssn_deleg_amt[userAddressBase16]).length;
                     }
 
-                    console.log("updating node details");
+                    if (mountedRef.current) {
+                        console.log("updating node details");
 
-                    setNodeDetails(prevNodeDetails => ({
-                        ...prevNodeDetails,
-                        stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
-                        bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                        commRate: ssnArgs[7],
-                        commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
-                        numOfDeleg: tempNumOfDeleg,
-                        receiver: toBech32Address(ssnArgs[9])
-                    }));
+                        setNodeDetails(prevNodeDetails => ({
+                            ...prevNodeDetails,
+                            stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
+                            bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
+                            commRate: ssnArgs[7],
+                            commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
+                            numOfDeleg: tempNumOfDeleg,
+                            receiver: toBech32Address(ssnArgs[9])
+                        }));
+                    }
 
                 }
             }
@@ -106,6 +132,11 @@ function Dashboard(props: any) {
 
         getOperatorNodeDetails();
         refreshStats();
+
+        return () => {
+            mountedRef.current = false;
+        }
+
     }, [selectedNetwork]);
 
     return (
@@ -187,7 +218,7 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Other Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center"> 
-                                            <SsnTable proxy={PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
+                                            { mountedRef.current && <SsnTable proxy={PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} /> }
                                         </div>
                                     </div>
                                 </div>

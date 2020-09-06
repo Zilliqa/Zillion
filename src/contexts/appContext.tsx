@@ -7,6 +7,7 @@ import { Role } from '../util/enum';
 
 const AppContext = React.createContext({
     address: '',
+    isAuth: false,
     role: '',
     setWallet: (inputAddr: string) => {},
     initParams: (inputAddress: string, selectedRole: string) => {},
@@ -59,7 +60,7 @@ function AppProvider(props: any) {
     };
 
     return (
-        <AppContext.Provider value={{ address, role, setWallet, initParams, updateAuth, updateRole }}>
+        <AppContext.Provider value={{ address, isAuth, role, setWallet, initParams, updateAuth, updateRole }}>
             {props.children}
         </AppContext.Provider>
     );
