@@ -11,8 +11,8 @@ function App() {
     <AppProvider>
       <Switch>
         <Route exact path="/" render={(props) => <Home {...props} />} />
-        <Route path="/dashboard" render={(props) => <Dashboard {...props}/>} />
-        <Route path="/notlogin" render={(props) => <Notlogin {...props}/>} />
+        <Route exact path="/dashboard" render={(props) => <Dashboard {...props}/>} />
+        <Route exact path="/notlogin" render={(props) => <Notlogin {...props}/>} />
       </Switch>
     </AppProvider>
   );
