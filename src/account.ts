@@ -2,8 +2,13 @@
  * Modified for StakeZ
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
+import { Network as NetworkOptions, OperationStatus, AccessMethod } from './util/enum';
+import ZilliqaLedger from './ledger';
+
+import TransportU2F from "@ledgerhq/hw-transport-u2f";
+import TransportWebAuthn from "@ledgerhq/hw-transport-webauthn";
+
 import { HTTPProvider } from '@zilliqa-js/core';
-import { Network as NetworkOptions, OperationStatus } from './util/enum';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
@@ -294,3 +299,143 @@ export const updateReceiverAddress = async (proxy: string, address: string) => {
 export const ZilliqaAccount = () => {
     return zilliqa;
 };
+
+// refactor
+export const handleSign = async (accessMethod: string, networkURL: string, txParams: any) => {
+    switch (accessMethod) {
+        case AccessMethod.LEDGER:
+            handleLedgerSign(networkURL, txParams);
+            break;
+        case AccessMethod.PRIVATEKEY:
+            handleNormalSign(txParams);
+            break;
+        case AccessMethod.MNEMONIC:
+            handleNormalSign(txParams);
+            break;
+        case AccessMethod.KEYSTORE:
+            handleNormalSign(txParams);
+            break;
+        default:
+            console.error("error: no such account type :%o", accessMethod);
+    }
+};
+
+const handleLedgerSign = async (networkURL: string, txParams: any) => {
+    changeNetwork(networkURL);
+
+    let transport = null;
+    const isWebAuthn = await TransportWebAuthn.isSupported();
+    if (isWebAuthn) {
+        console.log("webauthn is supported");
+        transport = await TransportWebAuthn.create();
+    } else {
+        transport = await TransportU2F.create();
+    }
+
+    const ledger = new ZilliqaLedger(transport);
+    const result = await ledger.getPublicAddress(0);
+
+    // get public key
+    let pubKey = result.pubKey;
+
+    // get recipient base16 address
+    let recipient = result.pubAddr;
+    if (validation.isBech32(recipient)) {
+        recipient = fromBech32Address(recipient);
+    }
+
+    console.log("pubKey: %o", pubKey);
+    console.log("pubAddr: %o", recipient);
+
+    // get nonce
+    let nonce = await getNonce(recipient);
+
+    try {
+        const newParams = {
+            toAddr: recipient,
+            amount: txParams.amount.toString(),
+            code: txParams.code,
+            data: txParams.data,
+            gasPrice: txParams.gasPrice.toString(),
+            gasLimit: txParams.gasLimit.toString(),
+            nonce: nonce,
+            pubKey: pubKey,
+            signature: '',
+            version: bytes.pack(CHAIN_ID, MSG_VERSION),
+        };
+        const signature = await ledger.signTxn(0, newParams);
+        const signedTx = {
+            ...newParams,
+            amount: txParams.amount.toString(),
+            gasPrice: txParams.gasPrice.toString(),
+            gasLimit: txParams.gasLimit.toString(),
+            signature
+        };
+        console.log(signedTx);
+
+        // send the signed transaction
+        try {
+            const newTx = {
+                id: "1",
+                jsonrpc: "2.0",
+                method: "CreateTransaction",
+                params: [
+                    {
+                        toAddr: recipient,
+                        amount: txParams.amount.toString(),
+                        code: txParams.code,
+                        data: txParams.data,
+                        gasPrice: txParams.gasPrice.toString(),
+                        gasLimit: txParams.gasLimit.toString(),
+                        nonce: nonce,
+                        pubKey: pubKey,
+                        signature: signature,
+                        version: bytes.pack(CHAIN_ID, MSG_VERSION),
+                        priority: true
+                    }
+                ]
+            };
+
+            const response = await fetch(networkURL, {
+                method: "POST",
+                mode: "cors",
+                cache: "no-cache",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newTx)
+            });
+
+            let data = await response.json();
+            if (data.result.TranID !== undefined) {
+                console.log("ledger sent txn! - txnid: %o", data.result.TranID);
+                return data.result.TranID;
+            }
+
+            if (data.error !== undefined) {
+                console.error(data.error);
+                return OperationStatus.ERROR;
+            }
+
+            if (data.result.error !== undefined) {
+                console.error(data.result.error);
+                return OperationStatus.ERROR;
+            }
+
+            transport.close();
+
+        } catch (err) {
+            console.log("something is wrong with broadcasting the transaction :%o", JSON.stringify(err));
+            return OperationStatus.ERROR;
+        }
+
+    } catch (err) {
+        console.error("error - ledger signing: %o", err);
+        return OperationStatus.ERROR;
+    }
+}
+
+const handleNormalSign = (txParams: any) => {
+
+}
