@@ -120,6 +120,20 @@ export const getBalance = async (address: string) => {
     }
 };
 
+export const getNonce = async (address: string) => {
+    try {
+        const balance = await zilliqa.blockchain.getBalance(address);
+        if (balance.error && balance.error.code === -5) {
+            console.error("account has not balance.");
+            return -1;
+        }
+        return parseInt(balance.result.nonce) + 1;
+    } catch (err) {
+        console.error("error: getNonce - o%", err);
+        return -1;
+    }
+}
+
 // getSsnImplContract - get implementation contract state from the proxy contract
 export const getSsnImplContract = async (proxyAddr: string, networkURL?: string) => {
     if (networkURL) {
