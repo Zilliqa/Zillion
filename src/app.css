@@ -221,6 +221,18 @@
   background-image: linear-gradient(to left, #12171c, #171d23, #1c242a, #212b31, #263238);
 }
 
+.navbar .btn-sign-out {
+  font-size: 0.9em;
+  color: #ffffff;
+  margin: 4px;
+  background-color: #263238;
+}
+
+.navbar .btn-sign-out:hover {
+  cursor: pointer;
+  color: #00d18a;
+}
+
 .navbar-right li {
   color: #89adf5;
   font-size: 0.9em;

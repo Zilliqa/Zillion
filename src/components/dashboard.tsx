@@ -194,7 +194,7 @@ function Dashboard(props: any) {
                         { network === 'isolated_server' && <p className="px-1">Isolated Server</p> }
                     </li>
                     <li className="nav-item">
-                        <button type="button" className="nav-link btn" onClick={cleanUp}>Sign Out</button>
+                        <button type="button" className="btn btn-sign-out mx-2" onClick={cleanUp}>Sign Out</button>
                     </li>
                 </ul>
             </div>
