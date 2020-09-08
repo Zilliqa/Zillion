@@ -24,7 +24,7 @@
     refresh_rate_config: 3000
 ``` 
 
-3. For development, use `yarn dev`, it will enforce HTTPS due to ledger requirements.
+3. For development, use `yarn dev` and browse to `https://localhost:3000/` it will enforce HTTPS due to ledger requirements.
 
 4. On the home page, select the network. Next, select _Sign in as Delegators_ or _Sign in as Operators_
 
