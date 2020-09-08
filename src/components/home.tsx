@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { withRouter } from "react-router-dom";
 
 import { AccessMethod, Network, Role } from '../util/enum';
+import AppContext from "../contexts/appContext";
 import SsnTable from './ssn-table';
 
 import WalletKeystore from './wallet-keystore';
@@ -17,12 +18,17 @@ import IconLedger from './icons/ledger';
 
 
 function Home(props: any) {
+  const appContext = useContext(AppContext);
+  const { updateNetwork } = appContext;
 
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
-  const [selectedNetwork, setSelectedNetwork] = useState('');
+  const [selectedNetwork, setSelectedNetwork] = useState(Network.TESTNET);
+  
+  // config.js from public folder
+  const { networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
 
   // trigger show wallets to choose
   const resetWalletsClicked = () => {
@@ -47,6 +53,7 @@ function Home(props: any) {
 
   const handleChangeNetwork = (e: any) => {
     setSelectedNetwork(e.target.value);
+    updateNetwork(e.target.value);
   }
 
   const handleShowAccessMethod = (selectedRole: Role) => {
@@ -146,7 +153,7 @@ function Home(props: any) {
                   <div className="row rounded p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
                     <div className="col-12">
-                      <SsnTable proxy={process.env.REACT_APP_PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} />
+                      <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
                     </div>
                   </div>
                 </div>

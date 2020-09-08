@@ -2,7 +2,7 @@
  * Modified for StakeZ
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
-import { Network as NetworkOptions, OperationStatus, AccessMethod } from './util/enum';
+import { NetworkURL, OperationStatus, AccessMethod } from './util/enum';
 import ZilliqaLedger from './ledger';
 
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
@@ -48,15 +48,15 @@ export const changeNetwork = function(networkURL: string) {
     
     // set to correct chain id for contract calls
     switch (networkURL) {
-        case NetworkOptions.TESTNET: {
+        case NetworkURL.TESTNET: {
             CHAIN_ID = 333;
             break;
         }
-        case NetworkOptions.MAINNET: {
+        case NetworkURL.MAINNET: {
             CHAIN_ID = 1;
             break;
         }
-        case NetworkOptions.ISOLATED_SERVER: {
+        case NetworkURL.ISOLATED_SERVER: {
             CHAIN_ID = 1;
             break;
         }

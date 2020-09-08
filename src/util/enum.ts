@@ -8,6 +8,12 @@ export enum AccessMethod {
 }
 
 export enum Network {
+    TESTNET = "testnet",
+    MAINNET = "mainnet",
+    ISOLATED_SERVER = "isolated_server"
+}
+
+export enum NetworkURL {
     TESTNET = "https://dev-api.zilliqa.com",
     MAINNET = "https://api.zilliqa.com",
     ISOLATED_SERVER = "https://zilliqa-isolated-server.zilliqa.com"

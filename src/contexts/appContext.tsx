@@ -3,26 +3,28 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 
 import * as ZilliqaAccount from '../account';
-import { Role } from '../util/enum';
+import { Role, Network } from '../util/enum';
 
 const AppContext = React.createContext({
     accountType: '',
     address: '',
+    network: '',
     isAuth: false,
     role: '',
     setWallet: (inputAddr: string) => {},
     initParams: (inputAddress: string, selectedRole: string, selectedAccountType: string) => {},
     updateAuth: () => {},
+    updateNetwork: (selectedNetwork: string) => {},
     updateRole: (inputAddress: string, selectedRole: string) => {},
 });
 
 function AppProvider(props: any) {
-    const proxy = process.env.REACT_APP_PROXY ? process.env.REACT_APP_PROXY : '';
-    const network = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK : '';
-    
+    const proxy = "";
+
     // bech32 address
     const [address, setAddress] = useState('');
     const [accountType, setAccountType] = useState('');
+    const [network, setNetwork] = useState(Network.TESTNET as string); // testnet, mainnet, or isolated server
     const [publicKey, setPublicKey] = useState('');
     const [role, setRole] = useState('');
     const [isAuth, setAuth] = useState(false);
@@ -52,6 +54,10 @@ function AppProvider(props: any) {
         setAuth(!isAuth);
     };
 
+    const updateNetwork = (selectedNetwork: string) => {
+        setNetwork(selectedNetwork);
+    }
+
     const initParams = (inputAddress: string, selectedRole: string, selectedAccountType: string) => {
         let walletAddress = inputAddress;
         if (!validation.isBech32(walletAddress)) {
@@ -64,7 +70,7 @@ function AppProvider(props: any) {
     };
 
     return (
-        <AppContext.Provider value={{ accountType, address, isAuth, role, setWallet, initParams, updateAuth, updateRole }}>
+        <AppContext.Provider value={{ accountType, address, network, isAuth, role, setWallet, initParams, updateAuth, updateNetwork, updateRole }}>
             {props.children}
         </AppContext.Provider>
     );

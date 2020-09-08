@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
 import { Network, PromiseArea, Role } from '../util/enum';
-import * as Account from "../account";
+import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import SsnTable from './ssn-table';
 
@@ -22,18 +22,19 @@ import CompleteWithdrawModal from './contract-calls/complete-withdraw';
 import logo from "../static/logo.png";
 
 
-const PROXY = process.env.REACT_APP_PROXY ? process.env.REACT_APP_PROXY : '';
-const BLOCKCHAIN_NETWORK = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK : '';
-
-
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { address, isAuth, role } = appContext;
+    const { address, isAuth, role, network } = appContext;
     const [balance, setBalance] = useState("");
-    const [selectedNetwork, setSelectedNetwork] = useState('');
+    const [selectedNetwork, setSelectedNetwork] = useState(network);
     const [recentTransactions, setRecentTransactions] = useState([] as any);
     const [error, setError] = useState('');
+
+    // config.js from public folder
+    const { networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
+    const proxy = networks_config[network].proxy;
+    const networkURL = networks_config[network].blockchain;
 
     const mountedRef = useRef(false);
 
@@ -48,7 +49,7 @@ function Dashboard(props: any) {
 
     const handleChangeNetwork = (e: any) => {
         setSelectedNetwork(e.target.value);
-        Account.changeNetwork(e.target.value);
+        ZilliqaAccount.changeNetwork(e.target.value);
     }
 
     const handleError = () => {
@@ -59,7 +60,7 @@ function Dashboard(props: any) {
         setError('');
 
         // get account balance
-        trackPromise(Account.getBalance(address).then((balance) => {
+        trackPromise(ZilliqaAccount.getBalance(address).then((balance) => {
             const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
             console.log("retrieving balance: %o", zilBalance);
             
@@ -84,14 +85,22 @@ function Dashboard(props: any) {
         // }
     });
 
+    // set network that is selected from home page
+    useEffect(() => {
+        // network in context is set
+        if (network) {
+            ZilliqaAccount.changeNetwork(networkURL);
+        }
+    });
+
     // when selected network is changed
     // useEffect is executed again
     useEffect(() => {
         console.log("dashboard use effect running");
         console.log("dashboard address: %o", address);
         console.log("dashboard role: %o", role);
-        console.log("dashboard proxy: %o", PROXY);
-        console.log("dashboard network :%o", BLOCKCHAIN_NETWORK);
+        console.log("dashboard proxy :%o", proxy);
+        console.log("dashboard networkURL :%o", networkURL);
 
         mountedRef.current = true;
 
@@ -108,7 +117,7 @@ function Dashboard(props: any) {
             userAddressBase16 = fromBech32Address(address).toLowerCase();
 
             if (role === Role.OPERATOR) {
-                const contract = await Account.getSsnImplContract(PROXY, BLOCKCHAIN_NETWORK);
+                const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
                 if (contract === 'error') {
                     return;
                 }
@@ -173,13 +182,9 @@ function Dashboard(props: any) {
                         <p className="px-1">{balance ? balance : '0.000'} ZIL</p>
                     </li>
                     <li className="nav-item">
-                        <div className="form-group mt-1 ml-2">
-                            <select id="network" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control">
-                                <option value={Network.TESTNET}>Testnet</option>
-                                <option value={Network.MAINNET}>Mainnet</option>
-                                <option value={Network.ISOLATED_SERVER}>Isolated Server</option>
-                            </select>
-                        </div>
+                        { network === 'testnet' && <p className="px-1">Testnet</p> }
+                        { network === 'mainnet' && <p className="px-1">Mainnet</p> }
+                        { network === 'isolated_server' && <p className="px-1">Isolated Server</p> }
                     </li>
                 </ul>
             </div>
@@ -260,7 +265,7 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Other Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
-                                            { mountedRef.current && <SsnTable proxy={PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} /> }
+                                            { mountedRef.current && <SsnTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} /> }
                                         </div>
                                     </div>
                                 </div>
@@ -272,7 +277,7 @@ function Dashboard(props: any) {
                                         </div>
                                         <div className="col-12 text-left">
                                             { recentTransactions.length === 0 && <p><em>No recent transactions.</em></p> }
-                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={BLOCKCHAIN_NETWORK}/> }
+                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL}/> }
                                         </div>
                                     </div>
                                 </div>
@@ -282,13 +287,13 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
-            <UpdateReceiverAddress proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawCommModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} />
-            <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawRewardModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
-            <CompleteWithdrawModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
+            <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
+            <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} />
+            <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} />
+            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
+            <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
+            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
+            <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
         </div>
         </>
     );
