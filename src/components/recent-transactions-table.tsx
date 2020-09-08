@@ -63,13 +63,14 @@ function Table({ columns, data, tableId }: any) {
 
 function RecentTransactionsTable(props: any) {
     const networkURL = props.network;
+    const blockchainExplorer = props.blockchainExplorer;
 
     const columns = useMemo(
         () => [
             {
                 Header: 'Transaction ID',
                 accessor: 'txnId',
-                Cell: ({ row }: any) => <a href={"https://devex.zilliqa.com/tx/0x" + row.original.txnId + "?network=" + networkURL} target="_blank">{row.original.txnId}</a>
+                Cell: ({ row }: any) => <a href={blockchainExplorer + "/tx/0x" + row.original.txnId + "?network=" + networkURL} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
             }
         ], []
     );

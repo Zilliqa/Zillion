@@ -16,7 +16,7 @@ const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
 const { Blockchain } = require('@zilliqa-js/blockchain');
 const { Contracts } = require('@zilliqa-js/contract');
-const { BN, units, bytes, Long } = require('@zilliqa-js/util');
+const { units, bytes } = require('@zilliqa-js/util');
 
 const bip39 = require('bip39');
 const hdkey = require('hdkey');

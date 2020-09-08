@@ -32,7 +32,7 @@ function Dashboard(props: any) {
     const [error, setError] = useState('');
 
     // config.js from public folder
-    const { networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
+    const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
     const proxy = networks_config[network].proxy;
     const networkURL = networks_config[network].blockchain;
 
@@ -83,13 +83,13 @@ function Dashboard(props: any) {
     }
 
     useEffect(() => {
-        // if (!isAuth) {
-        //     // redirect to ask to login
-        //     props.history.push("/notlogin");
-        // }
-        // return () => {
-        //     mountedRef.current = false;
-        // }
+        if (!isAuth) {
+            // redirect to login request
+            props.history.push("/notlogin");
+        }
+        return () => {
+            mountedRef.current = false;
+        }
     });
 
     // set network that is selected from home page
@@ -179,7 +179,7 @@ function Dashboard(props: any) {
     return (
         <>
         <nav className="navbar navbar-expand-lg navbar-dark">
-            <a className="navbar-brand" href="" onClick={refreshStats}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
+            <a className="navbar-brand" href="#" onClick={refreshStats}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
@@ -296,7 +296,7 @@ function Dashboard(props: any) {
                                         </div>
                                         <div className="col-12 text-left">
                                             { recentTransactions.length === 0 && <p><em>No recent transactions.</em></p> }
-                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL}/> }
+                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL} blockchainExplorer={blockchain_explorer_config} /> }
                                         </div>
                                     </div>
                                 </div>
