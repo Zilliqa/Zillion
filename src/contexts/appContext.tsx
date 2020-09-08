@@ -11,6 +11,7 @@ const AppContext = React.createContext({
     network: '',
     isAuth: false,
     role: '',
+    cleanUp: () => {},
     setWallet: (inputAddr: string) => {},
     initParams: (inputAddress: string, selectedRole: string, selectedAccountType: string) => {},
     updateAuth: () => {},
@@ -28,6 +29,15 @@ function AppProvider(props: any) {
     const [publicKey, setPublicKey] = useState('');
     const [role, setRole] = useState('');
     const [isAuth, setAuth] = useState(false);
+
+    const cleanUp = () => {
+        setAddress('');
+        setAccountType('')
+        setNetwork(Network.TESTNET);
+        setPublicKey('');
+        setRole('');
+        setAuth(false);
+    };
 
     const setWallet = (inputAddr: string) => {
         setAddress(inputAddr);
@@ -70,7 +80,7 @@ function AppProvider(props: any) {
     };
 
     return (
-        <AppContext.Provider value={{ accountType, address, network, isAuth, role, setWallet, initParams, updateAuth, updateNetwork, updateRole }}>
+        <AppContext.Provider value={{ accountType, address, network, isAuth, role, cleanUp, setWallet, initParams, updateAuth, updateNetwork, updateRole }}>
             {props.children}
         </AppContext.Provider>
     );

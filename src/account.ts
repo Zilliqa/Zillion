@@ -42,6 +42,12 @@ Zilliqa.prototype.clearAccount = function() {
     this.wallet.defaultAccount = undefined;
 };
 
+export const cleanUp = function() {
+    console.log("clean up wallet");
+    zilliqa.wallet.accounts = {};
+    zilliqa.wallet.defaultAccount = undefined;
+}
+
 export const changeNetwork = function(networkURL: string) {
     zilliqa.setProvider(new HTTPProvider(networkURL));
     console.log("network changed: %o", networkURL);
@@ -174,127 +180,6 @@ export const isOperator = async (proxy: string, address: string, networkURL: str
     }
 };
 
-// withdrawComm - withdraw commission
-// @ssn operator
-// @param proxy: contract address of the ssn proxy
-// @return a json with the transaction id and a success boolean
-export const withdrawComm = async (proxy: string) => {
-    try {
-        const contract = zilliqa.contracts.at(proxy);
-        const txn = await contract.call(
-            'WithdrawComm',
-            [],
-            {
-                version: bytes.pack(CHAIN_ID, MSG_VERSION),
-                amount: new BN(0),
-                gasPrice: GAS_PRICE,
-                gasLimit: Long.fromNumber(GAS_LIMIT)
-            },
-            33,
-            1000,
-            true
-        );
-        console.log("transaction: %o", txn.id);
-        console.log(JSON.stringify(txn.receipt, null, 4));
-        let result = {
-            txn_id: txn.id,
-            success: txn.receipt.success
-        }
-        return JSON.stringify(result);
-    } catch (err) {
-        console.error("error: withdrawComm: %o", err);
-        return OperationStatus.ERROR;
-    }
-};
-
-// updateCommissionRate - update the commission rate of a ssn
-// @ssn operator
-// @param proxy:   contract address of the ssn proxy
-// @param newRate: the new commission rate 
-// @return a json with the transaction id and a success boolean
-export const updateCommissionRate = async (proxy: string, newRate: string) => {
-    console.log("update commission rate - new_rate %o", newRate);
-    try {
-        const contract = zilliqa.contracts.at(proxy);
-        const txn = await contract.call(
-            'UpdateComm',
-            [
-                {
-                    vname: 'new_rate',
-                    type: 'Uint128',
-                    value: newRate
-                }
-            ],
-            {
-                version: bytes.pack(CHAIN_ID, MSG_VERSION),
-                amount: new BN(0),
-                gasPrice: GAS_PRICE,
-                gasLimit: Long.fromNumber(GAS_LIMIT)
-            },
-            33,
-            1000,
-            true
-        );
-        console.log("transaction: %o", txn.id);
-        console.log(JSON.stringify(txn.receipt, null, 4));
-        let result = {
-            txn_id: txn.id,
-            success: txn.receipt.success
-        }
-        return JSON.stringify(result);
-    } catch (err) {
-        console.error("error: updateCommissionRate: %o", err);
-        return OperationStatus.ERROR;
-    }
-}
-
-// updateReceiverAddress - update the address which would received the commission
-// @ssn operator
-// @param proxy:   contract address of the ssn proxy
-// @param address: receiver address
-// @return a json with the transaction id and a success boolean
-export const updateReceiverAddress = async (proxy: string, address: string) => {
-    // check address format and convert to ByStr20
-    if (validation.isBech32(address)) {
-        address = fromBech32Address(address);
-    } else if (!validation.isAddress(address)) {
-        return OperationStatus.ERROR
-    }
-
-    console.log("updateReceiverAddress - new_addr: %o", address);
-    try {
-        const contract = zilliqa.contracts.at(proxy);
-        const txn = await contract.call(
-            'UpdateReceivedAddr',
-            [
-                {
-                    vname: 'new_addr',
-                    type: 'ByStr20',
-                    value: address
-                }
-            ],
-            {
-                version: bytes.pack(CHAIN_ID, MSG_VERSION),
-                amount: new BN(0),
-                gasPrice: GAS_PRICE,
-                gasLimit: Long.fromNumber(GAS_LIMIT)
-            },
-            33,
-            1000,
-            true
-        );
-        console.log("transaction: %o", txn.id);
-        console.log(JSON.stringify(txn.receipt, null, 4));
-        let result = {
-            txn_id: txn.id,
-            success: txn.receipt.success
-        }
-        return JSON.stringify(result);
-    } catch (err) {
-        console.error("error: updateReceiverAddress: %o", err);
-        return OperationStatus.ERROR;
-    }
-};
 
 export const ZilliqaAccount = () => {
     return zilliqa;

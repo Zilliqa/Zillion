@@ -122,19 +122,14 @@ function Home(props: any) {
         <div className="row h-100 align-items-center">
           <div className="col-12 text-center text-light">
 
-            {
-              !isShowAccessMethod &&
-
-              <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
-                <div className="form-group">
-                    <select id="home-network-selector" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control-xs">
-                        <option value={Network.TESTNET}>Testnet</option>
-                        <option value={Network.MAINNET}>Mainnet</option>
-                        <option value={Network.ISOLATED_SERVER}>Isolated Server</option>
-                    </select>
-                </div>
+            <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
+              <div className="form-group">
+                  <select id="home-network-selector" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control-xs">
+                      <option value={Network.TESTNET}>Testnet</option>
+                      <option value={Network.MAINNET}>Mainnet</option>
+                  </select>
               </div>
-            }
+            </div>
 
             <div className="heading">
               <h1 className="font-weight-light display-1">Stake$ZIL</h1>

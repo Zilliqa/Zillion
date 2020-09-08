@@ -47,6 +47,13 @@ function Dashboard(props: any) {
         receiver: ''
     });
 
+    const cleanUp = () => {
+        ZilliqaAccount.cleanUp();
+        appContext.cleanUp();
+        console.log("directing to dashboard");
+        props.history.replace("/");
+    }
+
     const handleChangeNetwork = (e: any) => {
         setSelectedNetwork(e.target.value);
         ZilliqaAccount.changeNetwork(e.target.value);
@@ -185,6 +192,9 @@ function Dashboard(props: any) {
                         { network === 'testnet' && <p className="px-1">Testnet</p> }
                         { network === 'mainnet' && <p className="px-1">Mainnet</p> }
                         { network === 'isolated_server' && <p className="px-1">Isolated Server</p> }
+                    </li>
+                    <li className="nav-item">
+                        <button type="button" className="nav-link btn" onClick={cleanUp}>Sign Out</button>
                     </li>
                 </ul>
             </div>
