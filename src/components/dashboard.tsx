@@ -4,6 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 import AppContext from "../contexts/appContext";
 import { Network, PromiseArea, Role } from '../util/enum';
 import * as Account from "../account";
+import RecentTransactionsTable from './recent-transactions-table';
 import SsnTable from './ssn-table';
 
 import { BN, units } from '@zilliqa-js/util';
@@ -18,12 +19,14 @@ import logo from "../static/logo.png";
 const PROXY = process.env.REACT_APP_PROXY ? process.env.REACT_APP_PROXY : '';
 const BLOCKCHAIN_NETWORK = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK : '';
 
+
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
     const { address, isAuth, role } = appContext;
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState('');
+    const [recentTransactions, setRecentTransactions] = useState([] as any);
     const [error, setError] = useState('');
 
     const mountedRef = useRef(false);
@@ -216,7 +219,7 @@ function Dashboard(props: any) {
                                         <div className="col">
                                             <h5 className="card-title mb-4">Other Staked Seed Nodes</h5>
                                         </div>
-                                        <div className="col-12 text-center"> 
+                                        <div className="col-12 text-center">
                                             { mountedRef.current && <SsnTable proxy={PROXY} network={selectedNetwork} refresh={process.env.REACT_APP_DATA_REFRESH_RATE} /> }
                                         </div>
                                     </div>
@@ -236,6 +239,18 @@ function Dashboard(props: any) {
                                     </div>
                                     </>
                                 }
+
+                                <div id="dashboard-recent-txn" className="p-4 mb-4 bg-white rounded dashboard-card container-fluid">
+                                    <div className="row">
+                                        <div className="col">
+                                            <h5 className="card-title mb-4">Recent Transactions</h5>
+                                        </div>
+                                        <div className="col-12 text-left">
+                                            { recentTransactions.length === 0 && <p><em>No recent transactions.</em></p> }
+                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={BLOCKCHAIN_NETWORK}/> }
+                                        </div>
+                                    </div>
+                                </div>
 
                             </div>
                         </div>

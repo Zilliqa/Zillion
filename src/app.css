@@ -287,12 +287,12 @@
   font-family: 'Poppins', sans-serif;
 }
 
-#dashboard-ssn-details {
+#dashboard-ssn-details, #dashboard-recent-txn {
   color: #000000;
   font-size: 0.85em;
 }
 
-#dashboard-ssn-details h5 {
+#dashboard-ssn-details h5, #dashboard-recent-txn h5 {
   color: #263238;
   font-size: 1.2em;
   font-weight: 500;
@@ -304,7 +304,7 @@
   background-color: rgba(255,255,255, 0.95);
 }
 
-#dashboard-ssn-details th {
+#dashboard-ssn-details th, #dashboard-recent-txn th {
   border-top: #ffffff;
   color: #263238;
   font-size: 0.9em;
