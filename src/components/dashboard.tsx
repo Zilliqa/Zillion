@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
-import { Network, PromiseArea, Role } from '../util/enum';
+import { PromiseArea, Role } from '../util/enum';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import SsnTable from './ssn-table';
@@ -98,7 +98,7 @@ function Dashboard(props: any) {
         if (network) {
             ZilliqaAccount.changeNetwork(networkURL);
         }
-    });
+    }, [network]);
 
     // when selected network is changed
     // useEffect is executed again
@@ -161,11 +161,20 @@ function Dashboard(props: any) {
         getOperatorNodeDetails();
         refreshStats();
 
+        // refresh wallet
+        // refresh operator details
+        const intervalId = setInterval(async () => {
+            getOperatorNodeDetails();
+            refreshStats();
+        }, (2 * refresh_rate_config));
+
         return () => {
+            clearInterval(intervalId);
             mountedRef.current = false;
         }
 
     }, [selectedNetwork]);
+
 
     return (
         <>
