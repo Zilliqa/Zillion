@@ -1,9 +1,6 @@
 import React, { useState, useContext} from 'react';
-import { AuthContext } from '../contexts/authContext';
 
 function MoonletWallet(props: any) {
-
-    const authContext = useContext(AuthContext);
 
     const unlockWallet = async () => {
         console.log("unlock by moonlet");
