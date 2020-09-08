@@ -302,27 +302,30 @@ export const ZilliqaAccount = () => {
 
 // refactor
 export const handleSign = async (accessMethod: string, networkURL: string, txParams: any) => {
+    changeNetwork(networkURL);
+    let result = "";
     switch (accessMethod) {
         case AccessMethod.LEDGER:
-            handleLedgerSign(networkURL, txParams);
+            result = await handleLedgerSign(networkURL, txParams);
             break;
         case AccessMethod.PRIVATEKEY:
-            handleNormalSign(txParams);
+            result = await handleNormalSign(txParams);
             break;
         case AccessMethod.MNEMONIC:
-            handleNormalSign(txParams);
+            result = await handleNormalSign(txParams);
             break;
         case AccessMethod.KEYSTORE:
-            handleNormalSign(txParams);
+            result = await handleNormalSign(txParams);
             break;
         default:
             console.error("error: no such account type :%o", accessMethod);
+            result = OperationStatus.ERROR;
+            break;
     }
+    return result;
 };
 
 const handleLedgerSign = async (networkURL: string, txParams: any) => {
-    changeNetwork(networkURL);
-
     let transport = null;
     const isWebAuthn = await TransportWebAuthn.isSupported();
     if (isWebAuthn) {
@@ -331,44 +334,46 @@ const handleLedgerSign = async (networkURL: string, txParams: any) => {
     } else {
         transport = await TransportU2F.create();
     }
-
+    
     const ledger = new ZilliqaLedger(transport);
     const result = await ledger.getPublicAddress(0);
 
     // get public key
     let pubKey = result.pubKey;
 
-    // get recipient base16 address
-    let recipient = result.pubAddr;
-    if (validation.isBech32(recipient)) {
-        recipient = fromBech32Address(recipient);
+    // get user base 16 address
+    let userWalletAddress = result.pubAddr;
+    if (validation.isBech32(userWalletAddress)) {
+        userWalletAddress = fromBech32Address(userWalletAddress);
     }
 
     console.log("pubKey: %o", pubKey);
-    console.log("pubAddr: %o", recipient);
+    console.log("pubAddr: %o", userWalletAddress);
 
     // get nonce
-    let nonce = await getNonce(recipient);
+    let nonce = await getNonce(userWalletAddress);
 
+    // toAddr: proxy checksum contract address
     try {
         const newParams = {
-            toAddr: recipient,
+            version: bytes.pack(CHAIN_ID, MSG_VERSION),
+            toAddr: txParams.toAddr,
             amount: txParams.amount.toString(),
             code: txParams.code,
             data: txParams.data,
-            gasPrice: txParams.gasPrice.toString(),
-            gasLimit: txParams.gasLimit.toString(),
+            gasLimit: GAS_LIMIT.toString(),
+            gasPrice: GAS_PRICE.toString(),
             nonce: nonce,
             pubKey: pubKey,
-            signature: '',
-            version: bytes.pack(CHAIN_ID, MSG_VERSION),
+            signature: "",
         };
+        console.log("new params :%o", newParams);
         const signature = await ledger.signTxn(0, newParams);
         const signedTx = {
             ...newParams,
             amount: txParams.amount.toString(),
-            gasPrice: txParams.gasPrice.toString(),
-            gasLimit: txParams.gasLimit.toString(),
+            gasPrice: GAS_PRICE.toString(),
+            gasLimit: GAS_LIMIT.toString(),
             signature
         };
         console.log(signedTx);
@@ -381,12 +386,12 @@ const handleLedgerSign = async (networkURL: string, txParams: any) => {
                 method: "CreateTransaction",
                 params: [
                     {
-                        toAddr: recipient,
+                        toAddr: txParams.toAddr,
                         amount: txParams.amount.toString(),
                         code: txParams.code,
                         data: txParams.data,
-                        gasPrice: txParams.gasPrice.toString(),
-                        gasLimit: txParams.gasLimit.toString(),
+                        gasPrice: GAS_PRICE.toString(),
+                        gasLimit: GAS_LIMIT.toString(),
                         nonce: nonce,
                         pubKey: pubKey,
                         signature: signature,
@@ -436,6 +441,26 @@ const handleLedgerSign = async (networkURL: string, txParams: any) => {
     }
 }
 
-const handleNormalSign = (txParams: any) => {
-
+const handleNormalSign = async (txParams: any) => {
+    // convert to zilliqa transaction object
+    // toAddr: proxy checksum contract address
+    const zilliqaTxn = zilliqa.transactions.new(
+        {
+            toAddr: txParams.toAddr,
+            amount: txParams.amount,
+            data: txParams.data,
+            gasPrice: GAS_PRICE,
+            gasLimit: GAS_LIMIT,
+            version: bytes.pack(CHAIN_ID, MSG_VERSION),
+        },
+        true
+    );
+    console.log(zilliqaTxn);
+    try {
+        const txn = await zilliqa.blockchain.createTransaction(zilliqaTxn);
+        return txn.id;
+    } catch (err) {
+        console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
+        return OperationStatus.ERROR;
+    }
 }

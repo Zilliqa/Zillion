@@ -44,7 +44,7 @@ function MnemonicWallet(props: any) {
             props.onWalletLoadingCallback();
 
             // update context
-            initParams(address, role);
+            initParams(address, role, AccessMethod.MNEMONIC);
             await updateRole(address, role);
             updateAuth();
 
@@ -75,7 +75,7 @@ function MnemonicWallet(props: any) {
             </div>
 
             {
-                (mnemonicIndex == 1) &&
+                (mnemonicIndex === 1) &&
 
                 <div className="form-group mb-4">
                     <input id="mnemonic-password-input" className="p-2" type="password" name="password" value={password} placeholder="Enter your password" onChange={handlePassword} />

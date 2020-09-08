@@ -6,11 +6,12 @@ import * as ZilliqaAccount from '../account';
 import { Role } from '../util/enum';
 
 const AppContext = React.createContext({
+    accountType: '',
     address: '',
     isAuth: false,
     role: '',
     setWallet: (inputAddr: string) => {},
-    initParams: (inputAddress: string, selectedRole: string) => {},
+    initParams: (inputAddress: string, selectedRole: string, selectedAccountType: string) => {},
     updateAuth: () => {},
     updateRole: (inputAddress: string, selectedRole: string) => {},
 });
@@ -21,6 +22,8 @@ function AppProvider(props: any) {
     
     // bech32 address
     const [address, setAddress] = useState('');
+    const [accountType, setAccountType] = useState('');
+    const [publicKey, setPublicKey] = useState('');
     const [role, setRole] = useState('');
     const [isAuth, setAuth] = useState(false);
 
@@ -49,7 +52,7 @@ function AppProvider(props: any) {
         setAuth(!isAuth);
     };
 
-    const initParams = (inputAddress: string, selectedRole: string) => {
+    const initParams = (inputAddress: string, selectedRole: string, selectedAccountType: string) => {
         let walletAddress = inputAddress;
         if (!validation.isBech32(walletAddress)) {
             walletAddress = toBech32Address(walletAddress);
@@ -57,10 +60,11 @@ function AppProvider(props: any) {
 
         setAddress(walletAddress);
         setRole(selectedRole);
+        setAccountType(selectedAccountType);
     };
 
     return (
-        <AppContext.Provider value={{ address, isAuth, role, setWallet, initParams, updateAuth, updateRole }}>
+        <AppContext.Provider value={{ accountType, address, isAuth, role, setWallet, initParams, updateAuth, updateRole }}>
             {props.children}
         </AppContext.Provider>
     );

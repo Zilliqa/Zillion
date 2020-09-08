@@ -54,7 +54,7 @@ class WalletKeystore extends Component<any, any> {
                     this.props.onWalletLoadingCallback();
 
                     // update context
-                    this.context.initParams(address, this.props.role);
+                    this.context.initParams(address, this.props.role, AccessMethod.KEYSTORE);
                     await this.context.updateRole(address, this.props.role);
                     this.context.updateAuth();
 

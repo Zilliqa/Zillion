@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import * as Account from '../account';
+import { AccessMethod } from '../util/enum';
 
 
 function WalletPrivatekey(props: any) {
@@ -32,7 +33,7 @@ function WalletPrivatekey(props: any) {
                 props.onWalletLoadingCallback();
 
                 // update context
-                initParams(walletAddress, role);
+                initParams(walletAddress, role, AccessMethod.PRIVATEKEY);
                 await updateRole(walletAddress, role);
                 updateAuth();
 

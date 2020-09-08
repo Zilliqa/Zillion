@@ -21,6 +21,7 @@ export default class Ledger {
 
     constructor(transport: Transport<any>, scrambleKey: string = "w0w") {
         this.transport = transport;
+        transport.setExchangeTimeout(180000);
         transport.decorateAppAPIMethods(
             this,
             ["getVersion", "getPublicKey", "getPublicAddress", "signTxn"],

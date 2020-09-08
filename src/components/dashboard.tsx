@@ -12,9 +12,7 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
-import LedgerCallModal from './contract-calls/ledger-test';
 
-import IconErrorWarning from './icons/error-warning';
 import logo from "../static/logo.png";
 
 const PROXY = process.env.REACT_APP_PROXY ? process.env.REACT_APP_PROXY : '';
@@ -239,10 +237,6 @@ function Dashboard(props: any) {
                                     </>
                                 }
 
-                                <div>
-                                    <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#ledger-call-modal" data-keyboard="false" data-backdrop="static">Test Ledger</button>
-                                </div>
-
                             </div>
                         </div>
                     </div>
@@ -251,7 +245,7 @@ function Dashboard(props: any) {
             <UpdateCommRateModal proxy={PROXY} currentRate={nodeDetails.commRate}/>
             <UpdateReceiverAddress proxy={PROXY} currentReceiver={nodeDetails.receiver}/>
             <WithdrawCommModal proxy={PROXY} currentRewards={nodeDetails.commReward}/>
-            <LedgerCallModal />
+            {/* <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} /> */}
         </div>
         </>
     );

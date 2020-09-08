@@ -30,7 +30,13 @@ function Home(props: any) {
     setIsDirectDashboard(false);
   }
 
-  const redirectToDashboard = () => {
+  const timeout = (delay: number) => {
+    return new Promise(res => setTimeout(res, delay));
+  }
+
+  const redirectToDashboard = async () => {
+    // add some delay
+    await timeout(1000);
     console.log("directing to dashboard");
     props.history.push("/dashboard");
   }
@@ -79,15 +85,20 @@ function Home(props: any) {
                   onSuccessCallback={redirectToDashboard} 
                   role={role} />;
       case AccessMethod.ZILPAY:
-        return <WalletZilPay onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />
+        return <WalletZilPay onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
       case AccessMethod.LEDGER:
-        return <WalletLedger onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />
+        return <WalletLedger 
+                  onReturnCallback={resetWalletsClicked}
+                  onWalletLoadingCallback={toggleDirectToDashboard} 
+                  onSuccessCallback={redirectToDashboard} 
+                  role={role} />;
       default:
         return null;
     }
   }
 
   const DisplayLoader = () => {
+    console.log("retrieving wallet info...");
     return (
       <div className="animate__animated animate__fadeIn">
         <h2 className="mt-5 mb-4">Retrieving wallet info...</h2>

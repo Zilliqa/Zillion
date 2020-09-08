@@ -185,7 +185,7 @@
   top: 20%;
 }
 
-.modal-processing h2 {
+.modal-processing h2, .modal-sent h2 {
   color: #263238;
   font-size: 1.4em;
   font-weight: 500;
@@ -206,7 +206,7 @@
   font-size: 1em;
 }
 
-.modal-body span.txn-id {
+.modal-sent .txn-id {
   font-size: 0.85em;
   word-break: keep-all;
 }
