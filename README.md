@@ -5,7 +5,7 @@
 1. yarn
 
 2. Tweak the settings in `public/config.js`
-```json
+```
     networks_config: {
         testnet: {
             proxy: "<proxy_checksum_address>",
