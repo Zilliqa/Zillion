@@ -30,3 +30,13 @@ export enum Role {
     OPERATOR = "OPERATOR",
     NONE = "",
 }
+
+export enum ProxyCalls {
+    COMPLETE_WITHDRAWAL = "CompleteWithdrawal",
+    DELEGATE_STAKE = "DelegateStake",
+    UPDATE_COMM = "UpdateComm",
+    UPDATE_RECV_ADDR = "UpdateReceivingAddr",
+    WITHDRAW_COMM = "WithdrawComm",
+    WITHDRAW_STAKE_AMT = "WithdrawStakeAmt",
+    WITHDRAW_STAKE_REWARDS = "WithdrawStakeRewards",
+}

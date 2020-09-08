@@ -1,19 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
-import { OperationStatus } from "../../util/enum";
-import * as Account from "../../account";
+
+import { bech32ToChecksum } from '../../util/utils';
+import { AccessMethod, OperationStatus, ProxyCalls } from "../../util/enum";
+import * as ZilliqaAccount from "../../account";
+import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
+const { BN } = require('@zilliqa-js/util');
+
+
 function UpdateReceiverAddress(props: any) {
-    const { proxy, currentReceiver } = props;
+    const appContext = useContext(AppContext);
+    const { accountType } = appContext;
+
+    const { proxy, networkURL, currentReceiver } = props;
     const [newAddress, setNewAddress] = useState('');
     const [txnId, setTxnId] = useState('');
-    const [error, setError] = useState('');
     const [isPending, setIsPending] = useState('');
+
+    const updateAddress = async () => {
+        // create tx params
+
+        // toAddr: proxy address
+        const proxyChecksum = bech32ToChecksum(proxy);
+        const newReceivingAddress = bech32ToChecksum(newAddress);
+
+        // gas price, gas limit declared in account.ts
+        let txParams = {
+            toAddr: proxyChecksum,
+            amount: new BN(0),
+            code: "",
+            data: JSON.stringify({
+                _tag: ProxyCalls.UPDATE_RECV_ADDR,
+                params: [
+                    {
+                        vname: 'new_addr',
+                        type: 'ByStr20',
+                        value: `${newReceivingAddress}`,
+                    }
+                ]
+            })
+        };
+
+        setIsPending(OperationStatus.PENDING);
+        
+        if (accountType === AccessMethod.LEDGER) {
+            Alert('info', "Accessing the ledger device for keys.");
+            Alert('info', "Please follow the instructions on the device.");
+        }
+
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+            .then((result) => {
+                console.log(result);
+                if (result === OperationStatus.ERROR) {
+                    Alert('error', "There is an error. Please try again.");
+                } else {
+                    setTxnId(result);
+                }
+            })
+            .finally(() => {
+                setIsPending('');
+            }));
+    }
 
     const handleClose = () => {
         // reset state
@@ -23,27 +76,8 @@ function UpdateReceiverAddress(props: any) {
         setTimeout(() => {
             setNewAddress('');
             setTxnId('');
-            setError('');
             setIsPending('');
         }, 150);
-    }
-
-    const updateAddress = async () => {
-        setIsPending(OperationStatus.PENDING);
-        trackPromise(Account.updateReceiverAddress(proxy, newAddress)
-            .then((result) => {
-                console.log(result);
-                if (result === OperationStatus.ERROR) {
-                    setError(OperationStatus.ERROR);
-                    Alert('error', "There is an error. Please try again.");
-                } else {
-                    const resultJson = JSON.parse(result);
-                    setTxnId(resultJson.txn_id);
-                }
-            })
-            .finally(() => {
-                setIsPending('');
-            }));
     }
 
     return (

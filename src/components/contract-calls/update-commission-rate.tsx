@@ -1,21 +1,70 @@
 import React, { useState, useContext } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
-import { AuthContext } from '../../contexts/authContext';
-import { OperationStatus, AccessMethod } from "../../util/enum";
-import * as Account from "../../account";
+
+import AppContext from '../../contexts/appContext';
+import { OperationStatus, AccessMethod, ProxyCalls } from "../../util/enum";
+import { bech32ToChecksum } from '../../util/utils';
+import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
+const { BN } = require('@zilliqa-js/util');
+
 function UpdateCommRateModal(props: any) {
-    const authContext = useContext(AuthContext);
-    const { proxy, currentRate } = props;
+    const appContext = useContext(AppContext);
+    const { accountType } = appContext;
+
+    const { proxy, networkURL, currentRate } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
-    const [error, setError] = useState('');
     const [isPending, setIsPending] = useState('');
+
+
+    const updateCommRate = async () => {
+        // create tx params
+
+        // toAddr: proxy address
+        const proxyChecksum = bech32ToChecksum(proxy);
+
+        // gas price, gas limit declared in account.ts
+        let txParams = {
+            toAddr: proxyChecksum,
+            amount: new BN(0),
+            code: "",
+            data: JSON.stringify({
+                _tag: ProxyCalls.UPDATE_COMM,
+                params: [
+                    {
+                        vname: 'new_rate',
+                        type: 'Uint128',
+                        value: `${newRate}`,
+                    }
+                ]
+            })
+        };
+
+        setIsPending(OperationStatus.PENDING);
+
+        if (accountType === AccessMethod.LEDGER) {
+            Alert('info', "Accessing the ledger device for keys.");
+            Alert('info', "Please follow the instructions on the device.");
+        }
+
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+            .then((result) => {
+                console.log(result);
+                if (result === OperationStatus.ERROR) {
+                    Alert('error', "There is an error. Please try again.");
+                } else {
+                    setTxnId(result);
+                }
+            }).finally(() => {
+                setIsPending('');
+            }));
+    }
 
     const handleClose = () => {
         // reset state
@@ -25,32 +74,8 @@ function UpdateCommRateModal(props: any) {
         setTimeout(() => {
             setNewRate('');
             setTxnId('');
-            setError('');
             setIsPending('');
         }, 150);
-    }
-
-    const updateCommRate = async () => {
-        setIsPending(OperationStatus.PENDING);
-        trackPromise(Account.updateCommissionRate(proxy, newRate)
-            .then((result) => {
-                console.log(result);
-                if (result === OperationStatus.ERROR) {
-                    setError(OperationStatus.ERROR);
-                    Alert('error', "There is an error. Please try again.");
-                } else {
-                    const resultJson = JSON.parse(result);
-                    setTxnId(resultJson.txn_id);
-                }
-            }).finally(() => {
-                setIsPending('');
-            }));
-    }
-
-    const ledgerUpdateCommRate = async () => {
-        if (authContext.accountType === AccessMethod.LEDGER) {
-            console.log("access method is ledger!");
-        }
     }
 
     return (

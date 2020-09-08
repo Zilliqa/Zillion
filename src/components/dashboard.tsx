@@ -242,9 +242,9 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={PROXY} currentRate={nodeDetails.commRate}/>
-            <UpdateReceiverAddress proxy={PROXY} currentReceiver={nodeDetails.receiver}/>
-            <WithdrawCommModal proxy={PROXY} currentRewards={nodeDetails.commReward}/>
+            <UpdateCommRateModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRate={nodeDetails.commRate}/>
+            <UpdateReceiverAddress proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentReceiver={nodeDetails.receiver}/>
+            <WithdrawCommModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRewards={nodeDetails.commReward}/>
             {/* <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} /> */}
         </div>
         </>
