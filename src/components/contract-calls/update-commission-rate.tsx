@@ -17,7 +17,7 @@ function UpdateCommRateModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentRate } = props;
+    const { proxy, networkURL, currentRate, onSuccessCallback } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
@@ -67,6 +67,12 @@ function UpdateCommRateModal(props: any) {
     }
 
     const handleClose = () => {
+        // txn success
+        // update dashboard recent transactions
+        if (txnId) {
+            onSuccessCallback(txnId);
+        }
+
         // reset state
         // timeout to wait for modal to fade out before clearing
         // so that the animation is smoother

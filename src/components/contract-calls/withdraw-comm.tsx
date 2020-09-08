@@ -17,7 +17,7 @@ function WithdrawCommModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, currentRewards, networkURL } = props;
+    const { proxy, currentRewards, networkURL, onSuccessCallback } = props;
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
 
@@ -59,6 +59,12 @@ function WithdrawCommModal(props: any) {
     }
 
     const handleClose = () => {
+        // txn success
+        // update dashboard recent transactions
+        if (txnId) {
+            onSuccessCallback(txnId);
+        }
+        
         // reset state
         // timeout to wait for modal to fade out before clearing
         // so that the animation is smoother

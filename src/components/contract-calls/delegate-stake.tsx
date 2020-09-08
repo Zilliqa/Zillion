@@ -20,6 +20,7 @@ function DelegateStakeModal(props: any) {
 
     const proxy = props.proxy;
     const networkURL = props.networkURL;
+    const { onSuccessCallback } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [delegAmt, setDelegAmt] = useState(''); // in Qa
@@ -76,6 +77,12 @@ function DelegateStakeModal(props: any) {
     }
 
     const handleClose = () => {
+        // txn success
+        // update dashboard recent transactions
+        if (txnId) {
+            onSuccessCallback(txnId);
+        }
+        
         // reset state
         // timeout to wait for modal to fade out before clearing
         // so that the animation is smoother

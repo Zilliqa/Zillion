@@ -64,6 +64,10 @@ function Dashboard(props: any) {
         }), PromiseArea.PROMISE_GET_BALANCE);
     }
 
+    const updateRecentTransactions = (txnId: string) => {
+        setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
+    }
+
     useEffect(() => {
         // if (!isAuth) {
         //     // redirect to ask to login
@@ -257,10 +261,10 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRate={nodeDetails.commRate}/>
-            <UpdateReceiverAddress proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentReceiver={nodeDetails.receiver}/>
-            <WithdrawCommModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRewards={nodeDetails.commReward}/>
-            {/* <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} /> */}
+            <UpdateCommRateModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
+            <UpdateReceiverAddress proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} />
+            <WithdrawCommModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} />
+            {/* <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} /> */}
         </div>
         </>
     );
