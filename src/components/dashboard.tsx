@@ -16,8 +16,11 @@ import UpdateCommRateModal from './contract-calls/update-commission-rate';
 
 import DelegateStakeModal from './contract-calls/delegate-stake';
 import WithdrawStakeModal from './contract-calls/withdraw-stake';
+import WithdrawRewardModal from './contract-calls/withdraw-reward';
+import CompleteWithdrawModal from './contract-calls/complete-withdraw';
 
 import logo from "../static/logo.png";
+
 
 const PROXY = process.env.REACT_APP_PROXY ? process.env.REACT_APP_PROXY : '';
 const BLOCKCHAIN_NETWORK = process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK ? process.env.REACT_APP_DASHBOARD_BLOCKCHAIN_NETWORK : '';
@@ -199,7 +202,7 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Withdraw Rewards</button>
-                                        {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button>
                                     </div>
                                     </>
                                 }
@@ -284,6 +287,8 @@ function Dashboard(props: any) {
             <WithdrawCommModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} />
             <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
             <WithdrawStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
+            <WithdrawRewardModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
+            <CompleteWithdrawModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
         </div>
         </>
     );

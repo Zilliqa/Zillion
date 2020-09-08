@@ -13,8 +13,7 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 
 const { BN } = require('@zilliqa-js/util');
 
-
-function DelegateStakeModal(props: any) {
+function CompleteWithdrawModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
@@ -22,46 +21,22 @@ function DelegateStakeModal(props: any) {
     const networkURL = props.networkURL;
     const { onSuccessCallback } = props;
 
-    const [ssnAddress, setSsnAddress] = useState(''); // checksum address
-    const [delegAmt, setDelegAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
-    const delegateStake = async () => {
-        if (!ssnAddress) {
-            Alert('error', "operator address should be bech32 or checksum format");
-            return null;
-        }
-
-        if (!delegAmt || !delegAmt.match(/\d/)) {
-            Alert('error', "Delegate amount is invalid.");
-            return null;
-        }
+    const completeWithdraw = async () => {
         // create tx params
 
         // toAddr: proxy address
-        // amount: amount in Qa to stake
-        console.log("ssn address: %o", ssnAddress);
-        console.log("proxy: %o", proxy);
-
         const proxyChecksum = bech32ToChecksum(proxy);
-        const ssnChecksumAddress = bech32ToChecksum(ssnAddress);
-        const delegAmtQa = convertZilToQa(delegAmt);
-
         // gas price, gas limit declared in account.ts
         let txParams = {
             toAddr: proxyChecksum,
-            amount: new BN(`${delegAmtQa}`),
+            amount: new BN(0),
             code: "",
             data: JSON.stringify({
-                _tag: ProxyCalls.DELEGATE_STAKE,
-                params: [
-                    {
-                        vname: 'ssnaddr',
-                        type: 'ByStr20',
-                        value: `${ssnChecksumAddress}`,
-                    }
-                ]
+                _tag: ProxyCalls.COMPLETE_WITHDRAWAL,
+                params: []
             })
         };
 
@@ -97,22 +72,12 @@ function DelegateStakeModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setSsnAddress('');
-            setDelegAmt('');
             setTxnId('');
         }, 150);
     }
 
-    const handleDelegAmt = (e: any) => {
-        setDelegAmt(e.target.value);
-    }
-
-    const handleSsnAddress = (e: any) => {
-        setSsnAddress(e.target.value);
-    }
-
     return (
-        <div id="delegate-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="delegateStakeModalLabel" aria-hidden="true">
+        <div id="complete-withdrawal-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="completeWithdrawModalLabel" aria-hidden="true">
             <div className="modal-dialog" role="document">
                  <div className="modal-content">
                      {
@@ -130,15 +95,14 @@ function DelegateStakeModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="delegateStakeModalLabel">Delegate Stake</h5>
+                            <h5 className="modal-title" id="completeWithdrawModalLabel">Complete Withdrawal</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn address" />
-                            <input type="text" className="form-control mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
-                            <button type="button" className="btn btn-user-action mr-2" onClick={delegateStake}>Stake</button>
+                            <p>Are you sure you want to do a complete withdrawal?</p>
+                            <button type="button" className="btn btn-user-action mr-2" onClick={completeWithdraw}>Withdraw</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                         </div>
                          </>
@@ -150,4 +114,4 @@ function DelegateStakeModal(props: any) {
     );
 }
 
-export default DelegateStakeModal;
+export default CompleteWithdrawModal;
