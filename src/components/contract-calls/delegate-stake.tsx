@@ -23,11 +23,20 @@ function DelegateStakeModal(props: any) {
     const { onSuccessCallback } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
-    const [delegAmt, setDelegAmt] = useState(''); // in Qa
+    const [delegAmt, setDelegAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
     const delegateStake = async () => {
+        if (!ssnAddress) {
+            Alert('error', "operator address should be bech32 or checksum format");
+            return null;
+        }
+
+        if (!delegAmt || !delegAmt.match(/\d/)) {
+            Alert('error', "Delegate amount is invalid.");
+            return null;
+        }
         // create tx params
 
         // toAddr: proxy address
@@ -37,7 +46,7 @@ function DelegateStakeModal(props: any) {
 
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress);
-        const delegAmtQa = convertZilToQa(delegAmt)
+        const delegAmtQa = convertZilToQa(delegAmt);
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -127,7 +136,6 @@ function DelegateStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            { txnId && txnId }
                             <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn address" />
                             <input type="text" className="form-control mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
                             <button type="button" className="btn btn-user-action mr-2" onClick={delegateStake}>Update</button>

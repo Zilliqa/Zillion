@@ -14,6 +14,9 @@ import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
 
+import DelegateStakeModal from './contract-calls/delegate-stake';
+import WithdrawStakeModal from './contract-calls/withdraw-stake';
+
 import logo from "../static/logo.png";
 
 const PROXY = process.env.REACT_APP_PROXY ? process.env.REACT_APP_PROXY : '';
@@ -32,10 +35,10 @@ function Dashboard(props: any) {
     const mountedRef = useRef(false);
 
     const [nodeDetails, setNodeDetails] = useState({
-        stakeAmt: '',
-        bufferedDeposit: '',
-        commRate: '',
-        commReward: '',
+        stakeAmt: '0',
+        bufferedDeposit: '0',
+        commRate: '0',
+        commReward: '0',
         numOfDeleg: 0,
         receiver: ''
     });
@@ -187,6 +190,36 @@ function Dashboard(props: any) {
                                 <h1 className="mb-4">Stake$ZIL Dashboard</h1>
 
                                 {
+                                    (role === Role.DELEGATOR) &&
+
+                                    <>
+                                    {/* delegator section */}
+                                    <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                        <h5 className="card-title mb-4">Delegator, What would you like to do today?</h5>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Withdraw Rewards</button>
+                                        {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
+                                    </div>
+                                    </>
+                                }
+
+                                {
+                                    (role === Role.OPERATOR) &&
+
+                                    <>
+                                    {/* node operator section */}
+
+                                    <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                        <h5 className="card-title mb-4">Operator, What would you like to do today?</h5>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Received Address</button>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
+                                    </div>
+                                    </>
+                                }
+
+                                {
                                     (role === Role.OPERATOR) &&
 
                                     <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
@@ -229,21 +262,6 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                {
-                                    (role === Role.OPERATOR) &&
-
-                                    <>
-                                    {/* node operator section */}
-
-                                    <div className="p-4 mb-4 bg-white rounded dashboard-card">
-                                        <h5 className="card-title mb-4">What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Received Address</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
-                                    </div>
-                                    </>
-                                }
-
                                 <div id="dashboard-recent-txn" className="p-4 mb-4 bg-white rounded dashboard-card container-fluid">
                                     <div className="row">
                                         <div className="col">
@@ -264,7 +282,8 @@ function Dashboard(props: any) {
             <UpdateCommRateModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
             <UpdateReceiverAddress proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} />
             <WithdrawCommModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} />
-            {/* <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} /> */}
+            <DelegateStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
+            <WithdrawStakeModal proxy={PROXY} networkURL={BLOCKCHAIN_NETWORK} onSuccessCallback={updateRecentTransactions} />
         </div>
         </>
     );

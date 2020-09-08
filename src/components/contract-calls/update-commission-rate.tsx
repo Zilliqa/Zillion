@@ -24,6 +24,10 @@ function UpdateCommRateModal(props: any) {
 
 
     const updateCommRate = async () => {
+        if (!newRate || !newRate.match(/\d/)) {
+            Alert('error', "Commission rate is invalid.");
+            return null;
+        }
         // create tx params
 
         // toAddr: proxy address

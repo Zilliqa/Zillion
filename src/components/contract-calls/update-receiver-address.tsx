@@ -24,6 +24,11 @@ function UpdateReceiverAddress(props: any) {
     const [isPending, setIsPending] = useState('');
 
     const updateAddress = async () => {
+        if (!newAddress) {
+            Alert('error', "receiving address should be bech32 or checksum format");
+            return null;
+        }
+
         // create tx params
 
         // toAddr: proxy address
