@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from '../../contexts/appContext';
 import { OperationStatus, AccessMethod, ProxyCalls } from "../../util/enum";
-import { bech32ToChecksum } from '../../util/utils';
+import { bech32ToChecksum, percentToContractCommRate } from '../../util/utils';
 import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
 
@@ -32,6 +32,7 @@ function UpdateCommRateModal(props: any) {
 
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
+        const contractCommRate = percentToContractCommRate(newRate);
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -44,7 +45,7 @@ function UpdateCommRateModal(props: any) {
                     {
                         vname: 'new_rate',
                         type: 'Uint128',
-                        value: `${newRate}`,
+                        value: `${contractCommRate}`,
                     }
                 ]
             })

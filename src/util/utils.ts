@@ -19,3 +19,12 @@ export const convertToProperCommRate = (rate: string) => {
     let commRate = parseInt(rate);
     return commRate / 1e7;
 };
+
+
+// convert commission rate from percentage to contract comm rate
+export const percentToContractCommRate = (userInputRate: string) => {
+    if (!userInputRate) {
+        return 0;
+    }
+    return parseInt(userInputRate) * 1e7;
+};
