@@ -202,6 +202,9 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
         case AccessMethod.KEYSTORE:
             result = await handleNormalSign(txParams);
             break;
+        case AccessMethod.ZILPAY:
+            result = await handleZilPaySign(txParams);
+            break;
         default:
             console.error("error: no such account type :%o", accessMethod);
             result = OperationStatus.ERROR;
@@ -344,6 +347,32 @@ const handleNormalSign = async (txParams: any) => {
     try {
         const txn = await zilliqa.blockchain.createTransaction(zilliqaTxn);
         return txn.id;
+    } catch (err) {
+        console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
+        return OperationStatus.ERROR;
+    }
+}
+
+const handleZilPaySign = async (txParams: any) => {
+    // convert to zilliqa transaction object
+    // toAddr: proxy checksum contract address
+    const zilPay = (window as any).zilPay;
+    const zilliqaTxn = zilliqa.transactions.new(
+        {
+            toAddr: txParams.toAddr,
+            amount: txParams.amount,
+            data: txParams.data,
+            gasPrice: GAS_PRICE,
+            gasLimit: GAS_LIMIT,
+            version: bytes.pack(CHAIN_ID, MSG_VERSION),
+        },
+        true
+    );
+
+    try {
+        const txn = await zilPay.blockchain.createTransaction(zilliqaTxn);
+
+        return txn.ID;
     } catch (err) {
         console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
         return OperationStatus.ERROR;
