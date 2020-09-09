@@ -274,6 +274,23 @@
   width: 90%;
 }
 
+.ssn-table-status-active {
+  font-size: 0.80em;
+  font-weight: 500;
+  color: #2e7d32;
+  background-color: #d2f9dd;
+  text-transform: uppercase;
+}
+
+.ssn-table-status-inactive {
+  font-size: 0.80em;
+  font-weight: 500;
+  color: #424242;
+  background-color: #e0e0e0;
+  text-transform: lowercase;
+  text-transform: uppercase;
+}
+
 .wallet-access {
   margin-top: 3em;
   /* referring to animate.css */

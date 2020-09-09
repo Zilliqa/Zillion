@@ -37,6 +37,11 @@ export enum Role {
     NONE = "",
 }
 
+export enum SsnStatus {
+    ACTIVE = "Active",
+    INACTIVE = "Inactive"
+}
+
 export enum ProxyCalls {
     COMPLETE_WITHDRAWAL = "CompleteWithdrawal",
     DELEGATE_STAKE = "DelegateStake",

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
-import { PromiseArea } from '../util/enum';
+import { PromiseArea, SsnStatus } from '../util/enum';
 import { convertToProperCommRate } from '../util/utils';
 import * as Account from "../account";
 import Spinner from './spinner';
@@ -89,6 +89,16 @@ function SsnTable(props: any) {
             {
                 Header: 'Delegators',
                 accessor: 'ssnDeleg'
+            },
+            {
+                Header: 'Status',
+                accessor: 'ssnStatus',
+                Cell: ({ row }: any) => 
+                        <>
+                        <span className={ row.original.ssnStatus === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive' }>
+                            {row.original.ssnStatus}
+                        </span>
+                        </>
             }
         ],[]
     )
@@ -105,7 +115,13 @@ function SsnTable(props: any) {
             for (const key in implContract.ssnlist) {
                 if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
                     let delegAmt = 0;
+                    let status = SsnStatus.INACTIVE;
                     const ssnArgs = implContract.ssnlist[key].arguments;
+
+                    // get ssn status
+                    if (ssnArgs[0].constructor === 'True') {
+                        status = SsnStatus.ACTIVE;
+                    }
 
                     // get number of delegators
                     if (implContract.hasOwnProperty("ssn_deleg_amt") && implContract.ssn_deleg_amt.hasOwnProperty(key)) {
@@ -120,6 +136,7 @@ function SsnTable(props: any) {
                         ssnCommRate: convertToProperCommRate(ssnArgs[7]),
                         ssnCommReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
                         ssnDeleg: delegAmt,
+                        ssnStatus: status
                     }
                     outputResult.push(nodeJson);
                 }
