@@ -83,6 +83,11 @@ function Dashboard(props: any) {
     }
 
     useEffect(() => {
+        if (process.env.REACT_APP_STAKEZ_ENV && process.env.REACT_APP_STAKEZ_ENV === 'dev') {
+            // disable auth check for development
+            return;
+        }
+        
         if (!isAuth) {
             // redirect to login request
             props.history.push("/notlogin");

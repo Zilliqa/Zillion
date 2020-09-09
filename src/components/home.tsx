@@ -127,6 +127,11 @@ function Home(props: any) {
                   <select id="home-network-selector" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control-xs">
                       <option value={Network.TESTNET}>Testnet</option>
                       <option value={Network.MAINNET}>Mainnet</option>
+                      { 
+                        process.env.REACT_APP_STAKEZ_ENV && 
+                        process.env.REACT_APP_STAKEZ_ENV === 'dev' && 
+                        <option value={Network.ISOLATED_SERVER}>Isolated Server</option> 
+                      }
                   </select>
               </div>
             </div>
