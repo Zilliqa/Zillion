@@ -108,7 +108,7 @@ function WithdrawRewardModal(props: any) {
 
                          txnId ?
 
-                         <ModalSent txnId={txnId} handleClose={handleClose} />
+                         <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
                          :
 
@@ -120,7 +120,7 @@ function WithdrawRewardModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn address" />
+                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn bech32 address" />
                             <button type="button" className="btn btn-user-action mr-2" onClick={withdrawReward}>Withdraw</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                         </div>

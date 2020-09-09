@@ -89,7 +89,7 @@ function CompleteWithdrawModal(props: any) {
 
                          txnId ?
 
-                         <ModalSent txnId={txnId} handleClose={handleClose} />
+                         <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
                          :
 
