@@ -13,19 +13,37 @@ function WalletZilPay(props: any) {
     const role = props.role;
 
     const unlockWallet = async () => {
-        console.log("unlock by zilpay");
+        props.onWalletLoadingCallback();
+        // Getting ZilPay inject.
+        const zilPay = (window as any).zilPay;
+
+        // Checking on ZilPay inject and wallet state.
+        if (!zilPay) {
+            Alert('warn', 'Please install ZilPay wallet.');
+
+            return null;
+        } else if (!zilPay.wallet.isEnable) {
+            Alert('warn', 'Please unlock wallet.');
+
+            return null;
+        }
 
         try {
-            // import zilpay object
-            // use zilpay to connect
+            // Shell try ask user about access.
+            const connected = await zilPay.wallet.connect();
 
-            // if now issues
-            // request parent to show loading state
-            props.onWalletLoadingCallback();
+            // Checking access.
+            if (!connected) {
+                Alert('warn', 'Rejected access!');
+
+                return null;
+            }
+
+            const { base16 } = zilPay.wallet.defaultAccount;
 
             // update context
-            initParams("wallet_address", role, AccessMethod.ZILPAY);
-            await updateRole("wallet_address", role);
+            initParams(base16, role, AccessMethod.ZILPAY);
+            updateRole(base16, role);
             updateAuth()
 
             // request parent to redirect to dashboard
