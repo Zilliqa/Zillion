@@ -136,6 +136,8 @@ function Dashboard(props: any) {
                 }
 
                 if (contract.ssnlist && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
+                    console.log("attempt to fetch node details");
+
                     // since user is node operator
                     // compute the data for staking peformance section
                     let tempNumOfDeleg = 0;

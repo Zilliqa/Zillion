@@ -22,9 +22,10 @@ export const convertToProperCommRate = (rate: string) => {
 
 
 // convert commission rate from percentage to contract comm rate
+// userInputRate is a float
 export const percentToContractCommRate = (userInputRate: string) => {
     if (!userInputRate) {
         return 0;
     }
-    return parseInt(userInputRate) * 1e7;
+    return parseFloat(userInputRate) * 1e7;
 };

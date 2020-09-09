@@ -34,6 +34,8 @@ function UpdateCommRateModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const contractCommRate = percentToContractCommRate(newRate);
 
+        console.log("my new rate: %o", contractCommRate);
+
         // gas price, gas limit declared in account.ts
         let txParams = {
             toAddr: proxyChecksum,
