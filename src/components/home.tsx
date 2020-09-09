@@ -92,7 +92,11 @@ function Home(props: any) {
                   onSuccessCallback={redirectToDashboard} 
                   role={role} />;
       case AccessMethod.ZILPAY:
-        return <WalletZilPay onReturnCallback={resetWalletsClicked} onSuccessCallback={redirectToDashboard} />;
+        return <WalletZilPay 
+                  onReturnCallback={resetWalletsClicked} 
+                  onWalletLoadingCallback={toggleDirectToDashboard}
+                  onSuccessCallback={redirectToDashboard}
+                  role={role} />;
       case AccessMethod.LEDGER:
         return <WalletLedger 
                   onReturnCallback={resetWalletsClicked}
