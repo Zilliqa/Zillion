@@ -40,11 +40,22 @@ function WalletZilPay(props: any) {
             }
 
             const { base16 } = zilPay.wallet.defaultAccount;
+            const accountStreamChanged = zilPay.wallet.observableAccount();
 
             // update context
             initParams(base16, role, AccessMethod.ZILPAY);
             updateRole(base16, role);
-            updateAuth()
+            updateAuth();
+
+            /**
+             * Stream event by account change.
+             * @param account - Is `zilPay.wallet.defaultAccount` object.
+             */
+            accountStreamChanged.subscribe((account: any) => {
+                initParams(account.base16, role, AccessMethod.ZILPAY);
+                updateRole(account.base16, role);
+                updateAuth();
+            });
 
             // request parent to redirect to dashboard
             props.onSuccessCallback();
