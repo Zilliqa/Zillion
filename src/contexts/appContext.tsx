@@ -20,8 +20,6 @@ const AppContext = React.createContext({
 });
 
 function AppProvider(props: any) {
-    const proxy = "";
-
     // bech32 address
     const [address, setAddress] = useState('');
     const [accountType, setAccountType] = useState('');
@@ -29,6 +27,9 @@ function AppProvider(props: any) {
     const [publicKey, setPublicKey] = useState('');
     const [role, setRole] = useState('');
     const [isAuth, setAuth] = useState(false);
+
+    // config.js from public folder
+    const { networks_config } = (window as { [key: string]: any })['config'];
 
     const cleanUp = () => {
         setAddress('');
@@ -52,7 +53,7 @@ function AppProvider(props: any) {
         }
 
         if (selectedRole === Role.OPERATOR) {
-            const isOperator = await ZilliqaAccount.isOperator(proxy, walletAddress, network);
+            const isOperator = await ZilliqaAccount.isOperator(networks_config[network].proxy, walletAddress, networks_config[network].blockchain);
             if (!isOperator) {
                 console.error("user is not operator");
                 setRole(Role.DELEGATOR);

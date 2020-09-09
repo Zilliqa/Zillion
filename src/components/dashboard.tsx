@@ -3,6 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role } from '../util/enum';
+import { convertToProperCommRate } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import SsnTable from './ssn-table';
@@ -41,7 +42,7 @@ function Dashboard(props: any) {
     const [nodeDetails, setNodeDetails] = useState({
         stakeAmt: '0',
         bufferedDeposit: '0',
-        commRate: '0',
+        commRate: 0,
         commReward: '0',
         numOfDeleg: 0,
         receiver: ''
@@ -152,7 +153,7 @@ function Dashboard(props: any) {
                             ...prevNodeDetails,
                             stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
                             bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                            commRate: ssnArgs[7],
+                            commRate: convertToProperCommRate(ssnArgs[7]),
                             commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
                             numOfDeleg: tempNumOfDeleg,
                             receiver: toBech32Address(ssnArgs[9])
