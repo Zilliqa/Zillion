@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
 import { useTable, usePagination } from 'react-table';
 
+import { NetworkURL } from '../util/enum';
+
 import IconArrowLeft from './icons/arrow-left';
 import IconArrowRight from './icons/arrow-right';
+
 
 function Table({ columns, data, tableId }: any) {
     const {
@@ -70,7 +73,21 @@ function RecentTransactionsTable(props: any) {
             {
                 Header: 'Transaction ID',
                 accessor: 'txnId',
-                Cell: ({ row }: any) => <a href={blockchainExplorer + "/tx/0x" + row.original.txnId + "?network=" + networkURL} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
+                Cell: ({ row }: any) => {
+                    let link = "";
+                    switch (networkURL) {
+                        case NetworkURL.MAINNET:
+                            link = "https://viewblock.io/zilliqa/tx/0x" + row.original.txnId
+                            break;
+                        default:
+                            // default to testnet
+                            link = "https://viewblock.io/zilliqa/tx/0x" + row.original.txnId  + "?network=testnet"
+                            break;
+                    }
+                    return (
+                        <a href={link} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
+                    );
+                }
             }
         ], []
     );

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, Network } from '../util/enum';
 import { convertToProperCommRate } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
@@ -26,7 +26,7 @@ import logo from "../static/logo.png";
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { address, isAuth, role, network } = appContext;
+    const { address, isAuth, role, network, updateNetwork } = appContext;
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState(network);
     const [recentTransactions, setRecentTransactions] = useState([] as any);
@@ -34,8 +34,10 @@ function Dashboard(props: any) {
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
-    const proxy = networks_config[network].proxy;
-    const networkURL = networks_config[network].blockchain;
+    const [proxy, setProxy] = useState(networks_config[network].proxy);
+    // const networkURL = networks_config[network].blockchain;
+
+    const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
 
     const mountedRef = useRef(false);
 
@@ -56,8 +58,34 @@ function Dashboard(props: any) {
     }
 
     const handleChangeNetwork = (e: any) => {
+        // e.target.value is network URL
+        setNetworkURL(e.target.value);
         setSelectedNetwork(e.target.value);
         ZilliqaAccount.changeNetwork(e.target.value);
+        
+        // update the context to be safe
+        // context reads the network label not url
+        // probably no need to update 
+        // as networkURL is passed down from here onwards
+        let networkLabel = "";
+        switch (e.target.value) {
+            case NetworkURL.TESTNET:
+                networkLabel = NetworkLabel.TESTNET;
+                break;
+            case NetworkURL.MAINNET:
+                networkLabel = NetworkLabel.MAINNET;
+                break;
+            case NetworkURL.ISOLATED_SERVER:
+                networkLabel = NetworkLabel.ISOLATED_SERVER;
+                break;
+            default:
+                networkLabel = NetworkLabel.TESTNET
+                break;
+        }
+        updateNetwork(networkLabel);
+
+        // update the proxy contract state
+        setProxy(networks_config[networkLabel].proxy);
     }
 
     const handleError = () => {
@@ -203,9 +231,16 @@ function Dashboard(props: any) {
                         <p className="px-1">{balance ? balance : '0.000'} ZIL</p>
                     </li>
                     <li className="nav-item">
-                        { network === 'testnet' && <p className="px-1">Testnet</p> }
+                        {/* { network === 'testnet' && <p className="px-1">Testnet</p> }
                         { network === 'mainnet' && <p className="px-1">Mainnet</p> }
-                        { network === 'isolated_server' && <p className="px-1">Isolated Server</p> }
+                        { network === 'isolated_server' && <p className="px-1">Isolated Server</p> } */}
+                        <div className="form-group">
+                            <select id="dashboard-network-selector" value={networkURL} onChange={handleChangeNetwork} className="form-control-xs">
+                                <option value={NetworkURL.TESTNET}>Testnet</option>
+                                <option value={NetworkURL.MAINNET}>Mainnet</option>
+                                <option value={NetworkURL.ISOLATED_SERVER}>Isolated Server</option>
+                            </select>
+                        </div>
                     </li>
                     <li className="nav-item">
                         <button type="button" className="btn btn-sign-out mx-2" onClick={cleanUp}>Sign Out</button>
@@ -245,7 +280,7 @@ function Dashboard(props: any) {
                                     <div className="p-4 mb-4 bg-white rounded dashboard-card">
                                         <h5 className="card-title mb-4">Operator, What would you like to do today?</h5>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Received Address</button>
+                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
                                     </div>
                                     </>

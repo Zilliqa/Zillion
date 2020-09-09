@@ -104,19 +104,19 @@ function UpdateReceiverAddress(props: any) {
 
                         txnId ?
 
-                        <ModalSent txnId={txnId} handleClose={handleClose} />
+                        <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
                         :
                         <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="updateRecvAddrModalLabel">Update Received Address</h5>
+                            <h5 className="modal-title" id="updateRecvAddrModalLabel">Update Receiving Address</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
                             <p>Current Received Address: {currentReceiver ? currentReceiver : 'none'}</p>
-                            <input type="text" className="form-control mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in ByStr20" />
+                            <input type="text" className="form-control mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in bech32 format" />
                             <button type="button" className="btn btn-user-action mr-2" onClick={updateAddress}>Update</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                         </div>
