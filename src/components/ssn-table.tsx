@@ -84,7 +84,8 @@ function SsnTable(props: any) {
             },
             {
                 Header: 'Comm. Reward (ZIL)',
-                accessor: 'ssnCommReward'
+                accessor: 'ssnCommReward',
+                Cell: ({ row }: any) => <span className="ssn-table-comm-reward">{row.original.ssnCommReward}</span>
             },
             {
                 Header: 'Delegators',

@@ -274,6 +274,11 @@
   width: 90%;
 }
 
+.ssn-table-comm-reward {
+  color: #34444c;
+  letter-spacing: 0.05em;
+}
+
 .ssn-table-status-active {
   font-size: 0.80em;
   font-weight: 500;
