@@ -21,7 +21,7 @@ function Table({ columns, data, tableId }: any) {
     } = useTable({columns, data});
     
     return (
-        <table id={tableId} className="table" {...getTableProps()}>
+        <table id={tableId} className="table table-responsive" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
