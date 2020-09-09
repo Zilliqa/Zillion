@@ -93,9 +93,6 @@ function Dashboard(props: any) {
             // redirect to login request
             props.history.push("/notlogin");
         }
-        return () => {
-            mountedRef.current = false;
-        }
     });
 
     // set network that is selected from home page
@@ -148,17 +145,20 @@ function Dashboard(props: any) {
                         tempNumOfDeleg = Object.keys(contract.ssn_deleg_amt[userAddressBase16]).length;
                     }
 
-                    console.log("updating node details");
+                    if (mountedRef.current) {
+                        console.log("updating node details");
 
-                    setNodeDetails(prevNodeDetails => ({
-                        ...prevNodeDetails,
-                        stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
-                        bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                        commRate: convertToProperCommRate(ssnArgs[7]),
-                        commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
-                        numOfDeleg: tempNumOfDeleg,
-                        receiver: toBech32Address(ssnArgs[9])
-                    }));
+                        setNodeDetails(prevNodeDetails => ({
+                            ...prevNodeDetails,
+                            stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
+                            bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
+                            commRate: convertToProperCommRate(ssnArgs[7]),
+                            commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
+                            numOfDeleg: tempNumOfDeleg,
+                            receiver: toBech32Address(ssnArgs[9])
+                        }));
+                    }
+
                 }
             }
         }
