@@ -28,7 +28,7 @@ function Home(props: any) {
   const [selectedNetwork, setSelectedNetwork] = useState(Network.TESTNET);
   
   // config.js from public folder
-  const { networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
+  const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
 
   // trigger show wallets to choose
   const resetWalletsClicked = () => {
@@ -153,7 +153,7 @@ function Home(props: any) {
                   <div className="row rounded p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
                     <div className="col-12">
-                      <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                      <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} />
                     </div>
                   </div>
                 </div>

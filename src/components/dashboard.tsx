@@ -87,7 +87,7 @@ function Dashboard(props: any) {
             // disable auth check for development
             return;
         }
-        
+
         if (!isAuth) {
             // redirect to login request
             props.history.push("/notlogin");
@@ -289,7 +289,7 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Other Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
-                                            { mountedRef.current && <SsnTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} /> }
+                                            { mountedRef.current && <SsnTable proxy={proxy} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} /> }
                                         </div>
                                     </div>
                                 </div>

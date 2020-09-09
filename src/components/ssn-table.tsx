@@ -3,6 +3,7 @@ import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
 import { PromiseArea } from '../util/enum';
+import { convertToProperCommRate } from '../util/utils';
 import * as Account from "../account";
 import Spinner from './spinner';
 
@@ -48,8 +49,9 @@ function Table({ columns, data, tableId }: any) {
 
 function SsnTable(props: any) {
     const proxy = props.proxy;
-    const network = props.network;
+    const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : 3000;
+    const blockchainExplorer = props.blockchainExplorer;
     const [data, setData] = useState([] as any);
     const [showSpinner, setShowSpinner] = useState(false);
     
@@ -59,28 +61,29 @@ function SsnTable(props: any) {
     const columns = useMemo(
         () => [
             {
-                Header: 'address',
-                accessor: 'ssnAddress',
-                className: 'ssn-address'
-            },
-            {
                 Header: 'name',
                 accessor: 'ssnName'
             },
             {
-                Header: 'stake amount',
+                Header: 'address',
+                accessor: 'ssnAddress',
+                className: 'ssn-address',
+                Cell: ({ row }: any) => <a href={blockchainExplorer + "/address/" + row.original.ssnAddress + "?network=" + networkURL}>{row.original.ssnAddress}</a>
+            },
+            {
+                Header: 'stake amount (ZIL)',
                 accessor: 'ssnStakeAmt'
             },
             {
-                Header: 'buffered deposit',
+                Header: 'buffered deposit (ZIL)',
                 accessor: 'ssnBufferedDeposit'
             },
             {
-                Header: 'Comm. Rate',
+                Header: 'Comm. Rate (%)',
                 accessor: 'ssnCommRate'
             },
             {
-                Header: 'Comm. Reward',
+                Header: 'Comm. Reward (ZIL)',
                 accessor: 'ssnCommReward'
             },
             {
@@ -93,7 +96,7 @@ function SsnTable(props: any) {
     const getData = async () => {
         let outputResult: { ssnAddress: string; ssnName: any; ssnStakeAmt: string; ssnBufferedDeposit: string; ssnCommRate: any; ssnCommReward: string; ssnDeleg: number; }[] = [];
 
-        trackPromise(Account.getSsnImplContract(proxy, network).then((implContract) => {
+        trackPromise(Account.getSsnImplContract(proxy, networkURL).then((implContract) => {
             if (implContract === 'error') {
                 setData([]);
                 return null;
@@ -114,7 +117,7 @@ function SsnTable(props: any) {
                         ssnName: ssnArgs[3],
                         ssnStakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
                         ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                        ssnCommRate: ssnArgs[7],
+                        ssnCommRate: convertToProperCommRate(ssnArgs[7]),
                         ssnCommReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
                         ssnDeleg: delegAmt,
                     }
@@ -134,7 +137,7 @@ function SsnTable(props: any) {
         setShowSpinner(true);
         getData();
         // eslint-disable-next-line
-    }, [proxy, network]);
+    }, [proxy, networkURL]);
 
     useEffect(() => {
         mountedRef.current = true;

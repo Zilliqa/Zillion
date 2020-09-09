@@ -11,3 +11,11 @@ export const bech32ToChecksum = (address: string) => {
 export const convertZilToQa = (amount: string) => {
     return units.toQa(amount, units.Units.Zil);
 };
+
+export const convertToProperCommRate = (rate: string) => {
+    if (!rate) {
+        return 0;
+    }
+    let commRate = parseInt(rate);
+    return commRate / 1e7;
+};
