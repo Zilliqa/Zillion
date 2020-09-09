@@ -96,9 +96,9 @@ function SsnTable(props: any) {
                 accessor: 'ssnStatus',
                 Cell: ({ row }: any) => 
                         <>
-                        <span className={ row.original.ssnStatus === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive' }>
+                        <div className={ row.original.ssnStatus === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive' }>
                             {row.original.ssnStatus}
-                        </span>
+                        </div>
                         </>
             }
         ],[]
