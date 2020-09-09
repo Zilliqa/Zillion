@@ -17,19 +17,19 @@ registryURL="zilliqa/$application"
 echo "$DOCKER_API_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 rm -rf "$application"-artifact
-mkdir -p "$application"-artifact/stg/
+mkdir -p "$application"-artifact/build/
 
-docker build --build-arg REACT_APP_DEPLOY_ENV="stg" -t "tempimagestg:$commit" .
-docker create --name extractstg "tempimagestg:$commit"
-docker cp extractstg:/usr/share/nginx/html/. $(pwd)/"$application"-artifact/stg/
-docker rm extractstg
+docker build --build-arg REACT_APP_DEPLOY_ENV="stg" -t "tempimagebuild:$commit" .
+docker create --name extractbuild "tempimagebuild:$commit"
+docker cp extractbuild:/usr/share/nginx/html/. $(pwd)/"$application"-artifact/build/
+docker rm extractbuild
 docker push "$registryURL"
 
 cd "$application"-artifact
-cd stg
+cd build
 echo $commit > "$application"-artifact-commit.txt
-zip -r "$application"-artifact-stg.zip .
-aws s3 sync . s3://"$application"-static-artifact --exclude='*' --include=''"$application"'-artifact-stg.zip'
+zip -r "$application"-artifact.zip .
+aws s3 sync . s3://"$application"-static-artifact --exclude='*' --include=''"$application"'-artifact.zip'
 
 cd ..
 echo $(date) > date_created.txt
