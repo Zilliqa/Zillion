@@ -21,7 +21,7 @@ function Table({ columns, data, tableId }: any) {
     } = useTable({columns, data});
     
     return (
-        <table id={tableId} className="table table-responsive-lg" {...getTableProps()}>
+        <table id={tableId} className="table" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -69,6 +69,10 @@ function SsnTable(props: any) {
                 accessor: 'ssnAddress',
                 className: 'ssn-address',
                 Cell: ({ row }: any) => <a href={blockchainExplorer + "/address/" + row.original.ssnAddress + "?network=" + networkURL}>{row.original.ssnAddress}</a>
+            },
+            {
+                Header: 'api endpoint',
+                accessor: 'ssnApiURL',
             },
             {
                 Header: 'stake amount (ZIL)',
@@ -132,6 +136,7 @@ function SsnTable(props: any) {
                     const nodeJson = {
                         ssnAddress: toBech32Address(key),
                         ssnName: ssnArgs[3],
+                        ssnApiURL: ssnArgs[5],
                         ssnStakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
                         ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
                         ssnCommRate: convertToProperCommRate(ssnArgs[7]),
