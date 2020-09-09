@@ -1,3 +1,4 @@
+  
 language: generic
 sudo: required
 services:
@@ -15,13 +16,15 @@ addons:
     - build-essential
     - git
     - curl
+    - zip
+    - unzip
 
 before_cache:
   - docker save -o docker_images/images.tar $(docker images -aq)
 
 cache:
   directories:
-    - docker_images
+  - docker_images
 
 before_deploy:
   - pip install --user awscli
@@ -32,6 +35,6 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
-    - ./scripts/ci-build.sh
+    - ./scripts/ci_build.sh
   on:
     branch: master
