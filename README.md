@@ -1,8 +1,9 @@
 # Zilliqa Staking Wallet App
 
-## Startup
+## Getting Started
 
-1. yarn
+### Development
+1. `yarn`
 
 2. Tweak the settings in `public/config.js`
 ```
@@ -24,17 +25,34 @@
     refresh_rate_config: 3000
 ``` 
 
-3. For development, use `yarn dev` and browse to `https://localhost:3000/` it will enforce HTTPS due to ledger requirements.
+3. (Optional) If you are interested in using the isolated server, create a `.env` file in the parent project folder where `package.json` resides, example `%project_dir%/.env` with the variable:
 
-4. On the home page, select the network. Next, select _Sign in as Delegators_ or _Sign in as Operators_
+```
+REACT_APP_STAKEZ_ENV=dev
+```
 
-5. An operator can see "Staking Performance", "Other Staked Seed Nodes" whereas delegators can only see "Other Staked Seed Nodes"
+This enables the "Isolated Server" option in the network selection menu and disables authentications checks in the dashboard.
 
-6. Explore and execute any actions
+4. Execute `yarn dev` and browse to `https://localhost:3000/`. HTTPS is required due to hardware ledger support.
 
-7. If the contract details doesn't get update, click on the "Dashboard" wordings on the navigation bar to manually refresh
+5. On the home page, select the network. Next, select _Sign in as Delegators_ or _Sign in as Operators_
+
+6. An operator can see "Staking Performance", "Other Staked Seed Nodes" whereas delegators can only see "Other Staked Seed Nodes"
+
+7. Explore and execute any actions
+
+8. If the contract details doesn't get updated, click on the "Dashboard" wordings on the navigation bar to manually refresh
 
 
-**Note**: The wallet app has no persistency for security concerns.
-Do not refresh the browser, all statistics are retrieved at regular intervals configured by the settings.
+### Production
 
+1. Follow Steps (1) and (2) as stated in **Development** section.
+
+2. **DO NOT** set any `.env` file.
+
+3. Assuming the hosted server is running `https`, execute `yarn start`.
+
+4. Done.
+
+## Caveats
+The wallet app does not store your private keys or passphrases for privacy and security concerns. The wallet session object is disconnected upon refreshing the browser. We advise you to avoid refreshing the browser; all statistics are retrieved at regular intervals as configured by `config.js`.
