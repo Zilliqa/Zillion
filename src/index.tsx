@@ -5,6 +5,7 @@ import App from './app';
 import * as serviceWorker from './serviceWorker';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
+import './app.css';
 import { BrowserRouter } from 'react-router-dom';
 
 ReactDOM.render(

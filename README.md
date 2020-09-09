@@ -1,44 +1,58 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Zilliqa Staking Wallet App
 
-## Available Scripts
+## Getting Started
 
-In the project directory, you can run:
+### Development
+1. `yarn`
 
-### `yarn start`
+2. Tweak the settings in `public/config.js`
+```
+    networks_config: {
+        testnet: {
+            proxy: "<proxy_checksum_address>",
+            blockchain: "https://dev-api.zilliqa.com",
+        },
+        mainnet: {
+            proxy: "<proxy_checksum_address>",
+            blockchain: "https://api.zilliqa.com",
+        },
+        isolated_server: {
+            proxy: "<proxy_checksum_address>",
+            blockchain: "https://zilliqa-isolated-server.zilliqa.com",
+        }
+    },
+    blockchain_explorer_config: "https://devex.zilliqa.com",
+    refresh_rate_config: 3000
+``` 
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+3. (Optional) If you are interested in using the isolated server, create a `.env` file in the parent project folder where `package.json` resides, example `%project_dir%/.env` with the variable:
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+```
+REACT_APP_STAKEZ_ENV=dev
+```
 
-### `yarn test`
+This enables the "Isolated Server" option in the network selection menu and disables authentications checks in the dashboard.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+4. Execute `yarn dev` and browse to `https://localhost:3000/`. HTTPS is required due to hardware ledger support.
 
-### `yarn build`
+5. On the home page, select the network. Next, select _Sign in as Delegators_ or _Sign in as Operators_
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+6. An operator can see "Staking Performance", "Other Staked Seed Nodes" whereas delegators can only see "Other Staked Seed Nodes"
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+7. Explore and execute any actions
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+8. If the contract details doesn't get updated, click on the "Dashboard" wordings on the navigation bar to manually refresh
 
-### `yarn eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Production
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Follow Steps (1) and (2) as stated in **Development** section.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+2. **DO NOT** set any `.env` file.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+3. Assuming the hosted server is running `https`, execute `yarn start`.
 
-## Learn More
+4. Done.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Caveats
+The wallet app does not store your private keys or passphrases for privacy and security concerns. The wallet session object is disconnected upon refreshing the browser. We advise you to avoid refreshing the browser; all statistics are retrieved at regular intervals as configured by `config.js`.

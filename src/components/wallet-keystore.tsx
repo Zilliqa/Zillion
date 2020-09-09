@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { AuthContext } from '../contexts/authContext';
+import { ToastContainer } from 'react-toastify';
+import AppContext from '../contexts/appContext';
+import Alert from './alert';
 import * as Account from '../account';
+import { AccessMethod } from '../util/enum';
 
-// TODO
-// error handling decrypt error
 
 class WalletKeystore extends Component<any, any> {
 
-    static contextType = AuthContext;
+    static contextType = AppContext;
 
     constructor(props: any) {
         super(props);
@@ -15,7 +16,6 @@ class WalletKeystore extends Component<any, any> {
             filename: "",
             passphrase: "",
             keystore: "",
-            error: ""
         }
     }
 
@@ -34,7 +34,7 @@ class WalletKeystore extends Component<any, any> {
     }
 
     handleError = () => {
-        this.setState({error: "error"});
+        Alert('error', 'There is something wrong in decrypting. Ensure your passphrase is correct.')
     }
 
     unlockWallet = () => {
@@ -50,7 +50,14 @@ class WalletKeystore extends Component<any, any> {
 
                 if (address !== "error") {
                     console.log("wallet add success: %o", address);
-                    this.context.toggleAuthentication(address);
+                    // show loading state
+                    this.props.onWalletLoadingCallback();
+
+                    // update context
+                    this.context.initParams(address, this.props.role, AccessMethod.KEYSTORE);
+                    await this.context.updateRole(address, this.props.role);
+                    this.context.updateAuth();
+
                     // no error
                     // call parent function to redirect to dashboard
                     this.props.onSuccessCallback();
@@ -67,20 +74,20 @@ class WalletKeystore extends Component<any, any> {
 
     render() {
         return (
-            <div>
-                <h2>Load Wallet using Keystore</h2>
-                { this.state.error ? <p>There is something wrong in decrypting</p> : null }
+            <div className="wallet-access">
+                <h2 className="mb-4">Access Wallet via Keystore</h2>
                 <div>
                     <div id="keystore">
-                        <p>{this.state.filename}</p>
-                        <label htmlFor="browsekeystore">{this.state.filename ? this.state.filename : "Select wallet file"}</label>
+                        <p><strong>{this.state.filename}</strong></p>
+                        <label htmlFor="browsekeystore">{this.state.filename ? "Select wallet file" : "Select wallet file"}</label>
                         <input type="file" id="browsekeystore" onChange={this.handleFile} />
                     </div>
-                    <input id="keystore-passphrase" type="password" name="password" placeholder="Enter your passphrase" value={this.state.passphrase} onChange={this.handlePassword}/>
+                    <input id="keystore-passphrase" type="password" name="password" className="p-2" placeholder="Enter your passphrase" value={this.state.passphrase} onChange={this.handlePassword}/>
                 </div>
                 <br/>
-                <button type="button" className="btn btn-success mx-2" onClick={this.unlockWallet}>Unlock Wallet</button>
-                <button type="button" className="btn btn-primary mx-2" onClick={this.props.onReturnCallback}>Back</button>
+                <button type="button" className="btn btn-user-action mx-2" onClick={this.unlockWallet}>Unlock Wallet</button>
+                <button type="button" className="btn btn-user-action-cancel mx-2" onClick={this.props.onReturnCallback}>Back</button>
+                <ToastContainer hideProgressBar={true} />
             </div>
         );
     }
