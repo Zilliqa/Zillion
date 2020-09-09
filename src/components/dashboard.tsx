@@ -57,18 +57,19 @@ function Dashboard(props: any) {
         props.history.replace("/");
     }
 
-    const handleChangeNetwork = (e: any) => {
+    const handleChangeNetwork = React.useCallback((value: string) => {
         // e.target.value is network URL
-        setNetworkURL(e.target.value);
-        setSelectedNetwork(e.target.value);
-        ZilliqaAccount.changeNetwork(e.target.value);
-        
+        setNetworkURL(value);
+        setSelectedNetwork(value);
+        ZilliqaAccount.changeNetwork(value);
+
         // update the context to be safe
         // context reads the network label not url
         // probably no need to update 
         // as networkURL is passed down from here onwards
         let networkLabel = "";
-        switch (e.target.value) {
+        console.log(NetworkLabel)
+        switch (value) {
             case NetworkURL.TESTNET:
                 networkLabel = NetworkLabel.TESTNET;
                 break;
@@ -86,7 +87,7 @@ function Dashboard(props: any) {
 
         // update the proxy contract state
         setProxy(networks_config[networkLabel].proxy);
-    }
+    }, [updateNetwork, networks_config]);
 
     const handleError = () => {
         setError('error');
@@ -110,6 +111,36 @@ function Dashboard(props: any) {
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
     }
+
+    /**
+     * When document has loaded, it start to observable network form zilpay.
+     */
+    useEffect(() => {
+        return window.document.onload = () => {
+            const zilPay = (window as any).zilPay;
+            const change = (net: string) => {
+                switch (net) {
+                    case NetworkLabel.TESTNET:
+                        handleChangeNetwork(NetworkURL.TESTNET);
+                        break;
+                    case NetworkLabel.MAINNET:
+                        handleChangeNetwork(NetworkURL.MAINNET);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (zilPay) {
+                change(zilPay.wallet.net);
+
+                zilPay
+                    .wallet
+                    .observableNetwork()
+                    .subscribe((net: string) => change(net));
+            }
+        }
+    });
 
     useEffect(() => {
         if (process.env.REACT_APP_STAKEZ_ENV && process.env.REACT_APP_STAKEZ_ENV === 'dev') {
@@ -235,7 +266,7 @@ function Dashboard(props: any) {
                         { network === 'mainnet' && <p className="px-1">Mainnet</p> }
                         { network === 'isolated_server' && <p className="px-1">Isolated Server</p> } */}
                         <div className="form-group">
-                            <select id="dashboard-network-selector" value={networkURL} onChange={handleChangeNetwork} className="form-control-xs">
+                            <select id="dashboard-network-selector" value={networkURL} onChange={(e) => handleChangeNetwork(e.target.value)} className="form-control-xs">
                                 <option value={NetworkURL.TESTNET}>Testnet</option>
                                 <option value={NetworkURL.MAINNET}>Mainnet</option>
                                 <option value={NetworkURL.ISOLATED_SERVER}>Isolated Server</option>
