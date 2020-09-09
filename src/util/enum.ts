@@ -4,7 +4,7 @@ export enum AccessMethod {
     MNEMONIC = "MNEMONIC",
     ZILPAY = "ZILPAY",
     MOONLET = "MOONLET",
-    LEDGER = "LEDGER",
+    LEDGER = "LEDGER"
 }
 
 export enum Network {
