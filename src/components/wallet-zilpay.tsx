@@ -13,7 +13,6 @@ function WalletZilPay(props: any) {
     const role = props.role;
 
     const unlockWallet = async () => {
-        props.onWalletLoadingCallback();
         // Getting ZilPay inject.
         const zilPay = (window as any).zilPay;
 
@@ -41,6 +40,9 @@ function WalletZilPay(props: any) {
 
             const { base16 } = zilPay.wallet.defaultAccount;
             const accountStreamChanged = zilPay.wallet.observableAccount();
+
+            // request parent to show spinner while updating context
+            props.onWalletLoadingCallback();
 
             // update context
             initParams(base16, role, AccessMethod.ZILPAY);

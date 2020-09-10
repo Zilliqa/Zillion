@@ -45,6 +45,7 @@ function AppProvider(props: any) {
     };
 
     const updateRole = async (inputAddress: string, selectedRole: string) => {
+        console.log("update role");
         let walletAddress = inputAddress;
         if (validation.isBech32(walletAddress)) {
             walletAddress = fromBech32Address(walletAddress).toLowerCase();

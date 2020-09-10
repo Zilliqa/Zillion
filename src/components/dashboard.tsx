@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, Network } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod } from '../util/enum';
 import { convertToProperCommRate } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
@@ -26,16 +26,16 @@ import logo from "../static/logo.png";
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { address, isAuth, role, network, updateNetwork } = appContext;
+    const { accountType, address, isAuth, role, network, updateNetwork, updateRole } = appContext;
+
+
+    const [currWalletAddress, setCurrWalletAddress] = useState(address); // keep track of current wallet as zilpay have multiple wallets
     const [balance, setBalance] = useState("");
-    const [selectedNetwork, setSelectedNetwork] = useState(network);
     const [recentTransactions, setRecentTransactions] = useState([] as any);
-    const [error, setError] = useState('');
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
     const [proxy, setProxy] = useState(networks_config[network].proxy);
-    // const networkURL = networks_config[network].blockchain;
 
     const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
 
@@ -60,7 +60,6 @@ function Dashboard(props: any) {
     const handleChangeNetwork = React.useCallback((value: string) => {
         // e.target.value is network URL
         setNetworkURL(value);
-        setSelectedNetwork(value);
         ZilliqaAccount.changeNetwork(value);
 
         // update the context to be safe
@@ -68,7 +67,6 @@ function Dashboard(props: any) {
         // probably no need to update 
         // as networkURL is passed down from here onwards
         let networkLabel = "";
-        console.log(NetworkLabel)
         switch (value) {
             case NetworkURL.TESTNET:
                 networkLabel = NetworkLabel.TESTNET;
@@ -89,15 +87,9 @@ function Dashboard(props: any) {
         setProxy(networks_config[networkLabel].proxy);
     }, [updateNetwork, networks_config]);
 
-    const handleError = () => {
-        setError('error');
-    }
 
-    const refreshStats = async () => {
-        setError('');
-
-        // get account balance
-        trackPromise(ZilliqaAccount.getBalance(address).then((balance) => {
+    const getAccountBalance = async () => {
+        trackPromise(ZilliqaAccount.getBalance(currWalletAddress).then((balance) => {
             const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
             console.log("retrieving balance: %o", zilBalance);
             
@@ -116,28 +108,37 @@ function Dashboard(props: any) {
      * When document has loaded, it start to observable network form zilpay.
      */
     useEffect(() => {
-        return window.document.onload = () => {
-            const zilPay = (window as any).zilPay;
-            const change = (net: string) => {
-                switch (net) {
-                    case NetworkLabel.TESTNET:
-                        handleChangeNetwork(NetworkURL.TESTNET);
-                        break;
-                    case NetworkLabel.MAINNET:
-                        handleChangeNetwork(NetworkURL.MAINNET);
-                        break;
-                    default:
-                        break;
+        if (accountType === AccessMethod.ZILPAY) {
+            return window.document.onload = () => {
+                const zilPay = (window as any).zilPay;
+                const change = (net: string) => {
+                    switch (net) {
+                        case NetworkLabel.TESTNET:
+                            handleChangeNetwork(NetworkURL.TESTNET);
+                            break;
+                        case NetworkLabel.MAINNET:
+                            handleChangeNetwork(NetworkURL.MAINNET);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            }
-
-            if (zilPay) {
-                change(zilPay.wallet.net);
-
-                zilPay
-                    .wallet
-                    .observableNetwork()
-                    .subscribe((net: string) => change(net));
+    
+                if (zilPay) {
+                    change(zilPay.wallet.net);
+    
+                    zilPay
+                        .wallet
+                        .observableNetwork()
+                        .subscribe((net: string) => change(net));
+                    
+                    zilPay
+                        .wallet
+                        .observableAccount()
+                        .subscribe((account: any) => {
+                            setCurrWalletAddress(toBech32Address(account.base16));
+                        });
+                }
             }
         }
     });
@@ -165,8 +166,7 @@ function Dashboard(props: any) {
     // when selected network is changed
     // useEffect is executed again
     useEffect(() => {
-        console.log("dashboard use effect running");
-        console.log("dashboard address: %o", address);
+        console.log("dashboard address: %o", currWalletAddress);
         console.log("dashboard role: %o", role);
         console.log("dashboard proxy :%o", proxy);
         console.log("dashboard networkURL :%o", networkURL);
@@ -175,23 +175,27 @@ function Dashboard(props: any) {
 
         // check operator is indeed operator
         async function getOperatorNodeDetails() {
+            console.log("get node operator node details: %o", currWalletAddress);
+            console.log("get node operator node details: %o", proxy);
+            console.log("get node operator node details: %o", networkURL);
             // convert user wallet address to base16
             // contract address is in base16
             let userAddressBase16 = '';
 
-            if (!address) {
+            if (!currWalletAddress) {
                 return;
             }
 
-            userAddressBase16 = fromBech32Address(address).toLowerCase();
+            userAddressBase16 = fromBech32Address(currWalletAddress).toLowerCase();
 
             if (role === Role.OPERATOR) {
                 const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
-                if (contract === 'error') {
-                    return;
+                
+                if (contract === undefined || contract === 'error') {
+                    return null;
                 }
 
-                if (contract.ssnlist && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
+                if (contract.hasOwnProperty('ssnlist') && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
                     console.log("attempt to fetch node details");
 
                     // since user is node operator
@@ -219,17 +223,29 @@ function Dashboard(props: any) {
                     }
 
                 }
+            } else {
+                if (mountedRef.current) {
+                    setNodeDetails(prevNodeDetails => ({
+                        ...prevNodeDetails,
+                        stakeAmt: '0',
+                        bufferedDeposit: '0',
+                        commRate: 0,
+                        commReward: '0',
+                        numOfDeleg: 0,
+                        receiver: ''
+                    }));
+                }
             }
         }
 
         getOperatorNodeDetails();
-        refreshStats();
+        getAccountBalance();
 
         // refresh wallet
         // refresh operator details
         const intervalId = setInterval(async () => {
             getOperatorNodeDetails();
-            refreshStats();
+            getAccountBalance();
         }, (2 * refresh_rate_config));
 
         return () => {
@@ -237,13 +253,13 @@ function Dashboard(props: any) {
             mountedRef.current = false;
         }
 
-    }, [selectedNetwork]);
+    }, [networkURL, currWalletAddress]);
 
 
     return (
         <>
         <nav className="navbar navbar-expand-lg navbar-dark">
-            <a className="navbar-brand" href="#" onClick={refreshStats}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
+            <a className="navbar-brand" href="#" onClick={getAccountBalance}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
@@ -251,12 +267,12 @@ function Dashboard(props: any) {
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
                     <li className="nav-item active">
-                        <button type="button" className="nav-link btn" onClick={refreshStats}>Dashboard <span className="sr-only">(current)</span></button>
+                        <button type="button" className="nav-link btn" onClick={getAccountBalance}>Dashboard <span className="sr-only">(current)</span></button>
                     </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
                     <li className="nav-item">
-                        <p className="px-1">{address ? address : 'No wallet detected'}</p>
+                        <p className="px-1">{currWalletAddress ? currWalletAddress : 'No wallet detected'}</p>
                     </li>
                     <li className="nav-item">
                         <p className="px-1">{balance ? balance : '0.000'} ZIL</p>

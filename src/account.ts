@@ -123,6 +123,10 @@ export const addWalletByPrivatekey = async (privatekey: string) => {
 export const getBalance = async (address: string) => {
     try {
         const balance = await zilliqa.blockchain.getBalance(address);
+        if (balance.result.balance === undefined) {
+            console.error("error: getBalance undefined error");
+            return "0";
+        }
         console.log(balance.result);
         return balance.result.balance;
     } catch (err) {
@@ -151,11 +155,25 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
         changeNetwork(networkURL);
     }
     try {
+        if (!proxyAddr) {
+            console.error("error: getSsnImplContract - no proxy contract found");
+            return "error";
+        }
+
         const proxyContract = await zilliqa.blockchain.getSmartContractState(proxyAddr);
         console.log("fetched proxy contract state");
-        const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
-        console.log("fetched implementation contract state");
-        return implContract.result;
+        
+        if (proxyContract.result.hasOwnProperty('implementation')) {
+            // fetched implementation contract address
+            const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
+            console.log("fetched implementation contract state");
+            return implContract.result;
+
+        } else {
+            console.error("error: getSsnImplContract - no implementation contract found");
+            return "error"
+        }
+
     } catch (err) {
         console.error("error: getSsnImplContract - o%", err);
         return "error"
@@ -165,14 +183,18 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
 // isOperator - check if address is node operator
 // @param address: base16 address
 export const isOperator = async (proxy: string, address: string, networkURL: string) => {
+    if (!proxy || !networkURL) {
+        return false;
+    }
+
     const contract = await getSsnImplContract(proxy, networkURL);
-    if (contract === "error") {
+    if (contract === undefined || contract === "error") {
         return false;
     }
     console.log("account.ts check is operator: %o", address);
     console.log("account.ts check is proxy: %o", proxy);
     console.log("account.ts check is networkURL: %o", networkURL);
-    if (contract.ssnlist && contract.ssnlist.hasOwnProperty(address)) {
+    if (contract.hasOwnProperty('ssnlist') && contract.ssnlist.hasOwnProperty(address)) {
         console.log("operator %o exist", address);
         return true;
     } else {
@@ -369,9 +391,10 @@ const handleZilPaySign = async (txParams: any) => {
         true
     );
 
+    console.log(zilliqaTxn);
+    
     try {
         const txn = await zilPay.blockchain.createTransaction(zilliqaTxn);
-
         return txn.ID;
     } catch (err) {
         console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
