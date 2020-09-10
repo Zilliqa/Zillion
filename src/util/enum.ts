@@ -10,7 +10,8 @@ export enum AccessMethod {
 export enum Network {
     TESTNET = "testnet",
     MAINNET = "mainnet",
-    ISOLATED_SERVER = "isolated_server"
+    ISOLATED_SERVER = "isolated_server",
+    PRIVATE = "private"
 }
 
 export enum NetworkURL {

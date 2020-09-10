@@ -29,7 +29,7 @@ function Home(props: any) {
   const [selectedNetwork, setSelectedNetwork] = useState(Network.TESTNET);
   
   // config.js from public folder
-  const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
+  const { blockchain_explorer_config, networks_config, production_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
 
   // trigger show wallets to choose
   const resetWalletsClicked = () => {
@@ -133,8 +133,7 @@ function Home(props: any) {
                       <option value={Network.TESTNET}>Testnet</option>
                       <option value={Network.MAINNET}>Mainnet</option>
                       { 
-                        process.env.REACT_APP_STAKEZ_ENV && 
-                        process.env.REACT_APP_STAKEZ_ENV === 'dev' && 
+                        production_config === false && 
                         <option value={Network.ISOLATED_SERVER}>Isolated Server</option> 
                       }
                   </select>

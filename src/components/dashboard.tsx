@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { ToastContainer } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
@@ -7,6 +8,7 @@ import { convertToProperCommRate } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import SsnTable from './ssn-table';
+import Alert from './alert';
 
 import { BN, units } from '@zilliqa-js/util';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
@@ -26,15 +28,16 @@ import logo from "../static/logo.png";
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { accountType, address, isAuth, role, network, updateNetwork, updateRole } = appContext;
+    const { accountType, address, isAuth, role, network, initParams, updateRole, updateNetwork } = appContext;
 
 
     const [currWalletAddress, setCurrWalletAddress] = useState(address); // keep track of current wallet as zilpay have multiple wallets
+    const [currRole, setCurrRole] = useState(role);
     const [balance, setBalance] = useState("");
     const [recentTransactions, setRecentTransactions] = useState([] as any);
 
     // config.js from public folder
-    const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
+    const { blockchain_explorer_config, networks_config, refresh_rate_config, production_config } = (window as { [key: string]: any })['config'];
     const [proxy, setProxy] = useState(networks_config[network].proxy);
 
     const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
@@ -109,42 +112,54 @@ function Dashboard(props: any) {
      */
     useEffect(() => {
         if (accountType === AccessMethod.ZILPAY) {
-            return window.document.onload = () => {
-                const zilPay = (window as any).zilPay;
-                const change = (net: string) => {
+            const zilPay = (window as any).zilPay;
+            const accountStreamChanged = zilPay.wallet.observableAccount();
+            const networkStreamChanged = zilPay.wallet.observableNetwork();
+
+            if (zilPay) {
+
+                networkStreamChanged.subscribe((net: string) => {
                     switch (net) {
-                        case NetworkLabel.TESTNET:
-                            handleChangeNetwork(NetworkURL.TESTNET);
-                            break;
                         case NetworkLabel.MAINNET:
-                            handleChangeNetwork(NetworkURL.MAINNET);
+                            // do nothing
+                            break;
+                        case NetworkLabel.TESTNET:
+                        case NetworkLabel.ISOLATED_SERVER:
+                        case NetworkLabel.PRIVATE:
+                            if (production_config) {
+                                // warn users not to switch to testnet on production
+                                Alert("warn", "Testnet is not supported. Please switch to Mainnet.");
+                            }
                             break;
                         default:
                             break;
                     }
-                }
-    
-                if (zilPay) {
-                    change(zilPay.wallet.net);
-    
-                    zilPay
-                        .wallet
-                        .observableNetwork()
-                        .subscribe((net: string) => change(net));
-                    
-                    zilPay
-                        .wallet
-                        .observableAccount()
-                        .subscribe((account: any) => {
-                            setCurrWalletAddress(toBech32Address(account.base16));
-                        });
-                }
+                });
+                
+                accountStreamChanged.subscribe(async (account: any) => {
+                    initParams(account.base16, role, AccessMethod.ZILPAY);
+                    let newRole = "";
+                    const isOperator = await ZilliqaAccount.isOperator(proxy, account.base16.toLowerCase(), networkURL);
+                    if (isOperator) {
+                        newRole = Role.OPERATOR;
+                    } else {
+                        newRole = Role.DELEGATOR;
+                    }
+                    setCurrRole(newRole);
+                    updateRole(account.base16, newRole);
+                    setCurrWalletAddress(toBech32Address(account.base16));
+                });
             }
+
+            return () => {
+                accountStreamChanged.unsubscribe();
+                networkStreamChanged.unsubscribe();
+            };
         }
-    });
+    }, []);
 
     useEffect(() => {
-        if (process.env.REACT_APP_STAKEZ_ENV && process.env.REACT_APP_STAKEZ_ENV === 'dev') {
+        if (production_config === false) {
             // disable auth check for development
             return;
         }
@@ -153,7 +168,8 @@ function Dashboard(props: any) {
             // redirect to login request
             props.history.push("/notlogin");
         }
-    });
+        // eslint-disable-next-line
+    }, []);
 
     // set network that is selected from home page
     useEffect(() => {
@@ -166,10 +182,6 @@ function Dashboard(props: any) {
     // when selected network is changed
     // useEffect is executed again
     useEffect(() => {
-        console.log("dashboard address: %o", currWalletAddress);
-        console.log("dashboard role: %o", role);
-        console.log("dashboard proxy :%o", proxy);
-        console.log("dashboard networkURL :%o", networkURL);
 
         mountedRef.current = true;
 
@@ -177,8 +189,9 @@ function Dashboard(props: any) {
         async function getOperatorNodeDetails() {
             console.log("get node operator node details: %o", currWalletAddress);
             console.log("get node operator node details: %o", proxy);
-            console.log("get node operator node details: %o", role);
+            console.log("get node operator node details: %o", currRole);
             console.log("get node operator node details: %o", networkURL);
+
             // convert user wallet address to base16
             // contract address is in base16
             let userAddressBase16 = '';
@@ -189,7 +202,7 @@ function Dashboard(props: any) {
 
             userAddressBase16 = fromBech32Address(currWalletAddress).toLowerCase();
 
-            if (role === Role.OPERATOR) {
+            if (currRole === Role.OPERATOR) {
                 const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
                 
                 if (contract === undefined || contract === 'error') {
@@ -279,16 +292,9 @@ function Dashboard(props: any) {
                         <p className="px-1">{balance ? balance : '0.000'} ZIL</p>
                     </li>
                     <li className="nav-item">
-                        {/* { network === 'testnet' && <p className="px-1">Testnet</p> }
-                        { network === 'mainnet' && <p className="px-1">Mainnet</p> }
-                        { network === 'isolated_server' && <p className="px-1">Isolated Server</p> } */}
-                        <div className="form-group">
-                            <select id="dashboard-network-selector" value={networkURL} onChange={(e) => handleChangeNetwork(e.target.value)} className="form-control-xs">
-                                <option value={NetworkURL.TESTNET}>Testnet</option>
-                                <option value={NetworkURL.MAINNET}>Mainnet</option>
-                                <option value={NetworkURL.ISOLATED_SERVER}>Isolated Server</option>
-                            </select>
-                        </div>
+                        { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
+                        { networkURL === NetworkURL.MAINNET && <p className="px-1">Mainnet</p> }
+                        { networkURL === NetworkURL.ISOLATED_SERVER && <p className="px-1">Isolated Server</p> }
                     </li>
                     <li className="nav-item">
                         <button type="button" className="btn btn-sign-out mx-2" onClick={cleanUp}>Sign Out</button>
@@ -305,7 +311,7 @@ function Dashboard(props: any) {
                                 <h1 className="mb-4">Stake$ZIL Dashboard</h1>
 
                                 {
-                                    (role === Role.DELEGATOR) &&
+                                    (currRole === Role.DELEGATOR) &&
 
                                     <>
                                     {/* delegator section */}
@@ -320,7 +326,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (role === Role.OPERATOR) &&
+                                    (currRole === Role.OPERATOR) &&
 
                                     <>
                                     {/* node operator section */}
@@ -335,7 +341,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (role === Role.OPERATOR) &&
+                                    (currRole === Role.OPERATOR) &&
 
                                     <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
                                         <h5 className="card-title mb-4">Staking Performance</h5>
@@ -392,6 +398,7 @@ function Dashboard(props: any) {
                             </div>
                         </div>
                     </div>
+                    <ToastContainer hideProgressBar={true}/>
                 </div>
             </div>
             <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
