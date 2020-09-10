@@ -15,6 +15,7 @@ import IconKey from './icons/key';
 import IconFileCode from './icons/filecode';
 import IconFileList from './icons/filelist';
 import IconLedger from './icons/ledger';
+import ZilPayIcon from './icons/zil-pay';
 
 
 function Home(props: any) {
@@ -28,7 +29,7 @@ function Home(props: any) {
   const [selectedNetwork, setSelectedNetwork] = useState(Network.TESTNET);
   
   // config.js from public folder
-  const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
+  const { blockchain_explorer_config, networks_config, production_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
 
   // trigger show wallets to choose
   const resetWalletsClicked = () => {
@@ -132,8 +133,7 @@ function Home(props: any) {
                       <option value={Network.TESTNET}>Testnet</option>
                       <option value={Network.MAINNET}>Mainnet</option>
                       { 
-                        process.env.REACT_APP_STAKEZ_ENV && 
-                        process.env.REACT_APP_STAKEZ_ENV === 'dev' && 
+                        production_config === false && 
                         <option value={Network.ISOLATED_SERVER}>Isolated Server</option> 
                       }
                   </select>
@@ -175,6 +175,7 @@ function Home(props: any) {
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}><IconFileList className="home-icon" /><span className="d-block mt-0.5">Mnemonic</span></div>
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedger className="home-icon my-3" width="32" height="32" /><span className="d-block mt-0.5">Ledger</span></div>
+                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}><ZilPayIcon className="home-icon my-3 path" width="32" height="32" /><span className="d-block mt-0.5">ZilPay</span></div>
                 </div>
                 <button type="button" className="btn-user-action-cancel mt-4 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
               </>

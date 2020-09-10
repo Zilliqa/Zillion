@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { ToastContainer } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod } from '../util/enum';
 import { convertToProperCommRate } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import SsnTable from './ssn-table';
+import Alert from './alert';
 
 import { BN, units } from '@zilliqa-js/util';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
@@ -26,16 +28,19 @@ import logo from "../static/logo.png";
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { address, isAuth, role, network } = appContext;
+    const { accountType, address, isAuth, role, network, initParams, updateRole, updateNetwork } = appContext;
+
+
+    const [currWalletAddress, setCurrWalletAddress] = useState(address); // keep track of current wallet as zilpay have multiple wallets
+    const [currRole, setCurrRole] = useState(role);
     const [balance, setBalance] = useState("");
-    const [selectedNetwork, setSelectedNetwork] = useState(network);
     const [recentTransactions, setRecentTransactions] = useState([] as any);
-    const [error, setError] = useState('');
 
     // config.js from public folder
-    const { blockchain_explorer_config, networks_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
-    const proxy = networks_config[network].proxy;
-    const networkURL = networks_config[network].blockchain;
+    const { blockchain_explorer_config, networks_config, refresh_rate_config, production_config } = (window as { [key: string]: any })['config'];
+    const [proxy, setProxy] = useState(networks_config[network].proxy);
+
+    const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
 
     const mountedRef = useRef(false);
 
@@ -55,20 +60,39 @@ function Dashboard(props: any) {
         props.history.replace("/");
     }
 
-    const handleChangeNetwork = (e: any) => {
-        setSelectedNetwork(e.target.value);
-        ZilliqaAccount.changeNetwork(e.target.value);
-    }
+    const handleChangeNetwork = React.useCallback((value: string) => {
+        // e.target.value is network URL
+        setNetworkURL(value);
+        ZilliqaAccount.changeNetwork(value);
 
-    const handleError = () => {
-        setError('error');
-    }
+        // update the context to be safe
+        // context reads the network label not url
+        // probably no need to update 
+        // as networkURL is passed down from here onwards
+        let networkLabel = "";
+        switch (value) {
+            case NetworkURL.TESTNET:
+                networkLabel = NetworkLabel.TESTNET;
+                break;
+            case NetworkURL.MAINNET:
+                networkLabel = NetworkLabel.MAINNET;
+                break;
+            case NetworkURL.ISOLATED_SERVER:
+                networkLabel = NetworkLabel.ISOLATED_SERVER;
+                break;
+            default:
+                networkLabel = NetworkLabel.TESTNET
+                break;
+        }
+        updateNetwork(networkLabel);
 
-    const refreshStats = async () => {
-        setError('');
+        // update the proxy contract state
+        setProxy(networks_config[networkLabel].proxy);
+    }, [updateNetwork, networks_config]);
 
-        // get account balance
-        trackPromise(ZilliqaAccount.getBalance(address).then((balance) => {
+
+    const getAccountBalance = async () => {
+        trackPromise(ZilliqaAccount.getBalance(currWalletAddress).then((balance) => {
             const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
             console.log("retrieving balance: %o", zilBalance);
             
@@ -83,8 +107,59 @@ function Dashboard(props: any) {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
     }
 
+    /**
+     * When document has loaded, it start to observable network form zilpay.
+     */
     useEffect(() => {
-        if (process.env.REACT_APP_STAKEZ_ENV && process.env.REACT_APP_STAKEZ_ENV === 'dev') {
+        if (accountType === AccessMethod.ZILPAY) {
+            const zilPay = (window as any).zilPay;
+            const accountStreamChanged = zilPay.wallet.observableAccount();
+            const networkStreamChanged = zilPay.wallet.observableNetwork();
+
+            if (zilPay) {
+
+                networkStreamChanged.subscribe((net: string) => {
+                    switch (net) {
+                        case NetworkLabel.MAINNET:
+                            // do nothing
+                            break;
+                        case NetworkLabel.TESTNET:
+                        case NetworkLabel.ISOLATED_SERVER:
+                        case NetworkLabel.PRIVATE:
+                            if (production_config) {
+                                // warn users not to switch to testnet on production
+                                Alert("warn", "Testnet is not supported. Please switch to Mainnet.");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                });
+                
+                accountStreamChanged.subscribe(async (account: any) => {
+                    initParams(account.base16, role, AccessMethod.ZILPAY);
+                    let newRole = "";
+                    const isOperator = await ZilliqaAccount.isOperator(proxy, account.base16.toLowerCase(), networkURL);
+                    if (isOperator) {
+                        newRole = Role.OPERATOR;
+                    } else {
+                        newRole = Role.DELEGATOR;
+                    }
+                    setCurrRole(newRole);
+                    updateRole(account.base16, newRole);
+                    setCurrWalletAddress(toBech32Address(account.base16));
+                });
+            }
+
+            return () => {
+                accountStreamChanged.unsubscribe();
+                networkStreamChanged.unsubscribe();
+            };
+        }
+    }, []);
+
+    useEffect(() => {
+        if (production_config === false) {
             // disable auth check for development
             return;
         }
@@ -93,7 +168,8 @@ function Dashboard(props: any) {
             // redirect to login request
             props.history.push("/notlogin");
         }
-    });
+        // eslint-disable-next-line
+    }, []);
 
     // set network that is selected from home page
     useEffect(() => {
@@ -106,33 +182,34 @@ function Dashboard(props: any) {
     // when selected network is changed
     // useEffect is executed again
     useEffect(() => {
-        console.log("dashboard use effect running");
-        console.log("dashboard address: %o", address);
-        console.log("dashboard role: %o", role);
-        console.log("dashboard proxy :%o", proxy);
-        console.log("dashboard networkURL :%o", networkURL);
 
         mountedRef.current = true;
 
         // check operator is indeed operator
         async function getOperatorNodeDetails() {
+            console.log("get node operator node details: %o", currWalletAddress);
+            console.log("get node operator node details: %o", proxy);
+            console.log("get node operator node details: %o", currRole);
+            console.log("get node operator node details: %o", networkURL);
+
             // convert user wallet address to base16
             // contract address is in base16
             let userAddressBase16 = '';
 
-            if (!address) {
+            if (!currWalletAddress) {
                 return;
             }
 
-            userAddressBase16 = fromBech32Address(address).toLowerCase();
+            userAddressBase16 = fromBech32Address(currWalletAddress).toLowerCase();
 
-            if (role === Role.OPERATOR) {
+            if (currRole === Role.OPERATOR) {
                 const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
-                if (contract === 'error') {
-                    return;
+                
+                if (contract === undefined || contract === 'error') {
+                    return null;
                 }
 
-                if (contract.ssnlist && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
+                if (contract.hasOwnProperty('ssnlist') && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
                     console.log("attempt to fetch node details");
 
                     // since user is node operator
@@ -160,17 +237,29 @@ function Dashboard(props: any) {
                     }
 
                 }
+            } else {
+                if (mountedRef.current) {
+                    setNodeDetails(prevNodeDetails => ({
+                        ...prevNodeDetails,
+                        stakeAmt: '0',
+                        bufferedDeposit: '0',
+                        commRate: 0,
+                        commReward: '0',
+                        numOfDeleg: 0,
+                        receiver: ''
+                    }));
+                }
             }
         }
 
         getOperatorNodeDetails();
-        refreshStats();
+        getAccountBalance();
 
         // refresh wallet
         // refresh operator details
         const intervalId = setInterval(async () => {
             getOperatorNodeDetails();
-            refreshStats();
+            getAccountBalance();
         }, (2 * refresh_rate_config));
 
         return () => {
@@ -178,13 +267,13 @@ function Dashboard(props: any) {
             mountedRef.current = false;
         }
 
-    }, [selectedNetwork]);
+    }, [networkURL, currWalletAddress]);
 
 
     return (
         <>
         <nav className="navbar navbar-expand-lg navbar-dark">
-            <a className="navbar-brand" href="#" onClick={refreshStats}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
+            <a className="navbar-brand" href="#" onClick={getAccountBalance}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
@@ -192,20 +281,20 @@ function Dashboard(props: any) {
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
                     <li className="nav-item active">
-                        <button type="button" className="nav-link btn" onClick={refreshStats}>Dashboard <span className="sr-only">(current)</span></button>
+                        <button type="button" className="nav-link btn" onClick={getAccountBalance}>Dashboard <span className="sr-only">(current)</span></button>
                     </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
                     <li className="nav-item">
-                        <p className="px-1">{address ? address : 'No wallet detected'}</p>
+                        <p className="px-1">{currWalletAddress ? currWalletAddress : 'No wallet detected'}</p>
                     </li>
                     <li className="nav-item">
                         <p className="px-1">{balance ? balance : '0.000'} ZIL</p>
                     </li>
                     <li className="nav-item">
-                        { network === 'testnet' && <p className="px-1">Testnet</p> }
-                        { network === 'mainnet' && <p className="px-1">Mainnet</p> }
-                        { network === 'isolated_server' && <p className="px-1">Isolated Server</p> }
+                        { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
+                        { networkURL === NetworkURL.MAINNET && <p className="px-1">Mainnet</p> }
+                        { networkURL === NetworkURL.ISOLATED_SERVER && <p className="px-1">Isolated Server</p> }
                     </li>
                     <li className="nav-item">
                         <button type="button" className="btn btn-sign-out mx-2" onClick={cleanUp}>Sign Out</button>
@@ -222,7 +311,7 @@ function Dashboard(props: any) {
                                 <h1 className="mb-4">Stake$ZIL Dashboard</h1>
 
                                 {
-                                    (role === Role.DELEGATOR) &&
+                                    (currRole === Role.DELEGATOR) &&
 
                                     <>
                                     {/* delegator section */}
@@ -237,7 +326,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (role === Role.OPERATOR) &&
+                                    (currRole === Role.OPERATOR) &&
 
                                     <>
                                     {/* node operator section */}
@@ -252,7 +341,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (role === Role.OPERATOR) &&
+                                    (currRole === Role.OPERATOR) &&
 
                                     <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
                                         <h5 className="card-title mb-4">Staking Performance</h5>
@@ -309,6 +398,7 @@ function Dashboard(props: any) {
                             </div>
                         </div>
                     </div>
+                    <ToastContainer hideProgressBar={true}/>
                 </div>
             </div>
             <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
