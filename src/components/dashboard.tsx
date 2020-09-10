@@ -177,6 +177,7 @@ function Dashboard(props: any) {
         async function getOperatorNodeDetails() {
             console.log("get node operator node details: %o", currWalletAddress);
             console.log("get node operator node details: %o", proxy);
+            console.log("get node operator node details: %o", role);
             console.log("get node operator node details: %o", networkURL);
             // convert user wallet address to base16
             // contract address is in base16
