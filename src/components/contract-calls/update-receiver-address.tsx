@@ -33,7 +33,7 @@ function UpdateReceiverAddress(props: any) {
 
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
-        const newReceivingAddress = bech32ToChecksum(newAddress);
+        const newReceivingAddress = bech32ToChecksum(newAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
         let txParams = {

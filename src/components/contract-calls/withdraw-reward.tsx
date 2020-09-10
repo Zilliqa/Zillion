@@ -35,7 +35,7 @@ function WithdrawRewardModal(props: any) {
 
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
-        const ssnChecksumAddress = bech32ToChecksum(ssnAddress);
+        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
         let txParams = {
