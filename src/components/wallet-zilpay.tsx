@@ -19,11 +19,10 @@ function WalletZilPay(props: any) {
         // Checking on ZilPay inject and wallet state.
         if (!zilPay) {
             Alert('warn', 'Please install ZilPay wallet.');
-
             return null;
+
         } else if (!zilPay.wallet.isEnable) {
             Alert('warn', 'Please unlock wallet.');
-
             return null;
         }
 
@@ -33,8 +32,7 @@ function WalletZilPay(props: any) {
 
             // Checking access.
             if (!connected) {
-                Alert('warn', 'Rejected access!');
-
+                Alert('error', 'Rejected access!');
                 return null;
             }
 
@@ -52,7 +50,7 @@ function WalletZilPay(props: any) {
             props.onSuccessCallback();
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
-            Alert('info', 'There is something wrong with accessing ZilPay.')
+            Alert('error', 'There is something wrong with accessing ZilPay.')
         }
 
         // if no error
@@ -61,10 +59,10 @@ function WalletZilPay(props: any) {
     }
 
     return (
-        <div>
-            <h2>Access Wallet using ZilPay</h2>
-            <button type="button" className="btn btn-success mx-2" onClick={unlockWallet}>Unlock Wallet</button>
-            <button type="button" className="btn btn-primary mx-2" onClick={props.onReturnCallback}>Back</button>
+        <div className="wallet-access">
+            <h2 className="mb-4">Access Wallet using ZilPay</h2>
+            <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
+            <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             <ToastContainer hideProgressBar={true} />
         </div>
     );
