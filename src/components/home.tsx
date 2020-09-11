@@ -6,14 +6,10 @@ import AppContext from "../contexts/appContext";
 import SsnTable from './ssn-table';
 
 import WalletKeystore from './wallet-keystore';
-import WalletMnemonic from './wallet-mnemonic';
 import WalletLedger from './wallet-ledger';
 import WalletZilPay from './wallet-zilpay';
-import WalletPrivatekey from './wallet-privatekey';
 
-import IconKey from './icons/key';
 import IconFileCode from './icons/filecode';
-import IconFileList from './icons/filelist';
 import IconLedger from './icons/ledger';
 import ZilPayIcon from './icons/zil-pay';
 
@@ -129,7 +125,7 @@ function Home(props: any) {
             </div>
 
             <div className="heading">
-              <h1 className="font-weight-light display-1">Stake$ZIL</h1>
+              <h1 className="font-weight-light display-1">Zillion</h1>
               <p className="lead">Staking with Zilliqa. Revolutionize.</p>
             </div>
 

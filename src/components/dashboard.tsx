@@ -349,7 +349,7 @@ function Dashboard(props: any) {
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
-                                <h1 className="mb-4">Stake$ZIL Dashboard</h1>
+                                <h1 className="mb-4">Zillion Dashboard</h1>
 
                                 {
                                     (currRole === Role.DELEGATOR) &&
