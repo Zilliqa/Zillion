@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod } from '../util/enum';
-import { convertToProperCommRate } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import SsnTable from './ssn-table';
@@ -103,11 +103,10 @@ function Dashboard(props: any) {
 
     const getAccountBalance = async () => {
         trackPromise(ZilliqaAccount.getBalance(currWalletAddress).then((balance) => {
-            const zilBalance = units.fromQa(new BN(balance), units.Units.Zil);
-            console.log("retrieving balance: %o", zilBalance);
+            console.log("retrieving balance: %o", balance);
             
             if (mountedRef.current) {
-                setBalance(zilBalance);
+                setBalance(balance);
             }
             
         }), PromiseArea.PROMISE_GET_BALANCE);
@@ -238,10 +237,10 @@ function Dashboard(props: any) {
                         setNodeDetails(prevNodeDetails => ({
                             ...prevNodeDetails,
                             name: ssnArgs[3],
-                            stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
-                            bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                            commRate: convertToProperCommRate(ssnArgs[7]),
-                            commReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
+                            stakeAmt: ssnArgs[1],
+                            bufferedDeposit: ssnArgs[6],
+                            commRate: ssnArgs[7],
+                            commReward: ssnArgs[8],
                             numOfDeleg: tempNumOfDeleg,
                             receiver: toBech32Address(ssnArgs[9])
                         }));
@@ -330,7 +329,7 @@ function Dashboard(props: any) {
                         <p className="px-1">{currWalletAddress ? currWalletAddress : 'No wallet detected'}</p>
                     </li>
                     <li className="nav-item">
-                        <p className="px-1">{balance ? balance : '0.000'} ZIL</p>
+                        <p className="px-1">{balance ? convertQaToCommaStr(balance) : '0.000'} ZIL</p>
                     </li>
                     <li className="nav-item">
                         { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
@@ -403,11 +402,11 @@ function Dashboard(props: any) {
                                         <div className="row">
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">
                                                 <h4>Stake Amount</h4>
-                                                <p>{nodeDetails.stakeAmt} ZIL</p>
+                                                <p>{convertQaToCommaStr(nodeDetails.stakeAmt)} ZIL</p>
                                             </div>
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">
                                                 <h4>Buffered Deposit</h4>
-                                                <p>{nodeDetails.bufferedDeposit} ZIL</p>
+                                                <p>{convertQaToCommaStr(nodeDetails.bufferedDeposit)} ZIL</p>
                                             </div>
                                         </div>
                                         <div className="row">
@@ -417,11 +416,11 @@ function Dashboard(props: any) {
                                             </div>
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">
                                                 <h4>Commission Rate</h4>
-                                                <p>{nodeDetails.commRate}%</p>
+                                                <p>{convertToProperCommRate(nodeDetails.commRate.toString()).toFixed(2)}%</p>
                                             </div>
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">
                                                 <h4>Commission Reward</h4>
-                                                <p>{nodeDetails.commReward} ZIL</p>
+                                                <p>{convertQaToCommaStr(nodeDetails.commReward)} ZIL</p>
                                             </div>
                                         </div>
                                     </div>
