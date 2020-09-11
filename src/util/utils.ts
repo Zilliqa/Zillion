@@ -20,6 +20,16 @@ export const convertToProperCommRate = (rate: string) => {
     return commRate / 1e7;
 };
 
+// compute the stake amount as a percentage of total stake amount
+export const computeStakeAmtPercent = (inputStake: string, totalStake: string) => {
+    console.log("inputStake :%o", inputStake);
+    console.log("total stake amount :%o", totalStake);
+    if (!inputStake) {
+        return 0;
+    }
+    const stakePercentage = (parseInt(inputStake) / parseInt(totalStake)) * 100;
+    return stakePercentage;
+}
 
 // convert commission rate from percentage to contract comm rate
 // userInputRate is a float

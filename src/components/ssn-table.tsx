@@ -3,7 +3,7 @@ import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
 import { PromiseArea, SsnStatus } from '../util/enum';
-import { convertToProperCommRate } from '../util/utils';
+import { convertToProperCommRate, computeStakeAmtPercent } from '../util/utils';
 import * as Account from "../account";
 import Spinner from './spinner';
 
@@ -53,6 +53,7 @@ function SsnTable(props: any) {
     const refresh = props.refresh ? props.refresh : 3000;
     const blockchainExplorer = props.blockchainExplorer;
     const [data, setData] = useState([] as any);
+    const [totalStakeAmount, setTotalStakeAmount] = useState('');
     const [showSpinner, setShowSpinner] = useState(false);
     
     // prevent react update state on unmounted component 
@@ -76,7 +77,11 @@ function SsnTable(props: any) {
             },
             {
                 Header: 'stake amount (ZIL)',
-                accessor: 'ssnStakeAmt'
+                accessor: 'ssnStakeAmt',
+                Cell: ({ row }: any) => 
+                    <>
+                    <span>{units.fromQa(new BN(row.original.ssnStakeAmt), units.Units.Zil)} ({computeStakeAmtPercent(row.original.ssnStakeAmt, totalStakeAmount).toFixed(2)}&#37;)</span>
+                    </>
             },
             {
                 Header: 'buffered deposit (ZIL)',
@@ -84,12 +89,15 @@ function SsnTable(props: any) {
             },
             {
                 Header: 'Comm. Rate (%)',
-                accessor: 'ssnCommRate'
+                accessor: 'ssnCommRate',
+                Cell: ({ row }: any) =>
+                    <span>{convertToProperCommRate(row.original.ssnCommRate).toFixed(2)}</span>
             },
             {
                 Header: 'Comm. Reward (ZIL)',
                 accessor: 'ssnCommReward',
-                Cell: ({ row }: any) => <span className="ssn-table-comm-reward">{row.original.ssnCommReward}</span>
+                Cell: ({ row }: any) => 
+                    <span className="ssn-table-comm-reward">{units.fromQa(new BN(row.original.ssnCommReward), units.Units.Zil)}</span>
             },
             {
                 Header: 'Delegators',
@@ -105,7 +113,7 @@ function SsnTable(props: any) {
                         </div>
                         </>
             }
-        ],[]
+        ],[totalStakeAmount]
     )
     
     const getData = async () => {
@@ -117,6 +125,13 @@ function SsnTable(props: any) {
                 return null;
             }
 
+            // get total stake amount
+            if (implContract.hasOwnProperty('totalstakeamount')) {
+                console.log();
+                setTotalStakeAmount(implContract.totalstakeamount);
+            }
+
+            // get node operator details
             for (const key in implContract.ssnlist) {
                 if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
                     let delegAmt = 0;
@@ -137,10 +152,10 @@ function SsnTable(props: any) {
                         ssnAddress: toBech32Address(key),
                         ssnName: ssnArgs[3],
                         ssnApiURL: ssnArgs[5],
-                        ssnStakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
+                        ssnStakeAmt: ssnArgs[1],
                         ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
-                        ssnCommRate: convertToProperCommRate(ssnArgs[7]),
-                        ssnCommReward: units.fromQa(new BN(ssnArgs[8]), units.Units.Zil),
+                        ssnCommRate: ssnArgs[7],
+                        ssnCommReward: ssnArgs[8],
                         ssnDeleg: delegAmt,
                         ssnStatus: status
                     }
