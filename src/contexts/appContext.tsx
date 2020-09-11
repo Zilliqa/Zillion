@@ -58,11 +58,13 @@ function AppProvider(props: any) {
         }
 
         const isOperator = await ZilliqaAccount.isOperator(networks_config[network].proxy, walletAddress, networks_config[network].blockchain);
-        if (!isOperator) {
+        if (selectedRole === Role.OPERATOR && !isOperator) {
             console.error("user is not operator");
             setRole(Role.DELEGATOR);
-        } else {
+        } else if (selectedRole === Role.OPERATOR && isOperator) {
             setRole(Role.OPERATOR);
+        } else {
+            setRole(Role.DELEGATOR);
         }
     }
 

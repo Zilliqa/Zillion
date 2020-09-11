@@ -150,7 +150,7 @@ function Dashboard(props: any) {
                     initParams(account.base16, role, AccessMethod.ZILPAY);
                     let newRole = "";
                     const isOperator = await ZilliqaAccount.isOperator(proxy, account.base16.toLowerCase(), networkURL);
-                    if (isOperator) {
+                    if (role === Role.OPERATOR && isOperator) {
                         newRole = Role.OPERATOR;
                     } else {
                         newRole = Role.DELEGATOR;
