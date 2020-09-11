@@ -382,8 +382,22 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (currRole === Role.OPERATOR) &&
+                                    (currRole === Role.DELEGATOR) &&
+                                    <>
+                                    {/* delegator statistics */}
 
+                                    {/* <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
+                                        <h5 className="card-title mb-4">Delegator Statistics</h5>
+                                        <div className="row">
+
+                                        </div>
+                                    </div> */}
+                                    </>
+                                }
+
+                                {/* operator statistics */}
+                                {
+                                    (currRole === Role.OPERATOR) &&
                                     <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
                                         <h5 className="card-title mb-4">Staking Performance</h5>
                                         <div className="row">
