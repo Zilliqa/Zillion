@@ -17,7 +17,7 @@ function WithdrawCommModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, currentRewards, networkURL, onSuccessCallback } = props;
+    const { proxy, currentRewards, networkURL, onSuccessCallback, ledgerIndex } = props;
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
 
@@ -45,7 +45,7 @@ function WithdrawCommModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {

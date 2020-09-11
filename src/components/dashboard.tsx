@@ -26,7 +26,7 @@ import logo from "../static/logo.png";
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { address, isAuth, role, network } = appContext;
+    const { address, isAuth, role, ledgerIndex, network } = appContext;
     const [balance, setBalance] = useState("");
     const [selectedNetwork, setSelectedNetwork] = useState(network);
     const [recentTransactions, setRecentTransactions] = useState([] as any);
@@ -313,13 +313,13 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
-            <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} />
-            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
-            <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
+            <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
         </div>
         </>
     );

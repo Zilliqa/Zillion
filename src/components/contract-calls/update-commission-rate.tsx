@@ -17,7 +17,7 @@ function UpdateCommRateModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentRate, onSuccessCallback } = props;
+    const { proxy, networkURL, currentRate, onSuccessCallback, ledgerIndex } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
@@ -67,7 +67,7 @@ function UpdateCommRateModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {

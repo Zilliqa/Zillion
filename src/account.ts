@@ -186,12 +186,12 @@ export const ZilliqaAccount = () => {
 };
 
 // refactor
-export const handleSign = async (accessMethod: string, networkURL: string, txParams: any) => {
+export const handleSign = async (accessMethod: string, networkURL: string, txParams: any, ledgerIndex: number) => {
     changeNetwork(networkURL);
     let result = "";
     switch (accessMethod) {
         case AccessMethod.LEDGER:
-            result = await handleLedgerSign(networkURL, txParams);
+            result = await handleLedgerSign(networkURL, txParams, ledgerIndex);
             break;
         case AccessMethod.PRIVATEKEY:
             result = await handleNormalSign(txParams);
@@ -210,7 +210,7 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
     return result;
 };
 
-const handleLedgerSign = async (networkURL: string, txParams: any) => {
+const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: number) => {
     let transport = null;
     const isWebAuthn = await TransportWebAuthn.isSupported();
     if (isWebAuthn) {
@@ -221,7 +221,7 @@ const handleLedgerSign = async (networkURL: string, txParams: any) => {
     }
     
     const ledger = new ZilliqaLedger(transport);
-    const result = await ledger.getPublicAddress(0);
+    const result = await ledger.getPublicAddress(ledgerIndex);
 
     // get public key
     let pubKey = result.pubKey;
@@ -253,7 +253,7 @@ const handleLedgerSign = async (networkURL: string, txParams: any) => {
             signature: "",
         };
         console.log("new params :%o", newParams);
-        const signature = await ledger.signTxn(0, newParams);
+        const signature = await ledger.signTxn(ledgerIndex, newParams);
         const signedTx = {
             ...newParams,
             amount: txParams.amount.toString(),

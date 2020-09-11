@@ -18,6 +18,7 @@ function WithdrawRewardModal(props: any) {
     const { accountType } = appContext;
 
     const proxy = props.proxy;
+    const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const { onSuccessCallback } = props;
 
@@ -61,7 +62,7 @@ function WithdrawRewardModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
