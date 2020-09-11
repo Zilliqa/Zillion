@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -21,6 +22,8 @@ function WithdrawStakeModal(props: any) {
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
     const { onSuccessCallback } = props;
+
+    const nodeSelectorOptions = props.nodeSelectorOptions;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [withdrawAmt, setWithdrawAmt] = useState(''); // in ZIL
@@ -109,8 +112,9 @@ function WithdrawStakeModal(props: any) {
         setWithdrawAmt(e.target.value);
     }
 
-    const handleSsnAddress = (e: any) => {
-        setSsnAddress(e.target.value);
+    const handleChange = (option: any) => {
+        console.log(option.value);
+        setSsnAddress(option.value);
     }
 
     return (
@@ -138,7 +142,11 @@ function WithdrawStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn bech32 address" />
+                            <Select
+                                placeholder="Select an operator to withdraw the stake from"
+                                className="mb-4"
+                                options={nodeSelectorOptions}
+                                onChange={handleChange} />
                             <input type="text" className="form-control mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
                             <button type="button" className="btn btn-user-action mr-2" onClick={withdrawStake}>Withdraw</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
