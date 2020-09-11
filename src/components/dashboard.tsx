@@ -70,32 +70,6 @@ function Dashboard(props: any) {
         props.history.replace("/");
     }
 
-    const generateFormOptions = async () => {
-        let tempNodeOptions = [];
-
-        const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
-
-        if (contract === undefined || contract === 'error') {
-            return [];
-        }
-
-        if (contract.hasOwnProperty('ssnlist')) {
-            for (const operatorAddr in contract.ssnlist) {
-                if (!contract.ssnlist.hasOwnProperty(operatorAddr)) {
-                    continue;
-                }
-                const operatorName = contract.ssnlist[operatorAddr].arguments[3];
-                const operatorBech32Addr = toBech32Address(operatorAddr);
-                const operatorOption: NodeOptions = {
-                    label: operatorName + ": " + operatorBech32Addr,
-                    value: operatorAddr
-                }
-                tempNodeOptions.push(operatorOption);
-            }
-        }
-        return tempNodeOptions;
-    }
-
     const handleChangeNetwork = React.useCallback((value: string) => {
         // e.target.value is network URL
         setNetworkURL(value);
@@ -473,7 +447,7 @@ function Dashboard(props: any) {
             <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
             <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
-            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
             <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
         </div>
         </>
