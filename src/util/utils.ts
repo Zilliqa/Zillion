@@ -1,5 +1,5 @@
 import { fromBech32Address } from '@zilliqa-js/crypto';
-const { validation, units } = require('@zilliqa-js/util');
+const { BN, validation, units } = require('@zilliqa-js/util');
 
 export const bech32ToChecksum = (address: string) => {
     if (validation.isBech32(address)) {
@@ -39,3 +39,11 @@ export const percentToContractCommRate = (userInputRate: string) => {
     }
     return parseFloat(userInputRate) * 1e7;
 };
+
+// convert balances and other numbers into string
+// with commas as thousand separators and decimals places
+export const convertQaToCommaStr = (inputVal: string) => {
+    let zil = units.fromQa(new BN(inputVal), units.Units.Zil);
+    let zilProperDecimalStr = parseFloat(zil).toFixed(3);
+    return zilProperDecimalStr.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}

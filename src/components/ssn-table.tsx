@@ -3,7 +3,7 @@ import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
 import { PromiseArea, SsnStatus } from '../util/enum';
-import { convertToProperCommRate, computeStakeAmtPercent } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent } from '../util/utils';
 import * as Account from "../account";
 import Spinner from './spinner';
 
@@ -80,12 +80,16 @@ function SsnTable(props: any) {
                 accessor: 'ssnStakeAmt',
                 Cell: ({ row }: any) => 
                     <>
-                    <span>{units.fromQa(new BN(row.original.ssnStakeAmt), units.Units.Zil)} ({computeStakeAmtPercent(row.original.ssnStakeAmt, totalStakeAmount).toFixed(2)}&#37;)</span>
+                    <span>{convertQaToCommaStr(row.original.ssnStakeAmt)} ({computeStakeAmtPercent(row.original.ssnStakeAmt, totalStakeAmount).toFixed(2)}&#37;)</span>
                     </>
             },
             {
                 Header: 'buffered deposit (ZIL)',
-                accessor: 'ssnBufferedDeposit'
+                accessor: 'ssnBufferedDeposit',
+                Cell: ({ row }: any) =>
+                    <>
+                    <span>{convertQaToCommaStr(row.original.ssnBufferedDeposit)}</span>
+                    </>
             },
             {
                 Header: 'Comm. Rate (%)',
@@ -97,7 +101,7 @@ function SsnTable(props: any) {
                 Header: 'Comm. Reward (ZIL)',
                 accessor: 'ssnCommReward',
                 Cell: ({ row }: any) => 
-                    <span className="ssn-table-comm-reward">{units.fromQa(new BN(row.original.ssnCommReward), units.Units.Zil)}</span>
+                    <span className="ssn-table-comm-reward">{convertQaToCommaStr(row.original.ssnCommReward)}</span>
             },
             {
                 Header: 'Delegators',
