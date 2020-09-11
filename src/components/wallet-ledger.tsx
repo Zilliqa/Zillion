@@ -74,7 +74,10 @@ function LedgerWallet(props: any) {
     return (
         <div className="wallet-access">
             <h2 className="mb-4">Access Wallet using Hardware Ledger</h2>
-            <Select className="text-dark mb-4" 
+       
+            <label htmlFor="ledger-index-select"><strong>Ledger Wallet Address</strong></label>
+            <Select className="text-dark mb-4"
+                id="ledger-index-select"
                 name="ledgerIndex"
                 options={getLedgerIndexOptions()} 
                 onChange={handleChange}
@@ -82,6 +85,7 @@ function LedgerWallet(props: any) {
                     return op.value === ledgerIndex;
                 })}
             />
+            
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             <ToastContainer hideProgressBar={true} />
