@@ -42,7 +42,7 @@ function WithdrawStakeModal(props: any) {
 
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
-        const ssnChecksumAddress = bech32ToChecksum(ssnAddress);
+        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         const withdrawAmtQa = convertZilToQa(withdrawAmt);
 
         // gas price, gas limit declared in account.ts

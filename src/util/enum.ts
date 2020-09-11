@@ -4,7 +4,7 @@ export enum AccessMethod {
     MNEMONIC = "MNEMONIC",
     ZILPAY = "ZILPAY",
     MOONLET = "MOONLET",
-    LEDGER = "LEDGER",
+    LEDGER = "LEDGER"
 }
 
 export enum LedgerIndex {
@@ -14,7 +14,8 @@ export enum LedgerIndex {
 export enum Network {
     TESTNET = "testnet",
     MAINNET = "mainnet",
-    ISOLATED_SERVER = "isolated_server"
+    ISOLATED_SERVER = "isolated_server",
+    PRIVATE = "private"
 }
 
 export enum NetworkURL {

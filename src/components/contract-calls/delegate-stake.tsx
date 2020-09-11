@@ -46,7 +46,7 @@ function DelegateStakeModal(props: any) {
         console.log("proxy: %o", proxy);
 
         const proxyChecksum = bech32ToChecksum(proxy);
-        const ssnChecksumAddress = bech32ToChecksum(ssnAddress);
+        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         const delegAmtQa = convertZilToQa(delegAmt);
 
         // gas price, gas limit declared in account.ts

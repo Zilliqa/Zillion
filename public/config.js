@@ -14,5 +14,6 @@ window['config'] = {
         }
     },
     blockchain_explorer_config: "https://devex.zilliqa.com",
-    refresh_rate_config: 3000
+    refresh_rate_config: 3000,
+    production_config: false,
 }

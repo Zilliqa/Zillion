@@ -49,6 +49,7 @@ function AppProvider(props: any) {
     };
 
     const updateRole = async (inputAddress: string, selectedRole: string) => {
+        console.log("update role - selected role: %o", selectedRole);
         let walletAddress = inputAddress;
         if (validation.isBech32(walletAddress)) {
             walletAddress = fromBech32Address(walletAddress).toLowerCase();
@@ -56,12 +57,12 @@ function AppProvider(props: any) {
             walletAddress = walletAddress.toLowerCase();
         }
 
-        if (selectedRole === Role.OPERATOR) {
-            const isOperator = await ZilliqaAccount.isOperator(networks_config[network].proxy, walletAddress, networks_config[network].blockchain);
-            if (!isOperator) {
-                console.error("user is not operator");
-                setRole(Role.DELEGATOR);
-            }
+        const isOperator = await ZilliqaAccount.isOperator(networks_config[network].proxy, walletAddress, networks_config[network].blockchain);
+        if (!isOperator) {
+            console.error("user is not operator");
+            setRole(Role.DELEGATOR);
+        } else {
+            setRole(Role.OPERATOR);
         }
     }
 
