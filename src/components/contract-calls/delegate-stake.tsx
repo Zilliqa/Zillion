@@ -14,6 +14,11 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 const { BN } = require('@zilliqa-js/util');
 
 
+interface NodeOptions {
+    label: string,
+    value: string,
+}
+
 function DelegateStakeModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
@@ -24,6 +29,13 @@ function DelegateStakeModal(props: any) {
     const { onSuccessCallback } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
+    
+    const defaultOption: NodeOptions = {
+        label: "Select an operator to stake",
+        value: ""
+    };
+    const nodeSelectorOptions = [defaultOption, ...props.nodeSelectorOptions];
+
     const [delegAmt, setDelegAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -108,8 +120,9 @@ function DelegateStakeModal(props: any) {
         setDelegAmt(e.target.value);
     }
 
-    const handleSsnAddress = (e: any) => {
-        setSsnAddress(e.target.value);
+    const handleSsnAddress = (option: any) => {
+        console.log(option.target.value);
+        setSsnAddress(option.target.value);
     }
 
     return (
@@ -137,7 +150,17 @@ function DelegateStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn bech32 address" />
+                            <div className="form-group">
+                                <select id="ssn-address-selector" className="form-control" onChange={handleSsnAddress}>
+                                    {nodeSelectorOptions.map((item) => (
+                                        <>
+                                            { item.value === "" ?
+                                                <option key={item.label} value={item.value} hidden>{item.label}</option> :
+                                                <option key={item.label} value={item.value}>{item.label}</option> }
+                                        </>
+                                    ))}
+                                </select>
+                            </div>
                             <input type="text" className="form-control mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
                             <button type="button" className="btn btn-user-action mr-2" onClick={delegateStake}>Stake</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>

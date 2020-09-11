@@ -25,6 +25,12 @@ import CompleteWithdrawModal from './contract-calls/complete-withdraw';
 import logo from "../static/logo.png";
 
 
+interface NodeOptions {
+    label: string,
+    value: string,
+}
+
+
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
@@ -55,11 +61,39 @@ function Dashboard(props: any) {
         receiver: ''
     });
 
+    const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
+
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
         appContext.cleanUp();
         console.log("directing to dashboard");
         props.history.replace("/");
+    }
+
+    const generateFormOptions = async () => {
+        let tempNodeOptions = [];
+
+        const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
+
+        if (contract === undefined || contract === 'error') {
+            return [];
+        }
+
+        if (contract.hasOwnProperty('ssnlist')) {
+            for (const operatorAddr in contract.ssnlist) {
+                if (!contract.ssnlist.hasOwnProperty(operatorAddr)) {
+                    continue;
+                }
+                const operatorName = contract.ssnlist[operatorAddr].arguments[3];
+                const operatorBech32Addr = toBech32Address(operatorAddr);
+                const operatorOption: NodeOptions = {
+                    label: operatorName + ": " + operatorBech32Addr,
+                    value: operatorAddr
+                }
+                tempNodeOptions.push(operatorOption);
+            }
+        }
+        return tempNodeOptions;
     }
 
     const handleChangeNetwork = React.useCallback((value: string) => {
@@ -255,14 +289,44 @@ function Dashboard(props: any) {
             }
         }
 
+        // generate options list
+        // fetch node operator names and address
+        async function getNodeOptions() {
+            console.log("generate form node options");
+            const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
+            
+            if (contract === undefined || contract === 'error') {
+                return null;
+            }
+
+            if (contract.hasOwnProperty('ssnlist')) {
+                let tempNodeOptions = [];
+                for (const operatorAddr in contract.ssnlist) {
+                    if (!contract.ssnlist.hasOwnProperty(operatorAddr)) {
+                        continue;
+                    }
+                    const operatorName = contract.ssnlist[operatorAddr].arguments[3];
+                    const operatorBech32Addr = toBech32Address(operatorAddr);
+                    const operatorOption: NodeOptions = {
+                        label: operatorName + ": " + operatorBech32Addr,
+                        value: operatorAddr
+                    }
+                    tempNodeOptions.push(operatorOption);
+                }
+                setNodeOptions([...tempNodeOptions]);
+            }
+        }
+
         getOperatorNodeDetails();
         getAccountBalance();
+        getNodeOptions();
 
         // refresh wallet
         // refresh operator details
         const intervalId = setInterval(async () => {
             getOperatorNodeDetails();
             getAccountBalance();
+            getNodeOptions();
         }, (2 * refresh_rate_config));
 
         return () => {
@@ -407,7 +471,7 @@ function Dashboard(props: any) {
             <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
-            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
             <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
