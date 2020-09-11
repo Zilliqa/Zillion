@@ -74,22 +74,10 @@ function Home(props: any) {
 
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
-      case AccessMethod.PRIVATEKEY:
-        return <WalletPrivatekey 
-                  onReturnCallback={resetWalletsClicked} 
-                  onSuccessCallback={redirectToDashboard} 
-                  onWalletLoadingCallback={toggleDirectToDashboard} 
-                  role={role} />;
       case AccessMethod.KEYSTORE: 
         return <WalletKeystore 
                   onReturnCallback={resetWalletsClicked} 
                   onWalletLoadingCallback={toggleDirectToDashboard} 
-                  onSuccessCallback={redirectToDashboard} 
-                  role={role} />;
-      case AccessMethod.MNEMONIC:
-        return <WalletMnemonic 
-                  onReturnCallback={resetWalletsClicked} 
-                  onWalletLoadingCallback={toggleDirectToDashboard}
                   onSuccessCallback={redirectToDashboard} 
                   role={role} />;
       case AccessMethod.ZILPAY:
@@ -171,9 +159,7 @@ function Home(props: any) {
                 { /* no wallets selected - show wallets to connect */ }
                 <p className="mt-5 animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
                 <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn">
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.PRIVATEKEY)}><IconKey className="home-icon" /><span className="d-block mt-0.5">Private Key</span></div>
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.MNEMONIC)}><IconFileList className="home-icon" /><span className="d-block mt-0.5">Mnemonic</span></div>
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedger className="home-icon my-3" width="32" height="32" /><span className="d-block mt-0.5">Ledger</span></div>
                   <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}><ZilPayIcon className="home-icon my-3 path" width="32" height="32" /><span className="d-block mt-0.5">ZilPay</span></div>
                 </div>

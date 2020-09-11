@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -13,6 +14,7 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 
 const { BN } = require('@zilliqa-js/util');
 
+
 function WithdrawRewardModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
@@ -21,6 +23,8 @@ function WithdrawRewardModal(props: any) {
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const { onSuccessCallback } = props;
+
+    const nodeSelectorOptions = props.nodeSelectorOptions;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [txnId, setTxnId] = useState('');
@@ -92,8 +96,9 @@ function WithdrawRewardModal(props: any) {
         }, 150);
     }
 
-    const handleSsnAddress = (e: any) => {
-        setSsnAddress(e.target.value);
+    const handleChange = (option: any) => {
+        console.log(option.value);
+        setSsnAddress(option.value);
     }
 
     return (
@@ -121,7 +126,11 @@ function WithdrawRewardModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn bech32 address" />
+                            <Select 
+                                placeholder="Select an operator to withdraw the rewards from"
+                                className="mb-4"
+                                options={nodeSelectorOptions}
+                                onChange={handleChange}  />
                             <button type="button" className="btn btn-user-action mr-2" onClick={withdrawReward}>Withdraw</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                         </div>

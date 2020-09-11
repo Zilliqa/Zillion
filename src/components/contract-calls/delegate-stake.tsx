@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -24,6 +25,9 @@ function DelegateStakeModal(props: any) {
     const { onSuccessCallback } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
+    
+    const nodeSelectorOptions = props.nodeSelectorOptions;
+
     const [delegAmt, setDelegAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -108,8 +112,9 @@ function DelegateStakeModal(props: any) {
         setDelegAmt(e.target.value);
     }
 
-    const handleSsnAddress = (e: any) => {
-        setSsnAddress(e.target.value);
+    const handleChange = (option: any) => {
+        console.log(option.value);
+        setSsnAddress(option.value);
     }
 
     return (
@@ -137,7 +142,11 @@ function DelegateStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn bech32 address" />
+                            <Select
+                                placeholder="Select an operator to delegate the stake"
+                                className="mb-4"
+                                options={nodeSelectorOptions}
+                                onChange={handleChange} />
                             <input type="text" className="form-control mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
                             <button type="button" className="btn btn-user-action mr-2" onClick={delegateStake}>Stake</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
