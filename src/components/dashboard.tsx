@@ -28,11 +28,12 @@ import logo from "../static/logo.png";
 function Dashboard(props: any) {
 
     const appContext = useContext(AppContext);
-    const { accountType, address, isAuth, role, network, initParams, updateRole, updateNetwork } = appContext;
+    const { accountType, address, isAuth, role, ledgerIndex, network, initParams, updateRole, updateNetwork } = appContext;
 
 
     const [currWalletAddress, setCurrWalletAddress] = useState(address); // keep track of current wallet as zilpay have multiple wallets
     const [currRole, setCurrRole] = useState(role);
+
     const [balance, setBalance] = useState("");
     const [recentTransactions, setRecentTransactions] = useState([] as any);
 
@@ -45,6 +46,7 @@ function Dashboard(props: any) {
     const mountedRef = useRef(false);
 
     const [nodeDetails, setNodeDetails] = useState({
+        name: '',
         stakeAmt: '0',
         bufferedDeposit: '0',
         commRate: 0,
@@ -227,6 +229,7 @@ function Dashboard(props: any) {
 
                         setNodeDetails(prevNodeDetails => ({
                             ...prevNodeDetails,
+                            name: ssnArgs[3],
                             stakeAmt: units.fromQa(new BN(ssnArgs[1]), units.Units.Zil),
                             bufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
                             commRate: convertToProperCommRate(ssnArgs[7]),
@@ -316,11 +319,11 @@ function Dashboard(props: any) {
                                     <>
                                     {/* delegator section */}
                                     <div className="p-4 mb-4 bg-white rounded dashboard-card">
-                                        <h5 className="card-title mb-4">Delegator, What would you like to do today?</h5>
+                                        <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Withdraw Rewards</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button>
+                                        {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
                                     </div>
                                     </>
                                 }
@@ -332,7 +335,7 @@ function Dashboard(props: any) {
                                     {/* node operator section */}
 
                                     <div className="p-4 mb-4 bg-white rounded dashboard-card">
-                                        <h5 className="card-title mb-4">Operator, What would you like to do today?</h5>
+                                        <h5 className="card-title mb-4">Hi {nodeDetails.name ? nodeDetails.name : 'Operator'}! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
                                         <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
@@ -375,7 +378,7 @@ function Dashboard(props: any) {
                                 <div id="dashboard-ssn-details" className="p-4 mb-4 bg-white rounded dashboard-card container-fluid">
                                     <div className="row">
                                         <div className="col">
-                                            <h5 className="card-title mb-4">Other Staked Seed Nodes</h5>
+                                            <h5 className="card-title mb-4">Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
                                             { mountedRef.current && <SsnTable proxy={proxy} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} /> }
@@ -401,13 +404,13 @@ function Dashboard(props: any) {
                     <ToastContainer hideProgressBar={true}/>
                 </div>
             </div>
-            <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} />
-            <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} />
-            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
-            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
-            <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} />
+            <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+            <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
         </div>
         </>
     );

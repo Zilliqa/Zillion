@@ -17,7 +17,7 @@ function UpdateCommRateModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentRate, onSuccessCallback } = props;
+    const { proxy, networkURL, currentRate, onSuccessCallback, ledgerIndex } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
@@ -28,6 +28,13 @@ function UpdateCommRateModal(props: any) {
             Alert('error', "Commission rate is invalid.");
             return null;
         }
+
+        if (newRate.length > 9) {
+            Alert('error', "Commission rate should have a maximum of 7 decimals only.");
+            return null;
+        }
+
+
         // create tx params
 
         // toAddr: proxy address
@@ -60,7 +67,7 @@ function UpdateCommRateModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
@@ -117,7 +124,7 @@ function UpdateCommRateModal(props: any) {
                         </div>
                         <div className="modal-body">
                             <p>Current Commission Rate: {currentRate ? currentRate : '0'} &#37;</p>
-                            <input type="text" className="form-control mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" />
+                            <input type="text" className="form-control mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" maxLength={9} />
                             <button type="button" className="btn btn-user-action mr-2" onClick={updateCommRate}>Update</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                         </div>

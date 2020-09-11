@@ -18,7 +18,7 @@ function UpdateReceiverAddress(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentReceiver, onSuccessCallback } = props;
+    const { proxy, networkURL, currentReceiver, onSuccessCallback, ledgerIndex } = props;
     const [newAddress, setNewAddress] = useState('');
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -59,7 +59,7 @@ function UpdateReceiverAddress(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {

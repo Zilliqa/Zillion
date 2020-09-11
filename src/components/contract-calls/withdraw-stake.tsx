@@ -19,6 +19,7 @@ function WithdrawStakeModal(props: any) {
 
     const proxy = props.proxy;
     const networkURL = props.networkURL;
+    const ledgerIndex = props.ledgerIndex;
     const { onSuccessCallback } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
@@ -73,7 +74,7 @@ function WithdrawStakeModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {

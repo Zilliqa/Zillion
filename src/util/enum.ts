@@ -7,6 +7,10 @@ export enum AccessMethod {
     LEDGER = "LEDGER"
 }
 
+export enum LedgerIndex {
+    DEFAULT = -1,
+}
+
 export enum Network {
     TESTNET = "testnet",
     MAINNET = "mainnet",

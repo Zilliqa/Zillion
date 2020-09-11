@@ -3,11 +3,12 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 
 import * as ZilliqaAccount from '../account';
-import { Role, Network } from '../util/enum';
+import { Role, LedgerIndex, Network } from '../util/enum';
 
 const AppContext = React.createContext({
     accountType: '',
     address: '',
+    ledgerIndex: LedgerIndex.DEFAULT,
     network: '',
     isAuth: false,
     role: '',
@@ -15,6 +16,7 @@ const AppContext = React.createContext({
     setWallet: (inputAddr: string) => {},
     initParams: (inputAddress: string, selectedRole: string, selectedAccountType: string) => {},
     updateAuth: () => {},
+    updateLedgerIndex: (index: number) => {},
     updateNetwork: (selectedNetwork: string) => {},
     updateRole: (inputAddress: string, selectedRole: string) => {},
 });
@@ -25,6 +27,7 @@ function AppProvider(props: any) {
     const [accountType, setAccountType] = useState('');
     const [network, setNetwork] = useState(Network.TESTNET as string); // testnet, mainnet, or isolated server
     const [publicKey, setPublicKey] = useState('');
+    const [ledgerIndex, setLedgerIndex] = useState(LedgerIndex.DEFAULT);
     const [role, setRole] = useState('');
     const [isAuth, setAuth] = useState(false);
 
@@ -37,6 +40,7 @@ function AppProvider(props: any) {
         setNetwork(Network.TESTNET);
         setPublicKey('');
         setRole('');
+        setLedgerIndex(LedgerIndex.DEFAULT);
         setAuth(false);
     };
 
@@ -66,6 +70,10 @@ function AppProvider(props: any) {
         setAuth(!isAuth);
     };
 
+    const updateLedgerIndex = (index: number) => {
+        setLedgerIndex(index);
+    }
+
     const updateNetwork = (selectedNetwork: string) => {
         setNetwork(selectedNetwork);
     }
@@ -82,7 +90,7 @@ function AppProvider(props: any) {
     };
 
     return (
-        <AppContext.Provider value={{ accountType, address, network, isAuth, role, cleanUp, setWallet, initParams, updateAuth, updateNetwork, updateRole }}>
+        <AppContext.Provider value={{ accountType, address, ledgerIndex, network, isAuth, role, cleanUp, setWallet, initParams, updateAuth, updateLedgerIndex, updateNetwork, updateRole }}>
             {props.children}
         </AppContext.Provider>
     );

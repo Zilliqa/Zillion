@@ -1,5 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
+import Select from 'react-select'
 
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
@@ -13,7 +14,9 @@ import ZilliqaLedger from '../ledger';
 function LedgerWallet(props: any) {
 
     const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateRole } = appContext;
+    const { initParams, updateAuth, updateLedgerIndex, updateRole } = appContext;
+
+    const [ledgerIndex, setLedgerIndex] = useState(0);
 
     const role = props.role;
 
@@ -33,7 +36,7 @@ function LedgerWallet(props: any) {
             const ledger = new ZilliqaLedger(transport);
             Alert('info', "Please confirm action on Ledger Device.")
 
-            const result = await ledger.getPublicAddress(0);
+            const result = await ledger.getPublicAddress(ledgerIndex);
             console.log("unlock ledger success - public address...: %o", result.pubAddr);
             // show loading state
             props.onWalletLoadingCallback();
@@ -41,6 +44,7 @@ function LedgerWallet(props: any) {
             // update context
             initParams(result.pubAddr, role, AccessMethod.LEDGER);
             await updateRole(result.pubAddr, role);
+            updateLedgerIndex(ledgerIndex);
             updateAuth()
 
             // no error
@@ -52,9 +56,36 @@ function LedgerWallet(props: any) {
         }
     }
 
+    const getLedgerIndexOptions = () => {
+        let indexOptions = [];
+        for (let i = 0; i < 100; i++) {
+            indexOptions.push({
+                label: 'Address #' + i, 
+                value: i
+            });
+        }
+        return indexOptions;
+    }
+
+    const handleChange = (option: any) => {
+        setLedgerIndex(option.value);
+    }
+
     return (
         <div className="wallet-access">
             <h2 className="mb-4">Access Wallet using Hardware Ledger</h2>
+       
+            <label htmlFor="ledger-index-select"><strong>Ledger Wallet Address</strong></label>
+            <Select className="text-dark mb-4"
+                id="ledger-index-select"
+                name="ledgerIndex"
+                options={getLedgerIndexOptions()} 
+                onChange={handleChange}
+                value={getLedgerIndexOptions().find((op: { label: string, value: number }) => {
+                    return op.value === ledgerIndex;
+                })}
+            />
+            
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             <ToastContainer hideProgressBar={true} />
