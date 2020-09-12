@@ -147,7 +147,8 @@ function DelegateStakeModal(props: any) {
                                 className="mb-4"
                                 options={nodeSelectorOptions}
                                 onChange={handleChange} />
-                            <input type="text" className="form-control mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
+                            <input type="text" className="form-control mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
+                            <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after delegation to pay for gas fees for future transactions such as withdrawal.</em></small></p>
                             <button type="button" className="btn btn-user-action mr-2" onClick={delegateStake}>Stake</button>
                             <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
                         </div>
