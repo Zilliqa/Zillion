@@ -1,5 +1,5 @@
 import { fromBech32Address } from '@zilliqa-js/crypto';
-const { validation, units } = require('@zilliqa-js/util');
+const { BN, validation, units } = require('@zilliqa-js/util');
 
 export const bech32ToChecksum = (address: string) => {
     if (validation.isBech32(address)) {
@@ -20,6 +20,14 @@ export const convertToProperCommRate = (rate: string) => {
     return commRate / 1e7;
 };
 
+// compute the stake amount as a percentage of total stake amount
+export const computeStakeAmtPercent = (inputStake: string, totalStake: string) => {
+    if (!inputStake) {
+        return 0;
+    }
+    const stakePercentage = (parseInt(inputStake) / parseInt(totalStake)) * 100;
+    return stakePercentage;
+}
 
 // convert commission rate from percentage to contract comm rate
 // userInputRate is a float
@@ -29,3 +37,11 @@ export const percentToContractCommRate = (userInputRate: string) => {
     }
     return parseFloat(userInputRate) * 1e7;
 };
+
+// convert balances and other numbers into string
+// with commas as thousand separators and decimals places
+export const convertQaToCommaStr = (inputVal: string) => {
+    let zil = units.fromQa(new BN(inputVal), units.Units.Zil);
+    let zilProperDecimalStr = parseFloat(zil).toFixed(3);
+    return zilProperDecimalStr.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}

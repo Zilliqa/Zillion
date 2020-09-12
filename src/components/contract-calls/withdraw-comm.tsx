@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 import { OperationStatus, AccessMethod, ProxyCalls } from "../../util/enum";
-import { bech32ToChecksum } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr } from '../../util/utils';
 import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
 
@@ -100,7 +100,7 @@ function WithdrawCommModal(props: any) {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <p>Current Commission Reward: {currentRewards ? currentRewards : '0'} ZIL</p>
+                                <p>Current Commission Reward: {currentRewards ? convertQaToCommaStr(currentRewards) : '0.000'} ZIL</p>
                                 <p>Are you sure you want to withdraw the commission rewards?</p>
                                 <button type="button" className="btn btn-user-action mr-2" onClick={withdrawComm}>Withdraw</button>
                                 <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
