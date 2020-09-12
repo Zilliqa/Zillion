@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
-import { PromiseArea, SsnStatus } from '../util/enum';
+import { PromiseArea, SsnStatus, Role } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent } from '../util/utils';
 import * as Account from "../account";
 import Spinner from './spinner';
@@ -11,14 +11,19 @@ import { BN, units } from '@zilliqa-js/util';
 import { toBech32Address } from '@zilliqa-js/crypto';
 
 
-function Table({ columns, data, tableId }: any) {
+function Table({ columns, data, tableId, hiddenColumns }: any) {
     const {
         getTableProps,
         getTableBodyProps,
         headerGroups,
         rows,
         prepareRow,
-    } = useTable({columns, data});
+    } = useTable(
+        {
+            columns, 
+            data,
+            initialState: { pageIndex: 0, hiddenColumns: hiddenColumns }
+        });
     
     return (
         <table id={tableId} className="table table-responsive" {...getTableProps()}>
@@ -52,6 +57,7 @@ function SsnTable(props: any) {
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : 3000;
     const blockchainExplorer = props.blockchainExplorer;
+    const role = props.currRole;
     const [data, setData] = useState([] as any);
     const [totalStakeAmount, setTotalStakeAmount] = useState('');
     const [showSpinner, setShowSpinner] = useState(false);
@@ -117,8 +123,18 @@ function SsnTable(props: any) {
                         </div>
                         </>
             }
-        ],[totalStakeAmount]
+        ],[totalStakeAmount, role]
     )
+
+    const getHiddenColumns = () => {
+        // hide redudant info for certain group of users, e.g. commission reward
+        // list the hidden column accessor names
+        let hiddenColumns = [];
+        if (role !== undefined && role === Role.DELEGATOR) {
+            hiddenColumns.push("ssnCommReward");
+        }
+        return hiddenColumns;
+    }
     
     const getData = async () => {
         let outputResult: { ssnAddress: string; ssnName: any; ssnStakeAmt: string; ssnBufferedDeposit: string; ssnCommRate: any; ssnCommReward: string; ssnDeleg: number; }[] = [];
@@ -197,7 +213,7 @@ function SsnTable(props: any) {
     return (
         <>
         { showSpinner && <Spinner class="spinner-border dashboard-spinner" area={PromiseArea.PROMISE_GET_CONTRACT} /> }
-        <Table columns={columns} data={data} className={props.tableId}></Table>
+        <Table columns={columns} data={data} className={props.tableId} hiddenColumns={getHiddenColumns()}></Table>
         </>
     );
 }

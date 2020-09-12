@@ -22,8 +22,6 @@ export const convertToProperCommRate = (rate: string) => {
 
 // compute the stake amount as a percentage of total stake amount
 export const computeStakeAmtPercent = (inputStake: string, totalStake: string) => {
-    console.log("inputStake :%o", inputStake);
-    console.log("total stake amount :%o", totalStake);
     if (!inputStake) {
         return 0;
     }
