@@ -123,6 +123,7 @@ function SsnTable(props: any) {
                         </div>
                         </>
             }
+            // eslint-disable-next-line
         ],[totalStakeAmount, role]
     )
 
@@ -208,6 +209,7 @@ function SsnTable(props: any) {
             clearInterval(intervalId);
             mountedRef.current = false;
         }
+        // eslint-disable-next-line
     });
 
     return (

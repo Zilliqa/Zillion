@@ -7,6 +7,7 @@ import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod } 
 import { convertToProperCommRate, convertQaToCommaStr } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
+import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
 
@@ -385,12 +386,14 @@ function Dashboard(props: any) {
                                     <>
                                     {/* delegator statistics */}
 
-                                    {/* <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
+                                    <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
                                         <h5 className="card-title mb-4">Delegator Statistics</h5>
                                         <div className="row">
-
+                                            <div className="col-12">
+                                                { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                            </div>
                                         </div>
-                                    </div> */}
+                                    </div>
                                     </>
                                 }
 
