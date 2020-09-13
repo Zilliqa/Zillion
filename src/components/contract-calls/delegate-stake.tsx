@@ -119,7 +119,7 @@ function DelegateStakeModal(props: any) {
 
     return (
         <div id="delegate-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="delegateStakeModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                  <div className="modal-content">
                      {
                          isPending ?

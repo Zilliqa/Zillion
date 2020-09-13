@@ -171,6 +171,16 @@
   color: #00cba5;
 }
 
+.disclaimer span {
+  font-size: 0.85em;
+  color: #00cba5;
+}
+
+.disclaimer .btn {
+  font-size: 0.85em;
+  color: #00cba5;
+}
+
 .close {
   font-weight: 400;
 }
@@ -185,8 +195,8 @@
   background-color: rgba(43, 46, 56, 0.7); /* Black w/ opacity */
 }
 
-.modal-dialog {
-  top: 20%;
+.modal .contract-calls-modal {
+    padding-top: 10%;
 }
 
 .modal-processing h2, .modal-sent h2 {
@@ -442,6 +452,23 @@
 #keystore-passphrase {
   font-size: 0.9em;
   width: 450px;
+}
+
+#ledger-connect-modal th {
+  color: #3b76ef;
+  font-size: 0.95em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#ledger-connect-modal table {
+  font-size: 0.85em;
+}
+
+#ledger-connect-modal .account-row:hover {
+  cursor: pointer;
+  color: #ffffff;
+  background-color: #3b76ef !important;
 }
 
 #navigation ul {

@@ -93,7 +93,7 @@ function UpdateReceiverAddress(props: any) {
 
     return (
         <div id="update-recv-addr-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="updateRecvAddrModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                 <div className="modal-content">
                     {
                         isPending ?

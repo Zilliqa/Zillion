@@ -3,6 +3,7 @@ import { withRouter } from "react-router-dom";
 
 import { AccessMethod, Network, Role } from '../util/enum';
 import AppContext from "../contexts/appContext";
+import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
 
 import WalletKeystore from './wallet-keystore';
@@ -107,8 +108,8 @@ function Home(props: any) {
 
   return (
     <div className="cover">
-      <div className="container-fluid h-100">
-        <div className="row h-100 align-items-center">
+      <div className="container-fluid min-vh-100">
+        <div className="row min-vh-100 align-items-center">
           <div className="col-12 text-center text-light">
 
             <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
@@ -177,6 +178,13 @@ function Home(props: any) {
               </>
             }
           </div>
+          <footer className="footer col-12 d-flex flex-column align-items-end">
+            <div className="disclaimer p-2">
+              <button type="button" className="btn mx-2" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
+              <span>&copy; 2020 Zilliqa</span> 
+            </div>
+          </footer>
+          <DisclaimerModal />
         </div>
       </div>
     </div>

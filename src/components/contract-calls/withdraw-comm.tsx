@@ -77,7 +77,7 @@ function WithdrawCommModal(props: any) {
 
     return (
             <div id="withdraw-comm-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawCommModalLabel" aria-hidden="true">
-                <div className="modal-dialog" role="document">
+                <div className="contract-calls-modal modal-dialog" role="document">
                     <div className="modal-content">
                         {
                             isPending ?

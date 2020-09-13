@@ -119,7 +119,7 @@ function WithdrawStakeModal(props: any) {
 
     return (
         <div id="withdraw-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawStakeModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
