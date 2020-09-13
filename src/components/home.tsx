@@ -3,6 +3,7 @@ import { withRouter } from "react-router-dom";
 
 import { AccessMethod, Network, Role } from '../util/enum';
 import AppContext from "../contexts/appContext";
+import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
 
 import WalletKeystore from './wallet-keystore';
@@ -177,6 +178,10 @@ function Home(props: any) {
               </>
             }
           </div>
+          <div className="col-12">
+            <button type="button" className="btn mx-2" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
+          </div>
+          <DisclaimerModal />
         </div>
       </div>
     </div>
