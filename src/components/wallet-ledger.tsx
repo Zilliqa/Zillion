@@ -118,7 +118,7 @@ function LedgerWallet(props: any) {
                 <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div className="modal-content">
                         <div className="modal-body">
-                            <table className="table table-striped">
+                            <table className="table table-striped p-4 my-4">
                                 <thead>
                                     <tr>
                                         <th>Index</th>
@@ -128,7 +128,7 @@ function LedgerWallet(props: any) {
                                 </thead>
                                 <tbody>
                                     { ledgerAccounts && ledgerAccounts.map((item) => 
-                                        <tr className="" onClick={test} key={item.hwIndex}>
+                                        <tr className="account-row" onClick={() => unlockWallet(item.hwIndex)} key={item.hwIndex}>
                                             <td>#{item.hwIndex}</td>
                                             <td>{item.bech32Address}</td>
                                             <td>{convertQaToCommaStr(item.balance)}</td>

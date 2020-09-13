@@ -454,6 +454,23 @@
   width: 450px;
 }
 
+#ledger-connect-modal th {
+  color: #3b76ef;
+  font-size: 0.95em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#ledger-connect-modal table {
+  font-size: 0.85em;
+}
+
+#ledger-connect-modal .account-row:hover {
+  cursor: pointer;
+  color: #ffffff;
+  background-color: #3b76ef !important;
+}
+
 #navigation ul {
   font-weight: bold;
   list-style: none;
