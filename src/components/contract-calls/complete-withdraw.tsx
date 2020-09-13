@@ -79,7 +79,7 @@ function CompleteWithdrawModal(props: any) {
 
     return (
         <div id="complete-withdrawal-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="completeWithdrawModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                  <div className="modal-content">
                      {
                          isPending ?

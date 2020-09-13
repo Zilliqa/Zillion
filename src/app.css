@@ -185,8 +185,8 @@
   background-color: rgba(43, 46, 56, 0.7); /* Black w/ opacity */
 }
 
-.modal-dialog {
-  top: 20%;
+.modal .contract-calls-modal {
+    padding-top: 10%;
 }
 
 .modal-processing h2, .modal-sent h2 {
