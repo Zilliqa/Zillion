@@ -9,6 +9,7 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "@types/bootstrap": "^4.5.0",
     "@types/jquery": "^3.5.1",
     "@types/ledgerhq__hw-transport": "^4.21.2",
     "@types/ledgerhq__hw-transport-u2f": "^4.21.1",
