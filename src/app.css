@@ -171,6 +171,16 @@
   color: #00cba5;
 }
 
+.disclaimer span {
+  font-size: 0.85em;
+  color: #00cba5;
+}
+
+.disclaimer .btn {
+  font-size: 0.85em;
+  color: #00cba5;
+}
+
 .close {
   font-weight: 400;
 }
