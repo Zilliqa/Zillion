@@ -3,7 +3,7 @@ import { useTable } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
 import { PromiseArea, SsnStatus, Role } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink } from '../util/utils';
 import * as Account from "../account";
 import Spinner from './spinner';
 
@@ -56,8 +56,8 @@ function SsnTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : 3000;
-    const blockchainExplorer = props.blockchainExplorer;
     const role = props.currRole;
+    
     const [data, setData] = useState([] as any);
     const [totalStakeAmount, setTotalStakeAmount] = useState('');
     const [showSpinner, setShowSpinner] = useState(false);
@@ -75,7 +75,7 @@ function SsnTable(props: any) {
                 Header: 'address',
                 accessor: 'ssnAddress',
                 className: 'ssn-address',
-                Cell: ({ row }: any) => <a href={blockchainExplorer + "/address/" + row.original.ssnAddress + "?network=" + networkURL}>{row.original.ssnAddress}</a>
+                Cell: ({ row }: any) => <a href={getAddressLink(row.original.ssnAddress, networkURL)}>{row.original.ssnAddress}</a>
             },
             {
                 Header: 'api endpoint',

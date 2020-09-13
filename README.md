@@ -21,7 +21,7 @@
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
         }
     },
-    blockchain_explorer_config: "https://devex.zilliqa.com",
+    blockchain_explorer_config: "viewblock",
     refresh_rate_config: 3000,
     production_config: false,
 ``` 

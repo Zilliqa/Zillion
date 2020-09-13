@@ -447,7 +447,7 @@ function Dashboard(props: any) {
                                         </div>
                                         <div className="col-12 text-left">
                                             { recentTransactions.length === 0 && <p><em>No recent transactions.</em></p> }
-                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL} blockchainExplorer={blockchain_explorer_config} /> }
+                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL} /> }
                                         </div>
                                     </div>
                                 </div>

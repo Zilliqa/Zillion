@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTable, usePagination } from 'react-table';
 
-import { NetworkURL } from '../util/enum';
+import { getTxnLink } from '../util/utils';
 
 import IconArrowLeft from './icons/arrow-left';
 import IconArrowRight from './icons/arrow-right';
@@ -66,7 +66,6 @@ function Table({ columns, data, tableId }: any) {
 
 function RecentTransactionsTable(props: any) {
     const networkURL = props.network;
-    const blockchainExplorer = props.blockchainExplorer;
 
     const columns = useMemo(
         () => [
@@ -74,18 +73,8 @@ function RecentTransactionsTable(props: any) {
                 Header: 'Transaction ID',
                 accessor: 'txnId',
                 Cell: ({ row }: any) => {
-                    let link = "";
-                    switch (networkURL) {
-                        case NetworkURL.MAINNET:
-                            link = "https://viewblock.io/zilliqa/tx/0x" + row.original.txnId
-                            break;
-                        default:
-                            // default to testnet
-                            link = "https://viewblock.io/zilliqa/tx/0x" + row.original.txnId  + "?network=testnet"
-                            break;
-                    }
                     return (
-                        <a href={link} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
+                        <a href={getTxnLink(row.original.txnId, networkURL)} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
                     );
                 }
             }

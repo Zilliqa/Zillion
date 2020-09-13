@@ -7,6 +7,11 @@ export enum AccessMethod {
     LEDGER = "LEDGER"
 }
 
+export enum Explorer {
+    DEVEX = "devex",
+    VIEWBLOCK = "viewblock"
+}
+
 export enum LedgerIndex {
     DEFAULT = -1,
 }

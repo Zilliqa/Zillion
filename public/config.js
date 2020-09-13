@@ -1,3 +1,17 @@
+/* config file
+ *
+ * blockchain_explorer_config: [viewblock (default) | devex]
+ * - domain link to blockchain explorer
+ * 
+ * refresh_rate_config: [time in milliseconds]
+ * - interval at which contract data and wallet's info are updated
+ * 
+ * production_config: [false (default) | true]
+ *  - when set to false, allows isolated server, 
+ *    and disables authentication checks
+ * 
+*/
+
 window['config'] = {
     networks_config: {
         testnet: {
@@ -13,7 +27,7 @@ window['config'] = {
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
         }
     },
-    blockchain_explorer_config: "https://devex.zilliqa.com",
+    blockchain_explorer_config: "viewblock",
     refresh_rate_config: 3000,
     production_config: false,
 }
