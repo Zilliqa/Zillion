@@ -6,9 +6,13 @@
  * refresh_rate_config: [time in milliseconds]
  * - interval at which contract data and wallet's info are updated
  * 
- * production_config: [false (default) | true]
- *  - when set to false, allows isolated server, 
+ * environment_config: [dev (default) | stage | prod]
+ *  - when set to dev, allows users to change network on home page
  *    and disables authentication checks
+ * 
+ *  - when set to stage, blockchain is set to testnet
+ * 
+ *  - when set to prod, blockchain is set to mainnet
  * 
 */
 
@@ -29,6 +33,5 @@ window['config'] = {
     },
     blockchain_explorer_config: "viewblock",
     refresh_rate_config: 3000,
-    production_config: false,
-    environment_config: "prod"
+    environment_config: "stage"
 }

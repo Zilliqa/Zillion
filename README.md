@@ -23,10 +23,10 @@
     },
     blockchain_explorer_config: "viewblock",
     refresh_rate_config: 3000,
-    production_config: false,
+    environment_config: "dev",
 ``` 
 
-3. (Optional) If you are interested in using the isolated server, set `production_config` to `false`.
+3. (Optional) If you are interested in using the isolated server, set `environment_config` to `dev` otherwise, set to `stage` for testnet and `prod` for mainnet respectively.
 
 This enables the "Isolated Server" option in the network selection menu and disables authentications checks in the dashboard.
 
@@ -45,7 +45,7 @@ This enables the "Isolated Server" option in the network selection menu and disa
 
 1. Follow Steps (1) and (2) as stated in **Development** section.
 
-2. Set the `production_config` flag in `config.js` to `true`.
+2. Set the `environment_config` flag in `config.js` to `prod`.
 
 3. Assuming the hosted server is running `https`, execute `yarn start`.
 
