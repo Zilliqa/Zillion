@@ -11,9 +11,11 @@ import WalletKeystore from './wallet-keystore';
 import WalletLedger from './wallet-ledger';
 import WalletZilPay from './wallet-zilpay';
 
-import IconFileCode from './icons/filecode';
-import IconLedger from './icons/ledger';
-import ZilPayIcon from './icons/zil-pay';
+import IconKeystoreLine from './icons/keystore-line';
+import IconLedgerLine from './icons/ledger-line';
+import IconZilPayLine from './icons/zil-pay-line';
+
+import ZillionLogo from '../static/zillion.svg';
 
 
 function Home(props: any) {
@@ -147,8 +149,8 @@ function Home(props: any) {
             </div>
 
             <div className="heading">
-              <h1 className="font-weight-light display-1">Zillion</h1>
-              <p className="lead">Staking with Zilliqa. Revolutionize.</p>
+              <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4" />
+              <p className="tagline">Staking with Zilliqa. Simplified</p>
             </div>
 
             {
@@ -175,13 +177,13 @@ function Home(props: any) {
 
               <>
                 { /* no wallets selected - show wallets to connect */ }
-                <p className="mt-5 animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
-                <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn">
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedger className="home-icon my-3" width="32" height="32" /><span className="d-block mt-0.5">Ledger</span></div>
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}><ZilPayIcon className="home-icon my-3 path" width="32" height="32" /><span className="d-block mt-0.5">ZilPay</span></div>
+                <p className="wallet-connect-text animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
+                <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span></div>
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span></div>
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}><IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span></div>
                 </div>
-                <button type="button" className="btn-user-action-cancel mt-4 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
+                <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
               </>
 
               :
@@ -199,7 +201,7 @@ function Home(props: any) {
               </>
             }
           </div>
-          <footer className="footer col-12 d-flex flex-column align-items-end">
+          <footer className="footer col-12 d-flex flex-column align-items-start">
             <div className="disclaimer p-2">
               <button type="button" className="btn mx-2" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
               <span>&copy; 2020 Zilliqa</span> 
