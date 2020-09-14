@@ -30,4 +30,5 @@ window['config'] = {
     blockchain_explorer_config: "viewblock",
     refresh_rate_config: 3000,
     production_config: false,
+    environment_config: "prod"
 }

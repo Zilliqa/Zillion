@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
@@ -11,7 +11,6 @@ import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
 
-import { BN, units } from '@zilliqa-js/util';
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 
 import WithdrawCommModal from './contract-calls/withdraw-comm';
@@ -45,7 +44,7 @@ function Dashboard(props: any) {
     const [recentTransactions, setRecentTransactions] = useState([] as any);
 
     // config.js from public folder
-    const { blockchain_explorer_config, networks_config, refresh_rate_config, production_config } = (window as { [key: string]: any })['config'];
+    const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
     const [proxy, setProxy] = useState(networks_config[network].proxy);
 
     const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
@@ -132,13 +131,14 @@ function Dashboard(props: any) {
                     switch (net) {
                         case NetworkLabel.MAINNET:
                             // do nothing
+                            Alert("info", "You are on Mainnet.");
                             break;
                         case NetworkLabel.TESTNET:
                         case NetworkLabel.ISOLATED_SERVER:
                         case NetworkLabel.PRIVATE:
-                            if (production_config) {
+                            if (environment_config === Environment.PROD) {
                                 // warn users not to switch to testnet on production
-                                Alert("warn", "Testnet is not supported. Please switch to Mainnet.");
+                                Alert("warn", "Testnet is not supported. Please switch to Mainnet from ZilPay.");
                             }
                             break;
                         default:
@@ -169,7 +169,7 @@ function Dashboard(props: any) {
     }, []);
 
     useEffect(() => {
-        if (production_config === false) {
+        if (environment_config === Environment.DEV) {
             // disable auth check for development
             return;
         }

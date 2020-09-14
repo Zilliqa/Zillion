@@ -7,6 +7,12 @@ export enum AccessMethod {
     LEDGER = "LEDGER"
 }
 
+export enum Environment {
+    DEV = "dev",
+    PROD = "prod",
+    STAGE = "stage"
+}
+
 export enum Explorer {
     DEVEX = "devex",
     VIEWBLOCK = "viewblock"

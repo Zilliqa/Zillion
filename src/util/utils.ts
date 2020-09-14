@@ -1,6 +1,5 @@
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { Explorer, NetworkURL } from './enum';
-import { link } from 'fs';
 const { BN, validation, units } = require('@zilliqa-js/util');
 
 // config.js from public folder

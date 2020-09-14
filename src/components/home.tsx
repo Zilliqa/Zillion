@@ -1,10 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { withRouter } from "react-router-dom";
 
-import { AccessMethod, Network, Role } from '../util/enum';
+import { AccessMethod, Environment, Network, Role, NetworkURL } from '../util/enum';
 import AppContext from "../contexts/appContext";
 import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
+import * as ZilliqaAccount from "../account";
 
 import WalletKeystore from './wallet-keystore';
 import WalletLedger from './wallet-ledger';
@@ -19,14 +20,14 @@ function Home(props: any) {
   const appContext = useContext(AppContext);
   const { updateNetwork } = appContext;
 
+  // config.js from public folder
+  const { networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
+
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState(Network.TESTNET);
-  
-  // config.js from public folder
-  const { blockchain_explorer_config, networks_config, production_config, refresh_rate_config } = (window as { [key: string]: any })['config'];
 
   // trigger show wallets to choose
   const resetWalletsClicked = () => {
@@ -106,6 +107,18 @@ function Home(props: any) {
     );
   }
 
+  useEffect(() => {
+    if (environment_config === Environment.PROD) {
+      setSelectedNetwork(Network.MAINNET);
+      updateNetwork(Network.MAINNET);
+      ZilliqaAccount.changeNetwork(NetworkURL.MAINNET);
+    } else {
+      setSelectedNetwork(Network.TESTNET);
+      updateNetwork(Network.TESTNET);
+      ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
+    }
+  }, [environment_config, selectedNetwork, updateNetwork]);
+
   return (
     <div className="cover">
       <div className="container-fluid min-vh-100">
@@ -113,16 +126,24 @@ function Home(props: any) {
           <div className="col-12 text-center text-light">
 
             <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
-              <div className="form-group">
-                  <select id="home-network-selector" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control-xs">
-                      <option value={Network.TESTNET}>Testnet</option>
-                      <option value={Network.MAINNET}>Mainnet</option>
-                      { 
-                        production_config === false && 
-                        <option value={Network.ISOLATED_SERVER}>Isolated Server</option> 
-                      }
-                  </select>
-              </div>
+
+              { 
+                environment_config === Environment.DEV && 
+
+                <div className="form-group">
+                    <select id="home-network-selector" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control-xs">
+                        <option value={Network.TESTNET}>Testnet</option>
+                        <option value={Network.MAINNET}>Mainnet</option>
+                        <option value={Network.ISOLATED_SERVER}>Isolated Server</option>
+                    </select>
+                </div>
+              }
+
+              { 
+                ( environment_config === Environment.STAGE || environment_config === Environment.PROD ) && 
+                <span>{selectedNetwork}</span>
+              }
+
             </div>
 
             <div className="heading">

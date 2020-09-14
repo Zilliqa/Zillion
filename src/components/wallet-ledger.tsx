@@ -105,11 +105,7 @@ function LedgerWallet(props: any) {
         }
     }
 
-    const test = () => {
-        console.log("you click a table!");
-    }
-
-
+    
     return (
         <div className="wallet-access">
             <h2 className="mb-4">Access Wallet using Hardware Ledger</h2>
