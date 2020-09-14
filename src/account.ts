@@ -1,5 +1,5 @@
 /**
- * Modified for StakeZ
+ * Modified for Zilliqa
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
 import { NetworkURL, OperationStatus, AccessMethod } from './util/enum';
