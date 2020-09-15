@@ -896,16 +896,7 @@ body {
 }
 
 #unauthenticated-section {
-  height: 100vh;
-  min-height: 550px;
-  background-color: #18191a;
-  background-image: url('./static/bg2.jpg');
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-#unauthenticated-section .content {
+  margin-top: 10%;
   width: 600px;
   background-color: #ffffff;
 }
