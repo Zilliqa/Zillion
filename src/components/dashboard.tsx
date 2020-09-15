@@ -356,7 +356,7 @@ function Dashboard(props: any) {
 
                                     <>
                                     {/* delegator section */}
-                                    <div className="p-4 dashboard-card">
+                                    <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
@@ -372,7 +372,7 @@ function Dashboard(props: any) {
                                     <>
                                     {/* node operator section */}
 
-                                    <div className="p-4 dashboard-card">
+                                    <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi {nodeDetails.name ? nodeDetails.name : 'Operator'}! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
@@ -388,7 +388,9 @@ function Dashboard(props: any) {
 
                                     <div className="p-4 dashboard-card container-fluid">
                                         <div className="row">
-                                            <h5 className="card-title mb-4">My Staking Portfolio</h5>
+                                            <div className="col">
+                                                <h5 className="card-title mb-4">My Staking Portfolio</h5>
+                                            </div>
                                             <div className="col-12">
                                                 { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>

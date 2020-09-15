@@ -70,6 +70,8 @@ body {
   
   --dashboard-shadow-color: rgba(8,255,226,0.10);
   --input-shadow-color: rgba(8,255,226,0.08);
+  --stats-header-color: #89adf5;
+  --stats-card-body-color: #06102d;
   --hyperlink-color: #89adf5;
   --hyperlink-hover-color: #5b8df1;
 }
@@ -137,7 +139,7 @@ body {
 
 .btn-contract {
   color: var(--primary-color);
-  background-color: var(--seconday-color);
+  background-color: var(--secondary-color);
   border: 1px solid var(--primary-dark-color);
   font-size: 1em;
   font-weight: 500;
@@ -517,24 +519,24 @@ body {
 }
 
 .performance-stats {
-  border: 1px solid #e0e0e0;
-  background-color: #ffffff;
+  border: 0;
+  border-radius: 6px;
+  color: var(--primary-table-font-color);
+  background-color: var(--primary-table-striped-color);
 }
 
 .performance-stats h4 {
-  color: #3b76ef;
-  font-size: 0.9em;
-  text-transform: capitalize;
+  color: var(--stats-header-color);
+  font-size: 0.78em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  margin-top: 0.5em;
+  text-transform: uppercase;
 }
 
 .performance-stats p {
   font-size: 1.4em;
-  margin-top: -0.5em;
-}
-
-.sidebar-divider {
-  background-color:#3f4b5a;
-  width: 90%;
+  margin-top: -0.2em;
 }
 
 .ssn-table-status-active {
@@ -858,6 +860,23 @@ body {
   letter-spacing: 0.1em;
   text-align: center;
   text-transform: uppercase;
+}
+
+#stake-portfolio-accordion .card {
+  color: var(--text-color);
+  background-color: var(--primary-table-striped-color);
+}
+
+#stake-portfolio-accordion .card .card-body {
+  background-color: var(--stats-card-body-color);
+}
+
+#stake-portfolio-accordion a {
+  color: var(--hyperlink-color);
+}
+
+#stake-portfolio-accordion a:hover {
+  color: var(--hyperlink-hover-color);
 }
 
 #staking-table {
