@@ -48,6 +48,7 @@ body {
   font-family: 'Avenir Next LT Pro', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: var(--secondary-color);
 }
 
 /* primary is dark theme */
@@ -426,20 +427,30 @@ body {
 }
 
 .navbar {
-  background-color: #263238;
-  background-image: linear-gradient(to left, #12171c, #171d23, #1c242a, #212b31, #263238);
+  background-color: var(--secondary-color);
+  background-color: transparent;
 }
 
 .navbar .btn-sign-out {
   font-size: 0.9em;
-  color: #ffffff;
+  font-weight: 500;
+  border: 1px solid var(--primary-dark-color);
+  color: var(--primary-color);
   margin: 4px;
-  background-color: #263238;
+  background-color: var(--secondary-color);
 }
 
 .navbar .btn-sign-out:hover {
   cursor: pointer;
-  color: #00d18a;
+  color: var(--secondary-color);
+  background-color: var(--primary-color);
+}
+
+.navbar .nav-btn {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--secondary-color);
+  text-transform: uppercase;
 }
 
 .navbar-right li {
@@ -459,6 +470,15 @@ body {
   font-size: 0.8em;
   letter-spacing: 0.1em;
   margin-left: 0.5em;
+}
+
+.pagination span {
+  color: var(--primary-color);
+  margin-top: 0.9em;
+}
+
+.pagination .pagination-icon {
+  fill: var(--primary-color);
 }
 
 .performance-stats {
@@ -620,7 +640,8 @@ body {
 }
 
 #home-ssn-details, 
-#dashboard-ssn-details {
+#dashboard-ssn-details,
+#dashboard-recent-txn {
   font-size: 0.85em;
   margin-top: 3em;
 
@@ -641,36 +662,43 @@ body {
 }
 
 #home-ssn-details table tbody, 
-#dashboard-ssn-details table tbody {
+#dashboard-ssn-details table tbody,
+#dashboard-recent-txn table tbody {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
 }
 
 #home-ssn-details table tbody a, 
-#dashboard-ssn-details table tbody a {
+#dashboard-ssn-details table tbody a,
+#dashboard-recent-txn table tbody a {
   color: var(--hyperlink-color);
 }
 
 #home-ssn-details table tbody a:hover, 
-#dashboard-ssn-details table tbody a:hover {
+#dashboard-ssn-details table tbody a:hover,
+#dashboard-recent-txn table tbody a:hover {
   color: var(--hyperlink-hover-color);
 }
 
 #home-ssn-details table tbody tr:nth-child(odd),
-#dashboard-ssn-details table tbody tr:nth-child(odd) {
+#dashboard-ssn-details table tbody tr:nth-child(odd),
+#dashboard-recent-txn table tbody tr:nth-child(odd) {
   background-color: var(--primary-table-striped-color);
 }
 
 #home-ssn-details .table td, 
 #home-ssn-details .table th,
 #dashboard-ssn-details .table td, 
-#dashboard-ssn-details .table th {
+#dashboard-ssn-details .table th,
+#dashboard-recent-txn .table td,
+#dashboard-recent-txn .table th {
   border: 0;
 }
 
 #home-ssn-details th,
-#dashboard-ssn-details th {
+#dashboard-ssn-details th,
+#dashboard-recent-txn th {
   color: var(--primary-color);
   font-size: 0.85em;
   font-weight: 600;
