@@ -467,8 +467,9 @@ body {
 }
 
 #home-mini-navbar span {
-  font-weight: 500;
-  font-size: 0.9em;
+  color: var(--text-color);
+  font-weight: 600;
+  font-size: 0.85em;
   text-transform: capitalize;
 }
 
@@ -479,8 +480,8 @@ body {
   border: 1px;  
   border-radius: 6px;
   color: #dddddd;
-  font-weight: 500;
-  font-size: 0.9em;
+  font-weight: 600;
+  font-size: 0.85em;
   line-height: 1em;
   padding: 0.8em 1.6em;
   -webkit-appearance: none;

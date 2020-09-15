@@ -53,6 +53,7 @@ function Home(props: any) {
   }
 
   const handleChangeNetwork = (e: any) => {
+    console.log("home change network %o", e.target.value);
     setSelectedNetwork(e.target.value);
     updateNetwork(e.target.value);
   }
@@ -114,12 +115,13 @@ function Home(props: any) {
       setSelectedNetwork(Network.MAINNET);
       updateNetwork(Network.MAINNET);
       ZilliqaAccount.changeNetwork(NetworkURL.MAINNET);
-    } else {
+
+    } else if (environment_config === Environment.STAGE) {
       setSelectedNetwork(Network.TESTNET);
       updateNetwork(Network.TESTNET);
       ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
-  }, [environment_config, selectedNetwork, updateNetwork]);
+  }, [selectedNetwork]);
 
   return (
     <div className="cover">
@@ -143,7 +145,7 @@ function Home(props: any) {
 
               { 
                 ( environment_config === Environment.STAGE || environment_config === Environment.PROD ) && 
-                <span>{selectedNetwork}</span>
+                <span className="mr-2">{selectedNetwork}</span>
               }
 
             </div>
@@ -203,8 +205,8 @@ function Home(props: any) {
           </div>
           <footer className="footer col-12 d-flex flex-column align-items-start">
             <div className="disclaimer p-2">
-              <button type="button" className="btn mx-2" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
-              <span>&copy; 2020 Zilliqa</span> 
+              <span className="mx-4">&copy; 2020 Zilliqa</span> 
+              <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
             </div>
           </footer>
           <DisclaimerModal />
