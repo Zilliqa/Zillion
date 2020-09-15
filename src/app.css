@@ -393,20 +393,16 @@ body {
 }
 
 .modal-processing h2, .modal-sent h2 {
-  color: #263238;
-  font-size: 1.4em;
+  color: var(--primary-color);
+  font-size: 1.2em;
   font-weight: 500;
 }
 
 .modal-title {
   color: var(--primary-color);
-  font-size: 1.2  em;
+  font-size: 1.2em;
   font-weight: 500;
   text-transform: capitalize;
-}
-
-.modal-body input {
-  font-size: 1em;
 }
 
 .modal-footer {
@@ -418,8 +414,20 @@ body {
 }
 
 .modal-sent .txn-id {
-  font-size: 0.85em;
+  font-size: 0.80em;
+  font-weight: 500;
+  margin-left: -18px;
+  margin-top: 20px;
+  margin-bottom: 10px;
   word-break: keep-all;
+}
+
+.modal-sent .txn-id a {
+  color: var(--hyperlink-color);
+}
+
+.modal-sent .txn-id a:hover {
+  color: var(--hyperlink-hover-color);
 }
 
 .modal-icon-success {

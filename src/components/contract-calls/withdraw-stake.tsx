@@ -122,7 +122,7 @@ function WithdrawStakeModal(props: any) {
             <div className="contract-calls-modal modal-dialog" role="document">
                 <div className="modal-content">
                     {
-                        isPending ?
+                        !isPending ?
 
                         <ModalPending />
 
