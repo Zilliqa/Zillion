@@ -1,3 +1,4 @@
+/* import custom fonts */
 @font-face {
   font-family: 'Avenir Next LT Pro';
   src: local('Avenir Next LT Pro Bold'), local('AvenirNextLTPro-Bold'),
@@ -49,7 +50,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-
 /* primary is dark theme */
 :root {
   --primary-color: #08ffe1;
@@ -74,6 +74,28 @@ body {
 [data-theme="light"] {
   --primary-color: #ffffff;
   --secondary-color: #3b76ef;
+}
+
+/* scrollbars */
+/* The emerging W3C standard that is currently Firefox-only */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #fafafa;
+}
+  
+/* Works on Chrome/Edge/Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #fafafa;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  border-radius: 20px;
+  border: 3px solid #fafafa;
 }
 
 @keyframes modalFade {
@@ -121,7 +143,9 @@ body {
   background-color: var(--primary-color);
   font-size: 1em;
   font-weight: 500;
-  padding: 0.8em 1.4em;
+  padding: 0 1.4em;
+  padding-top: 1em;
+  padding-bottom: 0.8em;
 }
 
 .btn-sign-in:hover {
@@ -133,7 +157,9 @@ body {
   background-color: var(--primary-color);
   font-size: 1em;
   font-weight: 500;
-  padding: 0.4em 1.8em;
+  padding: 0 1.8em;
+  padding-top: 0.6em;
+  padding-bottom: 0.4em;
 }
 
 .btn-user-action-cancel {
@@ -143,7 +169,9 @@ body {
   background-color: var(--secondary-color);
   font-size: 0.85em;
   font-weight: 500;
-  padding: 0.6em 2em;
+  padding: 0 2em;
+  padding-top: 0.8em;
+  padding-bottom: 0.6em;
 }
 
 .btn-user-action:hover {
