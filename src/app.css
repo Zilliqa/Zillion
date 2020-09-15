@@ -374,16 +374,16 @@ body {
   color: var(--text-color);
 }
 
-.modal .contract-calls-modal .modal-body input[type=text] {
+.modal .contract-calls-modal .modal-body > input[type=text] {
   color: var(--text-color);
   font-size: 1em !important;
 
-  border-radius: 10px;
+  border-radius: 6px;
   border: none;
   background-color: var(--secondary-color);
 
   margin: 0.5em 0;
-  padding: 1em 1.4em !important;
+  padding: 0.9em 1.4em !important;
 
   width: 100%;
 
@@ -478,6 +478,33 @@ body {
   font-size: 0.8em;
   letter-spacing: 0.1em;
   margin-left: 0.5em;
+}
+
+/* for selection box in modals */
+.node-options-container .node-options__placeholder {
+  color: var(--placeholder-text-color);
+}
+
+.node-options-container .node-options__control {
+  margin: 0.5em 0;
+  padding: 0.6em 1em;
+
+  background-color: var(--secondary-color);
+  border: none;
+  border-radius: 6px;
+
+  -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+}
+
+.node-options-container .node-options__menu {
+  background-color: var(--secondary-color);
+}
+
+.node-options-container .node-options__option--is-focused {
+  color: var(--secondary-color);
+  background-color: var(--primary-color);
 }
 
 .pagination span {

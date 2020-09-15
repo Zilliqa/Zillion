@@ -367,7 +367,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (currRole !== Role.OPERATOR) &&
+                                    (currRole === Role.OPERATOR) &&
 
                                     <>
                                     {/* node operator section */}
