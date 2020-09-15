@@ -53,7 +53,6 @@ function Home(props: any) {
   }
 
   const handleChangeNetwork = (e: any) => {
-    console.log("home change network %o", e.target.value);
     setSelectedNetwork(e.target.value);
     updateNetwork(e.target.value);
   }

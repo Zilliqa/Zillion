@@ -42,6 +42,8 @@ body {
 /* primary is dark theme */
 :root {
   --primary-color: #08ffe1;
+  --primary-dark-color: #009987;
+  --primary-hover-color: #00ccb4;
   --secondary-color: #01051e;
   --text-color: #ffffff;
 
@@ -108,13 +110,13 @@ body {
 }
 
 .btn-user-action {
-  color: #ffffff;
-  border: 1px solid #3b76ef;
-  border-radius: 18px;
-  background-color: #3b76ef;
-  font-size: 0.85em;
-  font-weight: 500;
-  padding: 0.4em 1em;
+  color: var(--secondary-color);
+  /* border: 1px solid #3b76ef; */
+  /* border-radius: 6px; */
+  background-color: var(--primary-color);
+  font-size: 1em;
+  font-weight: bold;
+  padding: 0.4em 1.4em;
 }
 
 .btn-user-action-cancel {
@@ -128,8 +130,8 @@ body {
 }
 
 .btn-user-action:hover {
-  color: #ffffff;
-  background-color: #135bec;
+  color: var(--secondary-color);
+  background-color: var(--primary-hover-color);
 }
 
 .btn-user-action-cancel:hover {
@@ -268,8 +270,14 @@ body {
   color: var(--primary-color);
 }
 
-.close {
-  font-weight: 400;
+.close span {
+  color: var(--primary-color);
+  font-size: 1.4em;
+  font-weight: 500;
+}
+
+.close:hover {
+  color: var(--primary-dark-color);
 }
 
 .logo {
@@ -289,6 +297,18 @@ body {
   background-color: rgba(43, 46, 56, 0.7); /* Black w/ opacity */
 }
 
+.modal-content {
+  background-color: var(--secondary-color);
+  border: 2px solid var(--primary-dark-color);
+  border-radius: 10px;
+
+  padding: 1em;
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--wallet-access-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--wallet-access-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--wallet-access-shadow-color);
+}
+
 .modal .contract-calls-modal {
     padding-top: 10%;
 }
@@ -300,9 +320,9 @@ body {
 }
 
 .modal-title {
-  color: #263238;
-  font-size: 1em;
-  font-weight: 500;
+  color: var(--primary-color);
+  font-size: 1.4em;
+  font-weight: 600;
   text-transform: capitalize;
 }
 
@@ -312,6 +332,14 @@ body {
 
 .modal-body input {
   font-size: 1em;
+}
+
+.modal-footer {
+  border-top: none;
+}
+
+.modal-header {
+  border-bottom: none;
 }
 
 .modal-sent .txn-id {
@@ -458,6 +486,10 @@ body {
 #dashboard-ssn-details tbody > tr > :nth-child(1){
   color:#3b76ef;
   font-weight: 500;
+}
+
+#disclaimer-modal .modal-body {
+  color: var(--text-color);
 }
 
 #home-mini-navbar {
