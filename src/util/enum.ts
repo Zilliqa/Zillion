@@ -4,13 +4,29 @@ export enum AccessMethod {
     MNEMONIC = "MNEMONIC",
     ZILPAY = "ZILPAY",
     MOONLET = "MOONLET",
-    LEDGER = "LEDGER",
+    LEDGER = "LEDGER"
+}
+
+export enum Environment {
+    DEV = "dev",
+    PROD = "prod",
+    STAGE = "stage"
+}
+
+export enum Explorer {
+    DEVEX = "devex",
+    VIEWBLOCK = "viewblock"
+}
+
+export enum LedgerIndex {
+    DEFAULT = -1,
 }
 
 export enum Network {
     TESTNET = "testnet",
     MAINNET = "mainnet",
-    ISOLATED_SERVER = "isolated_server"
+    ISOLATED_SERVER = "isolated_server",
+    PRIVATE = "private"
 }
 
 export enum NetworkURL {
@@ -28,6 +44,7 @@ export enum OperationStatus {
 export enum PromiseArea {
     PROMISE_GET_BALANCE = "PROMISE_GET_BALANCE",
     PROMISE_GET_CONTRACT = "PROMISE_GET_CONTRACT",
+    PROMISE_GET_STAKE_PORTFOLIO = 'PROMISE_GET_STAKE_PORTFOLIO',
     PROMISE_WITHDRAW_COMM = "PROMISE_WITHDRAW_COMM",
 }
 

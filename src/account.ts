@@ -1,5 +1,5 @@
 /**
- * Modified for StakeZ
+ * Modified for Zilliqa
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
 import { NetworkURL, OperationStatus, AccessMethod } from './util/enum';
@@ -123,6 +123,10 @@ export const addWalletByPrivatekey = async (privatekey: string) => {
 export const getBalance = async (address: string) => {
     try {
         const balance = await zilliqa.blockchain.getBalance(address);
+        if (balance.result.balance === undefined) {
+            console.error("error: getBalance undefined error");
+            return "0";
+        }
         console.log(balance.result);
         return balance.result.balance;
     } catch (err) {
@@ -151,11 +155,25 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
         changeNetwork(networkURL);
     }
     try {
+        if (!proxyAddr) {
+            console.error("error: getSsnImplContract - no proxy contract found");
+            return "error";
+        }
+
         const proxyContract = await zilliqa.blockchain.getSmartContractState(proxyAddr);
         console.log("fetched proxy contract state");
-        const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
-        console.log("fetched implementation contract state");
-        return implContract.result;
+        
+        if (proxyContract.result.hasOwnProperty('implementation')) {
+            // fetched implementation contract address
+            const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
+            console.log("fetched implementation contract state");
+            return implContract.result;
+
+        } else {
+            console.error("error: getSsnImplContract - no implementation contract found");
+            return "error"
+        }
+
     } catch (err) {
         console.error("error: getSsnImplContract - o%", err);
         return "error"
@@ -165,14 +183,18 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
 // isOperator - check if address is node operator
 // @param address: base16 address
 export const isOperator = async (proxy: string, address: string, networkURL: string) => {
+    if (!proxy || !networkURL) {
+        return false;
+    }
+
     const contract = await getSsnImplContract(proxy, networkURL);
-    if (contract === "error") {
+    if (contract === undefined || contract === "error") {
         return false;
     }
     console.log("account.ts check is operator: %o", address);
     console.log("account.ts check is proxy: %o", proxy);
     console.log("account.ts check is networkURL: %o", networkURL);
-    if (contract.ssnlist && contract.ssnlist.hasOwnProperty(address)) {
+    if (contract.hasOwnProperty('ssnlist') && contract.ssnlist.hasOwnProperty(address)) {
         console.log("operator %o exist", address);
         return true;
     } else {
@@ -186,12 +208,12 @@ export const ZilliqaAccount = () => {
 };
 
 // refactor
-export const handleSign = async (accessMethod: string, networkURL: string, txParams: any) => {
+export const handleSign = async (accessMethod: string, networkURL: string, txParams: any, ledgerIndex: number) => {
     changeNetwork(networkURL);
     let result = "";
     switch (accessMethod) {
         case AccessMethod.LEDGER:
-            result = await handleLedgerSign(networkURL, txParams);
+            result = await handleLedgerSign(networkURL, txParams, ledgerIndex);
             break;
         case AccessMethod.PRIVATEKEY:
             result = await handleNormalSign(txParams);
@@ -202,6 +224,9 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
         case AccessMethod.KEYSTORE:
             result = await handleNormalSign(txParams);
             break;
+        case AccessMethod.ZILPAY:
+            result = await handleZilPaySign(txParams);
+            break;
         default:
             console.error("error: no such account type :%o", accessMethod);
             result = OperationStatus.ERROR;
@@ -210,7 +235,7 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
     return result;
 };
 
-const handleLedgerSign = async (networkURL: string, txParams: any) => {
+const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: number) => {
     let transport = null;
     const isWebAuthn = await TransportWebAuthn.isSupported();
     if (isWebAuthn) {
@@ -221,7 +246,7 @@ const handleLedgerSign = async (networkURL: string, txParams: any) => {
     }
     
     const ledger = new ZilliqaLedger(transport);
-    const result = await ledger.getPublicAddress(0);
+    const result = await ledger.getPublicAddress(ledgerIndex);
 
     // get public key
     let pubKey = result.pubKey;
@@ -253,7 +278,7 @@ const handleLedgerSign = async (networkURL: string, txParams: any) => {
             signature: "",
         };
         console.log("new params :%o", newParams);
-        const signature = await ledger.signTxn(0, newParams);
+        const signature = await ledger.signTxn(ledgerIndex, newParams);
         const signedTx = {
             ...newParams,
             amount: txParams.amount.toString(),
@@ -344,6 +369,33 @@ const handleNormalSign = async (txParams: any) => {
     try {
         const txn = await zilliqa.blockchain.createTransaction(zilliqaTxn);
         return txn.id;
+    } catch (err) {
+        console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
+        return OperationStatus.ERROR;
+    }
+}
+
+const handleZilPaySign = async (txParams: any) => {
+    // convert to zilliqa transaction object
+    // toAddr: proxy checksum contract address
+    const zilPay = (window as any).zilPay;
+    const zilliqaTxn = zilliqa.transactions.new(
+        {
+            toAddr: txParams.toAddr,
+            amount: txParams.amount,
+            data: txParams.data,
+            gasPrice: GAS_PRICE,
+            gasLimit: GAS_LIMIT,
+            version: bytes.pack(CHAIN_ID, MSG_VERSION),
+        },
+        true
+    );
+
+    console.log(zilliqaTxn);
+    
+    try {
+        const txn = await zilPay.blockchain.createTransaction(zilliqaTxn);
+        return txn.ID;
     } catch (err) {
         console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
         return OperationStatus.ERROR;

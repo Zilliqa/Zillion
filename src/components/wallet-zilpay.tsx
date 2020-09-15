@@ -13,26 +13,44 @@ function WalletZilPay(props: any) {
     const role = props.role;
 
     const unlockWallet = async () => {
-        console.log("unlock by zilpay");
+        // Getting ZilPay inject.
+        const zilPay = (window as any).zilPay;
+
+        // Checking on ZilPay inject and wallet state.
+        if (!zilPay) {
+            Alert('warn', 'Please install ZilPay wallet.');
+            return null;
+
+        } else if (!zilPay.wallet.isEnable) {
+            Alert('warn', 'Please unlock wallet.');
+            return null;
+        }
 
         try {
-            // import zilpay object
-            // use zilpay to connect
+            // Shell try ask user about access.
+            const connected = await zilPay.wallet.connect();
 
-            // if now issues
-            // request parent to show loading state
+            // Checking access.
+            if (!connected) {
+                Alert('error', 'Rejected access!');
+                return null;
+            }
+
+            const { base16 } = zilPay.wallet.defaultAccount;
+
+            // request parent to show spinner while updating context
             props.onWalletLoadingCallback();
 
             // update context
-            initParams("wallet_address", role, AccessMethod.ZILPAY);
-            await updateRole("wallet_address", role);
-            updateAuth()
+            initParams(base16, role, AccessMethod.ZILPAY);
+            updateRole(base16, role);
+            updateAuth();
 
             // request parent to redirect to dashboard
             props.onSuccessCallback();
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
-            Alert('info', 'There is something wrong with accessing ZilPay.')
+            Alert('error', 'There is something wrong with accessing ZilPay.')
         }
 
         // if no error
@@ -41,10 +59,10 @@ function WalletZilPay(props: any) {
     }
 
     return (
-        <div>
-            <h2>Access Wallet using ZilPay</h2>
-            <button type="button" className="btn btn-success mx-2" onClick={unlockWallet}>Unlock Wallet</button>
-            <button type="button" className="btn btn-primary mx-2" onClick={props.onReturnCallback}>Back</button>
+        <div className="wallet-access">
+            <h2>Access wallet using ZilPay</h2>
+            <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
+            <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             <ToastContainer hideProgressBar={true} />
         </div>
     );

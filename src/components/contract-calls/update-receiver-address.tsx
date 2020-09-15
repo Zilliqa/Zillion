@@ -18,7 +18,7 @@ function UpdateReceiverAddress(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentReceiver, onSuccessCallback } = props;
+    const { proxy, networkURL, currentReceiver, onSuccessCallback, ledgerIndex } = props;
     const [newAddress, setNewAddress] = useState('');
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -33,7 +33,7 @@ function UpdateReceiverAddress(props: any) {
 
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
-        const newReceivingAddress = bech32ToChecksum(newAddress);
+        const newReceivingAddress = bech32ToChecksum(newAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -59,7 +59,7 @@ function UpdateReceiverAddress(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
@@ -93,7 +93,7 @@ function UpdateReceiverAddress(props: any) {
 
     return (
         <div id="update-recv-addr-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="updateRecvAddrModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -104,21 +104,22 @@ function UpdateReceiverAddress(props: any) {
 
                         txnId ?
 
-                        <ModalSent txnId={txnId} handleClose={handleClose} />
+                        <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
                         :
                         <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="updateRecvAddrModalLabel">Update Received Address</h5>
+                            <h5 className="modal-title" id="updateRecvAddrModalLabel">Update Receiving Address</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p>Current Received Address: {currentReceiver ? currentReceiver : 'none'}</p>
-                            <input type="text" className="form-control mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in ByStr20" />
-                            <button type="button" className="btn btn-user-action mr-2" onClick={updateAddress}>Update</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <p>Current Receiving Address: {currentReceiver ? currentReceiver : 'none'}</p>
+                            <input type="text" className="mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in bech32 format" />
+                            <div className="d-flex mt-2">
+                            <button type="button" className="btn btn-user-action mx-auto" onClick={updateAddress}>Update</button>
+                            </div>
                         </div>
                         </>
                     }

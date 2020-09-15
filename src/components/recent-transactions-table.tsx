@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
 import { useTable, usePagination } from 'react-table';
 
+import { getTxnLink } from '../util/utils';
+
 import IconArrowLeft from './icons/arrow-left';
 import IconArrowRight from './icons/arrow-right';
+
 
 function Table({ columns, data, tableId }: any) {
     const {
@@ -30,9 +33,11 @@ function Table({ columns, data, tableId }: any) {
     return (
         <>
         <div className="pagination justify-content-end">
-            <button type="button" className="btn" onClick={() => previousPage()} disabled={!canPreviousPage}><IconArrowLeft /></button>
-            <button type="button" className="btn" onClick={() => nextPage()} disabled={!canNextPage}><IconArrowRight /></button>
-            <span className="ml-2 mt-2">Page {pageIndex + 1} of {pageOptions.length}</span>
+            <div>
+                <button type="button" className="btn" onClick={() => previousPage()} disabled={!canPreviousPage}><IconArrowLeft className="pagination-icon"/></button>
+                <button type="button" className="btn" onClick={() => nextPage()} disabled={!canNextPage}><IconArrowRight className="pagination-icon"/></button>
+            </div>
+            <span className="ml-2">Page {pageIndex + 1} of {pageOptions.length}</span>
         </div>
         <table id={tableId} className="table table-responsive-lg" {...getTableProps()}>
             <thead>
@@ -63,14 +68,17 @@ function Table({ columns, data, tableId }: any) {
 
 function RecentTransactionsTable(props: any) {
     const networkURL = props.network;
-    const blockchainExplorer = props.blockchainExplorer;
 
     const columns = useMemo(
         () => [
             {
                 Header: 'Transaction ID',
                 accessor: 'txnId',
-                Cell: ({ row }: any) => <a href={blockchainExplorer + "/tx/0x" + row.original.txnId + "?network=" + networkURL} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
+                Cell: ({ row }: any) => {
+                    return (
+                        <a href={getTxnLink(row.original.txnId, networkURL)} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
+                    );
+                }
             }
         ], []
     );

@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -19,10 +20,14 @@ function DelegateStakeModal(props: any) {
     const { accountType } = appContext;
 
     const proxy = props.proxy;
+    const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const { onSuccessCallback } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
+    
+    const nodeSelectorOptions = props.nodeSelectorOptions;
+
     const [delegAmt, setDelegAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -45,7 +50,7 @@ function DelegateStakeModal(props: any) {
         console.log("proxy: %o", proxy);
 
         const proxyChecksum = bech32ToChecksum(proxy);
-        const ssnChecksumAddress = bech32ToChecksum(ssnAddress);
+        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         const delegAmtQa = convertZilToQa(delegAmt);
 
         // gas price, gas limit declared in account.ts
@@ -72,7 +77,7 @@ function DelegateStakeModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
@@ -107,13 +112,14 @@ function DelegateStakeModal(props: any) {
         setDelegAmt(e.target.value);
     }
 
-    const handleSsnAddress = (e: any) => {
-        setSsnAddress(e.target.value);
+    const handleChange = (option: any) => {
+        console.log(option.value);
+        setSsnAddress(option.value);
     }
 
     return (
         <div id="delegate-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="delegateStakeModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                  <div className="modal-content">
                      {
                          isPending ?
@@ -124,22 +130,29 @@ function DelegateStakeModal(props: any) {
 
                          txnId ?
 
-                         <ModalSent txnId={txnId} handleClose={handleClose} />
+                         <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
                          :
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="delegateStakeModalLabel">Delegate Stake</h5>
+                            <h5 className="contract-calls-modal modal-title" id="delegateStakeModalLabel">Delegate Stake</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn address" />
-                            <input type="text" className="form-control mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
-                            <button type="button" className="btn btn-user-action mr-2" onClick={delegateStake}>Stake</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <Select
+                                placeholder="Select an operator to delegate the stake"
+                                className="node-options-container mb-4"
+                                classNamePrefix="node-options"
+                                options={nodeSelectorOptions}
+                                onChange={handleChange} />
+                            <input type="text" className="mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
+                            <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after delegation to pay for gas fees for future transactions such as withdrawal.</em></small></p>
+                            <div className="d-flex">
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={delegateStake}>Stake</button>
+                            </div>
                         </div>
                          </>
                      }

@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from '../../contexts/appContext';
 import { OperationStatus, AccessMethod, ProxyCalls } from "../../util/enum";
-import { bech32ToChecksum, percentToContractCommRate } from '../../util/utils';
+import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate } from '../../util/utils';
 import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
 
@@ -17,7 +17,7 @@ function UpdateCommRateModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentRate, onSuccessCallback } = props;
+    const { proxy, networkURL, currentRate, onSuccessCallback, ledgerIndex } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
@@ -28,6 +28,13 @@ function UpdateCommRateModal(props: any) {
             Alert('error', "Commission rate is invalid.");
             return null;
         }
+
+        if (newRate.length > 9) {
+            Alert('error', "Commission rate should have a maximum of 7 decimals only.");
+            return null;
+        }
+
+
         // create tx params
 
         // toAddr: proxy address
@@ -60,7 +67,7 @@ function UpdateCommRateModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
@@ -93,7 +100,7 @@ function UpdateCommRateModal(props: any) {
 
     return (
         <div id="update-comm-rate-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="updateCommRateModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -104,7 +111,7 @@ function UpdateCommRateModal(props: any) {
 
                         txnId ?
 
-                        <ModalSent txnId={txnId} handleClose={handleClose} />
+                        <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
                         :
 
@@ -116,10 +123,11 @@ function UpdateCommRateModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p>Current Commission Rate: {currentRate ? currentRate : '0'} &#37;</p>
-                            <input type="text" className="form-control mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" />
-                            <button type="button" className="btn btn-user-action mr-2" onClick={updateCommRate}>Update</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <p>Current Commission Rate: {currentRate ? convertToProperCommRate(currentRate).toFixed(2) : '0.00'}&#37;</p>
+                            <input type="text" className="mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" maxLength={9} />
+                            <div className="d-flex mt-2">
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={updateCommRate}>Update</button>
+                            </div>
                         </div>
                         </>
                     }

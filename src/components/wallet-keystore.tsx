@@ -75,10 +75,10 @@ class WalletKeystore extends Component<any, any> {
     render() {
         return (
             <div className="wallet-access">
-                <h2 className="mb-4">Access Wallet via Keystore</h2>
+                <h2>Access wallet via Keystore</h2>
                 <div>
                     <div id="keystore">
-                        <p><strong>{this.state.filename}</strong></p>
+                        <p className="file-name">{this.state.filename}</p>
                         <label htmlFor="browsekeystore">{this.state.filename ? "Select wallet file" : "Select wallet file"}</label>
                         <input type="file" id="browsekeystore" onChange={this.handleFile} />
                     </div>

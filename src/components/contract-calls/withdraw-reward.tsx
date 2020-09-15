@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -13,13 +14,17 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 
 const { BN } = require('@zilliqa-js/util');
 
+
 function WithdrawRewardModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
     const proxy = props.proxy;
+    const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const { onSuccessCallback } = props;
+
+    const nodeSelectorOptions = props.nodeSelectorOptions;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [txnId, setTxnId] = useState('');
@@ -35,7 +40,7 @@ function WithdrawRewardModal(props: any) {
 
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
-        const ssnChecksumAddress = bech32ToChecksum(ssnAddress);
+        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -61,7 +66,7 @@ function WithdrawRewardModal(props: any) {
             Alert('info', "Please follow the instructions on the device.");
         }
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams)
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
@@ -91,13 +96,14 @@ function WithdrawRewardModal(props: any) {
         }, 150);
     }
 
-    const handleSsnAddress = (e: any) => {
-        setSsnAddress(e.target.value);
+    const handleChange = (option: any) => {
+        console.log(option.value);
+        setSsnAddress(option.value);
     }
 
     return (
         <div id="withdraw-reward-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawRewardModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog" role="document">
                  <div className="modal-content">
                      {
                          isPending ?
@@ -108,7 +114,7 @@ function WithdrawRewardModal(props: any) {
 
                          txnId ?
 
-                         <ModalSent txnId={txnId} handleClose={handleClose} />
+                         <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
 
                          :
 
@@ -120,9 +126,15 @@ function WithdrawRewardModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-4" value={ssnAddress} onChange={handleSsnAddress} placeholder="Enter ssn address" />
-                            <button type="button" className="btn btn-user-action mr-2" onClick={withdrawReward}>Withdraw</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <Select 
+                                placeholder="Select an operator to withdraw the rewards"
+                                className="node-options-container mb-4"
+                                classNamePrefix="node-options"
+                                options={nodeSelectorOptions}
+                                onChange={handleChange}  />
+                            <div className="d-flex">
+                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Withdraw</button>
+                            </div>
                         </div>
                          </>
                      }

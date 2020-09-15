@@ -1,3 +1,21 @@
+/* config file
+ *
+ * blockchain_explorer_config: [viewblock (default) | devex]
+ * - domain link to blockchain explorer
+ * 
+ * refresh_rate_config: [time in milliseconds]
+ * - interval at which contract data and wallet's info are updated
+ * 
+ * environment_config: [dev (default) | stage | prod]
+ *  - when set to dev, allows users to change network on home page
+ *    and disables authentication checks
+ * 
+ *  - when set to stage, blockchain is set to testnet
+ * 
+ *  - when set to prod, blockchain is set to mainnet
+ * 
+*/
+
 window['config'] = {
     networks_config: {
         testnet: {
@@ -13,6 +31,7 @@ window['config'] = {
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
         }
     },
-    blockchain_explorer_config: "https://devex.zilliqa.com",
-    refresh_rate_config: 3000
+    blockchain_explorer_config: "viewblock",
+    refresh_rate_config: 3000,
+    environment_config: "stage"
 }

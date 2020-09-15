@@ -21,15 +21,12 @@
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
         }
     },
-    blockchain_explorer_config: "https://devex.zilliqa.com",
-    refresh_rate_config: 3000
+    blockchain_explorer_config: "viewblock",
+    refresh_rate_config: 3000,
+    environment_config: "dev",
 ``` 
 
-3. (Optional) If you are interested in using the isolated server, create a `.env` file in the parent project folder where `package.json` resides, example `%project_dir%/.env` with the variable:
-
-```
-REACT_APP_STAKEZ_ENV=dev
-```
+3. (Optional) If you are interested in using the isolated server, set `environment_config` to `dev` otherwise, set to `stage` for testnet and `prod` for mainnet respectively.
 
 This enables the "Isolated Server" option in the network selection menu and disables authentications checks in the dashboard.
 
@@ -48,7 +45,7 @@ This enables the "Isolated Server" option in the network selection menu and disa
 
 1. Follow Steps (1) and (2) as stated in **Development** section.
 
-2. **DO NOT** set any `.env` file.
+2. Set the `environment_config` flag in `config.js` to `prod`.
 
 3. Assuming the hosted server is running `https`, execute `yarn start`.
 
