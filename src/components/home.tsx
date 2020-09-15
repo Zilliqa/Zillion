@@ -100,8 +100,8 @@ function Home(props: any) {
   const DisplayLoader = () => {
     console.log("retrieving wallet info...");
     return (
-      <div className="animate__animated animate__fadeIn">
-        <h2 className="mt-5 mb-4">Retrieving wallet info...</h2>
+      <div className="wallet-access">
+        <h2>Retrieving wallet info...</h2>
         <div className="spinner-border dashboard-spinner" role="status">
           <span className="sr-only">Connecting...</span>
         </div>
@@ -160,13 +160,13 @@ function Home(props: any) {
               
               <div className="initial-load">
                 { /* sign in and seed node table */ }
-                <div className="btn btn-sign-in mt-4 mx-2" onClick={() => handleShowAccessMethod(Role.DELEGATOR)}>Sign in for Delegators</div>
-                <div className="btn btn-sign-in mt-4 mx-2" onClick={() => handleShowAccessMethod(Role.OPERATOR)}>Sign in for Operators</div>
+                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR)}>Sign in for Delegators</div>
+                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR)}>Sign in for Operators</div>
                 <div id="home-ssn-details" className="container">
-                  <div className="row rounded p-4">
+                  <div className="row p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
-                    <div className="col-12">
-                      <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                    <div className="col-12 content">
+                        <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
                     </div>
                   </div>
                 </div>
