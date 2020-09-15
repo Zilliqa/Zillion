@@ -205,8 +205,6 @@ body {
 }
 
 .cover {
-  height: 100vh;
-  min-height: 550px;
   background-color: var(--secondary-color);
 
   background-image: url('./static/bg_circle.svg'), url('./static/bg_stake_zil.svg');
@@ -220,7 +218,13 @@ body {
   background-repeat: no-repeat;
 }
 
+.cover-content {
+  min-height: calc(100vh - 50px);
+  padding-bottom: 3em;
+}
+
 .cover .heading {
+  margin-top: 3em;
   animation: fadeInUp;
   animation-duration: 1s;
 }
@@ -266,24 +270,6 @@ body {
 
 .dashboard-spinner {
   color: #00cba5;
-}
-
-.disclaimer {
-  position: fixed;
-  bottom: 0;
-  left: 0; 
-}
-
-.disclaimer span {
-  font-size: 0.85em;
-  font-weight: 500;
-  color: var(--primary-color);
-}
-
-.disclaimer .btn {
-  font-size: 0.85em;
-  font-weight: 500;
-  color: var(--primary-color);
 }
 
 .close span {
@@ -513,12 +499,29 @@ body {
   font-weight: 500;
 }
 
+#disclaimer {
+  bottom: 0;
+  left: 0; 
+}
+
+#disclaimer span {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+#disclaimer .btn {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
 #disclaimer-modal .modal-body {
   color: var(--text-color);
 }
 
 #home-mini-navbar {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
 }

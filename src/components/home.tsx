@@ -124,9 +124,9 @@ function Home(props: any) {
 
   return (
     <div className="cover">
-      <div className="container-fluid min-vh-100">
-        <div className="row min-vh-100 align-items-center">
-          <div className="col-12 text-center text-light">
+      <div className="container-fluid">
+        <div className="row align-items-center">
+          <div className="cover-content col-12 text-center text-light">
 
             <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
 
@@ -202,8 +202,8 @@ function Home(props: any) {
               </>
             }
           </div>
-          <footer className="footer col-12 d-flex flex-column align-items-start">
-            <div className="disclaimer p-2">
+          <footer id="disclaimer" className="align-items-start">
+            <div className="p-2">
               <span className="mx-4">&copy; 2020 Zilliqa</span> 
               <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
             </div>
