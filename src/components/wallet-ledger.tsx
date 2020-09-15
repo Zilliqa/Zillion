@@ -108,13 +108,12 @@ function LedgerWallet(props: any) {
     
     return (
         <div className="wallet-access">
-            <h2 className="mb-4">Access Wallet using Hardware Ledger</h2>
-
+            <h2>Access wallet using Hardware Ledger</h2>
             <div id="ledger-connect-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="ledgerConnectModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div className="modal-content">
                         <div className="modal-body">
-                            <table className="table table-striped p-4 my-4">
+                            <table className="table p-4 my-4">
                                 <thead>
                                     <tr>
                                         <th>Index</th>

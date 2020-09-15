@@ -61,6 +61,7 @@ body {
   --placeholder-text-color: #45474a;
   --wallet-access-shadow-color: rgba(8,255,226,0.22);
 
+  --primary-table-striped-color: #060f2a;
   --primary-shadow-color: rgba(8,255,226,0.15);
 }
 
@@ -129,7 +130,7 @@ body {
   background-color: var(--primary-color);
   font-size: 1em;
   font-weight: 500;
-  padding: 0.4em 1.4em;
+  padding: 0.4em 1.8em;
 }
 
 .btn-user-action-cancel {
@@ -139,7 +140,7 @@ body {
   background-color: var(--secondary-color);
   font-size: 0.85em;
   font-weight: 500;
-  padding: 0.6em 1.6em;
+  padding: 0.6em 2em;
 }
 
 .btn-user-action:hover {
@@ -227,7 +228,6 @@ body {
 .cover .heading .tagline {
   color: var(--primary-color);
   font-size: 1.2em;
-  font-weight: 500;
   position: relative;
   margin-left: -190px;
   margin-top: -80px;
@@ -627,21 +627,35 @@ body {
 }
 
 #ledger-connect-modal th {
-  color: #3b76ef;
-  font-size: 0.95em;
-  font-weight: 500;
+  color: var(--primary-color);
+  font-size: 0.85em;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
-#ledger-connect-modal table {
-  font-size: 0.85em;
+#ledger-connect-modal table tbody {
+  font-size: 1em;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+#ledger-connect-modal .table td, #ledger-connect-modal .table th {
+  border: 0;
 }
 
 #ledger-connect-modal .account-row:hover {
   cursor: pointer;
-  color: #ffffff;
-  background-color: #3b76ef !important;
+  color: var(--secondary-color);
+  background-color: var(--primary-color) !important;
 }
+
+#ledger-connect-modal table tbody tr:nth-child(odd) {
+  background-color: var(--primary-table-striped-color);
+  }
+
+#ledger-connect-modal table tbody tr:nth-child(even) {
+  /* background-color: lightpink; */
+  }
 
 #navigation ul {
   font-weight: bold;
