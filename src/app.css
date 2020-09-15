@@ -66,6 +66,9 @@ body {
   --primary-table-font-color: #f0f0f0;
   --primary-table-striped-color: #060f2a;
   --primary-shadow-color: rgba(8,255,226,0.15);
+
+  --hyperlink-color: #89adf5;
+  --hyperlink-hover-color: #5b8df1;
 }
 
 [data-theme="light"] {
@@ -584,6 +587,14 @@ body {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
+}
+
+#home-ssn-details table tbody a {
+  color: var(--hyperlink-color);
+}
+
+#home-ssn-details table tbody a:hover {
+  color: var(--hyperlink-hover-color);
 }
 
 #home-ssn-details table tbody tr:nth-child(odd) {
