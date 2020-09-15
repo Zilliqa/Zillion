@@ -143,13 +143,15 @@ function WithdrawStakeModal(props: any) {
                         </div>
                         <div className="modal-body">
                             <Select
-                                placeholder="Select an operator to withdraw the stake from"
-                                className="mb-4"
+                                placeholder="Select an operator to withdraw the stake"
+                                className="node-options-container mb-4"
+                                classNamePrefix="node-options"
                                 options={nodeSelectorOptions}
                                 onChange={handleChange} />
-                            <input type="text" className="form-control mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
-                            <button type="button" className="btn btn-user-action mr-2" onClick={withdrawStake}>Withdraw</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
+                            <div className="d-flex">
+                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawStake}>Withdraw</button>
+                            </div>
                         </div>
                         </>
                     }

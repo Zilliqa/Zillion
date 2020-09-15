@@ -136,7 +136,7 @@ function DelegateStakeModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="delegateStakeModalLabel">Delegate Stake</h5>
+                            <h5 className="contract-calls-modal modal-title" id="delegateStakeModalLabel">Delegate Stake</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -144,13 +144,15 @@ function DelegateStakeModal(props: any) {
                         <div className="modal-body">
                             <Select
                                 placeholder="Select an operator to delegate the stake"
-                                className="mb-4"
+                                className="node-options-container mb-4"
+                                classNamePrefix="node-options"
                                 options={nodeSelectorOptions}
                                 onChange={handleChange} />
-                            <input type="text" className="form-control mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
+                            <input type="text" className="mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
                             <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after delegation to pay for gas fees for future transactions such as withdrawal.</em></small></p>
-                            <button type="button" className="btn btn-user-action mr-2" onClick={delegateStake}>Stake</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <div className="d-flex">
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={delegateStake}>Stake</button>
+                            </div>
                         </div>
                          </>
                      }

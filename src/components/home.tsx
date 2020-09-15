@@ -11,9 +11,11 @@ import WalletKeystore from './wallet-keystore';
 import WalletLedger from './wallet-ledger';
 import WalletZilPay from './wallet-zilpay';
 
-import IconFileCode from './icons/filecode';
-import IconLedger from './icons/ledger';
-import ZilPayIcon from './icons/zil-pay';
+import IconKeystoreLine from './icons/keystore-line';
+import IconLedgerLine from './icons/ledger-line';
+import IconZilPayLine from './icons/zil-pay-line';
+
+import ZillionLogo from '../static/zillion.svg';
 
 
 function Home(props: any) {
@@ -98,8 +100,8 @@ function Home(props: any) {
   const DisplayLoader = () => {
     console.log("retrieving wallet info...");
     return (
-      <div className="animate__animated animate__fadeIn">
-        <h2 className="mt-5 mb-4">Retrieving wallet info...</h2>
+      <div className="wallet-access">
+        <h2>Retrieving wallet info...</h2>
         <div className="spinner-border dashboard-spinner" role="status">
           <span className="sr-only">Connecting...</span>
         </div>
@@ -112,18 +114,19 @@ function Home(props: any) {
       setSelectedNetwork(Network.MAINNET);
       updateNetwork(Network.MAINNET);
       ZilliqaAccount.changeNetwork(NetworkURL.MAINNET);
-    } else {
+
+    } else if (environment_config === Environment.STAGE) {
       setSelectedNetwork(Network.TESTNET);
       updateNetwork(Network.TESTNET);
       ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
-  }, [environment_config, selectedNetwork, updateNetwork]);
+  }, [selectedNetwork]);
 
   return (
     <div className="cover">
-      <div className="container-fluid min-vh-100">
-        <div className="row min-vh-100 align-items-center">
-          <div className="col-12 text-center text-light">
+      <div className="container-fluid">
+        <div className="row align-items-center">
+          <div className="cover-content col-12 text-center text-light">
 
             <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
 
@@ -141,14 +144,14 @@ function Home(props: any) {
 
               { 
                 ( environment_config === Environment.STAGE || environment_config === Environment.PROD ) && 
-                <span>{selectedNetwork}</span>
+                <span className="mr-2">{selectedNetwork}</span>
               }
 
             </div>
 
             <div className="heading">
-              <h1 className="font-weight-light display-1">Zillion</h1>
-              <p className="lead">Staking with Zilliqa. Revolutionize.</p>
+              <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4" />
+              <p className="tagline">Staking with Zilliqa. Simplified</p>
             </div>
 
             {
@@ -157,13 +160,13 @@ function Home(props: any) {
               
               <div className="initial-load">
                 { /* sign in and seed node table */ }
-                <div className="btn btn-sign-in mt-4 mx-2" onClick={() => handleShowAccessMethod(Role.DELEGATOR)}>Sign in for Delegators</div>
-                <div className="btn btn-sign-in mt-4 mx-2" onClick={() => handleShowAccessMethod(Role.OPERATOR)}>Sign in for Operators</div>
+                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR)}>Sign in for Delegators</div>
+                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR)}>Sign in for Operators</div>
                 <div id="home-ssn-details" className="container">
-                  <div className="row rounded p-4">
+                  <div className="row p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
-                    <div className="col-12">
-                      <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                    <div className="col-12 content">
+                        <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
                     </div>
                   </div>
                 </div>
@@ -175,13 +178,13 @@ function Home(props: any) {
 
               <>
                 { /* no wallets selected - show wallets to connect */ }
-                <p className="mt-5 animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
-                <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn">
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconFileCode className="home-icon" /><span className="d-block mt-0.5">Keystore</span></div>
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedger className="home-icon my-3" width="32" height="32" /><span className="d-block mt-0.5">Ledger</span></div>
-                  <div className="btn-wallet-access mx-2 d-block p-4" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}><ZilPayIcon className="home-icon my-3 path" width="32" height="32" /><span className="d-block mt-0.5">ZilPay</span></div>
+                <p className="wallet-connect-text animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
+                <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span></div>
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span></div>
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}><IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span></div>
                 </div>
-                <button type="button" className="btn-user-action-cancel mt-4 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
+                <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
               </>
 
               :
@@ -199,10 +202,10 @@ function Home(props: any) {
               </>
             }
           </div>
-          <footer className="footer col-12 d-flex flex-column align-items-end">
-            <div className="disclaimer p-2">
-              <button type="button" className="btn mx-2" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
-              <span>&copy; 2020 Zilliqa</span> 
+          <footer id="disclaimer" className="align-items-start">
+            <div className="p-2">
+              <span className="ml-4 mx-3">&copy; 2020 Zilliqa</span> 
+              <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
             </div>
           </footer>
           <DisclaimerModal />

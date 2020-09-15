@@ -101,9 +101,10 @@ function WithdrawCommModal(props: any) {
                             </div>
                             <div className="modal-body">
                                 <p>Current Commission Reward: {currentRewards ? convertQaToCommaStr(currentRewards) : '0.000'} ZIL</p>
-                                <p>Are you sure you want to withdraw the commission rewards?</p>
-                                <button type="button" className="btn btn-user-action mr-2" onClick={withdrawComm}>Withdraw</button>
-                                <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                                <p>Are you sure you wish to withdraw commission rewards ?</p>
+                                <div className="d-flex mt-2">
+                                    <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawComm}>Withdraw</button>
+                                </div>
                             </div>
                             </>
                         }

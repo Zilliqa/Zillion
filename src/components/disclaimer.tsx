@@ -22,7 +22,7 @@ function DisclaimerModal(props: any) {
                         <p>The ZILs are not intended to be securities (or any other regulated instrument) under the laws of any jurisdiction where they are intended to be, or will be, purchased or sold and no action has been or will be taken in any jurisdiction by Zilliqa Research or any of its affiliates that would permit a public offering, or any other offering under circumstances not permitted by applicable law of the ZILs, in any country or jurisdiction where action for that purpose is required. Accordingly, the ZILs may not be offered or sold, directly or indirectly, by any holder, in or from any country or jurisdiction, except in circumstances which will result in compliance with all applicable rules and regulations of any such country or jurisdiction.</p>
                     </div>
                     <div className="modal-footer">
-                    <button type="button" className="btn btn-user-action mx-auto d-block" data-dismiss="modal">Okay</button>
+                        <button type="button" className="btn btn-user-action mx-auto d-block" data-dismiss="modal">Okay</button>
                     </div>
                 </div>
             </div>

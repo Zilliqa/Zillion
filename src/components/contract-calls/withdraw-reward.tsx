@@ -127,12 +127,14 @@ function WithdrawRewardModal(props: any) {
                         </div>
                         <div className="modal-body">
                             <Select 
-                                placeholder="Select an operator to withdraw the rewards from"
-                                className="mb-4"
+                                placeholder="Select an operator to withdraw the rewards"
+                                className="node-options-container mb-4"
+                                classNamePrefix="node-options"
                                 options={nodeSelectorOptions}
                                 onChange={handleChange}  />
-                            <button type="button" className="btn btn-user-action mr-2" onClick={withdrawReward}>Withdraw</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <div className="d-flex">
+                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Withdraw</button>
+                            </div>
                         </div>
                          </>
                      }

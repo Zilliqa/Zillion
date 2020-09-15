@@ -23,6 +23,7 @@ import WithdrawRewardModal from './contract-calls/withdraw-reward';
 import CompleteWithdrawModal from './contract-calls/complete-withdraw';
 
 import logo from "../static/logo.png";
+import DisclaimerModal from './disclaimer';
 
 
 interface NodeOptions {
@@ -322,7 +323,7 @@ function Dashboard(props: any) {
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
                     <li className="nav-item active">
-                        <button type="button" className="nav-link btn" onClick={getAccountBalance}>Dashboard <span className="sr-only">(current)</span></button>
+                        <button type="button" className="nav-link btn nav-btn" onClick={getAccountBalance}>Dashboard <span className="sr-only">(current)</span></button>
                     </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
@@ -349,18 +350,17 @@ function Dashboard(props: any) {
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
-                                <h1 className="mb-4">Zillion Dashboard</h1>
 
                                 {
                                     (currRole === Role.DELEGATOR) &&
 
                                     <>
                                     {/* delegator section */}
-                                    <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                    <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Withdraw Rewards</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Withdraw Rewards</button>
                                         {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
                                     </div>
                                     </>
@@ -372,11 +372,11 @@ function Dashboard(props: any) {
                                     <>
                                     {/* node operator section */}
 
-                                    <div className="p-4 mb-4 bg-white rounded dashboard-card">
+                                    <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi {nodeDetails.name ? nodeDetails.name : 'Operator'}! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
-                                        <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
                                     </div>
                                     </>
                                 }
@@ -386,9 +386,11 @@ function Dashboard(props: any) {
                                     <>
                                     {/* delegator statistics */}
 
-                                    <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
-                                        <h5 className="card-title mb-4">My Staking Portfolio</h5>
+                                    <div className="p-4 dashboard-card container-fluid">
                                         <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title mb-4">My Staking Portfolio</h5>
+                                            </div>
                                             <div className="col-12">
                                                 { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
@@ -400,7 +402,7 @@ function Dashboard(props: any) {
                                 {/* operator statistics */}
                                 {
                                     (currRole === Role.OPERATOR) &&
-                                    <div className="p-4 mb-4 rounded bg-white dashboard-card container-fluid">
+                                    <div className="p-4 dashboard-card container-fluid">
                                         <h5 className="card-title mb-4">Staking Performance</h5>
                                         <div className="row">
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">
@@ -429,7 +431,7 @@ function Dashboard(props: any) {
                                     </div>
                                 }
 
-                                <div id="dashboard-ssn-details" className="p-4 mb-4 bg-white rounded dashboard-card container-fluid">
+                                <div id="dashboard-ssn-details" className="p-4 dashboard-card container-fluid">
                                     <div className="row">
                                         <div className="col">
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
@@ -440,7 +442,7 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                <div id="dashboard-recent-txn" className="p-4 mb-4 bg-white rounded dashboard-card container-fluid">
+                                <div id="dashboard-recent-txn" className="p-4 dashboard-card container-fluid">
                                     <div className="row">
                                         <div className="col">
                                             <h5 className="card-title mb-4">Recent Transactions</h5>
@@ -458,6 +460,13 @@ function Dashboard(props: any) {
                     <ToastContainer hideProgressBar={true}/>
                 </div>
             </div>
+            <footer id="disclaimer" className="align-items-start">
+                <div className="p-2">
+                <span className="mx-3">&copy; 2020 Zilliqa</span> 
+                <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
+                </div>
+            </footer>
+            <DisclaimerModal />
             <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />

@@ -60,7 +60,7 @@ function WalletZilPay(props: any) {
 
     return (
         <div className="wallet-access">
-            <h2 className="mb-4">Access Wallet using ZilPay</h2>
+            <h2>Access wallet using ZilPay</h2>
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             <ToastContainer hideProgressBar={true} />
