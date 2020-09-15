@@ -60,14 +60,15 @@ body {
 
   --primary-section-bg-color: #070e22;
 
-  --placeholder-text-color: #45474a;
-  --wallet-access-shadow-color: rgba(8,255,226,0.22);
+  --placeholder-text-color: #bdbdbd;
+  --wallet-access-shadow-color: rgba(8,255,226, 0.22);
 
   --primary-table-font-color: #f0f0f0;
   --primary-table-striped-color: #060f2a;
   --primary-shadow-color: rgba(8,255,226,0.15);
   
   --dashboard-shadow-color: rgba(8,255,226,0.10);
+  --input-shadow-color: rgba(8,255,226,0.08);
   --hyperlink-color: #89adf5;
   --hyperlink-hover-color: #5b8df1;
 }
@@ -97,6 +98,19 @@ body {
   background-color: #c0c0c0;
   border-radius: 20px;
   border: 3px solid #fafafa;
+}
+
+/* placeholder */
+::-webkit-input-placeholder { /* Edge */
+  color: var(--placeholder-text-color);
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: var(--placeholder-text-color);
+}
+
+::placeholder {
+  color: var(--placeholder-text-color);
 }
 
 @keyframes modalFade {
@@ -314,7 +328,7 @@ body {
 
 .close span {
   color: var(--primary-color);
-  font-size: 1.2em;
+  font-size: 1em;
 }
 
 .close:hover {
@@ -354,6 +368,29 @@ body {
     padding-top: 10%;
 }
 
+.modal .contract-calls-modal .modal-body {
+  font-size: 1em;
+  color: var(--text-color);
+}
+
+.modal .contract-calls-modal .modal-body input[type=text] {
+  color: var(--text-color);
+  font-size: 1em !important;
+
+  border-radius: 10px;
+  border: none;
+  background-color: var(--secondary-color);
+
+  margin: 0.5em 0;
+  padding: 1em 1.4em !important;
+
+  width: 100%;
+
+  -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+}
+
 .modal-processing h2, .modal-sent h2 {
   color: #263238;
   font-size: 1.4em;
@@ -362,13 +399,9 @@ body {
 
 .modal-title {
   color: var(--primary-color);
-  font-size: 1.4em;
-  font-weight: 600;
+  font-size: 1.2  em;
+  font-weight: 500;
   text-transform: capitalize;
-}
-
-.modal-body {
-  font-size: 0.9em;
 }
 
 .modal-body input {
