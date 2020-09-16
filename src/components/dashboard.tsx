@@ -56,7 +56,7 @@ function Dashboard(props: any) {
         name: '',
         stakeAmt: '0',
         bufferedDeposit: '0',
-        commRate: 0,
+        commRate: '0',
         commReward: '0',
         numOfDeleg: 0,
         receiver: ''
@@ -255,7 +255,7 @@ function Dashboard(props: any) {
                         ...prevNodeDetails,
                         stakeAmt: '0',
                         bufferedDeposit: '0',
-                        commRate: 0,
+                        commRate: '0',
                         commReward: '0',
                         numOfDeleg: 0,
                         receiver: ''
@@ -421,7 +421,7 @@ function Dashboard(props: any) {
                                             </div>
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">
                                                 <h4>Commission Rate</h4>
-                                                <p>{convertToProperCommRate(nodeDetails.commRate.toString()).toFixed(2)}%</p>
+                                                <p>{convertToProperCommRate(nodeDetails.commRate).toFixed(2)}%</p>
                                             </div>
                                             <div className="col performance-stats rounded pt-3 pl-4 m-2">
                                                 <h4>Commission Reward</h4>
