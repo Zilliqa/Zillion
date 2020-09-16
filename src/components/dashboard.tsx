@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
@@ -310,6 +310,21 @@ function Dashboard(props: any) {
         }
 
     }, [networkURL, currWalletAddress]);
+
+
+    // prevent user from refreshing
+    useEffect(() => {
+        window.onbeforeunload = (e: any) => {
+            e.preventDefault();
+            e.returnValue = 'The page auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.';
+            setTimeout(() => {
+                toast.dismiss();
+            }, 5000);
+            return (
+                Alert("warn", "The app auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.")
+            );
+        }
+    }, []);
 
 
     return (

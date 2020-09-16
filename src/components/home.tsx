@@ -122,6 +122,10 @@ function Home(props: any) {
     }
   }, [selectedNetwork]);
 
+  useEffect(() => {
+    window.onbeforeunload = null;
+  }, []);
+
   return (
     <div className="cover">
       <div className="container-fluid">
