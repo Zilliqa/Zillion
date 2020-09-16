@@ -74,7 +74,7 @@ function StakingPortfolio(props: any) {
             {
                 Header: 'address',
                 accessor: 'ssnAddress',
-                Cell: ({ row }: any) => <a href={getAddressLink(row.original.ssnAddress, networkURL)}>{row.original.ssnAddress}</a>
+                Cell: ({ row }: any) => <a href={getAddressLink(row.original.ssnAddress, networkURL)} target="_blank" rel="noopener noreferrer">{row.original.ssnAddress}</a>
             },
             {
                 Header: 'deposit (ZIL)',
