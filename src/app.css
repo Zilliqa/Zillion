@@ -920,6 +920,9 @@ body {
   background-color: var(--secondary-color);
   background-color: transparent;
 
+  margin-left: -1em;
+  margin-right: -1.1em;
+
   -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
   -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
   box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
