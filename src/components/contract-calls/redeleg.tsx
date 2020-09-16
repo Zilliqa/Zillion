@@ -1,80 +1,93 @@
 import React, { useState, useContext } from 'react';
 import Select from 'react-select';
-import { trackPromise } from 'react-promise-tracker';
 import { ToastContainer, toast } from 'react-toastify';
+import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
-import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
-import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
-
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import Alert from '../alert';
+import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
+import { ProxyCalls, OperationStatus, AccessMethod } from '../../util/enum';
+
 
 const { BN } = require('@zilliqa-js/util');
 
-function WithdrawStakeModal(props: any) {
+function ReDelegateStakeModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
+    
+    const { 
+        proxy,
+        onSuccessCallback,
+        ledgerIndex,
+        networkURL,
+        nodeSelectorOptions } = props;
 
-    const proxy = props.proxy;
-    const networkURL = props.networkURL;
-    const ledgerIndex = props.ledgerIndex;
-    const { onSuccessCallback } = props;
+    const [fromSsn, setFromSsn] = useState('');
+    const [toSsn, setToSsn] = useState('');
+    const [delegAmt, setDelegAmt] = useState(''); // in ZIL
 
-    const nodeSelectorOptions = props.nodeSelectorOptions;
-
-    const [ssnAddress, setSsnAddress] = useState(''); // checksum address
-    const [withdrawAmt, setWithdrawAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
-    const withdrawStake = async () => {
-        if (!ssnAddress) {
+    const redeleg = () => {
+        if (!fromSsn || !toSsn) {
             Alert('error', "operator address should be bech32 or checksum format");
             return null;
         }
 
-        if (!withdrawAmt || !withdrawAmt.match(/\d/)) {
-            Alert('error', "Withdraw amount is invalid.");
+        if (!delegAmt || !delegAmt.match(/\d/)) {
+            Alert('error', "Delegate amount is invalid.");
             return null;
         }
 
         // create tx params
 
         // toAddr: proxy address
+
         const proxyChecksum = bech32ToChecksum(proxy);
-        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-        const withdrawAmtQa = convertZilToQa(withdrawAmt);
+        const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
+        const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
+        const delegAmtQa = convertZilToQa(delegAmt);
 
         // gas price, gas limit declared in account.ts
         let txParams = {
             toAddr: proxyChecksum,
-            amount: new BN(0),
+            amount: new BN(`${delegAmtQa}`),
             code: "",
             data: JSON.stringify({
-                _tag: ProxyCalls.WITHDRAW_STAKE_AMT,
+                _tag: ProxyCalls.REDELEGATE_STAKE,
                 params: [
                     {
                         vname: 'ssnaddr',
                         type: 'ByStr20',
-                        value: `${ssnChecksumAddress}`,
+                        value: `${fromSsnChecksumAddress}`,
                     },
                     {
-                        vname: 'amt',
-                        type: 'Uint128',
-                        value: `${withdrawAmtQa}`,
+                        vname: 'to_ssn',
+                        type: 'ByStr20',
+                        value: `${toSsnChecksumAddress}`,
                     },
+                    {
+                        vname: 'amount',
+                        type: 'Uint128',
+                        value: `${delegAmtQa}`,
+                    }
                 ]
             })
         };
 
         setIsPending(OperationStatus.PENDING);
-        
+
         if (accountType === AccessMethod.LEDGER) {
             Alert('info', "Accessing the ledger device for keys.");
             Alert('info', "Please follow the instructions on the device.");
+        }
+
+        if (accountType === AccessMethod.ZILPAY) {
+            Alert('info', "Please follow the instructions on ZilPay.");
         }
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
@@ -102,23 +115,27 @@ function WithdrawStakeModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setSsnAddress('');
-            setWithdrawAmt('');
+            setFromSsn('');
+            setToSsn('');
             setTxnId('');
+            setDelegAmt('')
         }, 150);
     }
 
-    const handleWithdrawAmt = (e: any) => {
-        setWithdrawAmt(e.target.value);
+    const handleFromAddress = (option: any) => {
+        setFromSsn(option.value);
     }
 
-    const handleChange = (option: any) => {
-        console.log(option.value);
-        setSsnAddress(option.value);
+    const handleToAddress = (option: any) => {
+        setToSsn(option.value);
+    }
+
+    const handleDelegAmt = (e: any) => {
+        setDelegAmt(e.target.value);
     }
 
     return (
-        <div id="withdraw-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawStakeModalLabel" aria-hidden="true">
+        <div id="redeleg-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="redelegModalLabel" aria-hidden="true">
             <div className="contract-calls-modal modal-dialog modal-lg" role="document">
                 <div className="modal-content">
                     {
@@ -130,28 +147,39 @@ function WithdrawStakeModal(props: any) {
 
                         txnId ?
 
-                        <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose} />
+                        <ModalSent txnId={txnId} networkURL={networkURL} handleClose={handleClose}/>
 
                         :
 
                         <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="withdrawStakeModalLabel">Withdraw Stake</h5>
+                            <h5 className="modal-title" id="withdrawRewardModalLabel">Re-Delegate Stake</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <Select
-                                placeholder="Select an operator to withdraw the stake"
+
+                            <Select 
+                                placeholder="Select an operator to transfer from"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
                                 options={nodeSelectorOptions}
-                                onChange={handleChange} />
-                            <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
-                            <div className="d-flex">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawStake}>Withdraw</button>
+                                onChange={handleFromAddress}  />
+                            
+                            <Select 
+                                placeholder="Select an operator to receive the delegated amount"
+                                className="node-options-container mb-4"
+                                classNamePrefix="node-options"
+                                options={nodeSelectorOptions}
+                                onChange={handleToAddress}  />
+
+                            <input type="text" className="mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to redelegate in ZIL" />
+
+                            <div className="d-flex mt-4">
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={redeleg}>Re-Stake</button>
                             </div>
+
                         </div>
                         </>
                     }
@@ -162,4 +190,4 @@ function WithdrawStakeModal(props: any) {
     );
 }
 
-export default WithdrawStakeModal;
+export default ReDelegateStakeModal;

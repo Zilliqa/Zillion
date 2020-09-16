@@ -62,6 +62,7 @@ export enum SsnStatus {
 export enum ProxyCalls {
     COMPLETE_WITHDRAWAL = "CompleteWithdrawal",
     DELEGATE_STAKE = "DelegateStake",
+    REDELEGATE_STAKE = "ReDelegateStake",
     UPDATE_COMM = "UpdateComm",
     UPDATE_RECV_ADDR = "UpdateReceivingAddr",
     WITHDRAW_COMM = "WithdrawComm",

@@ -122,15 +122,22 @@ function Home(props: any) {
     }
   }, [selectedNetwork]);
 
+  useEffect(() => {
+    window.onbeforeunload = null;
+  }, []);
+
   return (
     <div className="cover">
       <div className="container-fluid">
         <div className="row align-items-center">
           <div className="cover-content col-12 text-center text-light">
+            <div id="banner" className="mb-4 text-center">
+              <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
+            </div>
 
             <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
 
-              { 
+              {
                 environment_config === Environment.DEV && 
 
                 <div className="form-group">
