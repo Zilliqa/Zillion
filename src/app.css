@@ -544,7 +544,7 @@ body {
 }
 
 .ssn-table-status-active {
-  color: #89adf5;
+  color: var(--primary-dark-color);
   font-size: 0.78em;
   letter-spacing: 0.02em;
   text-transform: uppercase;
