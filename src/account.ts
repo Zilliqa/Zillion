@@ -193,6 +193,17 @@ export const getTotalCoinSupply = async (proxy: string, networkURL?: string) => 
     }
 };
 
+export const getTotalGzilSupply = async (gzilAddress: string) => {
+    // assume the blockchain network is already set
+    try {
+        const contract = await zilliqa.blockchain.getSmartContractState(gzilAddress);
+        return contract.result;
+    } catch (err) {
+        console.error("error - getTotalGzilSupply: %o", err);
+        return OperationStatus.ERROR;
+    }
+};
+
 // isOperator - check if address is node operator
 // @param address: base16 address
 export const isOperator = async (proxy: string, address: string, networkURL: string) => {

@@ -835,6 +835,7 @@ body {
   font-size: 1em;
   margin-bottom: 4px;
   letter-spacing: 0.02em;
+  text-transform: capitalize;
 }
 
 #ledger-connect-modal th {

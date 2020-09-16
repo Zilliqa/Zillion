@@ -3,28 +3,35 @@ import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../account';
 import { PromiseArea, OperationStatus } from '../util/enum';
-import { convertZilToQa } from '../util/utils';
+import { convertZilToQa, convertQaToCommaStr } from '../util/utils';
+
+import Spinner from './spinner';
 
 const BigNumber = require('bignumber.js');
 
+
+const MAX_GZIL_SUPPLY = "682550";
 
 function LandingStatsTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : 3000;
+    const [showSpinner, setShowSpinner] = useState(false);
 
     const [data, setData] = useState({
         circulatingSupplyStake: '0',
         nodesNum: '0',
         delegNum: '0',
         gzil: '0',
-        remaingGzil: '0'
+        remainingGzil: '0'
     });
 
     const mountedRef = useRef(false);
 
     const getData = () => {
         let circulatingSupplyStake = '0';
+        let gzil = '0';
+        let remainingGzil = '0';
 
         trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
             .then(async (contract) => {
@@ -40,65 +47,94 @@ function LandingStatsTable(props: any) {
             if (totalCoinSupply !== OperationStatus.ERROR && totalCoinSupply.result !== undefined) {
                 const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply.result));
                 const totalStakeAmountBN = new BigNumber(totalStakeAmount);
-                console.log("landing.....%o", totalCoinSupplyBN);
-                console.log("landing.....%o", totalStakeAmountBN);
                 circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
-                console.log(circulatingSupplyStake.toString());
             }
 
+            // compute total number of gzil
+            const gzilContract = await ZilliqaAccount.getTotalGzilSupply(contract.gziladdr);
+            if (gzilContract !== undefined) {
+                gzil = gzilContract.total_supply;
+                const remainGzil = new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)).minus(new BigNumber(gzil));
+                remainingGzil = (remainGzil.dividedBy(new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)))).times(100).toFixed(2);
+            }
 
             setData(prevData => ({
                 ...prevData,
                 circulatingSupplyStake: circulatingSupplyStake.toString(),
-                nodesNum: '0',
-                delegNum: '0',
-                gzil: '0',
-                remaingGzil: '0'
+                nodesNum: Object.keys(contract.ssnlist).length.toString(),
+                delegNum: Object.keys(contract.deposit_amt_deleg).length.toString(),
+                gzil: gzil,
+                remainingGzil: remainingGzil.toString(),
             }));
 
-            }), PromiseArea.PROMISE_GET_STAKE_PORTFOLIO);
+            }), PromiseArea.PROMISE_LANDING_STATS);
         
     }
 
     useEffect(() => {
+        setShowSpinner(true);
         getData();
+        // eslint-disable-next-line
+    }, [proxy, networkURL]);
+
+    useEffect(() => {
+        mountedRef.current = true;
+        const intervalId = setInterval(async () => {
+            setShowSpinner(false);
+            getData();
+        }, refresh);
+        return () => {
+            clearInterval(intervalId);
+            mountedRef.current = false;
+        }
+        // eslint-disable-next-line
     }, []);
 
     return (
+        <>
         <div id="landing-stats" className="container">
             <div className="row p-4">
             <h2 className="mb-4">Statistics</h2>
             
             <div className="col-12">
+                { showSpinner && <Spinner class="spinner-border dashboard-spinner" area={PromiseArea.PROMISE_LANDING_STATS} /> }
+                
+                { !showSpinner && 
+
+                <>
                 <div className="row pl-4 align-items-center justify-content-left">
-                <div className="d-block landing-stats-card">
-                    <h3>Circulating Supply Staked</h3>
-                    <span>{data.circulatingSupplyStake}%</span>
-                </div>
-                <div className="d-block landing-stats-card">
-                    <h3>Staked Seed Nodes</h3>
-                    <span>10</span>
-                </div>
-                <div className="d-block landing-stats-card">
-                    <h3>Delegators</h3>
-                    <span>10</span>
-                </div>
+                    <div className="d-block landing-stats-card">
+                        <h3>Circulating Supply Staked</h3>
+                        <span>{data.circulatingSupplyStake}%</span>
+                    </div>
+                    <div className="d-block landing-stats-card">
+                        <h3>Staked Seed Nodes</h3>
+                        <span>{data.nodesNum}</span>
+                    </div>
+                    <div className="d-block landing-stats-card">
+                        <h3>Delegators</h3>
+                        <span>{data.delegNum}</span>
+                    </div>
                 </div>
 
                 <div className="row pl-4 align-items-center justify-content-left">
-                <div className="d-block landing-stats-card">
-                    <h3>Total Number of GZIL minted</h3>
-                    <span>10</span>
+                    <div className="d-block landing-stats-card">
+                        <h3>Total Number of GZIL minted</h3>
+                        <span>{convertQaToCommaStr(data.gzil)}</span>
+                    </div>
+                    <div className="d-block landing-stats-card">
+                        <h3>Remaining GZIL Available</h3>
+                        <span>{data.remainingGzil}%</span>
+                    </div>
                 </div>
-                <div className="d-block landing-stats-card">
-                    <h3>Remaining GZIL</h3>
-                    <span>10%</span>
-                </div>
-                </div>
+                </>
+
+                }
 
             </div>
             </div>
-      </div>
+        </div>
+        </>
     );
 }
 
