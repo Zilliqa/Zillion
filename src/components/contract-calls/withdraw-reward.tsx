@@ -133,7 +133,7 @@ function WithdrawRewardModal(props: any) {
                                 options={nodeSelectorOptions}
                                 onChange={handleChange}  />
                             <div className="d-flex">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim</button>
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim</button>
                             </div>
                         </div>
                          </>
