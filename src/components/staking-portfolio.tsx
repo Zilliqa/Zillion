@@ -12,12 +12,6 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 const { BN } = require('@zilliqa-js/util');
 
 
-interface PortfolioData {
-    ssnName: string,
-    ssnAddress: string,
-    delegAmt: string,
-    rewards: string
-}
 
 function Table({ columns, data }: any) {
     const {
@@ -33,7 +27,7 @@ function Table({ columns, data }: any) {
         });
     
     return (
-        <table className="table table-responsive" {...getTableProps()}>
+        <table className="table" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -75,7 +69,7 @@ function StakingPortfolio(props: any) {
         () => [
             {
                 Header: 'name',
-                accessor: 'ssnName'
+                accessor: 'ssnName',
             },
             {
                 Header: 'address',
@@ -96,7 +90,7 @@ function StakingPortfolio(props: any) {
     );
 
     const getData = async () => {
-        let outputResult : PortfolioData[] = [];
+        let outputResult: { ssnName: string; ssnAddress: string; delegAmt: string; rewards: string; }[] = [];
 
         trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
             .then(async (contract) => {
@@ -114,16 +108,18 @@ function StakingPortfolio(props: any) {
                         }
 
                         // compute stake amount
-                        const delegAmt = new BN(depositDelegList[ssnAddress]).toString();
+                        const delegAmt = new BN(depositDelegList[ssnAddress]);
+                        console.log("STAKING PORTFOLIO deleg amt: %o", delegAmt);
 
                         // compute rewards
                         const delegRewards = new BN(await computeDelegRewards(proxy, networkURL, ssnAddress, userBase16Address)).toString();
+                        console.log("STAKING PORTFOLIO deleg rewards : %o", delegRewards);
 
-                        const portfolioData : PortfolioData = {
-                            ssnName: toBech32Address(contract.ssnlist[ssnAddress].arguments[3]),
-                            ssnAddress: ssnAddress,
-                            delegAmt: delegAmt,
-                            rewards: delegRewards
+                        const portfolioData = {
+                            ssnName: contract.ssnlist[ssnAddress].arguments[3],
+                            ssnAddress: toBech32Address(ssnAddress),
+                            delegAmt: delegAmt.toString(),
+                            rewards: delegRewards.toString()
                         }
 
                         outputResult.push(portfolioData);
@@ -141,7 +137,7 @@ function StakingPortfolio(props: any) {
         setShowSpinner(true);
         getData();
         // eslint-disable-next-line
-    }, [])
+    }, [proxy, networkURL])
 
     useEffect(() => {
         mountedRef.current = true;
@@ -154,12 +150,13 @@ function StakingPortfolio(props: any) {
             mountedRef.current = false;
         }
         // eslint-disable-next-line
-    }, [proxy, networkURL, userBase16Address]);
+    }, []);
 
     return (
         <>
         { showSpinner && <Spinner class="spinner-border dashboard-spinner" area={PromiseArea.PROMISE_GET_STAKE_PORTFOLIO} /> }
-        <Table columns={columns} data={portfolioTable} />
+        { portfolioTable.length === 0 && <div className="d-block text-left"><em>You have not deposited in any nodes yet.</em></div> }
+        { portfolioTable.length > 0 && <Table columns={columns} data={portfolioTable} /> }
         </>
     );
 }

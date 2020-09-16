@@ -386,12 +386,12 @@ function Dashboard(props: any) {
                                     <>
                                     {/* delegator statistics */}
 
-                                    <div className="p-4 dashboard-card container-fluid">
+                                    <div id="staking-portfolio-details" className="p-4 dashboard-card container-fluid">
                                         <div className="row">
                                             <div className="col">
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
-                                            <div className="col-12">
+                                            <div className="col-12 text-center">
                                                 { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
                                         </div>

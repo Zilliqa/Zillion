@@ -678,7 +678,8 @@ body {
 
 #home-ssn-details, 
 #dashboard-ssn-details,
-#dashboard-recent-txn {
+#dashboard-recent-txn,
+#staking-portfolio-details {
   font-size: 0.85em;
   margin-top: 3em;
 
@@ -700,7 +701,8 @@ body {
 
 #home-ssn-details table tbody, 
 #dashboard-ssn-details table tbody,
-#dashboard-recent-txn table tbody {
+#dashboard-recent-txn table tbody,
+#staking-portfolio-details table tbody {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
@@ -708,19 +710,22 @@ body {
 
 #home-ssn-details table tbody a, 
 #dashboard-ssn-details table tbody a,
-#dashboard-recent-txn table tbody a {
+#dashboard-recent-txn table tbody a,
+#staking-portfolio-details table tbody a {
   color: var(--hyperlink-color);
 }
 
 #home-ssn-details table tbody a:hover, 
 #dashboard-ssn-details table tbody a:hover,
-#dashboard-recent-txn table tbody a:hover {
+#dashboard-recent-txn table tbody a:hover,
+#staking-portfolio-details table tbody a:hover {
   color: var(--hyperlink-hover-color);
 }
 
 #home-ssn-details table tbody tr:nth-child(odd),
 #dashboard-ssn-details table tbody tr:nth-child(odd),
-#dashboard-recent-txn table tbody tr:nth-child(odd) {
+#dashboard-recent-txn table tbody tr:nth-child(odd),
+#staking-portfolio-details table tbody tr:nth-child(odd) {
   background-color: var(--primary-table-striped-color);
 }
 
@@ -729,13 +734,16 @@ body {
 #dashboard-ssn-details .table td, 
 #dashboard-ssn-details .table th,
 #dashboard-recent-txn .table td,
-#dashboard-recent-txn .table th {
+#dashboard-recent-txn .table th,
+#staking-portfolio-details .table td,
+#staking-portfolio-details .table th {
   border: 0;
 }
 
 #home-ssn-details th,
 #dashboard-ssn-details th,
-#dashboard-recent-txn th {
+#dashboard-recent-txn th,
+#staking-portfolio-details th {
   color: var(--primary-color);
   font-size: 0.85em;
   font-weight: 600;
