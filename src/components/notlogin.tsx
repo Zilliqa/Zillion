@@ -1,6 +1,7 @@
 import React from 'react';
 import NotloginLogo from '../static/notlogin.svg';
 import DisclaimerModal from './disclaimer';
+import IconNotAuthenticated from './icons/not-authenticated';
 
 function Notlogin(props: any) {
 
@@ -13,8 +14,8 @@ function Notlogin(props: any) {
             <div className="container-fluid">
                 <div className="row align-items-center">
                     <div className="cover-content col-12">
-                        <div id="unauthenticated-section" className="text-center rounded mx-auto p-4">
-                            <img src={NotloginLogo} alt="not-authenticated" width="250" className="mt-2 mb-4" />
+                        <div id="unauthenticated-section" className="text-center mx-auto">
+                            <IconNotAuthenticated className="home-icon" width="400px" />
                             <h3>Not authenticated</h3>  
                             <p>Sorry, please connect your wallet to continue.</p>
                             <button type="button" className="btn btn-user-action mx-2" onClick={directUser}>Log In</button>
