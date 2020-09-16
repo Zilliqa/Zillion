@@ -16,6 +16,7 @@ import IconLedgerLine from './icons/ledger-line';
 import IconZilPayLine from './icons/zil-pay-line';
 
 import ZillionLogo from '../static/zillion.svg';
+import LandingStatsTable from './landing-stats-table';
 
 
 function Home(props: any) {
@@ -169,6 +170,9 @@ function Home(props: any) {
                 { /* sign in and seed node table */ }
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR)}>Sign in for Delegators</div>
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR)}>Sign in for Operators</div>
+
+                <LandingStatsTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} />
+
                 <div id="home-ssn-details" className="container">
                   <div className="row p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
