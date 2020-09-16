@@ -103,7 +103,7 @@ function WithdrawRewardModal(props: any) {
 
     return (
         <div id="withdraw-reward-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawRewardModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
                  <div className="modal-content">
                      {
                          isPending ?
