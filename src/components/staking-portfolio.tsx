@@ -6,17 +6,11 @@ import * as ZilliqaAccount from "../account";
 import Spinner from './spinner';
 import { computeDelegRewards } from '../util/reward-calculator'
 import { PromiseArea } from '../util/enum';
-import { convertQaToCommaStr, computeStakeAmtPercent } from '../util/utils';
+import { convertQaToCommaStr, computeStakeAmtPercent, getAddressLink } from '../util/utils';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 const { BN } = require('@zilliqa-js/util');
 
-interface Portfolio {
-    totalStakeDeposit: number,
-    ssnStakeList: any[],
-    totalRewards: number,
-    ssnRewardsList: any[]
-}
 
 interface PortfolioData {
     ssnName: string,
@@ -25,8 +19,7 @@ interface PortfolioData {
     rewards: string
 }
 
-
-function Table({ columns, data, tableId }: any) {
+function Table({ columns, data }: any) {
     const {
         getTableProps,
         getTableBodyProps,
@@ -40,7 +33,7 @@ function Table({ columns, data, tableId }: any) {
         });
     
     return (
-        <table id={tableId} className="table table-responsive" {...getTableProps()}>
+        <table className="table table-responsive" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -73,12 +66,6 @@ function StakingPortfolio(props: any) {
 
     const [showSpinner, setShowSpinner] = useState(false);
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
-    const [data, setData] = useState({
-            totalStakeDeposit: 0,
-            ssnStakeList: 0,
-            totalRewards: [],
-            ssnRewardsList: [],
-        } as unknown as Portfolio);
     const [portfolioTable, setPortfolioTable] = useState([] as any);
 
     // prevent react update state on unmounted component 
@@ -92,25 +79,23 @@ function StakingPortfolio(props: any) {
             },
             {
                 Header: 'address',
-                accessor: 'ssnAddress'
+                accessor: 'ssnAddress',
+                Cell: ({ row }: any) => <a href={getAddressLink(row.original.ssnAddress, networkURL)}>{row.original.ssnAddress}</a>
             },
             {
-                Header: 'deposit',
-                accessor: 'delegAmt'
+                Header: 'deposit (ZIL)',
+                accessor: 'delegAmt',
+                Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.delegAmt)}</span>
             },
             {
-                Header: 'rewards',
-                accessor: 'rewards'
+                Header: 'rewards (ZIL)',
+                accessor: 'rewards',
+                Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.rewards)}</span>
             }
         ], []
     );
 
     const getData = async () => {
-        let totalStakeDeposit = 0;
-        let totalRewards = 0;
-        let ssnStakeList: any[] = [];
-        let ssnRewardsList: any[] = [];
-
         let outputResult : PortfolioData[] = [];
 
         trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
@@ -135,7 +120,7 @@ function StakingPortfolio(props: any) {
                         const delegRewards = new BN(await computeDelegRewards(proxy, networkURL, ssnAddress, userBase16Address)).toString();
 
                         const portfolioData : PortfolioData = {
-                            ssnName: contract.ssnlist[ssnAddress].arguments[3],
+                            ssnName: toBech32Address(contract.ssnlist[ssnAddress].arguments[3]),
                             ssnAddress: ssnAddress,
                             delegAmt: delegAmt,
                             rewards: delegRewards
