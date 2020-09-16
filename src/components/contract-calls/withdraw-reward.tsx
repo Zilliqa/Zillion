@@ -120,20 +120,20 @@ function WithdrawRewardModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="withdrawRewardModalLabel">Withdraw Rewards</h5>
+                            <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
                             <Select 
-                                placeholder="Select an operator to withdraw the rewards"
+                                placeholder="Select an operator to claim the rewards"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
                                 options={nodeSelectorOptions}
                                 onChange={handleChange}  />
                             <div className="d-flex">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Withdraw</button>
+                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim</button>
                             </div>
                         </div>
                          </>
