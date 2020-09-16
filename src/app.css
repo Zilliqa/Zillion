@@ -642,7 +642,7 @@ body {
 
 #home-mini-navbar {
   position: absolute;
-  top: 0;
+  top: 40px;
   right: 0;
 }
 
@@ -911,4 +911,16 @@ body {
   margin-top: 10%;
   width: 600px;
   background-color: #ffffff;
+}
+
+#banner {
+  font-size: 0.78em;
+  font-weight: 400;
+  border: none;
+  background-color: var(--secondary-color);
+  background-color: transparent;
+
+  -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
 }
