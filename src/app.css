@@ -509,6 +509,10 @@ body {
   background-color: var(--primary-color);
 }
 
+.node-options-container .node-options__single-value {
+  color: var(--text-color);
+}
+
 .pagination span {
   color: var(--primary-color);
   margin-top: 0.9em;
