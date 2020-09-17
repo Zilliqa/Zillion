@@ -10,7 +10,7 @@ import Spinner from './spinner';
 const BigNumber = require('bignumber.js');
 
 const MAX_GZIL_SUPPLY = "682550";
-
+const TOTAL_REWARD_SEED_NODES = "1870000"; // 110000 * 17
 
 function LandingStatsTable(props: any) {
     const proxy = props.proxy;
@@ -23,7 +23,9 @@ function LandingStatsTable(props: any) {
         nodesNum: '0',
         delegNum: '0',
         gzil: '0',
-        remainingGzil: '0'
+        remainingGzil: '0',
+        totalDeposits: '0',
+        estRealtimeAPY: '0'
     });
 
     const mountedRef = useRef(false);
@@ -32,6 +34,7 @@ function LandingStatsTable(props: any) {
         let circulatingSupplyStake = '0';
         let gzil = '0';
         let remainingGzil = '0';
+        let estRealtimeAPY = '0';
 
         trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
             .then(async (contract) => {
@@ -58,6 +61,11 @@ function LandingStatsTable(props: any) {
                 remainingGzil = (remainGzil.dividedBy(new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)))).times(100).toFixed(2);
             }
 
+            // compute est. APY
+            const temp = new BigNumber(totalStakeAmount).times(36500);
+            const estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).toFixed(5);
+
+
             if (mountedRef.current) {
                 setData(prevData => ({
                     ...prevData,
@@ -66,6 +74,8 @@ function LandingStatsTable(props: any) {
                     delegNum: Object.keys(contract.deposit_amt_deleg).length.toString(),
                     gzil: gzil,
                     remainingGzil: remainingGzil.toString(),
+                    totalDeposits: totalStakeAmount.toString(),
+                    estRealtimeAPY: estAPY.toString(),
                 }));
             }
 
@@ -98,32 +108,37 @@ function LandingStatsTable(props: any) {
             <div className="row p-4">
             <h2 className="mb-4">Statistics</h2>
             
-            <div className="col-12">
-                { showSpinner && <Spinner class="spinner-border dashboard-spinner" area={PromiseArea.PROMISE_LANDING_STATS} /> }
+            <div className="col-12 align-items-center">
+                { showSpinner && <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_LANDING_STATS} /> }
                 
                 { !showSpinner && 
 
                 <>
-                <div className="row pl-4 align-items-center justify-content-left">
+                <div className="row mx-auto justify-content-center">
+                    <div className="d-block landing-stats-card">
+                        <h3>EST. Realtime APY</h3>
+                        <span>{data.estRealtimeAPY}%</span>
+                    </div>
                     <div className="d-block landing-stats-card">
                         <h3>Circulating Supply Staked</h3>
                         <span>{data.circulatingSupplyStake}%</span>
                     </div>
                     <div className="d-block landing-stats-card">
-                        <h3>Staked Seed Nodes</h3>
-                        <span>{data.nodesNum}</span>
-                    </div>
-                    <div className="d-block landing-stats-card">
-                        <h3>Delegators</h3>
-                        <span>{data.delegNum}</span>
-                    </div>
-                </div>
-
-                <div className="row pl-4 align-items-center justify-content-left">
-                    <div className="d-block landing-stats-card">
                         <h3>Remaining GZIL Available</h3>
                         <span>{data.remainingGzil}%</span>
                     </div>
+                </div>
+
+                <div className="row mx-auto pb-3 justify-content-center">
+                    <div className="d-block landing-stats-card">
+                        <h3>Delegators / Staked Seed Nodes</h3>
+                        <span>{data.delegNum} / {data.nodesNum}</span>
+                    </div>
+                    <div className="d-block landing-stats-card">
+                        <h3>Stake Amount</h3>
+                        <span>{convertQaToCommaStr(data.totalDeposits)}</span>
+                    </div>
+
                     <div className="d-block landing-stats-card">
                         <h3>Total GZIL minted</h3>
                         <span>{convertQaToCommaStr(data.gzil)}</span>
