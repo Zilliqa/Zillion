@@ -91,3 +91,14 @@ export const getAddressLink = (address: string, networkURL: string) => {
     
     return link;
 }
+
+// returns the zil address with '...'
+export const getTruncatedAddress = (address: string) => {
+    if (!address) {
+        return "";
+    }
+    const addressLen = address.length;
+    const front = address.substring(0, 6);
+    const end = address.substring(addressLen-4);
+    return front.concat("...", end);
+}

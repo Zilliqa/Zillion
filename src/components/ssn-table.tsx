@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useTable } from 'react-table';
+import ReactTooltip from "react-tooltip";
+import { useTable, useSortBy } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
 import { PromiseArea, SsnStatus, Role } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
 import * as Account from "../account";
 import Spinner from './spinner';
 
@@ -22,8 +23,17 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
         {
             columns, 
             data,
-            initialState: { pageIndex: 0, hiddenColumns: hiddenColumns }
-        });
+            initialState: { 
+                pageIndex: 0, 
+                hiddenColumns: hiddenColumns,
+                sortBy: [
+                    {
+                        id: 'ssnStakeAmt',
+                        desc: true
+                    }
+                ] 
+            }
+        }, useSortBy);
     
     return (
         <table id={tableId} className="table table-responsive" {...getTableProps()}>
@@ -75,7 +85,13 @@ function SsnTable(props: any) {
                 Header: 'address',
                 accessor: 'ssnAddress',
                 className: 'ssn-address',
-                Cell: ({ row }: any) => <a href={getAddressLink(row.original.ssnAddress, networkURL)} target="_blank" rel="noopener noreferrer">{row.original.ssnAddress}</a>
+                Cell: ({ row }: any) => 
+                    <>
+                    <a data-tip={row.original.ssnAddress} href={getAddressLink(row.original.ssnAddress, networkURL)} target="_blank" rel="noopener noreferrer">
+                        {getTruncatedAddress(row.original.ssnAddress)}
+                    </a>
+                    <ReactTooltip place="bottom" type="dark" effect="float" />
+                    </>
             },
             {
                 Header: 'api endpoint',
