@@ -523,27 +523,6 @@ body {
   fill: var(--primary-color);
 }
 
-.performance-stats {
-  border: 0;
-  border-radius: 6px;
-  color: var(--primary-table-font-color);
-  background-color: var(--primary-table-striped-color);
-}
-
-.performance-stats h4 {
-  color: var(--stats-header-color);
-  font-size: 0.78em;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  margin-top: 0.5em;
-  text-transform: uppercase;
-}
-
-.performance-stats p {
-  font-size: 1.4em;
-  margin-top: -0.2em;
-}
-
 .ssn-table-status-active {
   color: var(--primary-dark-color);
   font-size: 0.78em;
@@ -799,7 +778,8 @@ body {
 }
 
 #landing-stats, 
-#delegator-stats-details {
+#delegator-stats-details,
+#operator-stats-details {
   font-size: 0.85em;
   margin-top: 4em;
 
@@ -812,7 +792,8 @@ body {
 }
 
 #landing-stats .landing-stats-card, 
-#delegator-stats-details .deleg-stats-card {
+#delegator-stats-details .deleg-stats-card,
+#operator-stats-details .operator-stats-card {
   padding: 1em 0.5em;
   margin-left: auto;
   margin-right: auto;
@@ -820,7 +801,8 @@ body {
 }
 
 #landing-stats span, 
-#delegator-stats-details span {
+#delegator-stats-details span,
+#operator-stats-details span {
   font-size: 1.6em;
   font-weight: 600;
   color: var(--primary-table-font-color);
@@ -835,7 +817,8 @@ body {
 }
 
 #landing-stats h3, 
-#delegator-stats-details h3 {
+#delegator-stats-details h3,
+#operator-stats-details h3 {
   color: #6C6D7A;
   font-size: 0.78em;
   font-weight: 500;

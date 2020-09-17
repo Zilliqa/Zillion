@@ -410,7 +410,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">Overview</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                { mountedRef.current && <DelegatorStatsTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={"zil1w4sfekzy5vqcfpqvvkjw9z4qkl9rnzehe56l8a"} /> }
+                                                { mountedRef.current && <DelegatorStatsTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
                                         </div>
                                     </div>
@@ -428,7 +428,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
                                             <div className="col-12 text-center">
-                                                { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={"zil1w4sfekzy5vqcfpqvvkjw9z4qkl9rnzehe56l8a"} /> }
+                                                { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
                                         </div>
                                     </div>
@@ -438,30 +438,41 @@ function Dashboard(props: any) {
                                 {/* operator statistics */}
                                 {
                                     (currRole === Role.OPERATOR) &&
-                                    <div className="p-4 dashboard-card container-fluid">
-                                        <h5 className="card-title mb-4">Staking Performance</h5>
+
+                                   <div id="operator-stats-details" className="p-4 dashboard-card container-fluid">
                                         <div className="row">
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Stake Amount</h4>
-                                                <p>{convertQaToCommaStr(nodeDetails.stakeAmt)} ZIL</p>
-                                            </div>
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Buffered Deposit</h4>
-                                                <p>{convertQaToCommaStr(nodeDetails.bufferedDeposit)} ZIL</p>
-                                            </div>
-                                        </div>
-                                        <div className="row">
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Delegators</h4>
-                                                <p>{nodeDetails.numOfDeleg}</p>
-                                            </div>
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Commission Rate</h4>
-                                                <p>{convertToProperCommRate(nodeDetails.commRate).toFixed(2)}%</p>
-                                            </div>
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Commission Reward</h4>
-                                                <p>{convertQaToCommaStr(nodeDetails.commReward)} ZIL</p>
+                                            <div className="col">
+                                                <h5 className="card-title mb-4">My Node Performance</h5>
+                                            </div> 
+                                            <div className="col-12 text-center">
+
+                                                <div className="row px-2 align-items-center justify-content-center">
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Stake Amount</h3>
+                                                        <span>{convertQaToCommaStr(nodeDetails.stakeAmt)}</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Buffered Deposit</h3>
+                                                        <span>{convertQaToCommaStr(nodeDetails.bufferedDeposit)}</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Delegators</h3>
+                                                        <span>{nodeDetails.numOfDeleg}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="row px-2 pb-2 align-items-center justify-content-center">
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Commission Rate</h3>
+                                                        <span>{convertToProperCommRate(nodeDetails.commRate).toFixed(2)}%</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Commission Rewards</h3>
+                                                        <span>{convertQaToCommaStr(nodeDetails.commReward)}</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card"></div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
