@@ -6,7 +6,10 @@ import { PromiseArea } from '../util/enum';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { convertQaToCommaStr } from '../util/utils';
+import { computeDelegRewards } from '../util/reward-calculator';
 
+
+const { BN } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
 
@@ -17,26 +20,25 @@ function DelegatorStatsTable(props: any) {
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
-    // unclaimedZIL in Qa
-    // unclaimedGZIL in Qa
-    // gzilBalance in Qa
-    // totalPendingWithdrawal in Qa
+    // all except lastCycleAPY in Qa
     const [data, setData] = useState({
         lastCycleAPY: '0',
-        unclaimedZIL: '0',
-        unclaimedGZIL: '0',
+        zilRewards: '0',
+        gzilRewards: '0',
         gzilBalance: '0',
-        totalPendingWithdrawal: '0'
+        totalPendingWithdrawal: '0',
+        totalDeposits: '0'
     });
 
     const mountedRef = useRef(false);
 
     const getData = () => {
         let lastCycleAPY = '0';
-        let unclaimedZIL = '0';
-        let unclaimedGZIL = '0';
+        let zilRewards = '0';
+        let gzilRewards = '0';
         let gzilBalance = '0';
         let totalPendingWithdrawal = '0';
+        let totalDeposits = '0';
 
         trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
             .then(async (contract) => {
@@ -46,10 +48,13 @@ function DelegatorStatsTable(props: any) {
                 }
 
                 // compute last cycle APY
+                // use calculator
 
-                // compute unclaimed ZIL
                 if (contract.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
-                    let totalUnclaimedZILBN = new BigNumber(0);
+                    let totalDepositsBN = new BigNumber(0);
+                    let totalZilRewardsBN = new BigNumber(0);
+                    let totalGzilRewardsBN = new BigNumber(0);
+                    
                     const depositDelegList = contract.deposit_amt_deleg[userBase16Address];
                     
                     for (const ssnAddress in depositDelegList) {
@@ -57,13 +62,25 @@ function DelegatorStatsTable(props: any) {
                             continue;
                         }
 
+                        // compute total deposits
                         const delegAmtQaBN = new BigNumber(depositDelegList[ssnAddress]);
-                        totalUnclaimedZILBN = totalUnclaimedZILBN.plus(delegAmtQaBN);
+                        totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
+
+                        // compute zil rewards
+                        const delegRewards = new BN(await computeDelegRewards(proxy, networkURL, ssnAddress, userBase16Address)).toString();
+                        totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
                     }
-                    unclaimedZIL = totalUnclaimedZILBN.toString();
+
+                    // compute unclaimed gzil
+                    totalGzilRewardsBN = totalZilRewardsBN.dividedBy(1000);
+
+                    totalDeposits = totalDepositsBN.toString();
+                    zilRewards = totalZilRewardsBN.toString();
+                    gzilRewards = totalGzilRewardsBN.toString();
                 }
 
-                // compute unclaimed GZIL
+
+                // compute gzil balance
                 const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
                 if (gzilContract !== undefined) {
                     const gzilBalanceMap = gzilContract.balances;
@@ -92,10 +109,11 @@ function DelegatorStatsTable(props: any) {
                     setData(prevData => ({
                         ...prevData,
                         lastCycleAPY: lastCycleAPY,
-                        unclaimedZIL: unclaimedZIL,
-                        unclaimedGZIL: unclaimedGZIL,
+                        zilRewards: zilRewards,
+                        gzilRewards: gzilRewards,
                         gzilBalance: gzilBalance,
                         totalPendingWithdrawal: totalPendingWithdrawal,
+                        totalDeposits: totalDeposits,
                     }));
                 }
 
@@ -121,29 +139,33 @@ function DelegatorStatsTable(props: any) {
 
     return (
         <>
-        <div className="row pl-4 align-items-center justify-content-left">
+        <div className="row px-2 align-items-center justify-content-center">
             <div className="d-block deleg-stats-card">
                 <h3>Last Cycle APY</h3>
                 <span>{data.lastCycleAPY}%</span>
             </div>
             <div className="d-block deleg-stats-card">
-                <h3>Unclaimed ZIL Balance</h3>
-                <span>{convertQaToCommaStr(data.unclaimedZIL)}</span>
+                <h3>Total Deposits</h3>
+                <span>{convertQaToCommaStr(data.totalDeposits)}</span>
             </div>
             <div className="d-block deleg-stats-card">
-                <h3>Unclaimed GZIL Balance</h3>
-                <span>{convertQaToCommaStr(data.unclaimedGZIL)}</span>
+                <h3>Total Pending Withdrawal</h3>
+                <span>{convertQaToCommaStr(data.totalPendingWithdrawal)}</span>
             </div>
+        </div>
+
+        <div className="row px-2 pb-2 align-items-center justify-content-center">
             <div className="d-block deleg-stats-card">
                 <h3>GZIL Balance</h3>
                 <span>{convertQaToCommaStr(data.gzilBalance)}</span>
             </div>
-        </div>
-
-        <div className="row pl-4 align-items-center justify-content-left">
             <div className="d-block deleg-stats-card">
-                <h3>Total Pending Withdrawal</h3>
-                <span>{convertQaToCommaStr(data.totalPendingWithdrawal)}</span>
+                <h3>Unclaimed ZIL Rewards</h3>
+                <span>{convertQaToCommaStr(data.zilRewards)}</span>
+            </div>
+            <div className="d-block deleg-stats-card">
+                <h3>Unclaimed GZIL Rewards</h3>
+                <span>{convertQaToCommaStr(data.gzilRewards)}</span>
             </div>
         </div>
         </>

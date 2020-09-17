@@ -12,7 +12,6 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 const { BN } = require('@zilliqa-js/util');
 
 
-
 function Table({ columns, data }: any) {
     const {
         getTableProps,
