@@ -9,8 +9,8 @@ import Spinner from './spinner';
 
 const BigNumber = require('bignumber.js');
 
-
 const MAX_GZIL_SUPPLY = "682550";
+
 
 function LandingStatsTable(props: any) {
     const proxy = props.proxy;
@@ -58,14 +58,16 @@ function LandingStatsTable(props: any) {
                 remainingGzil = (remainGzil.dividedBy(new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)))).times(100).toFixed(2);
             }
 
-            setData(prevData => ({
-                ...prevData,
-                circulatingSupplyStake: circulatingSupplyStake.toString(),
-                nodesNum: Object.keys(contract.ssnlist).length.toString(),
-                delegNum: Object.keys(contract.deposit_amt_deleg).length.toString(),
-                gzil: gzil,
-                remainingGzil: remainingGzil.toString(),
-            }));
+            if (mountedRef.current) {
+                setData(prevData => ({
+                    ...prevData,
+                    circulatingSupplyStake: circulatingSupplyStake.toString(),
+                    nodesNum: Object.keys(contract.ssnlist).length.toString(),
+                    delegNum: Object.keys(contract.deposit_amt_deleg).length.toString(),
+                    gzil: gzil,
+                    remainingGzil: remainingGzil.toString(),
+                }));
+            }
 
             }), PromiseArea.PROMISE_LANDING_STATS);
         
@@ -119,12 +121,12 @@ function LandingStatsTable(props: any) {
 
                 <div className="row pl-4 align-items-center justify-content-left">
                     <div className="d-block landing-stats-card">
-                        <h3>Total Number of GZIL minted</h3>
-                        <span>{convertQaToCommaStr(data.gzil)}</span>
-                    </div>
-                    <div className="d-block landing-stats-card">
                         <h3>Remaining GZIL Available</h3>
                         <span>{data.remainingGzil}%</span>
+                    </div>
+                    <div className="d-block landing-stats-card">
+                        <h3>Total GZIL minted</h3>
+                        <span>{convertQaToCommaStr(data.gzil)}</span>
                     </div>
                 </div>
                 </>

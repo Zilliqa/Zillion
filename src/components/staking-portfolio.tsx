@@ -6,7 +6,7 @@ import * as ZilliqaAccount from "../account";
 import Spinner from './spinner';
 import { computeDelegRewards } from '../util/reward-calculator'
 import { PromiseArea } from '../util/enum';
-import { convertQaToCommaStr, computeStakeAmtPercent, getAddressLink } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 const { BN } = require('@zilliqa-js/util');

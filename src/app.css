@@ -798,7 +798,8 @@ body {
   box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
 }
 
-#landing-stats {
+#landing-stats, 
+#delegator-stats-details {
   font-size: 0.85em;
   margin-top: 4em;
 
@@ -810,13 +811,15 @@ body {
   box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
 }
 
-#landing-stats .landing-stats-card {
+#landing-stats .landing-stats-card, 
+#delegator-stats-details .deleg-stats-card {
   text-align: left;
   padding: 1em 0.5em;
   width: 250px;
 }
 
-#landing-stats span {
+#landing-stats span, 
+#delegator-stats-details span {
   font-size: 1.6em;
   font-weight: 600;
   color: var(--primary-table-font-color);
@@ -830,12 +833,14 @@ body {
   text-transform: uppercase;
 }
 
-#landing-stats h3 {
-  color: var(--hyperlink-color);
-  font-size: 1em;
+#landing-stats h3, 
+#delegator-stats-details h3 {
+  color: var(--primary-color);
+  font-size: 0.78em;
+  font-weight: 500;
   margin-bottom: 4px;
-  letter-spacing: 0.02em;
-  text-transform: capitalize;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 #ledger-connect-modal th {

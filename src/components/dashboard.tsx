@@ -25,6 +25,7 @@ import CompleteWithdrawModal from './contract-calls/complete-withdraw';
 
 import logo from "../static/logo.png";
 import DisclaimerModal from './disclaimer';
+import DelegatorStatsTable from './delegator-stats-table';
 
 
 interface NodeOptions {
@@ -403,13 +404,31 @@ function Dashboard(props: any) {
                                     <>
                                     {/* delegator statistics */}
 
+                                    <div id="delegator-stats-details" className="p-4 dashboard-card container-fluid">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title mb-4">Overview</h5>
+                                            </div> 
+                                            <div className="col-12 text-center">
+                                                { mountedRef.current && <DelegatorStatsTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={"zil1w4sfekzy5vqcfpqvvkjw9z4qkl9rnzehe56l8a"} /> }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </>
+                                }
+
+                                {
+                                    (currRole === Role.DELEGATOR) &&
+                                    <>
+                                    {/* delegator portfolio */}
+
                                     <div id="staking-portfolio-details" className="p-4 dashboard-card container-fluid">
                                         <div className="row">
                                             <div className="col">
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
                                             <div className="col-12 text-center">
-                                                { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                                { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={"zil1w4sfekzy5vqcfpqvvkjw9z4qkl9rnzehe56l8a"} /> }
                                             </div>
                                         </div>
                                     </div>
