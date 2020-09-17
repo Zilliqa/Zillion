@@ -5,6 +5,9 @@ import * as ZilliqaAccount from '../account';
 import { PromiseArea } from '../util/enum';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
+import { convertQaToCommaStr } from '../util/utils';
+
+const BigNumber = require('bignumber.js');
 
 
 function DelegatorStatsTable(props: any) {
@@ -14,6 +17,10 @@ function DelegatorStatsTable(props: any) {
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
+    // unclaimedZIL in Qa
+    // unclaimedGZIL in Qa
+    // gzilBalance in Qa
+    // totalPendingWithdrawal in Qa
     const [data, setData] = useState({
         lastCycleAPY: '0',
         unclaimedZIL: '0',
@@ -32,7 +39,7 @@ function DelegatorStatsTable(props: any) {
         let totalPendingWithdrawal = '0';
 
         trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
-            .then((contract) => {
+            .then(async (contract) => {
 
                 if (contract === undefined || contract === 'error') {
                     return null;
@@ -41,10 +48,45 @@ function DelegatorStatsTable(props: any) {
                 // compute last cycle APY
 
                 // compute unclaimed ZIL
+                if (contract.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
+                    let totalUnclaimedZILBN = new BigNumber(0);
+                    const depositDelegList = contract.deposit_amt_deleg[userBase16Address];
+                    
+                    for (const ssnAddress in depositDelegList) {
+                        if (!depositDelegList.hasOwnProperty(ssnAddress)) {
+                            continue;
+                        }
+
+                        const delegAmtQaBN = new BigNumber(depositDelegList[ssnAddress]);
+                        totalUnclaimedZILBN = totalUnclaimedZILBN.plus(delegAmtQaBN);
+                    }
+                    unclaimedZIL = totalUnclaimedZILBN.toString();
+                }
 
                 // compute unclaimed GZIL
+                const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
+                if (gzilContract !== undefined) {
+                    const gzilBalanceMap = gzilContract.balances;
+                    if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
+                        gzilBalance = gzilBalanceMap[userBase16Address];
+                    }
+                }
 
                 // compute total pending withdrawal
+                if (contract.withdrawal_pending.hasOwnProperty(userBase16Address)) {
+                    let totalPendingAmtBN = new BigNumber(0);
+                    const blkNumPendingWithdrawal = contract.withdrawal_pending[userBase16Address];
+                    
+                    for (const blkNum in blkNumPendingWithdrawal) {
+                        if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                            continue;
+                        }
+                        
+                        const pendingAmtQaBN = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                        totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmtQaBN);
+                    }
+                    totalPendingWithdrawal = totalPendingAmtBN.toString();
+                }
 
                 if (mountedRef.current) {
                     setData(prevData => ({
@@ -86,22 +128,22 @@ function DelegatorStatsTable(props: any) {
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Unclaimed ZIL Balance</h3>
-                <span>{data.unclaimedZIL}</span>
+                <span>{convertQaToCommaStr(data.unclaimedZIL)}</span>
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Unclaimed GZIL Balance</h3>
-                <span>{data.unclaimedGZIL}</span>
+                <span>{convertQaToCommaStr(data.unclaimedGZIL)}</span>
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>GZIL Balance</h3>
-                <span>{data.gzilBalance}</span>
+                <span>{convertQaToCommaStr(data.gzilBalance)}</span>
             </div>
         </div>
 
         <div className="row pl-4 align-items-center justify-content-left">
             <div className="d-block deleg-stats-card">
                 <h3>Total Pending Withdrawal</h3>
-                <span>{data.totalPendingWithdrawal}</span>
+                <span>{convertQaToCommaStr(data.totalPendingWithdrawal)}</span>
             </div>
         </div>
         </>

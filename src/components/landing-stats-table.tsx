@@ -51,7 +51,7 @@ function LandingStatsTable(props: any) {
             }
 
             // compute total number of gzil
-            const gzilContract = await ZilliqaAccount.getTotalGzilSupply(contract.gziladdr);
+            const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
             if (gzilContract !== undefined) {
                 gzil = gzilContract.total_supply;
                 const remainGzil = new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)).minus(new BigNumber(gzil));

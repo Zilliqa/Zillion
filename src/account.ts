@@ -193,7 +193,7 @@ export const getTotalCoinSupply = async (proxy: string, networkURL?: string) => 
     }
 };
 
-export const getTotalGzilSupply = async (gzilAddress: string) => {
+export const getGzilContract = async (gzilAddress: string) => {
     // assume the blockchain network is already set
     try {
         const contract = await zilliqa.blockchain.getSmartContractState(gzilAddress);
