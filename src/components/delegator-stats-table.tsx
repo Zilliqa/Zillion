@@ -56,7 +56,6 @@ function DelegatorStatsTable(props: any) {
                 if (contract.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
                     let totalDepositsBN = new BigNumber(0);
                     let totalZilRewardsBN = new BigNumber(0);
-                    let totalGzilRewardsBN = new BigNumber(0);
                     
                     const depositDelegList = contract.deposit_amt_deleg[userBase16Address];
                     
@@ -74,22 +73,27 @@ function DelegatorStatsTable(props: any) {
                         totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
                     }
 
-                    // compute unclaimed gzil
-                    totalGzilRewardsBN = totalZilRewardsBN.dividedBy(1000);
-
                     totalDeposits = totalDepositsBN.toString();
                     zilRewards = totalZilRewardsBN.toString();
-                    gzilRewards = totalGzilRewardsBN.toString();
                 }
 
 
                 // compute gzil balance
+                let totalGzilRewardsBN = new BigNumber(0);
+
                 const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
                 if (gzilContract !== undefined) {
                     const gzilBalanceMap = gzilContract.balances;
                     if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
-                        gzilBalance = gzilBalanceMap[userBase16Address];
+                        // compute user gzil balance
+                        gzilBalance = new BigNumber(gzilBalanceMap[userBase16Address]).dividedBy(1000).toString();
                     }
+
+                    for (const gzilUsersAddress in gzilBalanceMap) {
+                        totalGzilRewardsBN = totalGzilRewardsBN.plus(new BigNumber(gzilBalanceMap[gzilUsersAddress]));
+                    }
+                    totalGzilRewardsBN = totalGzilRewardsBN.dividedBy(1000);
+                    gzilRewards = gzilRewards.toString();
                 }
 
                 // compute total pending withdrawal
