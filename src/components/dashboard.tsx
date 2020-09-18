@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, getAddressLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import StakingPortfolio from './staking-portfolio';
@@ -349,7 +349,7 @@ function Dashboard(props: any) {
                 </ul>
                 <ul className="navbar-nav navbar-right">
                     <li className="nav-item">
-                        <p className="px-1">{currWalletAddress ? currWalletAddress : 'No wallet detected'}</p>
+                        <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>
                     </li>
                     <li className="nav-item">
                         <p className="px-1">{balance ? convertQaToCommaStr(balance) : '0.000'} ZIL</p>
