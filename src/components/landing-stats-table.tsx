@@ -7,6 +7,7 @@ import { convertZilToQa, convertQaToCommaStr } from '../util/utils';
 
 import Spinner from './spinner';
 
+const { BN, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
 const MAX_GZIL_SUPPLY = "682550";
@@ -55,7 +56,7 @@ function LandingStatsTable(props: any) {
             // compute total number of gzil
             const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
             if (gzilContract !== undefined) {
-                gzil = gzilContract.total_supply;
+                gzil = (parseFloat(units.fromQa(new BN(gzilContract.total_supply), units.Units.Zil))/1000.00).toFixed(3);
                 const remainGzil = new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)).minus(new BigNumber(gzil));
                 remainingGzil = (remainGzil.dividedBy(new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)))).times(100).toFixed(2);
             }
@@ -140,7 +141,7 @@ function LandingStatsTable(props: any) {
 
                     <div className="d-block landing-stats-card">
                         <h3>Total GZIL minted</h3>
-                        <span>{convertQaToCommaStr(data.gzil)}</span>
+                        <span>{data.gzil}</span>
                     </div>
                 </div>
                 </>

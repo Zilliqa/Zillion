@@ -23,6 +23,7 @@
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
     "react": "^16.13.1",
+    "react-device-detect": "^1.13.1",
     "react-dom": "^16.13.1",
     "react-promise-tracker": "^2.1.0",
     "react-router-dom": "^5.2.0",
