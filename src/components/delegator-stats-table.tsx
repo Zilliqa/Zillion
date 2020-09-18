@@ -178,7 +178,7 @@ function DelegatorStatsTable(props: any) {
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Unclaimed GZIL Rewards</h3>
-                <span>{convertQaToCommaStr(data.gzilRewards)}</span>
+                <span>{data.gzilRewards}</span>
             </div>
         </div>
         }
