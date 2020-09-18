@@ -4,9 +4,10 @@ import { trackPromise } from 'react-promise-tracker';
 import * as ZilliqaAccount from '../account';
 import { PromiseArea } from '../util/enum';
 
-import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
+import { fromBech32Address } from '@zilliqa-js/crypto';
 import { convertQaToCommaStr } from '../util/utils';
 import { computeDelegRewards } from '../util/reward-calculator';
+import Spinner from './spinner';
 
 
 const { BN } = require('@zilliqa-js/util');
@@ -19,6 +20,8 @@ function DelegatorStatsTable(props: any) {
     const refresh = props.refresh ? props.refresh : 3000;
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
+
+    const [showSpinner, setShowSpinner] = useState(false);
 
     // all except lastCycleAPY in Qa
     const [data, setData] = useState({
@@ -121,6 +124,7 @@ function DelegatorStatsTable(props: any) {
     };
 
     useEffect(() => {
+        setShowSpinner(true);
         getData();
         // eslint-disable-next-line
     }, [proxy, networkURL]);
@@ -128,6 +132,7 @@ function DelegatorStatsTable(props: any) {
     useEffect(() => {
         mountedRef.current = true;
         const intervalId = setInterval(async () => {
+            setShowSpinner(false);
             getData();
         }, refresh);
         return () => {
@@ -139,7 +144,11 @@ function DelegatorStatsTable(props: any) {
 
     return (
         <>
-        <div className="row px-2 align-items-center justify-content-center">
+        { showSpinner && <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} /> }
+        
+        { !showSpinner &&
+
+        <div className="row px-2 pb-3 align-items-center justify-content-center">
             <div className="d-block deleg-stats-card">
                 <h3>Last Cycle APY</h3>
                 <span>{data.lastCycleAPY}%</span>
@@ -152,9 +161,9 @@ function DelegatorStatsTable(props: any) {
                 <h3>Total Pending Withdrawal</h3>
                 <span>{convertQaToCommaStr(data.totalPendingWithdrawal)}</span>
             </div>
-        </div>
 
-        <div className="row px-2 pb-2 align-items-center justify-content-center">
+            <div className="w-100"></div>
+
             <div className="d-block deleg-stats-card">
                 <h3>GZIL Balance</h3>
                 <span>{convertQaToCommaStr(data.gzilBalance)}</span>
@@ -168,6 +177,8 @@ function DelegatorStatsTable(props: any) {
                 <span>{convertQaToCommaStr(data.gzilRewards)}</span>
             </div>
         </div>
+        }
+        
         </>
     );
 }

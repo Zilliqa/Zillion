@@ -114,7 +114,7 @@ function LandingStatsTable(props: any) {
                 { !showSpinner && 
 
                 <>
-                <div className="row mx-auto justify-content-center">
+                <div className="row pb-3 mx-auto justify-content-center">
                     <div className="d-block landing-stats-card">
                         <h3>EST. Realtime APY</h3>
                         <span>{data.estRealtimeAPY}%</span>
@@ -127,9 +127,9 @@ function LandingStatsTable(props: any) {
                         <h3>Remaining GZIL Available</h3>
                         <span>{data.remainingGzil}%</span>
                     </div>
-                </div>
 
-                <div className="row mx-auto pb-3 justify-content-center">
+                    <div className="w-100"></div>
+                    
                     <div className="d-block landing-stats-card">
                         <h3>Delegators / Staked Seed Nodes</h3>
                         <span>{data.delegNum} / {data.nodesNum}</span>
