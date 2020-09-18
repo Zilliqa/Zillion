@@ -19,7 +19,7 @@
 window['config'] = {
     networks_config: {
         testnet: {
-            proxy: "0x9f34364aa5FCA43a19d6792494F09C541a2a763A",
+            proxy: "0x2149562029eeE3e22428D7954fdB5d4E8Cd57A0e",
             blockchain: "https://dev-api.zilliqa.com",
         },
         mainnet: {

@@ -44,8 +44,10 @@ export enum OperationStatus {
 export enum PromiseArea {
     PROMISE_GET_BALANCE = "PROMISE_GET_BALANCE",
     PROMISE_GET_CONTRACT = "PROMISE_GET_CONTRACT",
+    PROMISE_GET_DELEG_STATS = "PROMISE_GET_DELEG_STATS",
     PROMISE_GET_STAKE_PORTFOLIO = 'PROMISE_GET_STAKE_PORTFOLIO',
     PROMISE_WITHDRAW_COMM = "PROMISE_WITHDRAW_COMM",
+    PROMISE_LANDING_STATS = "PROMISE_LANDING_STATS",
 }
 
 export enum Role {
@@ -62,6 +64,7 @@ export enum SsnStatus {
 export enum ProxyCalls {
     COMPLETE_WITHDRAWAL = "CompleteWithdrawal",
     DELEGATE_STAKE = "DelegateStake",
+    REDELEGATE_STAKE = "ReDelegateStake",
     UPDATE_COMM = "UpdateComm",
     UPDATE_RECV_ADDR = "UpdateReceivingAddr",
     WITHDRAW_COMM = "WithdrawComm",

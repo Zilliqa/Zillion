@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, getAddressLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import StakingPortfolio from './staking-portfolio';
@@ -18,12 +18,14 @@ import UpdateReceiverAddress from './contract-calls/update-receiver-address';
 import UpdateCommRateModal from './contract-calls/update-commission-rate';
 
 import DelegateStakeModal from './contract-calls/delegate-stake';
+import ReDelegateStakeModal from './contract-calls/redeleg';
 import WithdrawStakeModal from './contract-calls/withdraw-stake';
 import WithdrawRewardModal from './contract-calls/withdraw-reward';
 import CompleteWithdrawModal from './contract-calls/complete-withdraw';
 
 import logo from "../static/logo.png";
 import DisclaimerModal from './disclaimer';
+import DelegatorStatsTable from './delegator-stats-table';
 
 
 interface NodeOptions {
@@ -56,7 +58,7 @@ function Dashboard(props: any) {
         name: '',
         stakeAmt: '0',
         bufferedDeposit: '0',
-        commRate: 0,
+        commRate: '0',
         commReward: '0',
         numOfDeleg: 0,
         receiver: ''
@@ -71,6 +73,7 @@ function Dashboard(props: any) {
         props.history.replace("/");
     }
 
+    // eslint-disable-next-line
     const handleChangeNetwork = React.useCallback((value: string) => {
         // e.target.value is network URL
         setNetworkURL(value);
@@ -167,6 +170,7 @@ function Dashboard(props: any) {
                 networkStreamChanged.unsubscribe();
             };
         }
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
@@ -188,7 +192,7 @@ function Dashboard(props: any) {
         if (network) {
             ZilliqaAccount.changeNetwork(networkURL);
         }
-    }, [network]);
+    }, [network, networkURL]);
 
     // when selected network is changed
     // useEffect is executed again
@@ -255,7 +259,7 @@ function Dashboard(props: any) {
                         ...prevNodeDetails,
                         stakeAmt: '0',
                         bufferedDeposit: '0',
-                        commRate: 0,
+                        commRate: '0',
                         commReward: '0',
                         numOfDeleg: 0,
                         receiver: ''
@@ -308,10 +312,27 @@ function Dashboard(props: any) {
             clearInterval(intervalId);
             mountedRef.current = false;
         }
-
+        
+        // eslint-disable-next-line
     }, [networkURL, currWalletAddress]);
 
 
+    // prevent user from refreshing
+    useEffect(() => {
+        window.onbeforeunload = (e: any) => {
+            e.preventDefault();
+            e.returnValue = 'The page auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.';
+            setTimeout(() => {
+                toast.dismiss();
+            }, 5000);
+            return (
+                Alert("warn", "The app auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.")
+            );
+        }
+    }, []);
+
+
+    // eslint-disable-next-line
     return (
         <>
         <nav className="navbar navbar-expand-lg navbar-dark">
@@ -328,7 +349,7 @@ function Dashboard(props: any) {
                 </ul>
                 <ul className="navbar-nav navbar-right">
                     <li className="nav-item">
-                        <p className="px-1">{currWalletAddress ? currWalletAddress : 'No wallet detected'}</p>
+                        <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>
                     </li>
                     <li className="nav-item">
                         <p className="px-1">{balance ? convertQaToCommaStr(balance) : '0.000'} ZIL</p>
@@ -359,8 +380,9 @@ function Dashboard(props: any) {
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Re-Delegate Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Withdraw Rewards</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
                                         {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
                                     </div>
                                     </>
@@ -386,12 +408,30 @@ function Dashboard(props: any) {
                                     <>
                                     {/* delegator statistics */}
 
-                                    <div className="p-4 dashboard-card container-fluid">
+                                    <div id="delegator-stats-details" className="p-4 dashboard-card container-fluid">
+                                        <div className="row">
+                                            <div className="col">
+                                                <h5 className="card-title mb-4">Overview</h5>
+                                            </div> 
+                                            <div className="col-12 text-center">
+                                                { mountedRef.current && <DelegatorStatsTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </>
+                                }
+
+                                {
+                                    (currRole === Role.DELEGATOR) &&
+                                    <>
+                                    {/* delegator portfolio */}
+
+                                    <div id="staking-portfolio-details" className="p-4 dashboard-card container-fluid">
                                         <div className="row">
                                             <div className="col">
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
-                                            <div className="col-12">
+                                            <div className="col-12 text-center">
                                                 { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
                                         </div>
@@ -402,30 +442,42 @@ function Dashboard(props: any) {
                                 {/* operator statistics */}
                                 {
                                     (currRole === Role.OPERATOR) &&
-                                    <div className="p-4 dashboard-card container-fluid">
-                                        <h5 className="card-title mb-4">Staking Performance</h5>
+
+                                   <div id="operator-stats-details" className="p-4 dashboard-card container-fluid">
                                         <div className="row">
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Stake Amount</h4>
-                                                <p>{convertQaToCommaStr(nodeDetails.stakeAmt)} ZIL</p>
-                                            </div>
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Buffered Deposit</h4>
-                                                <p>{convertQaToCommaStr(nodeDetails.bufferedDeposit)} ZIL</p>
-                                            </div>
-                                        </div>
-                                        <div className="row">
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Delegators</h4>
-                                                <p>{nodeDetails.numOfDeleg}</p>
-                                            </div>
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Commission Rate</h4>
-                                                <p>{convertToProperCommRate(nodeDetails.commRate.toString()).toFixed(2)}%</p>
-                                            </div>
-                                            <div className="col performance-stats rounded pt-3 pl-4 m-2">
-                                                <h4>Commission Reward</h4>
-                                                <p>{convertQaToCommaStr(nodeDetails.commReward)} ZIL</p>
+                                            <div className="col">
+                                                <h5 className="card-title mb-4">My Node Performance</h5>
+                                            </div> 
+                                            <div className="col-12 text-center">
+
+                                                <div className="row px-2 align-items-center justify-content-center">
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Stake Amount</h3>
+                                                        <span>{convertQaToCommaStr(nodeDetails.stakeAmt)}</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Buffered Deposit</h3>
+                                                        <span>{convertQaToCommaStr(nodeDetails.bufferedDeposit)}</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Delegators</h3>
+                                                        <span>{nodeDetails.numOfDeleg}</span>
+                                                    </div>
+
+                                                </div>
+
+                                                <div className="row px-2 pb-2 align-items-center justify-content-center">
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Commission Rate</h3>
+                                                        <span>{convertToProperCommRate(nodeDetails.commRate).toFixed(2)}%</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card">
+                                                        <h3>Commission Rewards</h3>
+                                                        <span>{convertQaToCommaStr(nodeDetails.commReward)}</span>
+                                                    </div>
+                                                    <div className="d-block operator-stats-card"></div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -471,6 +523,7 @@ function Dashboard(props: any) {
             <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
             <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
+            <ReDelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
             <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
             <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
             <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />

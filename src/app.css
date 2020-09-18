@@ -58,6 +58,7 @@ body {
   --primary-hover-color: #00ccb4;
   --secondary-color: #01051e;
   --text-color: #ffffff;
+  --text-secondary-color: #3256cd;
 
   --primary-section-bg-color: #070e22;
 
@@ -482,6 +483,14 @@ body {
   margin-left: 0.5em;
 }
 
+.nav-item .wallet-link {
+  color: var(--hyperlink-color);
+}
+
+.nav-item .wallet-link:hover {
+  color: var(--hyperlink-hover-color);
+}
+
 /* for selection box in modals */
 .node-options-container .node-options__placeholder {
   color: var(--placeholder-text-color);
@@ -509,6 +518,10 @@ body {
   background-color: var(--primary-color);
 }
 
+.node-options-container .node-options__single-value {
+  color: var(--text-color);
+}
+
 .pagination span {
   color: var(--primary-color);
   margin-top: 0.9em;
@@ -518,32 +531,15 @@ body {
   fill: var(--primary-color);
 }
 
-.performance-stats {
-  border: 0;
-  border-radius: 6px;
-  color: var(--primary-table-font-color);
-  background-color: var(--primary-table-striped-color);
-}
-
-.performance-stats h4 {
-  color: var(--stats-header-color);
-  font-size: 0.78em;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  margin-top: 0.5em;
-  text-transform: uppercase;
-}
-
-.performance-stats p {
-  font-size: 1.4em;
-  margin-top: -0.2em;
-}
-
 .ssn-table-status-active {
-  color: #89adf5;
+  color: var(--primary-dark-color);
   font-size: 0.78em;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+}
+
+.ssn-table-api-url {
+  font-size: 0.92em;
 }
 
 .ssn-table-status-inactive {
@@ -638,7 +634,7 @@ body {
 
 #home-mini-navbar {
   position: absolute;
-  top: 0;
+  top: 40px;
   right: 0;
 }
 
@@ -678,7 +674,8 @@ body {
 
 #home-ssn-details, 
 #dashboard-ssn-details,
-#dashboard-recent-txn {
+#dashboard-recent-txn,
+#staking-portfolio-details {
   font-size: 0.85em;
   margin-top: 3em;
 
@@ -700,7 +697,8 @@ body {
 
 #home-ssn-details table tbody, 
 #dashboard-ssn-details table tbody,
-#dashboard-recent-txn table tbody {
+#dashboard-recent-txn table tbody,
+#staking-portfolio-details table tbody {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
@@ -708,19 +706,22 @@ body {
 
 #home-ssn-details table tbody a, 
 #dashboard-ssn-details table tbody a,
-#dashboard-recent-txn table tbody a {
+#dashboard-recent-txn table tbody a,
+#staking-portfolio-details table tbody a {
   color: var(--hyperlink-color);
 }
 
 #home-ssn-details table tbody a:hover, 
 #dashboard-ssn-details table tbody a:hover,
-#dashboard-recent-txn table tbody a:hover {
+#dashboard-recent-txn table tbody a:hover,
+#staking-portfolio-details table tbody a:hover {
   color: var(--hyperlink-hover-color);
 }
 
 #home-ssn-details table tbody tr:nth-child(odd),
 #dashboard-ssn-details table tbody tr:nth-child(odd),
-#dashboard-recent-txn table tbody tr:nth-child(odd) {
+#dashboard-recent-txn table tbody tr:nth-child(odd),
+#staking-portfolio-details table tbody tr:nth-child(odd) {
   background-color: var(--primary-table-striped-color);
 }
 
@@ -729,13 +730,16 @@ body {
 #dashboard-ssn-details .table td, 
 #dashboard-ssn-details .table th,
 #dashboard-recent-txn .table td,
-#dashboard-recent-txn .table th {
+#dashboard-recent-txn .table th,
+#staking-portfolio-details .table td,
+#staking-portfolio-details .table th {
   border: 0;
 }
 
 #home-ssn-details th,
 #dashboard-ssn-details th,
-#dashboard-recent-txn th {
+#dashboard-recent-txn th,
+#staking-portfolio-details th {
   color: var(--primary-color);
   font-size: 0.85em;
   font-weight: 600;
@@ -783,6 +787,56 @@ body {
   -webkit-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
   -moz-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
   box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
+}
+
+#landing-stats, 
+#delegator-stats-details,
+#operator-stats-details {
+  font-size: 0.85em;
+  margin-top: 4em;
+
+  border-radius: 10px;
+  background-color: var(--primary-section-bg-color);
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+}
+
+#landing-stats .landing-stats-card, 
+#delegator-stats-details .deleg-stats-card,
+#operator-stats-details .operator-stats-card {
+  padding: 1em 0.5em;
+  margin-left: auto;
+  margin-right: auto;
+  width: 250px;
+}
+
+#landing-stats span, 
+#delegator-stats-details span,
+#operator-stats-details span {
+  font-size: 1.6em;
+  font-weight: 600;
+  color: var(--primary-table-font-color);
+}
+
+#landing-stats h2 {
+  color: var(--text-color);
+  font-size: 0.9em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#landing-stats h3, 
+#delegator-stats-details h3,
+#operator-stats-details h3 {
+  color: #6C6D7A;
+  font-size: 0.78em;
+  font-weight: 500;
+  margin-bottom: 4px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 #ledger-connect-modal th {
@@ -896,7 +950,51 @@ body {
 }
 
 #unauthenticated-section {
+  color: var(--text-color);
   margin-top: 10%;
-  width: 600px;
-  background-color: #ffffff;
+  width: 500px;
+  background-color: var(--secondary-color);
+
+  border: 2px solid var(--primary-dark-color);
+  border-radius: 10px;
+
+  padding: 3em 0;
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
+}
+
+#unauthenticated-section h3 {
+  color: var(--primary-color);
+  font-size: 1.4em;
+  font-weight: 500;
+  margin-top: 1em;
+}
+
+#unauthenticated-section .home-icon {
+  fill: var(--primary-color);
+}
+
+#unauthenticated-section .home-icon .cls-3 {
+  fill: var(--primary-color);
+  stroke: var(--primary-color);
+  stroke-linecap: round;
+  stroke-width: 4px;
+  stroke-dasharray: 9.77 9.77;
+}
+
+#banner {
+  font-size: 0.78em;
+  font-weight: 400;
+  border: none;
+  background-color: var(--secondary-color);
+  background-color: transparent;
+
+  margin-left: -1em;
+  margin-right: -1.1em;
+
+  -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
 }

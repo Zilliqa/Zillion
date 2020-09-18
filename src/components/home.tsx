@@ -16,6 +16,7 @@ import IconLedgerLine from './icons/ledger-line';
 import IconZilPayLine from './icons/zil-pay-line';
 
 import ZillionLogo from '../static/zillion.svg';
+import LandingStatsTable from './landing-stats-table';
 
 
 function Home(props: any) {
@@ -120,17 +121,25 @@ function Home(props: any) {
       updateNetwork(Network.TESTNET);
       ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
+    // eslint-disable-next-line
   }, [selectedNetwork]);
+
+  useEffect(() => {
+    window.onbeforeunload = null;
+  }, []);
 
   return (
     <div className="cover">
       <div className="container-fluid">
         <div className="row align-items-center">
           <div className="cover-content col-12 text-center text-light">
+            <div id="banner" className="mb-4 text-center">
+              <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
+            </div>
 
             <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
 
-              { 
+              {
                 environment_config === Environment.DEV && 
 
                 <div className="form-group">
@@ -162,6 +171,9 @@ function Home(props: any) {
                 { /* sign in and seed node table */ }
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR)}>Sign in for Delegators</div>
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR)}>Sign in for Operators</div>
+
+                <LandingStatsTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} />
+
                 <div id="home-ssn-details" className="container">
                   <div className="row p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
