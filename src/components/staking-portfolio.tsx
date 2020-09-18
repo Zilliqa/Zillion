@@ -85,7 +85,7 @@ function StakingPortfolio(props: any) {
                 accessor: 'rewards',
                 Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.rewards)}</span>
             }
-        ], []
+        ], [networkURL]
     );
 
     const getData = async () => {

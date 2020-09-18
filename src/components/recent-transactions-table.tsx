@@ -19,7 +19,9 @@ function Table({ columns, data, tableId }: any) {
         pageOptions,
         nextPage,
         previousPage,
+        // eslint-disable-next-line
         setPageSize,
+        // eslint-disable-next-line
         state: { pageIndex, pageSize }
     } = useTable(
         {
@@ -80,7 +82,7 @@ function RecentTransactionsTable(props: any) {
                     );
                 }
             }
-        ], []
+        ], [networkURL]
     );
 
     return (

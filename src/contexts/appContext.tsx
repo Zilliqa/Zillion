@@ -26,6 +26,7 @@ function AppProvider(props: any) {
     const [address, setAddress] = useState('');
     const [accountType, setAccountType] = useState('');
     const [network, setNetwork] = useState(Network.TESTNET as string); // testnet, mainnet, or isolated server
+    // eslint-disable-next-line
     const [publicKey, setPublicKey] = useState('');
     const [ledgerIndex, setLedgerIndex] = useState(LedgerIndex.DEFAULT);
     const [role, setRole] = useState('');

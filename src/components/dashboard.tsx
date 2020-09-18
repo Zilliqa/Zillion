@@ -73,6 +73,7 @@ function Dashboard(props: any) {
         props.history.replace("/");
     }
 
+    // eslint-disable-next-line
     const handleChangeNetwork = React.useCallback((value: string) => {
         // e.target.value is network URL
         setNetworkURL(value);
@@ -169,6 +170,7 @@ function Dashboard(props: any) {
                 networkStreamChanged.unsubscribe();
             };
         }
+        // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
@@ -190,7 +192,7 @@ function Dashboard(props: any) {
         if (network) {
             ZilliqaAccount.changeNetwork(networkURL);
         }
-    }, [network]);
+    }, [network, networkURL]);
 
     // when selected network is changed
     // useEffect is executed again
@@ -310,7 +312,8 @@ function Dashboard(props: any) {
             clearInterval(intervalId);
             mountedRef.current = false;
         }
-
+        
+        // eslint-disable-next-line
     }, [networkURL, currWalletAddress]);
 
 
@@ -329,6 +332,7 @@ function Dashboard(props: any) {
     }, []);
 
 
+    // eslint-disable-next-line
     return (
         <>
         <nav className="navbar navbar-expand-lg navbar-dark">

@@ -121,6 +121,7 @@ function Home(props: any) {
       updateNetwork(Network.TESTNET);
       ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
+    // eslint-disable-next-line
   }, [selectedNetwork]);
 
   useEffect(() => {
