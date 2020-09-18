@@ -96,6 +96,7 @@ function SsnTable(props: any) {
             {
                 Header: 'api endpoint',
                 accessor: 'ssnApiURL',
+                Cell: ({ row }: any) => <span className="ssn-table-api-url">{row.original.ssnApiURL}</span>
             },
             {
                 Header: 'stake amount (ZIL)',
