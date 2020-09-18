@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { withRouter } from "react-router-dom";
+import ReactTooltip from "react-tooltip";
 
 import { AccessMethod, Environment, Network, Role, NetworkURL } from '../util/enum';
 import AppContext from "../contexts/appContext";
@@ -194,7 +195,8 @@ function Home(props: any) {
                 <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
                   <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span></div>
                   <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span></div>
-                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)}><IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span></div>
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)} data-tip="Please ensure your ZilPay is on Testnet network"><IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span></div>
+                  <ReactTooltip place="bottom" type="light" effect="float" />
                 </div>
                 <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
               </>
