@@ -446,7 +446,7 @@ function Dashboard(props: any) {
                                             </div> 
                                             <div className="col-12 text-center">
 
-                                                <div className="row px-2 pb-2 align-items-center justify-content-center">
+                                                <div className="row px-2 align-items-center justify-content-center">
                                                     <div className="d-block operator-stats-card">
                                                         <h3>Stake Amount</h3>
                                                         <span>{convertQaToCommaStr(nodeDetails.stakeAmt)}</span>
@@ -460,6 +460,9 @@ function Dashboard(props: any) {
                                                         <span>{nodeDetails.numOfDeleg}</span>
                                                     </div>
 
+                                                </div>
+
+                                                <div className="row px-2 pb-2 align-items-center justify-content-center">
                                                     <div className="d-block operator-stats-card">
                                                         <h3>Commission Rate</h3>
                                                         <span>{convertToProperCommRate(nodeDetails.commRate).toFixed(2)}%</span>
@@ -468,7 +471,7 @@ function Dashboard(props: any) {
                                                         <h3>Commission Rewards</h3>
                                                         <span>{convertQaToCommaStr(nodeDetails.commReward)}</span>
                                                     </div>
-                                                    <div className="w-100"></div>
+                                                    <div className="d-block operator-stats-card"></div>
                                                 </div>
 
                                             </div>
