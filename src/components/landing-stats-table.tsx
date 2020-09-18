@@ -34,7 +34,6 @@ function LandingStatsTable(props: any) {
         let circulatingSupplyStake = '0';
         let gzil = '0';
         let remainingGzil = '0';
-        let estRealtimeAPY = '0';
 
         trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
             .then(async (contract) => {

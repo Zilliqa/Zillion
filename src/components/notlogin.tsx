@@ -1,5 +1,4 @@
 import React from 'react';
-import NotloginLogo from '../static/notlogin.svg';
 import DisclaimerModal from './disclaimer';
 import IconNotAuthenticated from './icons/not-authenticated';
 
