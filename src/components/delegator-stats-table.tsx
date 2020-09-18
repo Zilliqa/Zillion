@@ -10,7 +10,7 @@ import { computeDelegRewards } from '../util/reward-calculator';
 import Spinner from './spinner';
 
 
-const { BN } = require('@zilliqa-js/util');
+const { BN, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
 
@@ -86,14 +86,14 @@ function DelegatorStatsTable(props: any) {
                     const gzilBalanceMap = gzilContract.balances;
                     if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
                         // compute user gzil balance
-                        gzilBalance = new BigNumber(gzilBalanceMap[userBase16Address]).dividedBy(1000).toString();
+                        
+                        gzilBalance = (parseFloat(units.fromQa(new BN(gzilBalanceMap[userBase16Address]), units.Units.Zil))/1000.00).toFixed(3);
                     }
 
                     for (const gzilUsersAddress in gzilBalanceMap) {
                         totalGzilRewardsBN = totalGzilRewardsBN.plus(new BigNumber(gzilBalanceMap[gzilUsersAddress]));
                     }
-                    totalGzilRewardsBN = totalGzilRewardsBN.dividedBy(1000);
-                    gzilRewards = gzilRewards.toString();
+                    gzilRewards = (parseFloat(units.fromQa(new BN(totalGzilRewardsBN.toString()), units.Units.Zil))/1000.00).toFixed(3);
                 }
 
                 // compute total pending withdrawal
@@ -170,7 +170,7 @@ function DelegatorStatsTable(props: any) {
 
             <div className="d-block deleg-stats-card">
                 <h3>GZIL Balance</h3>
-                <span>{convertQaToCommaStr(data.gzilBalance)}</span>
+                <span>{data.gzilBalance}</span>
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Unclaimed ZIL Rewards</h3>

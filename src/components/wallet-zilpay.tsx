@@ -1,9 +1,11 @@
-import React, { useContext} from 'react';
+import React, { useContext } from 'react';
 import { ToastContainer } from 'react-toastify';
 
 import AppContext from '../contexts/appContext';
 import { AccessMethod } from '../util/enum';
 import Alert from './alert';
+
+import { isFirefox } from "react-device-detect";
 
 function WalletZilPay(props: any) {
 
@@ -13,6 +15,11 @@ function WalletZilPay(props: any) {
     const role = props.role;
 
     const unlockWallet = async () => {
+        if (isFirefox) {
+            Alert('warn', 'Please use ZilPay on Chrome browsers.');
+            return null;
+        }
+
         // Getting ZilPay inject.
         const zilPay = (window as any).zilPay;
 
@@ -61,6 +68,7 @@ function WalletZilPay(props: any) {
     return (
         <div className="wallet-access">
             <h2>Access wallet using ZilPay</h2>
+            <p className="my-4"><strong>Note:</strong> We only support ZilPay extension on Chrome browsers currently and remember to set your ZilPay network to <strong>Testnet</strong></p>
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             <ToastContainer hideProgressBar={true} />
