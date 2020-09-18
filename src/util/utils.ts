@@ -30,7 +30,7 @@ export const convertToProperCommRate = (rate: string) => {
 // compute the stake amount as a percentage of total stake amount
 // returns a BigNumber
 export const computeStakeAmtPercent = (inputStake: string, totalStake: string) => {
-    if (!inputStake) {
+    if (!inputStake || !totalStake || totalStake === '0') {
         return 0;
     }
     const inputStakeBN = new BigNumber(inputStake);

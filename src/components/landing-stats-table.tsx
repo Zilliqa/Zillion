@@ -62,9 +62,12 @@ function LandingStatsTable(props: any) {
             }
 
             // compute est. APY
-            const temp = new BigNumber(totalStakeAmount).times(36500);
-            const estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).toFixed(5);
+            let temp = new BigNumber(totalStakeAmount).times(36500);
+            let estAPY = new BigNumber(0);
 
+            if (!temp.isEqualTo(0)) {
+                estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).toFixed(5);
+            }
 
             if (mountedRef.current) {
                 setData(prevData => ({
