@@ -126,18 +126,25 @@ function Dashboard(props: any) {
     useEffect(() => {
         if (accountType === AccessMethod.ZILPAY) {
             const zilPay = (window as any).zilPay;
-            const accountStreamChanged = zilPay.wallet.observableAccount();
-            const networkStreamChanged = zilPay.wallet.observableNetwork();
 
             if (zilPay) {
+                const accountStreamChanged = zilPay.wallet.observableAccount();
+                const networkStreamChanged = zilPay.wallet.observableNetwork();
+                const networkChanger = (net: string) => {
+                    let networkLabel = "";
+                    let url = '';
 
-                networkStreamChanged.subscribe((net: string) => {
                     switch (net) {
                         case NetworkLabel.MAINNET:
                             // do nothing
                             Alert("info", "You are on Mainnet.");
+                            networkLabel = NetworkLabel.MAINNET;
+                            url = NetworkURL.MAINNET;
                             break;
                         case NetworkLabel.TESTNET:
+                            networkLabel = NetworkLabel.TESTNET;
+                            url = NetworkURL.TESTNET;
+                            break;
                         case NetworkLabel.ISOLATED_SERVER:
                         case NetworkLabel.PRIVATE:
                             if (environment_config === Environment.PROD) {
@@ -148,7 +155,14 @@ function Dashboard(props: any) {
                         default:
                             break;
                     }
-                });
+
+                    updateNetwork(networkLabel);
+                    setNetworkURL(url);
+                    ZilliqaAccount.changeNetwork(url);
+                }
+
+                networkChanger(zilPay.wallet.net);
+                networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
                 accountStreamChanged.subscribe(async (account: any) => {
                     initParams(account.base16, role, AccessMethod.ZILPAY);
@@ -163,15 +177,15 @@ function Dashboard(props: any) {
                     updateRole(account.base16, newRole);
                     setCurrWalletAddress(toBech32Address(account.base16));
                 });
-            }
 
-            return () => {
-                accountStreamChanged.unsubscribe();
-                networkStreamChanged.unsubscribe();
-            };
+                return () => {
+                    accountStreamChanged.unsubscribe();
+                    networkStreamChanged.unsubscribe();
+                };
+            }
         }
         // eslint-disable-next-line
-    }, []);
+    }, [updateNetwork, setNetworkURL]);
 
     useEffect(() => {
         if (environment_config === Environment.DEV) {
