@@ -32,6 +32,6 @@ window['config'] = {
         }
     },
     blockchain_explorer_config: "viewblock",
-    refresh_rate_config: 15000,
+    refresh_rate_config: 30000,
     environment_config: "stage"
 }
