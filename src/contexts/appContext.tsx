@@ -11,10 +11,10 @@ const AppContext = React.createContext({
     ledgerIndex: LedgerIndex.DEFAULT,
     network: '',
     isAuth: false,
-    role: '',
+    loginRole: '',
     cleanUp: () => {},
     setWallet: (inputAddr: string) => {},
-    initParams: (inputAddress: string, selectedRole: string, selectedAccountType: string) => {},
+    initParams: (inputAddress: string, selectedAccountType: string) => {},
     updateAuth: () => {},
     updateLedgerIndex: (index: number) => {},
     updateNetwork: (selectedNetwork: string) => {},
@@ -29,7 +29,7 @@ function AppProvider(props: any) {
     // eslint-disable-next-line
     const [publicKey, setPublicKey] = useState('');
     const [ledgerIndex, setLedgerIndex] = useState(LedgerIndex.DEFAULT);
-    const [role, setRole] = useState('');
+    const [loginRole, setLoginRole] = useState(''); // role selected at home page; will be validated and set to the "correct" role on updateRole
     const [isAuth, setAuth] = useState(false);
 
     // config.js from public folder
@@ -40,7 +40,7 @@ function AppProvider(props: any) {
         setAccountType('')
         setNetwork(Network.TESTNET);
         setPublicKey('');
-        setRole('');
+        setLoginRole('');
         setLedgerIndex(LedgerIndex.DEFAULT);
         setAuth(false);
     };
@@ -49,6 +49,7 @@ function AppProvider(props: any) {
         setAddress(inputAddr);
     };
 
+    // used only in wallet components
     const updateRole = async (inputAddress: string, selectedRole: string) => {
         console.log("update role - selected role: %o", selectedRole);
         let walletAddress = inputAddress;
@@ -59,13 +60,15 @@ function AppProvider(props: any) {
         }
 
         const isOperator = await ZilliqaAccount.isOperator(networks_config[network].proxy, walletAddress, networks_config[network].blockchain);
-        if (selectedRole === Role.OPERATOR && !isOperator) {
+        if (selectedRole === Role.OPERATOR.toString() && !isOperator) {
             console.error("user is not operator");
-            setRole(Role.DELEGATOR);
+            setLoginRole(Role.DELEGATOR.toString());
         } else if (selectedRole === Role.OPERATOR && isOperator) {
-            setRole(Role.OPERATOR);
+            console.log("update role - %o", Role.OPERATOR);
+            setLoginRole(Role.OPERATOR.toString());
         } else {
-            setRole(Role.DELEGATOR);
+            console.log("update role - %o", Role.DELEGATOR);
+            setLoginRole(Role.DELEGATOR.toString());
         }
     }
 
@@ -81,19 +84,18 @@ function AppProvider(props: any) {
         setNetwork(selectedNetwork);
     }
 
-    const initParams = (inputAddress: string, selectedRole: string, selectedAccountType: string) => {
+    const initParams = (inputAddress: string, selectedAccountType: string) => {
         let walletAddress = inputAddress;
         if (!validation.isBech32(walletAddress)) {
             walletAddress = toBech32Address(walletAddress);
         }
 
         setAddress(walletAddress);
-        setRole(selectedRole);
         setAccountType(selectedAccountType);
     };
 
     return (
-        <AppContext.Provider value={{ accountType, address, ledgerIndex, network, isAuth, role, cleanUp, setWallet, initParams, updateAuth, updateLedgerIndex, updateNetwork, updateRole }}>
+        <AppContext.Provider value={{ accountType, address, ledgerIndex, network, isAuth, loginRole, cleanUp, setWallet, initParams, updateAuth, updateLedgerIndex, updateNetwork, updateRole }}>
             {props.children}
         </AppContext.Provider>
     );

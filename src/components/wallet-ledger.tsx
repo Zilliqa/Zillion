@@ -91,7 +91,7 @@ function LedgerWallet(props: any) {
             console.log("ledger wallet index: %o", hwIndex);
 
             // update context
-            initParams(selectedLedgerAddress, role, AccessMethod.LEDGER);
+            initParams(selectedLedgerAddress, AccessMethod.LEDGER);
             await updateRole(selectedLedgerAddress, role);
             updateLedgerIndex(hwIndex);
             updateAuth()
