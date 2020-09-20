@@ -243,6 +243,9 @@ function Dashboard(props: any) {
                 const accountStreamChanged = zilPay.wallet.observableAccount();
                 const networkStreamChanged = zilPay.wallet.observableNetwork();
 
+                // switch to the zilpay network on load
+                networkChanger(zilPay.wallet.net);
+
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
                 accountStreamChanged.subscribe((account: any) => {
@@ -259,7 +262,7 @@ function Dashboard(props: any) {
         }
         // must only run once due to global listener
         // eslint-disable-next-line
-    }, []);
+    }, [setNetworkURL]);
 
     useEffect(() => {
         if (environment_config === Environment.DEV) {
