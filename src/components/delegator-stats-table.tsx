@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../account';
@@ -7,7 +7,8 @@ import { PromiseArea } from '../util/enum';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { convertQaToCommaStr } from '../util/utils';
 import { computeDelegRewards } from '../util/reward-calculator';
-import Spinner from './spinner';
+import { useInterval } from '../util/use-interval';
+import SpinnerNormal from './spinner-normal';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -21,7 +22,7 @@ function DelegatorStatsTable(props: any) {
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
-    const [showSpinner, setShowSpinner] = useState(false);
+    const [showSpinner, setShowSpinner] = useState(true);
 
     // all except lastCycleAPY in Qa
     const [data, setData] = useState({
@@ -33,9 +34,9 @@ function DelegatorStatsTable(props: any) {
         totalDeposits: '0'
     });
 
-    const mountedRef = useRef(false);
+    const mountedRef = useRef(true);
 
-    const getData = () => {
+    const getData = useCallback(() => {
         let lastCycleAPY = '0';
         let zilRewards = '0';
         let gzilRewards = '0';
@@ -112,7 +113,17 @@ function DelegatorStatsTable(props: any) {
                     totalPendingWithdrawal = totalPendingAmtBN.toString();
                 }
 
+            })
+            .finally(() => {
+
+                if(!mountedRef.current) {
+                    return null;
+                }
+
+                setShowSpinner(false);
+                
                 if (mountedRef.current) {
+                    console.log("updating delegator stats...");
                     setData(prevData => ({
                         ...prevData,
                         lastCycleAPY: lastCycleAPY,
@@ -125,30 +136,25 @@ function DelegatorStatsTable(props: any) {
                 }
 
             }), PromiseArea.PROMISE_GET_DELEG_STATS);
-    };
 
+    }, [proxy, networkURL, userBase16Address]);
+
+    // load initial data
     useEffect(() => {
-        setShowSpinner(true);
         getData();
-        // eslint-disable-next-line
-    }, [proxy, networkURL]);
-
-    useEffect(() => {
-        mountedRef.current = true;
-        const intervalId = setInterval(async () => {
-            setShowSpinner(false);
-            getData();
-        }, refresh);
         return () => {
-            clearInterval(intervalId);
             mountedRef.current = false;
-        }
-        // eslint-disable-next-line
-    }, []);
+        };
+    }, [getData]);
+
+    // poll data
+    useInterval(() => {
+        getData();
+    }, mountedRef, refresh);
 
     return (
         <>
-        { showSpinner && <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} /> }
+        { showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> }
         
         { !showSpinner &&
 

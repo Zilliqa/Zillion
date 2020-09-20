@@ -1,17 +1,17 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr, getAddressLink } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
 
-import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
+import { toBech32Address } from '@zilliqa-js/crypto';
 
 import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
@@ -26,6 +26,8 @@ import CompleteWithdrawModal from './contract-calls/complete-withdraw';
 import logo from "../static/logo.png";
 import DisclaimerModal from './disclaimer';
 import DelegatorStatsTable from './delegator-stats-table';
+import OperatorStatsTable from './operator-stats-table';
+import { useInterval } from '../util/use-interval';
 
 
 interface NodeOptions {
@@ -52,15 +54,17 @@ function Dashboard(props: any) {
 
     const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
 
-    const mountedRef = useRef(false);
+    const mountedRef = useRef(true);
 
+    // used as info for the internal modal data
+    // state is updated by OperatorStatsTable
     const [nodeDetails, setNodeDetails] = useState({
         name: '',
-        stakeAmt: '0',
+        stakeAmount: '0',
         bufferedDeposit: '0',
         commRate: '0',
         commReward: '0',
-        numOfDeleg: 0,
+        numOfDeleg: '0',
         receiver: ''
     });
 
@@ -105,16 +109,72 @@ function Dashboard(props: any) {
     }, [updateNetwork, networks_config]);
 
 
-    const getAccountBalance = async () => {
-        trackPromise(ZilliqaAccount.getBalance(currWalletAddress).then((balance) => {
-            console.log("retrieving balance: %o", balance);
-            
-            if (mountedRef.current) {
-                setBalance(balance);
-            }
-            
-        }), PromiseArea.PROMISE_GET_BALANCE);
-    }
+    const getAccountBalance = useCallback(() => {
+        let currBalance = '0';
+
+        trackPromise(ZilliqaAccount.getBalance(currWalletAddress)
+            .then((balance) => {
+                currBalance = balance;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    console.log("updating balance...");
+                    setBalance(currBalance);
+                }
+
+            }), PromiseArea.PROMISE_GET_BALANCE);
+    }, [currWalletAddress]);
+
+    // generate options list
+    // fetch node operator names and address 
+    // for the dropdowns in the modals
+    const getNodeOptionsList = useCallback(() => {
+        let tempNodeOptions: NodeOptions[] = [];
+        
+        ZilliqaAccount.getSsnImplContract(proxy, networkURL)
+            .then((contract) => {
+
+                if (contract === undefined || contract === 'error') {
+                    return null;
+                }
+
+                if (contract.hasOwnProperty('ssnlist')) {
+                    for (const operatorAddr in contract.ssnlist) {
+                        if (!contract.ssnlist.hasOwnProperty(operatorAddr)) {
+                            continue;
+                        }
+                        const operatorName = contract.ssnlist[operatorAddr].arguments[3];
+                        const operatorBech32Addr = toBech32Address(operatorAddr);
+                        const operatorOption: NodeOptions = {
+                            label: operatorName + ": " + operatorBech32Addr,
+                            value: operatorAddr
+                        }
+                        tempNodeOptions.push(operatorOption);
+                    }
+                }
+            })
+            .finally(() => {
+                if (!mountedRef.current) {
+                    return null;
+                }
+                setNodeOptions([...tempNodeOptions]);
+            });
+    }, [proxy, networkURL]);
+
+    // load initial data
+    useEffect(() => {
+        getAccountBalance();
+        getNodeOptionsList();
+        return () => {
+            mountedRef.current = false;
+        }
+    }, [getAccountBalance, getNodeOptionsList]);
+
+    // poll data
+    useInterval(() => {
+        getAccountBalance();
+        getNodeOptionsList();
+    }, mountedRef, refresh_rate_config);
 
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
@@ -185,7 +245,7 @@ function Dashboard(props: any) {
             }
         }
         // eslint-disable-next-line
-    }, [updateNetwork, setNetworkURL]);
+    }, []);
 
     useEffect(() => {
         if (environment_config === Environment.DEV) {
@@ -207,128 +267,6 @@ function Dashboard(props: any) {
             ZilliqaAccount.changeNetwork(networkURL);
         }
     }, [network, networkURL]);
-
-    // when selected network is changed
-    // useEffect is executed again
-    useEffect(() => {
-
-        mountedRef.current = true;
-
-        // check operator is indeed operator
-        async function getOperatorNodeDetails() {
-            console.log("get node operator node details: %o", currWalletAddress);
-            console.log("get node operator node details: %o", proxy);
-            console.log("get node operator node details: %o", currRole);
-            console.log("get node operator node details: %o", networkURL);
-
-            // convert user wallet address to base16
-            // contract address is in base16
-            let userAddressBase16 = '';
-
-            if (!currWalletAddress) {
-                return;
-            }
-
-            userAddressBase16 = fromBech32Address(currWalletAddress).toLowerCase();
-
-            if (currRole === Role.OPERATOR) {
-                const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
-                
-                if (contract === undefined || contract === 'error') {
-                    return null;
-                }
-
-                if (contract.hasOwnProperty('ssnlist') && contract.ssnlist.hasOwnProperty(userAddressBase16)) {
-                    console.log("attempt to fetch node details");
-
-                    // since user is node operator
-                    // compute the data for staking peformance section
-                    let tempNumOfDeleg = 0;
-                    const ssnArgs = contract.ssnlist[userAddressBase16].arguments;
-
-                    // get number of delegators
-                    if (contract.hasOwnProperty("ssn_deleg_amt") && contract.ssn_deleg_amt.hasOwnProperty(userAddressBase16)) {
-                        tempNumOfDeleg = Object.keys(contract.ssn_deleg_amt[userAddressBase16]).length;
-                    }
-
-                    if (mountedRef.current) {
-                        console.log("updating node details");
-
-                        setNodeDetails(prevNodeDetails => ({
-                            ...prevNodeDetails,
-                            name: ssnArgs[3],
-                            stakeAmt: ssnArgs[1],
-                            bufferedDeposit: ssnArgs[6],
-                            commRate: ssnArgs[7],
-                            commReward: ssnArgs[8],
-                            numOfDeleg: tempNumOfDeleg,
-                            receiver: toBech32Address(ssnArgs[9])
-                        }));
-                    }
-
-                }
-            } else {
-                if (mountedRef.current) {
-                    setNodeDetails(prevNodeDetails => ({
-                        ...prevNodeDetails,
-                        stakeAmt: '0',
-                        bufferedDeposit: '0',
-                        commRate: '0',
-                        commReward: '0',
-                        numOfDeleg: 0,
-                        receiver: ''
-                    }));
-                }
-            }
-        }
-
-        // generate options list
-        // fetch node operator names and address
-        async function getNodeOptions() {
-            console.log("generate form node options");
-            const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
-            
-            if (contract === undefined || contract === 'error') {
-                return null;
-            }
-
-            if (contract.hasOwnProperty('ssnlist')) {
-                let tempNodeOptions = [];
-                for (const operatorAddr in contract.ssnlist) {
-                    if (!contract.ssnlist.hasOwnProperty(operatorAddr)) {
-                        continue;
-                    }
-                    const operatorName = contract.ssnlist[operatorAddr].arguments[3];
-                    const operatorBech32Addr = toBech32Address(operatorAddr);
-                    const operatorOption: NodeOptions = {
-                        label: operatorName + ": " + operatorBech32Addr,
-                        value: operatorAddr
-                    }
-                    tempNodeOptions.push(operatorOption);
-                }
-                setNodeOptions([...tempNodeOptions]);
-            }
-        }
-
-        getOperatorNodeDetails();
-        getAccountBalance();
-        getNodeOptions();
-
-        // refresh wallet
-        // refresh operator details
-        const intervalId = setInterval(async () => {
-            getOperatorNodeDetails();
-            getAccountBalance();
-            getNodeOptions();
-        }, (2 * refresh_rate_config));
-
-        return () => {
-            clearInterval(intervalId);
-            mountedRef.current = false;
-        }
-        
-        // eslint-disable-next-line
-    }, [networkURL, currWalletAddress]);
 
 
     // prevent user from refreshing
@@ -463,35 +401,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Node Performance</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-
-                                                <div className="row px-2 align-items-center justify-content-center">
-                                                    <div className="d-block operator-stats-card">
-                                                        <h3>Stake Amount</h3>
-                                                        <span>{convertQaToCommaStr(nodeDetails.stakeAmt)}</span>
-                                                    </div>
-                                                    <div className="d-block operator-stats-card">
-                                                        <h3>Buffered Deposit</h3>
-                                                        <span>{convertQaToCommaStr(nodeDetails.bufferedDeposit)}</span>
-                                                    </div>
-                                                    <div className="d-block operator-stats-card">
-                                                        <h3>Delegators</h3>
-                                                        <span>{nodeDetails.numOfDeleg}</span>
-                                                    </div>
-
-                                                </div>
-
-                                                <div className="row px-2 pb-2 align-items-center justify-content-center">
-                                                    <div className="d-block operator-stats-card">
-                                                        <h3>Commission Rate</h3>
-                                                        <span>{convertToProperCommRate(nodeDetails.commRate).toFixed(2)}%</span>
-                                                    </div>
-                                                    <div className="d-block operator-stats-card">
-                                                        <h3>Commission Rewards</h3>
-                                                        <span>{convertQaToCommaStr(nodeDetails.commReward)}</span>
-                                                    </div>
-                                                    <div className="d-block operator-stats-card"></div>
-                                                </div>
-
+                                                <OperatorStatsTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
                                             </div>
                                         </div>
                                     </div>
