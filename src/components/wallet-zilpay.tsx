@@ -15,10 +15,10 @@ function WalletZilPay(props: any) {
     const role = props.role;
 
     const unlockWallet = async () => {
-        // if (isFirefox) {
-        //     Alert('warn', 'Please use ZilPay on Chrome browsers.');
-        //     return null;
-        // }
+        if (isFirefox) {
+            Alert('warn', 'Please use ZilPay on Chrome browsers.');
+            return null;
+        }
 
         // Getting ZilPay inject.
         const zilPay = (window as any).zilPay;
