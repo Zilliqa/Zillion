@@ -218,7 +218,7 @@ export const isOperator = async (proxy: string, address: string, networkURL: str
     console.log("account.ts check is operator: %o", address);
     console.log("account.ts check is proxy: %o", proxy);
     console.log("account.ts check is networkURL: %o", networkURL);
-    if (contract.hasOwnProperty('ssnlist') && contract.ssnlist.hasOwnProperty(address)) {
+    if (contract.hasOwnProperty('ssnlist') && address in contract.ssnlist) {
         console.log("operator %o exist", address);
         return true;
     } else {

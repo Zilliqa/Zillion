@@ -33,7 +33,7 @@ function WalletPrivatekey(props: any) {
                 props.onWalletLoadingCallback();
 
                 // update context
-                initParams(walletAddress, role, AccessMethod.PRIVATEKEY);
+                initParams(walletAddress, AccessMethod.PRIVATEKEY);
                 await updateRole(walletAddress, role);
                 updateAuth();
 
