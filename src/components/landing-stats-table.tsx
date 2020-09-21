@@ -7,7 +7,6 @@ import { convertZilToQa, convertQaToCommaStr, convertGzilToCommaStr } from '../u
 import { useInterval } from '../util/use-interval';
 import SpinnerNormal from './spinner-normal';
 
-const { BN, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
 const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
