@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from "../account";
 import { computeDelegRewards } from '../util/reward-calculator'
-import { PromiseArea } from '../util/enum';
+import { PromiseArea, Constants } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import { useInterval } from '../util/use-interval';
 import SpinnerNormal from './spinner-normal';
@@ -57,7 +57,7 @@ function Table({ columns, data }: any) {
 function StakingPortfolio(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : 3000;
+    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
     const [showSpinner, setShowSpinner] = useState(true);
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();

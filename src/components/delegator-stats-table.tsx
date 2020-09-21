@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../account';
-import { PromiseArea } from '../util/enum';
+import { PromiseArea, Constants } from '../util/enum';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { convertQaToCommaStr } from '../util/utils';
@@ -18,7 +18,7 @@ const BigNumber = require('bignumber.js');
 function DelegatorStatsTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : 3000;
+    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 

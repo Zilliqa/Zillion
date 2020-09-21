@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../account';
-import { PromiseArea, OperationStatus } from '../util/enum';
+import { Constants, PromiseArea, OperationStatus } from '../util/enum';
 import { convertZilToQa, convertQaToCommaStr } from '../util/utils';
 import { useInterval } from '../util/use-interval';
 import SpinnerNormal from './spinner-normal';
@@ -10,13 +10,13 @@ import SpinnerNormal from './spinner-normal';
 const { BN, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
-const MAX_GZIL_SUPPLY = "682550";
-const TOTAL_REWARD_SEED_NODES = "1870000"; // 110000 * 17
+const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
+const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); // 110000 * 17
 
 function LandingStatsTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : 3000;
+    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const [showSpinner, setShowSpinner] = useState(true);
     const mountedRef = useRef(true);
 

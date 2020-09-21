@@ -7,6 +7,14 @@ export enum AccessMethod {
     LEDGER = "LEDGER"
 }
 
+
+// all other constants
+export enum Constants {
+    REFRESH_RATE = 30000,
+    MAX_GZIL_SUPPLY = 682550,
+    TOTAL_REWARD_SEED_NODES = 1870000,
+}
+
 export enum Environment {
     DEV = "dev",
     PROD = "prod",
