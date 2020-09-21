@@ -20,6 +20,7 @@ function WithdrawStakeModal(props: any) {
     const { accountType } = appContext;
 
     const proxy = props.proxy;
+    const impl = props.impl;
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
     const { onSuccessCallback } = props;
@@ -38,7 +39,7 @@ function WithdrawStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         
-        const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
+        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl, networkURL);
 
         if (contract === undefined || contract === 'error') {
             return false;

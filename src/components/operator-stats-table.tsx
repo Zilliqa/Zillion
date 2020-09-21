@@ -42,7 +42,7 @@ function OperatorStatsTable(props: any) {
         let commReward = '0';
         let receiver = '';
 
-        trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
             .then((contract) => {
 
                 if (contract === undefined || contract === 'error') {

@@ -44,7 +44,7 @@ function DelegatorStatsTable(props: any) {
         let totalDeposits = '0';
 
 
-        trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
             .then(async (contract) => {
 
                 if (contract === undefined || contract === 'error') {
