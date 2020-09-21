@@ -7,7 +7,6 @@ import { PromiseArea, SsnStatus, Role, Constants } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
 import * as Account from "../account";
 
-import { BN, units } from '@zilliqa-js/util';
 import { toBech32Address } from '@zilliqa-js/crypto';
 
 import { useInterval } from '../util/use-interval';
@@ -160,7 +159,7 @@ function SsnTable(props: any) {
         let outputResult: { ssnAddress: string; ssnName: any; ssnStakeAmt: string; ssnBufferedDeposit: string; ssnCommRate: any; ssnCommReward: string; ssnDeleg: number; }[] = [];
         let totalStakeAmount = '0';
 
-        trackPromise(Account.getSsnImplContract(proxy, networkURL).then((implContract) => {
+        trackPromise(Account.getSsnImplContractDirect(proxy, networkURL).then((implContract) => {
             if (implContract === 'error') {
                 return null;
             }
@@ -192,7 +191,7 @@ function SsnTable(props: any) {
                         ssnName: ssnArgs[3],
                         ssnApiURL: ssnArgs[5],
                         ssnStakeAmt: ssnArgs[1],
-                        ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
+                        ssnBufferedDeposit: ssnArgs[6],
                         ssnCommRate: ssnArgs[7],
                         ssnCommReward: ssnArgs[8],
                         ssnDeleg: delegAmt,

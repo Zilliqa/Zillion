@@ -93,7 +93,7 @@ function StakingPortfolio(props: any) {
     const getData = useCallback(() => {
         let outputResult: { ssnName: string; ssnAddress: string; delegAmt: string; rewards: string; }[] = [];
 
-        trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
             .then(async (contract) => {
                 if (contract === undefined || contract === 'error') {
                     return null;

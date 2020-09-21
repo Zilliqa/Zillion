@@ -20,18 +20,21 @@ window['config'] = {
     networks_config: {
         testnet: {
             proxy: "0xeeB4158d111dc9aC900ecd75168596289E0Bda02",
+            impl: "0x81dA48797790CcE8A50B1475f372C22eFcDd9AeC",
             blockchain: "https://dev-api.zilliqa.com",
         },
         mainnet: {
             proxy: "",
+            impl: "",
             blockchain: "https://api.zilliqa.com",
         },
         isolated_server: {
             proxy: "0x0578B8e9D9c2493D4a2E98f364c7ed311F7a0d71",
+            impl: "",
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
         }
     },
     blockchain_explorer_config: "viewblock",
-    refresh_rate_config: 3000,
+    refresh_rate_config: 300000,
     environment_config: "stage"
 }

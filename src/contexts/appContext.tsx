@@ -59,7 +59,7 @@ function AppProvider(props: any) {
             walletAddress = walletAddress.toLowerCase();
         }
 
-        const isOperator = await ZilliqaAccount.isOperator(networks_config[network].proxy, walletAddress, networks_config[network].blockchain);
+        const isOperator = await ZilliqaAccount.isOperator(networks_config[network].impl, walletAddress, networks_config[network].blockchain);
         if (selectedRole === Role.OPERATOR.toString() && !isOperator) {
             console.error("user is not operator");
             setLoginRole(Role.DELEGATOR.toString());

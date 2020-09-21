@@ -44,7 +44,7 @@ function DelegatorStatsTable(props: any) {
         let totalDeposits = '0';
 
 
-        trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
             .then(async (contract) => {
 
                 if (contract === undefined || contract === 'error') {
@@ -156,14 +156,14 @@ function DelegatorStatsTable(props: any) {
         <div className="row px-2 pb-3 align-items-center justify-content-center">
             <div className="d-block deleg-stats-card">
                 <h3>Last Cycle APY</h3>
-                <span>{data.lastCycleAPY}%</span>
+                <span>WIP</span>
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Total Deposits</h3>
                 <span>{convertQaToCommaStr(data.totalDeposits)}</span>
             </div>
             <div className="d-block deleg-stats-card">
-                <h3>Total Pending Withdrawal</h3>
+                <h3>Pending Stake Withdrawal</h3>
                 <span>{convertQaToCommaStr(data.totalPendingWithdrawal)}</span>
             </div>
 

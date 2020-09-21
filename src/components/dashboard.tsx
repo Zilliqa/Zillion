@@ -51,6 +51,7 @@ function Dashboard(props: any) {
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
     const [proxy, setProxy] = useState(networks_config[network].proxy);
+    const [impl, setImpl] = useState(networks_config[network].impl)
 
     const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
 
@@ -106,6 +107,7 @@ function Dashboard(props: any) {
 
         // update the proxy contract state
         setProxy(networks_config[networkLabel].proxy);
+        setImpl(networks_config[networkLabel].impl);
     }, [updateNetwork, networks_config]);
 
 
@@ -118,12 +120,11 @@ function Dashboard(props: any) {
             })
             .finally(() => {
                 if (mountedRef.current) {
-                    console.log("updating balance...proxy: %o, network: %o", proxy, networkURL);
                     setBalance(currBalance);
                 }
 
             }), PromiseArea.PROMISE_GET_BALANCE);
-    }, [proxy, networkURL, currWalletAddress]);
+    }, [currWalletAddress]);
 
 
     // generate options list
@@ -132,7 +133,7 @@ function Dashboard(props: any) {
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
         
-        ZilliqaAccount.getSsnImplContract(proxy, networkURL)
+        ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
             .then((contract) => {
 
                 if (contract === undefined || contract === 'error') {
@@ -160,7 +161,7 @@ function Dashboard(props: any) {
                 }
                 setNodeOptions([...tempNodeOptions]);
             });
-    }, [proxy, networkURL]);
+    }, [impl, networkURL]);
 
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
@@ -171,7 +172,7 @@ function Dashboard(props: any) {
     // role is always compared against the selected role at home page
     const updateCurrentRole = async (userBase16Address: string) => {
         let newRole = "";
-        const isOperator = await ZilliqaAccount.isOperator(proxy, userBase16Address, networkURL);
+        const isOperator = await ZilliqaAccount.isOperator(impl, userBase16Address, networkURL);
 
         // login role is set by context during wallet access
         if (loginRole === Role.OPERATOR.toString() && isOperator) {
@@ -227,6 +228,7 @@ function Dashboard(props: any) {
         setNetworkURL(url);
         ZilliqaAccount.changeNetwork(url);
         setProxy(networks_config[networkLabel].proxy);
+        setImpl(networks_config[networkLabel].impl);
 
         // update the current role since account has been switched
         updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
@@ -350,7 +352,7 @@ function Dashboard(props: any) {
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
+                                        <button type="button" className="btn btn-contract-disabled mr-4" data-toggle="modal" data-keyboard="false" data-backdrop="static">Withdraw Stake (WIP)</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
                                         {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
                                     </div>
@@ -383,7 +385,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">Overview</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <DelegatorStatsTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                                <DelegatorStatsTable proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                             </div>
                                         </div>
                                     </div>
@@ -401,7 +403,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
                                             <div className="col-12 text-center">
-                                                { mountedRef.current && <StakingPortfolio proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                                { mountedRef.current && <StakingPortfolio proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
                                         </div>
                                     </div>
@@ -418,7 +420,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Node Performance</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <OperatorStatsTable proxy={proxy} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
+                                                <OperatorStatsTable proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
                                             </div>
                                         </div>
                                     </div>
@@ -430,7 +432,7 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
-                                            { mountedRef.current && <SsnTable proxy={proxy} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
+                                            { mountedRef.current && <SsnTable proxy={impl} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
                                         </div>
                                     </div>
                                 </div>
@@ -463,7 +465,8 @@ function Dashboard(props: any) {
             <DisclaimerModal />
 
             <UpdateCommRateModal 
-                proxy={proxy} 
+                proxy={proxy}
+                impl={impl} 
                 networkURL={networkURL} 
                 currentRate={nodeDetails.commRate} 
                 onSuccessCallback={updateRecentTransactions} 
@@ -471,31 +474,39 @@ function Dashboard(props: any) {
 
             <UpdateReceiverAddress 
                 proxy={proxy} 
+                impl={impl} 
                 networkURL={networkURL} 
                 currentReceiver={nodeDetails.receiver} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} />
 
             <WithdrawCommModal 
-                proxy={proxy} networkURL={networkURL} 
+                proxy={proxy} 
+                impl={impl} 
+                networkURL={networkURL} 
                 currentRewards={nodeDetails.commReward} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} />
 
             <DelegateStakeModal 
-                proxy={proxy} networkURL={networkURL} 
+                proxy={proxy} 
+                impl={impl} 
+                networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={nodeOptions} />
 
             <ReDelegateStakeModal 
-                proxy={proxy} networkURL={networkURL} 
+                proxy={proxy} 
+                impl={impl} 
+                networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={nodeOptions} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
+                impl={impl} 
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
@@ -504,13 +515,15 @@ function Dashboard(props: any) {
 
             <WithdrawRewardModal 
                 proxy={proxy} 
+                impl={impl} 
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={nodeOptions} />
 
             <CompleteWithdrawModal 
-                proxy={proxy} 
+                proxy={proxy}
+                impl={impl}  
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} />

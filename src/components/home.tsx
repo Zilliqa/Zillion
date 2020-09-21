@@ -173,13 +173,13 @@ function Home(props: any) {
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
 
-                <LandingStatsTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                <LandingStatsTable proxy={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
 
                 <div id="home-ssn-details" className="container">
                   <div className="row p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
                     <div className="col-12 content">
-                        <SsnTable proxy={networks_config[selectedNetwork].proxy} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                        <SsnTable proxy={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
                     </div>
                   </div>
                 </div>
