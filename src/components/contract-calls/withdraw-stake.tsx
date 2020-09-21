@@ -8,6 +8,7 @@ import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
+import { fromBech32Address } from '@zilliqa-js/crypto';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -23,12 +24,42 @@ function WithdrawStakeModal(props: any) {
     const ledgerIndex = props.ledgerIndex;
     const { onSuccessCallback } = props;
 
+    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
+
     const nodeSelectorOptions = props.nodeSelectorOptions;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [withdrawAmt, setWithdrawAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+
+
+    // checks if there are any unwithdrawn rewards
+    const hasRewardToWithdraw = async () => {
+        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
+        
+        const contract = await ZilliqaAccount.getSsnImplContract(proxy, networkURL);
+
+        if (contract === undefined || contract === 'error') {
+            return false;
+        }
+
+        if (contract.last_withdraw_cycle_deleg.hasOwnProperty(userBase16Address)) {
+            const ssnRewardCycleList = contract.last_withdraw_cycle_deleg[userBase16Address];
+            
+            if (ssnRewardCycleList.hasOwnProperty(ssnChecksumAddress)) {
+                // last_withdraw_cycle_deleg[deleg][ssnaddr]
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+                const lastWithdrawnCycle = parseInt(ssnRewardCycleList[ssnChecksumAddress]);
+
+                if (lastWithdrawnCycle < lastRewardCycle) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     const withdrawStake = async () => {
         if (!ssnAddress) {
@@ -38,6 +69,12 @@ function WithdrawStakeModal(props: any) {
 
         if (!withdrawAmt || !withdrawAmt.match(/\d/)) {
             Alert('error', "Withdraw amount is invalid.");
+            return null;
+        }
+
+        // check if deleg has unwithdrawn rewards for this ssn address
+        if (hasRewardToWithdraw()) {
+            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
             return null;
         }
 
