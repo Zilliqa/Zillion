@@ -49,8 +49,9 @@ function WalletZilPay(props: any) {
             props.onWalletLoadingCallback();
 
             // update context
-            initParams(base16, role, AccessMethod.ZILPAY);
-            updateRole(base16, role);
+            // need await for update role for it to complete, otherwise context is empty
+            initParams(base16, AccessMethod.ZILPAY);
+            await updateRole(base16, role);
             updateAuth();
 
             // request parent to redirect to dashboard

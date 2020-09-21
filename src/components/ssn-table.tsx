@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
-import { PromiseArea, SsnStatus, Role } from '../util/enum';
+import { PromiseArea, SsnStatus, Role, Constants } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
 import * as Account from "../account";
-import Spinner from './spinner';
 
-import { BN, units } from '@zilliqa-js/util';
 import { toBech32Address } from '@zilliqa-js/crypto';
+
+import { useInterval } from '../util/use-interval';
+import SpinnerNormal from './spinner-normal';
 
 
 function Table({ columns, data, tableId, hiddenColumns }: any) {
@@ -65,15 +66,15 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
 function SsnTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : 3000;
+    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const role = props.currRole;
     
     const [data, setData] = useState([] as any);
     const [totalStakeAmount, setTotalStakeAmount] = useState('');
-    const [showSpinner, setShowSpinner] = useState(false);
+    const [showSpinner, setShowSpinner] = useState(true);
     
     // prevent react update state on unmounted component 
-    const mountedRef = useRef(false);
+    const mountedRef = useRef(true);
 
     const columns = useMemo(
         () => [
@@ -154,19 +155,18 @@ function SsnTable(props: any) {
         return hiddenColumns;
     }
     
-    const getData = async () => {
+    const getData = useCallback(() => {
         let outputResult: { ssnAddress: string; ssnName: any; ssnStakeAmt: string; ssnBufferedDeposit: string; ssnCommRate: any; ssnCommReward: string; ssnDeleg: number; }[] = [];
+        let totalStakeAmount = '0';
 
-        trackPromise(Account.getSsnImplContract(proxy, networkURL).then((implContract) => {
+        trackPromise(Account.getSsnImplContractDirect(proxy, networkURL).then((implContract) => {
             if (implContract === 'error') {
-                setData([]);
                 return null;
             }
 
             // get total stake amount
             if (implContract.hasOwnProperty('totalstakeamount')) {
-                console.log();
-                setTotalStakeAmount(implContract.totalstakeamount);
+                totalStakeAmount = implContract.totalstakeamount
             }
 
             // get node operator details
@@ -191,7 +191,7 @@ function SsnTable(props: any) {
                         ssnName: ssnArgs[3],
                         ssnApiURL: ssnArgs[5],
                         ssnStakeAmt: ssnArgs[1],
-                        ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
+                        ssnBufferedDeposit: ssnArgs[6],
                         ssnCommRate: ssnArgs[7],
                         ssnCommReward: ssnArgs[8],
                         ssnDeleg: delegAmt,
@@ -200,38 +200,40 @@ function SsnTable(props: any) {
                     outputResult.push(nodeJson);
                 }
             }
+        })
+        .finally(() => {
+            if(!mountedRef.current) {
+                return null;
+            }
+
+            setShowSpinner(false);
 
             if (mountedRef.current) {
+                console.log("updating ssn table...")
+                setTotalStakeAmount(totalStakeAmount);
                 setData([...outputResult]);
             }
-            
-            // console.log("data: %o", data);
-        }), PromiseArea.PROMISE_GET_CONTRACT);
-    };
 
-    useEffect(() => {
-        setShowSpinner(true);
-        getData();
-        // eslint-disable-next-line
+        }), PromiseArea.PROMISE_GET_CONTRACT);
+
     }, [proxy, networkURL]);
 
+    // load inital data
     useEffect(() => {
-        mountedRef.current = true;
-        const intervalId = setInterval(async () => {
-            console.log("refreshing");
-            setShowSpinner(false);
-            await getData();
-        }, refresh);
+        getData();
         return () => {
-            clearInterval(intervalId);
             mountedRef.current = false;
-        }
-        // eslint-disable-next-line
-    });
+        };
+    }, [getData]);
+
+    useInterval(() => {
+        console.log("ssn page stats table");
+        getData();
+    }, mountedRef, refresh);
 
     return (
         <>
-        { showSpinner && <Spinner class="spinner-border dashboard-spinner" area={PromiseArea.PROMISE_GET_CONTRACT} /> }
+        { showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> }
         <Table columns={columns} data={data} className={props.tableId} hiddenColumns={getHiddenColumns()}></Table>
         </>
     );

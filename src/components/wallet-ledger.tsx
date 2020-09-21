@@ -25,8 +25,8 @@ function LedgerWallet(props: any) {
     const appContext = useContext(AppContext);
     const { initParams, updateAuth, updateLedgerIndex, updateRole } = appContext;
 
+    const defaultLedgerIndex = 0;
     const [ledgerIndex, setLedgerIndex] = useState(0);
-    const [selectedLedgerIndex, setSelectedLedgerIndex] = useState(0);
     const [ledgerAccounts, setLedgerAccounts] = useState([] as LedgerAccount[]);
 
     const role = props.role;
@@ -58,7 +58,6 @@ function LedgerWallet(props: any) {
             const tempLedgerAccounts: LedgerAccount [] = ledgerAccounts.slice();
             tempLedgerAccounts.push(currLedgerAccount);
             setLedgerAccounts([...tempLedgerAccounts]);
-            setSelectedLedgerIndex(ledgerIndex);
             
             // prepare next ledger index
             const nextLedgerIndex = ledgerIndex + 1;
@@ -91,7 +90,7 @@ function LedgerWallet(props: any) {
             console.log("ledger wallet index: %o", hwIndex);
 
             // update context
-            initParams(selectedLedgerAddress, role, AccessMethod.LEDGER);
+            initParams(selectedLedgerAddress, AccessMethod.LEDGER);
             await updateRole(selectedLedgerAddress, role);
             updateLedgerIndex(hwIndex);
             updateAuth()
@@ -132,7 +131,7 @@ function LedgerWallet(props: any) {
                                 </tbody>
                             </table>
                             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={getLedgerAccounts}>Next Account</button>
-                            <button type="button" className="btn btn-user-action mx-2" onClick={() => unlockWallet(selectedLedgerIndex)}>Use Default Index #{selectedLedgerIndex}</button>
+                            <button type="button" className="btn btn-user-action mx-2" onClick={() => unlockWallet(defaultLedgerIndex)}>Use Default Index #{defaultLedgerIndex}</button>
                         </div>
                     </div>
                 </div>

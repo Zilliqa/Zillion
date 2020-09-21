@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from '../../contexts/appContext';
@@ -133,7 +133,6 @@ function UpdateCommRateModal(props: any) {
                     }
                 </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

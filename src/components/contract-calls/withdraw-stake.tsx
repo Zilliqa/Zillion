@@ -1,13 +1,14 @@
 import React, { useState, useContext } from 'react';
 import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
+import { fromBech32Address } from '@zilliqa-js/crypto';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -19,9 +20,12 @@ function WithdrawStakeModal(props: any) {
     const { accountType } = appContext;
 
     const proxy = props.proxy;
+    const impl = props.impl;
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
     const { onSuccessCallback } = props;
+
+    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
     const nodeSelectorOptions = props.nodeSelectorOptions;
 
@@ -29,6 +33,34 @@ function WithdrawStakeModal(props: any) {
     const [withdrawAmt, setWithdrawAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+
+
+    // checks if there are any unwithdrawn rewards
+    const hasRewardToWithdraw = async () => {
+        const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
+        
+        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl, networkURL);
+
+        if (contract === undefined || contract === 'error') {
+            return false;
+        }
+
+        if (contract.last_withdraw_cycle_deleg.hasOwnProperty(userBase16Address)) {
+            const ssnRewardCycleList = contract.last_withdraw_cycle_deleg[userBase16Address];
+            
+            if (ssnRewardCycleList.hasOwnProperty(ssnChecksumAddress)) {
+                // last_withdraw_cycle_deleg[deleg][ssnaddr]
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+                const lastWithdrawnCycle = parseInt(ssnRewardCycleList[ssnChecksumAddress]);
+
+                if (lastWithdrawnCycle < lastRewardCycle) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     const withdrawStake = async () => {
         if (!ssnAddress) {
@@ -38,6 +70,12 @@ function WithdrawStakeModal(props: any) {
 
         if (!withdrawAmt || !withdrawAmt.match(/\d/)) {
             Alert('error', "Withdraw amount is invalid.");
+            return null;
+        }
+
+        // check if deleg has unwithdrawn rewards for this ssn address
+        if (hasRewardToWithdraw()) {
+            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
             return null;
         }
 
@@ -157,7 +195,6 @@ function WithdrawStakeModal(props: any) {
                     }
                 </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

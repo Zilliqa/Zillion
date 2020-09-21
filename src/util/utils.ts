@@ -30,7 +30,7 @@ export const convertToProperCommRate = (rate: string) => {
 // compute the stake amount as a percentage of total stake amount
 // returns a BigNumber
 export const computeStakeAmtPercent = (inputStake: string, totalStake: string) => {
-    if (!inputStake) {
+    if (!inputStake || !totalStake || totalStake === '0') {
         return 0;
     }
     const inputStakeBN = new BigNumber(inputStake);
@@ -54,8 +54,15 @@ export const percentToContractCommRate = (userInputRate: string) => {
 // with commas as thousand separators and decimals places
 export const convertQaToCommaStr = (inputVal: string) => {
     let zil = units.fromQa(new BN(inputVal), units.Units.Zil);
-    let zilProperDecimalStr = BigNumber(zil).toFixed(3);
+    let zilProperDecimalStr = new BigNumber(zil).toFixed(3);
     return zilProperDecimalStr.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// convert gzil amount in 15 decimal places to a comma represented string
+export const convertGzilToCommaStr = (inputVal: string) => {
+    const decimalPlaces = new BigNumber(10**15);
+    const gzil = new BigNumber(inputVal).dividedBy(decimalPlaces).toFixed(3);
+    return gzil.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export const getTxnLink = (txnId: string, networkURL: string) => {

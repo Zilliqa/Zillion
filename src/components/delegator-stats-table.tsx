@@ -1,29 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../account';
-import { PromiseArea } from '../util/enum';
+import { PromiseArea, Constants } from '../util/enum';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
-import { convertQaToCommaStr } from '../util/utils';
+import { convertQaToCommaStr, convertGzilToCommaStr } from '../util/utils';
 import { computeDelegRewards } from '../util/reward-calculator';
-import Spinner from './spinner';
+import { useInterval } from '../util/use-interval';
+import SpinnerNormal from './spinner-normal';
 
 
-const { BN, units } = require('@zilliqa-js/util');
+const { BN } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
 
 function DelegatorStatsTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : 3000;
+    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
-    const [showSpinner, setShowSpinner] = useState(false);
+    const [showSpinner, setShowSpinner] = useState(true);
 
-    // all except lastCycleAPY in Qa
     const [data, setData] = useState({
         lastCycleAPY: '0',
         zilRewards: '0',
@@ -33,9 +33,9 @@ function DelegatorStatsTable(props: any) {
         totalDeposits: '0'
     });
 
-    const mountedRef = useRef(false);
+    const mountedRef = useRef(true);
 
-    const getData = () => {
+    const getData = useCallback(() => {
         let lastCycleAPY = '0';
         let zilRewards = '0';
         let gzilRewards = '0';
@@ -43,7 +43,8 @@ function DelegatorStatsTable(props: any) {
         let totalPendingWithdrawal = '0';
         let totalDeposits = '0';
 
-        trackPromise(ZilliqaAccount.getSsnImplContract(proxy, networkURL)
+
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
             .then(async (contract) => {
 
                 if (contract === undefined || contract === 'error') {
@@ -51,7 +52,7 @@ function DelegatorStatsTable(props: any) {
                 }
 
                 // compute last cycle APY
-                // use calculator
+                // TODO use calculator
 
                 if (contract.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
                     let totalDepositsBN = new BigNumber(0);
@@ -75,25 +76,20 @@ function DelegatorStatsTable(props: any) {
 
                     totalDeposits = totalDepositsBN.toString();
                     zilRewards = totalZilRewardsBN.toString();
+
+                    // compute gzil rewards
+                    // converted to gzil when display
+                    gzilRewards = totalZilRewardsBN;
                 }
 
-
-                // compute gzil balance
-                let totalGzilRewardsBN = new BigNumber(0);
-
+                // get gzil balance
                 const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
                 if (gzilContract !== undefined) {
                     const gzilBalanceMap = gzilContract.balances;
                     if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
                         // compute user gzil balance
-                        
-                        gzilBalance = (parseFloat(units.fromQa(new BN(gzilBalanceMap[userBase16Address]), units.Units.Zil))/1000.00).toFixed(3);
+                        gzilBalance = gzilBalanceMap[userBase16Address];
                     }
-
-                    for (const gzilUsersAddress in gzilBalanceMap) {
-                        totalGzilRewardsBN = totalGzilRewardsBN.plus(new BigNumber(gzilBalanceMap[gzilUsersAddress]));
-                    }
-                    gzilRewards = (parseFloat(units.fromQa(new BN(totalGzilRewardsBN.toString()), units.Units.Zil))/1000.00).toFixed(3);
                 }
 
                 // compute total pending withdrawal
@@ -112,57 +108,62 @@ function DelegatorStatsTable(props: any) {
                     totalPendingWithdrawal = totalPendingAmtBN.toString();
                 }
 
+            })
+            .finally(() => {
+
+                if(!mountedRef.current) {
+                    return null;
+                }
+
+                setShowSpinner(false);
+                
                 if (mountedRef.current) {
+                    console.log("updating delegator stats...");
                     setData(prevData => ({
                         ...prevData,
                         lastCycleAPY: lastCycleAPY,
-                        zilRewards: zilRewards,
-                        gzilRewards: gzilRewards,
-                        gzilBalance: gzilBalance,
+                        zilRewards: zilRewards,         // Qa
+                        gzilRewards: gzilRewards,       // 15 dp
+                        gzilBalance: gzilBalance,       // 15 dp
                         totalPendingWithdrawal: totalPendingWithdrawal,
                         totalDeposits: totalDeposits,
                     }));
                 }
 
             }), PromiseArea.PROMISE_GET_DELEG_STATS);
-    };
 
+    }, [proxy, networkURL, userBase16Address]);
+
+    // load initial data
     useEffect(() => {
-        setShowSpinner(true);
         getData();
-        // eslint-disable-next-line
-    }, [proxy, networkURL]);
-
-    useEffect(() => {
-        mountedRef.current = true;
-        const intervalId = setInterval(async () => {
-            setShowSpinner(false);
-            getData();
-        }, refresh);
         return () => {
-            clearInterval(intervalId);
             mountedRef.current = false;
-        }
-        // eslint-disable-next-line
-    }, []);
+        };
+    }, [getData]);
+
+    // poll data
+    useInterval(() => {
+        getData();
+    }, mountedRef, refresh);
 
     return (
         <>
-        { showSpinner && <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} /> }
+        { showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> }
         
         { !showSpinner &&
 
         <div className="row px-2 pb-3 align-items-center justify-content-center">
             <div className="d-block deleg-stats-card">
                 <h3>Last Cycle APY</h3>
-                <span>{data.lastCycleAPY}%</span>
+                <span>WIP</span>
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Total Deposits</h3>
                 <span>{convertQaToCommaStr(data.totalDeposits)}</span>
             </div>
             <div className="d-block deleg-stats-card">
-                <h3>Total Pending Withdrawal</h3>
+                <h3>Pending Stake Withdrawal</h3>
                 <span>{convertQaToCommaStr(data.totalPendingWithdrawal)}</span>
             </div>
 
@@ -170,7 +171,7 @@ function DelegatorStatsTable(props: any) {
 
             <div className="d-block deleg-stats-card">
                 <h3>GZIL Balance</h3>
-                <span>{data.gzilBalance}</span>
+                <span>{convertGzilToCommaStr(data.gzilBalance)}</span>
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Unclaimed ZIL Rewards</h3>
@@ -178,7 +179,7 @@ function DelegatorStatsTable(props: any) {
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Unclaimed GZIL Rewards</h3>
-                <span>{data.gzilRewards}</span>
+                <span>{convertGzilToCommaStr(data.gzilRewards)}</span>
             </div>
         </div>
         }

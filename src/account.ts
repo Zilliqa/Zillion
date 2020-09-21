@@ -180,6 +180,32 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
     }
 };
 
+export const getSsnImplContractDirect = async (implAddr: string, networkURL?: string) => {
+    if (networkURL) {
+        changeNetwork(networkURL);
+    }
+
+    try {
+        if (!implAddr) {
+            console.error("error: getSsnImplContractDirect - no implementation contract found");
+            return "error";
+        }
+        
+        // fetched implementation contract address
+        const implContract = await zilliqa.blockchain.getSmartContractState(implAddr);
+        
+        if (!implContract.hasOwnProperty("result")) {
+            return "error";
+        }
+        
+        return implContract.result;
+
+    } catch (err) {
+        console.error("error: getSsnImplContract - o%", err);
+        return "error"
+    }
+};
+
 export const getTotalCoinSupply = async (proxy: string, networkURL?: string) => {
     if (networkURL) {
         changeNetwork(networkURL);
@@ -211,14 +237,14 @@ export const isOperator = async (proxy: string, address: string, networkURL: str
         return false;
     }
 
-    const contract = await getSsnImplContract(proxy, networkURL);
+    const contract = await getSsnImplContractDirect(proxy, networkURL);
     if (contract === undefined || contract === "error") {
         return false;
     }
     console.log("account.ts check is operator: %o", address);
     console.log("account.ts check is proxy: %o", proxy);
     console.log("account.ts check is networkURL: %o", networkURL);
-    if (contract.hasOwnProperty('ssnlist') && contract.ssnlist.hasOwnProperty(address)) {
+    if (contract.hasOwnProperty('ssnlist') && address in contract.ssnlist) {
         console.log("operator %o exist", address);
         return true;
     } else {

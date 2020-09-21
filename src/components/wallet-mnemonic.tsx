@@ -44,7 +44,7 @@ function MnemonicWallet(props: any) {
             props.onWalletLoadingCallback();
 
             // update context
-            initParams(address, role, AccessMethod.MNEMONIC);
+            initParams(address, AccessMethod.MNEMONIC);
             await updateRole(address, role);
             updateAuth();
 
