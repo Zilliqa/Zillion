@@ -192,7 +192,7 @@ function SsnTable(props: any) {
                         ssnName: ssnArgs[3],
                         ssnApiURL: ssnArgs[5],
                         ssnStakeAmt: ssnArgs[1],
-                        ssnBufferedDeposit: units.fromQa(new BN(ssnArgs[6]), units.Units.Zil),
+                        ssnBufferedDeposit: ssnArgs[6],
                         ssnCommRate: ssnArgs[7],
                         ssnCommReward: ssnArgs[8],
                         ssnDeleg: delegAmt,
