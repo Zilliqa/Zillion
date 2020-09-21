@@ -102,18 +102,15 @@ function StakingPortfolio(props: any) {
                 if (contract.hasOwnProperty('deposit_amt_deleg') && contract.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
                     const depositDelegList = contract.deposit_amt_deleg[userBase16Address];
                     for (const ssnAddress in depositDelegList) {
-                        console.log("staking portfolio - got ssn address :%o", ssnAddress);
                         if (!depositDelegList.hasOwnProperty(ssnAddress)) {
                             continue;
                         }
 
                         // compute stake amount
                         const delegAmt = new BN(depositDelegList[ssnAddress]);
-                        console.log("STAKING PORTFOLIO deleg amt: %o", delegAmt);
 
                         // compute rewards
                         const delegRewards = new BN(await computeDelegRewards(proxy, networkURL, ssnAddress, userBase16Address)).toString();
-                        console.log("STAKING PORTFOLIO deleg rewards : %o", delegRewards);
 
                         const portfolioData = {
                             ssnName: contract.ssnlist[ssnAddress].arguments[3],
