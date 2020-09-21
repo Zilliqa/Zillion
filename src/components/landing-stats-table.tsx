@@ -57,7 +57,10 @@ function LandingStatsTable(props: any) {
                 if (totalCoinSupply !== OperationStatus.ERROR && totalCoinSupply.result !== undefined) {
                     const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply.result));
                     const totalStakeAmountBN = new BigNumber(totalStakeAmount);
-                    circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
+
+                    if (!totalCoinSupplyBN.isZero()) {
+                        circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
+                    }
                 }
 
                 // compute total number of gzil
