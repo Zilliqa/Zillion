@@ -11,7 +11,7 @@ import { useInterval } from '../util/use-interval';
 import SpinnerNormal from './spinner-normal';
 
 
-const { BN, units } = require('@zilliqa-js/util');
+const { BN } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
 
