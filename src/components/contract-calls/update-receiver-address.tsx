@@ -125,7 +125,6 @@ function UpdateReceiverAddress(props: any) {
                     }
                 </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

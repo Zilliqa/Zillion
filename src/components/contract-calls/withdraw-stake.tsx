@@ -157,7 +157,6 @@ function WithdrawStakeModal(props: any) {
                     }
                 </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

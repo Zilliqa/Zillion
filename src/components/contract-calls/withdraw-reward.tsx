@@ -140,7 +140,6 @@ function WithdrawRewardModal(props: any) {
                      }
                  </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

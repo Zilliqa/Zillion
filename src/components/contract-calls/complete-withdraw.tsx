@@ -110,7 +110,6 @@ function CompleteWithdrawModal(props: any) {
                      }
                  </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

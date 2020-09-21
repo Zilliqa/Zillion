@@ -185,7 +185,6 @@ function ReDelegateStakeModal(props: any) {
                     }
                 </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

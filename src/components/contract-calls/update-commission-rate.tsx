@@ -133,7 +133,6 @@ function UpdateCommRateModal(props: any) {
                     }
                 </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }
