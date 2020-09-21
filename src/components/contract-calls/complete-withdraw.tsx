@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { trackPromise } from 'react-promise-tracker';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
