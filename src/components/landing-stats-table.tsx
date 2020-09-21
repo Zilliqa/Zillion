@@ -77,10 +77,10 @@ function LandingStatsTable(props: any) {
                 }
 
                 // compute est. APY
-                let temp = new BigNumber(totalStakeAmount).times(36500);
+                let temp = new BigNumber(totalStakeAmount);
 
                 if (!temp.isEqualTo(0)) {
-                    estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).toFixed(5);
+                    estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2);
                 }
             })
             .finally(() => {
