@@ -153,7 +153,7 @@ function ReDelegateStakeModal(props: any) {
 
                         <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="withdrawRewardModalLabel">Re-Delegate Stake</h5>
+                            <h5 className="modal-title" id="withdrawRewardModalLabel">Transfer Stake</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -174,10 +174,10 @@ function ReDelegateStakeModal(props: any) {
                                 options={nodeSelectorOptions}
                                 onChange={handleToAddress}  />
 
-                            <input type="text" className="mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to redelegate in ZIL" />
+                            <input type="text" className="mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer in ZIL" />
 
                             <div className="d-flex mt-4">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={redeleg}>Re-Stake</button>
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={redeleg}>Transfer Stake</button>
                             </div>
 
                         </div>
