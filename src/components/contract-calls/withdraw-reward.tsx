@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
@@ -140,7 +140,6 @@ function WithdrawRewardModal(props: any) {
                      }
                  </div>
             </div>
-            <ToastContainer hideProgressBar={true}/>
         </div>
     );
 }

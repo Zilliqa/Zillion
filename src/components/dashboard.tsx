@@ -349,7 +349,7 @@ function Dashboard(props: any) {
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Re-Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
                                         {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
@@ -459,15 +459,62 @@ function Dashboard(props: any) {
                 <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
                 </div>
             </footer>
+            
             <DisclaimerModal />
-            <UpdateCommRateModal proxy={proxy} networkURL={networkURL} currentRate={nodeDetails.commRate} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
-            <UpdateReceiverAddress proxy={proxy} networkURL={networkURL} currentReceiver={nodeDetails.receiver} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
-            <WithdrawCommModal proxy={proxy} networkURL={networkURL} currentRewards={nodeDetails.commReward} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
-            <DelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
-            <ReDelegateStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
-            <WithdrawStakeModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
-            <WithdrawRewardModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} nodeSelectorOptions={nodeOptions} />
-            <CompleteWithdrawModal proxy={proxy} networkURL={networkURL} onSuccessCallback={updateRecentTransactions} ledgerIndex={ledgerIndex} />
+
+            <UpdateCommRateModal 
+                proxy={proxy} 
+                networkURL={networkURL} 
+                currentRate={nodeDetails.commRate} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} />
+
+            <UpdateReceiverAddress 
+                proxy={proxy} 
+                networkURL={networkURL} 
+                currentReceiver={nodeDetails.receiver} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} />
+
+            <WithdrawCommModal 
+                proxy={proxy} networkURL={networkURL} 
+                currentRewards={nodeDetails.commReward} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} />
+
+            <DelegateStakeModal 
+                proxy={proxy} networkURL={networkURL} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} 
+                nodeSelectorOptions={nodeOptions} />
+
+            <ReDelegateStakeModal 
+                proxy={proxy} networkURL={networkURL} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} 
+                nodeSelectorOptions={nodeOptions} />
+
+            <WithdrawStakeModal 
+                proxy={proxy} 
+                networkURL={networkURL} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} 
+                nodeSelectorOptions={nodeOptions} 
+                userAddress={currWalletAddress} />
+
+            <WithdrawRewardModal 
+                proxy={proxy} 
+                networkURL={networkURL} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} 
+                nodeSelectorOptions={nodeOptions} />
+
+            <CompleteWithdrawModal 
+                proxy={proxy} 
+                networkURL={networkURL} 
+                onSuccessCallback={updateRecentTransactions} 
+                ledgerIndex={ledgerIndex} />
+                
         </div>
         </>
     );

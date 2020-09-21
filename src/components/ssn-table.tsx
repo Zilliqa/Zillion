@@ -3,7 +3,7 @@ import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 import { trackPromise } from 'react-promise-tracker';
 
-import { PromiseArea, SsnStatus, Role } from '../util/enum';
+import { PromiseArea, SsnStatus, Role, Constants } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
 import * as Account from "../account";
 
@@ -67,7 +67,7 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
 function SsnTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : 3000;
+    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const role = props.currRole;
     
     const [data, setData] = useState([] as any);

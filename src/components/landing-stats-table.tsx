@@ -2,21 +2,20 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../account';
-import { PromiseArea, OperationStatus } from '../util/enum';
-import { convertZilToQa, convertQaToCommaStr } from '../util/utils';
+import { Constants, PromiseArea, OperationStatus } from '../util/enum';
+import { convertZilToQa, convertQaToCommaStr, convertGzilToCommaStr } from '../util/utils';
 import { useInterval } from '../util/use-interval';
 import SpinnerNormal from './spinner-normal';
 
-const { BN, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
-const MAX_GZIL_SUPPLY = "682550";
-const TOTAL_REWARD_SEED_NODES = "1870000"; // 110000 * 17
+const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
+const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); // 110000 * 17
 
 function LandingStatsTable(props: any) {
     const proxy = props.proxy;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : 3000;
+    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const [showSpinner, setShowSpinner] = useState(true);
     const mountedRef = useRef(true);
 
@@ -58,15 +57,23 @@ function LandingStatsTable(props: any) {
                 if (totalCoinSupply !== OperationStatus.ERROR && totalCoinSupply.result !== undefined) {
                     const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply.result));
                     const totalStakeAmountBN = new BigNumber(totalStakeAmount);
-                    circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
+
+                    if (!totalCoinSupplyBN.isZero()) {
+                        circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
+                    }
                 }
 
                 // compute total number of gzil
                 const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
                 if (gzilContract !== undefined) {
-                    gzil = (parseFloat(units.fromQa(new BN(gzilContract.total_supply), units.Units.Zil))/1000.00).toFixed(3);
-                    const remainGzil = new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)).minus(new BigNumber(gzil));
-                    remainingGzil = (remainGzil.dividedBy(new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)))).times(100).toFixed(2);
+                    // gzil is 15 decimal places
+                    gzil = gzilContract.total_supply;
+                    const decimalPlaces = new BigNumber(10**15);
+                    const maxGzilSupply = new BigNumber(MAX_GZIL_SUPPLY).times(decimalPlaces);
+                    const remainGzil = maxGzilSupply.minus(new BigNumber(gzil));
+
+                    // compute remaining gzil percentage
+                    remainingGzil = (remainGzil.dividedBy(maxGzilSupply)).times(100).toFixed(2);
                 }
 
                 // compute est. APY
@@ -153,7 +160,7 @@ function LandingStatsTable(props: any) {
 
                     <div className="d-block landing-stats-card">
                         <h3>Total GZIL minted</h3>
-                        <span>{data.gzil}</span>
+                        <span>{convertGzilToCommaStr(data.gzil)}</span>
                     </div>
                 </div>
                 </>

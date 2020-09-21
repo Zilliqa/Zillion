@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 import { OperationStatus, AccessMethod, ProxyCalls } from "../../util/enum";
 import { bech32ToChecksum, convertQaToCommaStr } from '../../util/utils';
@@ -110,7 +110,6 @@ function WithdrawCommModal(props: any) {
                         }
                     </div>
                 </div>
-                <ToastContainer hideProgressBar={true}/>
             </div>
     );
 }
