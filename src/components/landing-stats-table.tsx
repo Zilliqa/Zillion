@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 
 import * as ZilliqaAccount from '../account';
 import { Constants, PromiseArea, OperationStatus } from '../util/enum';
-import { convertZilToQa, convertQaToCommaStr } from '../util/utils';
+import { convertZilToQa, convertQaToCommaStr, convertGzilToCommaStr } from '../util/utils';
 import { useInterval } from '../util/use-interval';
 import SpinnerNormal from './spinner-normal';
 
@@ -64,9 +64,14 @@ function LandingStatsTable(props: any) {
                 // compute total number of gzil
                 const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
                 if (gzilContract !== undefined) {
-                    gzil = (parseFloat(units.fromQa(new BN(gzilContract.total_supply), units.Units.Zil))/1000.00).toFixed(3);
-                    const remainGzil = new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)).minus(new BigNumber(gzil));
-                    remainingGzil = (remainGzil.dividedBy(new BigNumber(convertZilToQa(MAX_GZIL_SUPPLY)))).times(100).toFixed(2);
+                    // gzil is 15 decimal places
+                    gzil = gzilContract.total_supply;
+                    const decimalPlaces = new BigNumber(10**15);
+                    const maxGzilSupply = new BigNumber(MAX_GZIL_SUPPLY).times(decimalPlaces);
+                    const remainGzil = maxGzilSupply.minus(new BigNumber(gzil));
+
+                    // compute remaining gzil percentage
+                    remainingGzil = (remainGzil.dividedBy(maxGzilSupply)).times(100).toFixed(2);
                 }
 
                 // compute est. APY
@@ -153,7 +158,7 @@ function LandingStatsTable(props: any) {
 
                     <div className="d-block landing-stats-card">
                         <h3>Total GZIL minted</h3>
-                        <span>{data.gzil}</span>
+                        <span>{convertGzilToCommaStr(data.gzil)}</span>
                     </div>
                 </div>
                 </>
