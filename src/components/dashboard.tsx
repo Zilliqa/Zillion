@@ -170,9 +170,14 @@ function Dashboard(props: any) {
     // update current role is used for ZilPay
     // due to account switch on the fly
     // role is always compared against the selected role at home page
-    const updateCurrentRole = async (userBase16Address: string) => {
+    const updateCurrentRole = async (userBase16Address: string, currImpl?: string, currNetworkURL?: string) => {
+        // setState is async
+        // use input params to get latest impl and network
         let newRole = "";
-        const isOperator = await ZilliqaAccount.isOperator(impl, userBase16Address, networkURL);
+        let implAddress = currImpl ? currImpl : impl;
+        let networkAddress = currNetworkURL ? currNetworkURL : networkURL;
+
+        const isOperator = await ZilliqaAccount.isOperator(implAddress, userBase16Address, networkAddress);
 
         // login role is set by context during wallet access
         if (loginRole === Role.OPERATOR.toString() && isOperator) {
@@ -198,6 +203,7 @@ function Dashboard(props: any) {
         getNodeOptionsList();
     }, mountedRef, refresh_rate_config);
 
+    
     const networkChanger = (net: string) => {
         let networkLabel = "";
         let url = '';
@@ -224,14 +230,14 @@ function Dashboard(props: any) {
                 break;
         }
 
+        ZilliqaAccount.changeNetwork(url);
         updateNetwork(networkLabel);
         setNetworkURL(url);
-        ZilliqaAccount.changeNetwork(url);
         setProxy(networks_config[networkLabel].proxy);
         setImpl(networks_config[networkLabel].impl);
-
+        
         // update the current role since account has been switched
-        updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
+        updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase(), networks_config[networkLabel].impl, url);
     }
 
     /**
@@ -264,7 +270,7 @@ function Dashboard(props: any) {
         }
         // must only run once due to global listener
         // eslint-disable-next-line
-    }, [setNetworkURL]);
+    }, []);
 
     useEffect(() => {
         if (environment_config === Environment.DEV) {
@@ -278,14 +284,6 @@ function Dashboard(props: any) {
         }
         // eslint-disable-next-line
     }, []);
-
-    // set network that is selected from home page
-    useEffect(() => {
-        // network in context is set
-        if (network) {
-            ZilliqaAccount.changeNetwork(networkURL);
-        }
-    }, [network, networkURL]);
 
 
     // prevent user from refreshing
