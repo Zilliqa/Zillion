@@ -200,7 +200,6 @@ function Dashboard(props: any) {
     // poll data
     useInterval(() => {
         getAccountBalance();
-        getNodeOptionsList();
     }, mountedRef, refresh_rate_config);
 
     
