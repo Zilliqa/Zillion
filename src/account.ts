@@ -209,10 +209,7 @@ export const getSsnImplContractDirect = async (implAddr: string, networkURL?: st
 };
 
 // uses get smart contract sub state
-export const getImplState = async (implAddr: string, networkURL: string, state: string) => {
-    if (networkURL) {
-        changeNetwork(networkURL);
-    }
+export const getImplState = async (implAddr: string, state: string) => {
 
     if (!implAddr) {
         console.error("error: getImplState - no implementation contract found");
@@ -267,14 +264,16 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
         return false;
     }
 
-    const contract = await getSsnImplContractDirect(impl, networkURL);
-    if (contract === undefined || contract === "error") {
+    const contractState = await getImplState(impl, "ssnlist");
+
+    if (contractState === undefined || contractState === "error") {
         return false;
     }
+
     console.log("account.ts check is operator: %o", address);
     console.log("account.ts check is impl: %o", impl);
     console.log("account.ts check is networkURL: %o", networkURL);
-    if (contract.hasOwnProperty('ssnlist') && address in contract.ssnlist) {
+    if (address in contractState.ssnlist) {
         console.log("operator %o exist", address);
         return true;
     } else {

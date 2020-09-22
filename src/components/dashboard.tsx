@@ -133,7 +133,7 @@ function Dashboard(props: any) {
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
 
-        ZilliqaAccount.getImplState(impl, networkURL, "ssnlist")
+        ZilliqaAccount.getImplState(impl, "ssnlist")
             .then((contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
@@ -160,7 +160,7 @@ function Dashboard(props: any) {
                 setNodeOptions([...tempNodeOptions]);
             });
 
-    }, [impl, networkURL]);
+    }, [impl]);
 
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
@@ -169,12 +169,14 @@ function Dashboard(props: any) {
     // update current role is used for ZilPay
     // due to account switch on the fly
     // role is always compared against the selected role at home page
-    const updateCurrentRole = async (userBase16Address: string, currImpl?: string, currNetworkURL?: string) => {
+    const updateCurrentRole = useCallback(async (userBase16Address: string, currImpl?: string, currNetworkURL?: string) => {
         // setState is async
         // use input params to get latest impl and network
         let newRole = "";
         let implAddress = currImpl ? currImpl : impl;
         let networkAddress = currNetworkURL ? currNetworkURL : networkURL;
+
+        console.log("updating current role...%o", userBase16Address);
 
         const isOperator = await ZilliqaAccount.isOperator(implAddress, userBase16Address, networkAddress);
 
@@ -185,7 +187,7 @@ function Dashboard(props: any) {
             newRole = Role.DELEGATOR.toString();
         }
         setCurrRole(newRole);
-    };
+    }, [impl, networkURL, loginRole]);
 
     // load initial data
     useEffect(() => {
@@ -228,14 +230,10 @@ function Dashboard(props: any) {
                 break;
         }
 
-        ZilliqaAccount.changeNetwork(url);
         updateNetwork(networkLabel);
         setNetworkURL(url);
         setProxy(networks_config[networkLabel].proxy);
         setImpl(networks_config[networkLabel].impl);
-        
-        // update the current role since account has been switched
-        updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase(), networks_config[networkLabel].impl, url);
     }
 
     /**
@@ -256,7 +254,6 @@ function Dashboard(props: any) {
                 
                 accountStreamChanged.subscribe((account: any) => {
                     initParams(account.base16, AccessMethod.ZILPAY);
-                    updateCurrentRole(account.base16.toLowerCase());
                     setCurrWalletAddress(toBech32Address(account.base16));
                 });
 
@@ -283,6 +280,15 @@ function Dashboard(props: any) {
         // eslint-disable-next-line
     }, []);
 
+    // change to correct network for account.ts
+    // change to correct role
+    // when wallet address change (zilpay switch account)
+    // when network change (zilpay switch network)
+    useEffect(() => {
+        console.log("unified change network");
+        ZilliqaAccount.changeNetwork(networkURL);
+        updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
+    }, [currWalletAddress, networkURL, updateCurrentRole]);
 
     // prevent user from refreshing
     useEffect(() => {
