@@ -468,6 +468,19 @@ body {
   background-color: var(--primary-color);
 }
 
+.navbar .btn-accessory {
+  fill: var(--primary-color);
+  border: 1px solid var(--primary-dark-color);
+  background-color: var(--secondary-color);
+  margin: 4px;
+}
+
+.navbar .btn-accessory:hover {
+  fill: var(--secondary-color);
+  border: 1px solid var(--primary-dark-color);
+  background-color: var(--primary-color);
+}
+
 .navbar .nav-btn {
   font-size: 0.9em;
   font-weight: 500;

@@ -13,7 +13,7 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 
 function OperatorStatsTable(props: any) {
     const impl = props.impl;
-    const networkURL = props.network;
+    // const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
