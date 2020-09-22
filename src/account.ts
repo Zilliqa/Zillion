@@ -84,6 +84,7 @@ export const addWalletByKeystore = async (keystore: string, passphrase: string) 
     }
 };
 
+// not in used
 export const addWalletByMnemonic = async (mnemonicPhrase: string, index: number, passphrase?: string) => {
     if (index === 1) {
         try {
@@ -110,6 +111,7 @@ export const addWalletByMnemonic = async (mnemonicPhrase: string, index: number,
     }
 };
 
+// not in used
 export const addWalletByPrivatekey = async (privatekey: string) => {
     try {
         const address = await zilliqa.wallet.addByPrivateKey(privatekey);
@@ -206,7 +208,32 @@ export const getSsnImplContractDirect = async (implAddr: string, networkURL?: st
     }
 };
 
-export const getTotalCoinSupply = async (proxy: string, networkURL?: string) => {
+// uses get smart contract sub state
+export const getImplState = async (implAddr: string, state: string) => {
+
+    if (!implAddr) {
+        console.error("error: getImplState - no implementation contract found");
+        return "error";
+    }
+
+    try {
+
+        // fetched implementation contract address
+        const contractState = await zilliqa.blockchain.getSmartContractSubState(implAddr, state);
+        
+        if (!contractState.hasOwnProperty("result")) {
+            return "error";
+        }
+        
+        return contractState.result;
+
+    } catch (err) {
+        console.error("error: getImplState - o%", err);
+        return "error";
+    }
+};
+
+export const getTotalCoinSupply = async (networkURL?: string) => {
     if (networkURL) {
         changeNetwork(networkURL);
     }
@@ -232,19 +259,21 @@ export const getGzilContract = async (gzilAddress: string) => {
 
 // isOperator - check if address is node operator
 // @param address: base16 address
-export const isOperator = async (proxy: string, address: string, networkURL: string) => {
-    if (!proxy || !networkURL) {
+export const isOperator = async (impl: string, address: string, networkURL: string) => {
+    if (!impl || !networkURL) {
         return false;
     }
 
-    const contract = await getSsnImplContractDirect(proxy, networkURL);
-    if (contract === undefined || contract === "error") {
+    const contractState = await getImplState(impl, "ssnlist");
+
+    if (contractState === undefined || contractState === "error") {
         return false;
     }
+
     console.log("account.ts check is operator: %o", address);
-    console.log("account.ts check is proxy: %o", proxy);
+    console.log("account.ts check is impl: %o", impl);
     console.log("account.ts check is networkURL: %o", networkURL);
-    if (contract.hasOwnProperty('ssnlist') && address in contract.ssnlist) {
+    if (address in contractState.ssnlist) {
         console.log("operator %o exist", address);
         return true;
     } else {

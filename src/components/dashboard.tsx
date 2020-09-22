@@ -132,27 +132,25 @@ function Dashboard(props: any) {
     // for the dropdowns in the modals
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
-        
-        ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
-            .then((contract) => {
 
-                if (contract === undefined || contract === 'error') {
+        ZilliqaAccount.getImplState(impl, "ssnlist")
+            .then((contractState) => {
+                if (contractState === undefined || contractState === 'error') {
                     return null;
                 }
 
-                if (contract.hasOwnProperty('ssnlist')) {
-                    for (const operatorAddr in contract.ssnlist) {
-                        if (!contract.ssnlist.hasOwnProperty(operatorAddr)) {
-                            continue;
-                        }
-                        const operatorName = contract.ssnlist[operatorAddr].arguments[3];
-                        const operatorBech32Addr = toBech32Address(operatorAddr);
-                        const operatorOption: NodeOptions = {
-                            label: operatorName + ": " + operatorBech32Addr,
-                            value: operatorAddr
-                        }
-                        tempNodeOptions.push(operatorOption);
+                for (const operatorAddr in contractState.ssnlist) {
+                    if (!contractState.ssnlist.hasOwnProperty(operatorAddr)) {
+                        continue;
                     }
+
+                    const operatorName = contractState.ssnlist[operatorAddr].arguments[3];
+                    const operatorBech32Addr = toBech32Address(operatorAddr);
+                    const operatorOption: NodeOptions = {
+                        label: operatorName + ": " + operatorBech32Addr,
+                        value: operatorAddr
+                    }
+                    tempNodeOptions.push(operatorOption);
                 }
             })
             .finally(() => {
@@ -161,7 +159,8 @@ function Dashboard(props: any) {
                 }
                 setNodeOptions([...tempNodeOptions]);
             });
-    }, [impl, networkURL]);
+
+    }, [impl]);
 
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
@@ -170,9 +169,16 @@ function Dashboard(props: any) {
     // update current role is used for ZilPay
     // due to account switch on the fly
     // role is always compared against the selected role at home page
-    const updateCurrentRole = async (userBase16Address: string) => {
+    const updateCurrentRole = useCallback(async (userBase16Address: string, currImpl?: string, currNetworkURL?: string) => {
+        // setState is async
+        // use input params to get latest impl and network
         let newRole = "";
-        const isOperator = await ZilliqaAccount.isOperator(impl, userBase16Address, networkURL);
+        let implAddress = currImpl ? currImpl : impl;
+        let networkAddress = currNetworkURL ? currNetworkURL : networkURL;
+
+        console.log("updating current role...%o", userBase16Address);
+
+        const isOperator = await ZilliqaAccount.isOperator(implAddress, userBase16Address, networkAddress);
 
         // login role is set by context during wallet access
         if (loginRole === Role.OPERATOR.toString() && isOperator) {
@@ -181,7 +187,7 @@ function Dashboard(props: any) {
             newRole = Role.DELEGATOR.toString();
         }
         setCurrRole(newRole);
-    };
+    }, [impl, networkURL, loginRole]);
 
     // load initial data
     useEffect(() => {
@@ -195,8 +201,8 @@ function Dashboard(props: any) {
     // poll data
     useInterval(() => {
         getAccountBalance();
-        getNodeOptionsList();
     }, mountedRef, refresh_rate_config);
+
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
@@ -226,12 +232,8 @@ function Dashboard(props: any) {
 
         updateNetwork(networkLabel);
         setNetworkURL(url);
-        ZilliqaAccount.changeNetwork(url);
         setProxy(networks_config[networkLabel].proxy);
         setImpl(networks_config[networkLabel].impl);
-
-        // update the current role since account has been switched
-        updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
     }
 
     /**
@@ -252,7 +254,6 @@ function Dashboard(props: any) {
                 
                 accountStreamChanged.subscribe((account: any) => {
                     initParams(account.base16, AccessMethod.ZILPAY);
-                    updateCurrentRole(account.base16.toLowerCase());
                     setCurrWalletAddress(toBech32Address(account.base16));
                 });
 
@@ -264,7 +265,7 @@ function Dashboard(props: any) {
         }
         // must only run once due to global listener
         // eslint-disable-next-line
-    }, [setNetworkURL]);
+    }, []);
 
     useEffect(() => {
         if (environment_config === Environment.DEV) {
@@ -279,15 +280,20 @@ function Dashboard(props: any) {
         // eslint-disable-next-line
     }, []);
 
-    // set network that is selected from home page
+
+    // change to correct network for account.ts
+    // change to correct role for zilpay switch
+    // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
+    // because setState is async - have to execute these functions from useEffect
+    // when wallet address change (zilpay switch account)
+    // when network change (zilpay switch network)
     useEffect(() => {
-        // network in context is set
-        if (network) {
-            ZilliqaAccount.changeNetwork(networkURL);
-        }
-    }, [network, networkURL]);
+        console.log("unified change network");
+        ZilliqaAccount.changeNetwork(networkURL);
+        updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
+    }, [currWalletAddress, networkURL, updateCurrentRole]);
 
-
+    
     // prevent user from refreshing
     useEffect(() => {
         window.onbeforeunload = (e: any) => {
@@ -385,7 +391,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">Overview</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <DelegatorStatsTable proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                                <DelegatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                             </div>
                                         </div>
                                     </div>
@@ -403,7 +409,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
                                             <div className="col-12 text-center">
-                                                { mountedRef.current && <StakingPortfolio proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                                { mountedRef.current && <StakingPortfolio impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
                                         </div>
                                     </div>
@@ -420,7 +426,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Node Performance</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <OperatorStatsTable proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
+                                                <OperatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
                                             </div>
                                         </div>
                                     </div>
@@ -432,7 +438,7 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
-                                            { mountedRef.current && <SsnTable proxy={impl} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
+                                            { mountedRef.current && <SsnTable impl={impl} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
                                         </div>
                                     </div>
                                 </div>

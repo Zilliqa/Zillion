@@ -10,7 +10,7 @@ import { isFirefox } from "react-device-detect";
 function WalletZilPay(props: any) {
 
     const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateRole } = appContext;
+    const { initParams, updateAuth, updateNetwork, updateRole } = appContext;
 
     const role = props.role;
 
@@ -50,7 +50,9 @@ function WalletZilPay(props: any) {
 
             // update context
             // need await for update role for it to complete, otherwise context is empty
+            // update with zilpay selected network
             initParams(base16, AccessMethod.ZILPAY);
+            updateNetwork(zilPay.wallet.net);
             await updateRole(base16, role);
             updateAuth();
 

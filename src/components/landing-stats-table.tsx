@@ -13,7 +13,7 @@ const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); // 110000 * 17
 
 function LandingStatsTable(props: any) {
-    const proxy = props.proxy;
+    const impl = props.impl;
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const [showSpinner, setShowSpinner] = useState(true);
@@ -38,7 +38,7 @@ function LandingStatsTable(props: any) {
         let totalDeposits = '0';
         let estAPY = new BigNumber(0);
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
             .then(async (contract) => {
                 
                 if (contract === undefined || contract === 'error') {
@@ -50,7 +50,7 @@ function LandingStatsTable(props: any) {
                 delegNum = Object.keys(contract.deposit_amt_deleg).length.toString();
 
                 // compute circulating supply
-                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupply(proxy);
+                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupply();
                 const totalStakeAmount = contract.totalstakeamount;
                 totalDeposits = totalStakeAmount.toString();
 
@@ -106,7 +106,7 @@ function LandingStatsTable(props: any) {
                 }
                 
             }), PromiseArea.PROMISE_LANDING_STATS);
-    }, [proxy, networkURL]);
+    }, [impl, networkURL]);
 
     // load inital data
     useEffect(() => {

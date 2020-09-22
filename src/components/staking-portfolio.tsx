@@ -55,7 +55,7 @@ function Table({ columns, data }: any) {
 }
 
 function StakingPortfolio(props: any) {
-    const proxy = props.proxy;
+    const impl = props.impl;
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
@@ -93,7 +93,7 @@ function StakingPortfolio(props: any) {
     const getData = useCallback(() => {
         let outputResult: { ssnName: string; ssnAddress: string; delegAmt: string; rewards: string; }[] = [];
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
             .then(async (contract) => {
                 if (contract === undefined || contract === 'error') {
                     return null;
@@ -110,7 +110,7 @@ function StakingPortfolio(props: any) {
                         const delegAmt = new BN(depositDelegList[ssnAddress]);
 
                         // compute rewards
-                        const delegRewards = new BN(await computeDelegRewards(proxy, networkURL, ssnAddress, userBase16Address)).toString();
+                        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
 
                         const portfolioData = {
                             ssnName: contract.ssnlist[ssnAddress].arguments[3],
@@ -139,7 +139,7 @@ function StakingPortfolio(props: any) {
 
             }), PromiseArea.PROMISE_GET_STAKE_PORTFOLIO);
 
-    }, [proxy, networkURL, userBase16Address]);
+    }, [impl, networkURL, userBase16Address]);
 
     // load initial data
     useEffect(() => {
