@@ -84,6 +84,7 @@ export const addWalletByKeystore = async (keystore: string, passphrase: string) 
     }
 };
 
+// not in used
 export const addWalletByMnemonic = async (mnemonicPhrase: string, index: number, passphrase?: string) => {
     if (index === 1) {
         try {
@@ -110,6 +111,7 @@ export const addWalletByMnemonic = async (mnemonicPhrase: string, index: number,
     }
 };
 
+// not in used
 export const addWalletByPrivatekey = async (privatekey: string) => {
     try {
         const address = await zilliqa.wallet.addByPrivateKey(privatekey);
@@ -203,6 +205,34 @@ export const getSsnImplContractDirect = async (implAddr: string, networkURL?: st
     } catch (err) {
         console.error("error: getSsnImplContract - o%", err);
         return "error"
+    }
+};
+
+// uses get smart contract sub state
+export const getImplState = async (implAddr: string, networkURL: string, state: string) => {
+    if (networkURL) {
+        changeNetwork(networkURL);
+    }
+
+    if (!implAddr) {
+        console.error("error: getImplState - no implementation contract found");
+        return "error";
+    }
+
+    try {
+
+        // fetched implementation contract address
+        const contractState = await zilliqa.blockchain.getSmartContractSubState(implAddr, state);
+        
+        if (!contractState.hasOwnProperty("result")) {
+            return "error";
+        }
+        
+        return contractState.result;
+
+    } catch (err) {
+        console.error("error: getImplState - o%", err);
+        return "error";
     }
 };
 

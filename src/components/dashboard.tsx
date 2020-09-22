@@ -132,27 +132,25 @@ function Dashboard(props: any) {
     // for the dropdowns in the modals
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
-        
-        ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
-            .then((contract) => {
 
-                if (contract === undefined || contract === 'error') {
+        ZilliqaAccount.getImplState(impl, networkURL, "ssnlist")
+            .then((contractState) => {
+                if (contractState === undefined || contractState === 'error') {
                     return null;
                 }
 
-                if (contract.hasOwnProperty('ssnlist')) {
-                    for (const operatorAddr in contract.ssnlist) {
-                        if (!contract.ssnlist.hasOwnProperty(operatorAddr)) {
-                            continue;
-                        }
-                        const operatorName = contract.ssnlist[operatorAddr].arguments[3];
-                        const operatorBech32Addr = toBech32Address(operatorAddr);
-                        const operatorOption: NodeOptions = {
-                            label: operatorName + ": " + operatorBech32Addr,
-                            value: operatorAddr
-                        }
-                        tempNodeOptions.push(operatorOption);
+                for (const operatorAddr in contractState.ssnlist) {
+                    if (!contractState.ssnlist.hasOwnProperty(operatorAddr)) {
+                        continue;
                     }
+
+                    const operatorName = contractState.ssnlist[operatorAddr].arguments[3];
+                    const operatorBech32Addr = toBech32Address(operatorAddr);
+                    const operatorOption: NodeOptions = {
+                        label: operatorName + ": " + operatorBech32Addr,
+                        value: operatorAddr
+                    }
+                    tempNodeOptions.push(operatorOption);
                 }
             })
             .finally(() => {
@@ -161,6 +159,7 @@ function Dashboard(props: any) {
                 }
                 setNodeOptions([...tempNodeOptions]);
             });
+
     }, [impl, networkURL]);
 
     const updateRecentTransactions = (txnId: string) => {
@@ -202,7 +201,7 @@ function Dashboard(props: any) {
         getAccountBalance();
     }, mountedRef, refresh_rate_config);
 
-    
+
     const networkChanger = (net: string) => {
         let networkLabel = "";
         let url = '';
