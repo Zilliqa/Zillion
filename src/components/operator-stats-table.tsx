@@ -42,7 +42,7 @@ function OperatorStatsTable(props: any) {
         let commReward = '0';
         let receiver = '';
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl)
             .then((contract) => {
 
                 if (contract === undefined || contract === 'error') {
@@ -99,7 +99,7 @@ function OperatorStatsTable(props: any) {
 
             }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
 
-    }, [impl, networkURL, userBase16Address, setNodeDetails]);
+    }, [impl, userBase16Address, setNodeDetails]);
 
     // load initial data
     useEffect(() => {

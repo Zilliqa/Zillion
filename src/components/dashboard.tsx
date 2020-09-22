@@ -280,8 +280,11 @@ function Dashboard(props: any) {
         // eslint-disable-next-line
     }, []);
 
+
     // change to correct network for account.ts
-    // change to correct role
+    // change to correct role for zilpay switch
+    // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
+    // because setState is async - have to execute these functions from useEffect
     // when wallet address change (zilpay switch account)
     // when network change (zilpay switch network)
     useEffect(() => {
@@ -290,6 +293,7 @@ function Dashboard(props: any) {
         updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
     }, [currWalletAddress, networkURL, updateCurrentRole]);
 
+    
     // prevent user from refreshing
     useEffect(() => {
         window.onbeforeunload = (e: any) => {
