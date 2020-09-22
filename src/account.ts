@@ -206,7 +206,7 @@ export const getSsnImplContractDirect = async (implAddr: string, networkURL?: st
     }
 };
 
-export const getTotalCoinSupply = async (proxy: string, networkURL?: string) => {
+export const getTotalCoinSupply = async (networkURL?: string) => {
     if (networkURL) {
         changeNetwork(networkURL);
     }
@@ -232,17 +232,17 @@ export const getGzilContract = async (gzilAddress: string) => {
 
 // isOperator - check if address is node operator
 // @param address: base16 address
-export const isOperator = async (proxy: string, address: string, networkURL: string) => {
-    if (!proxy || !networkURL) {
+export const isOperator = async (impl: string, address: string, networkURL: string) => {
+    if (!impl || !networkURL) {
         return false;
     }
 
-    const contract = await getSsnImplContractDirect(proxy, networkURL);
+    const contract = await getSsnImplContractDirect(impl, networkURL);
     if (contract === undefined || contract === "error") {
         return false;
     }
     console.log("account.ts check is operator: %o", address);
-    console.log("account.ts check is proxy: %o", proxy);
+    console.log("account.ts check is impl: %o", impl);
     console.log("account.ts check is networkURL: %o", networkURL);
     if (contract.hasOwnProperty('ssnlist') && address in contract.ssnlist) {
         console.log("operator %o exist", address);

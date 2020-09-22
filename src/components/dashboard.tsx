@@ -385,7 +385,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">Overview</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <DelegatorStatsTable proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                                <DelegatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                             </div>
                                         </div>
                                     </div>
@@ -403,7 +403,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
                                             <div className="col-12 text-center">
-                                                { mountedRef.current && <StakingPortfolio proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                                { mountedRef.current && <StakingPortfolio impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                             </div>
                                         </div>
                                     </div>
@@ -420,7 +420,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Node Performance</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <OperatorStatsTable proxy={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
+                                                <OperatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
                                             </div>
                                         </div>
                                     </div>
@@ -432,7 +432,7 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
-                                            { mountedRef.current && <SsnTable proxy={impl} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
+                                            { mountedRef.current && <SsnTable impl={impl} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
                                         </div>
                                     </div>
                                 </div>

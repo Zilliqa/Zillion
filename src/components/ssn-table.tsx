@@ -64,7 +64,7 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
 }
 
 function SsnTable(props: any) {
-    const proxy = props.proxy;
+    const impl = props.impl;
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const role = props.currRole;
@@ -159,7 +159,7 @@ function SsnTable(props: any) {
         let outputResult: { ssnAddress: string; ssnName: any; ssnStakeAmt: string; ssnBufferedDeposit: string; ssnCommRate: any; ssnCommReward: string; ssnDeleg: number; }[] = [];
         let totalStakeAmount = '0';
 
-        trackPromise(Account.getSsnImplContractDirect(proxy, networkURL).then((implContract) => {
+        trackPromise(Account.getSsnImplContractDirect(impl, networkURL).then((implContract) => {
             if (implContract === 'error') {
                 return null;
             }
@@ -216,7 +216,7 @@ function SsnTable(props: any) {
 
         }), PromiseArea.PROMISE_GET_CONTRACT);
 
-    }, [proxy, networkURL]);
+    }, [impl, networkURL]);
 
     // load inital data
     useEffect(() => {
