@@ -128,25 +128,28 @@ function CompleteWithdrawalTable(props: any) {
 
                         const amount = blkNumAmtMap[blkNum];
                         let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
-                        let blkNumCountdown = blkNumCheck.minus(currentBlkNum);
+                        let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
                         let completed = new BigNumber(0);
 
-                        completed = currentBlkNum.dividedBy(blkNumCheck);
+                        // compute progress using blk num countdown ratio
+                        if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                            // can withdraw
+                            totalClaimableAmtBN = totalClaimableAmtBN.plus(new BigNumber(amount));
+                            blkNumCountdown = new BigNumber(0);
+                            completed = new BigNumber(1);
+                        } else {
+                            // still have pending blks
+                            // 1 - (countdown/blk_req)
+                            const processed = blkNumCountdown.dividedBy(blkNumReq);
+                            completed = new BigNumber(1).minus(processed);
+                        }
 
                         console.log("complete withdraw currentblknum: %o", currentBlkNum.toString());
                         console.log("complete withdraw blkNumCheck: %o", blkNumCheck.toString());
                         console.log("complete withdraw blkNumcountdown: %o", blkNumCountdown.toString());
                         console.log("complete withdraw completed: %o", completed.toString());
 
-                        // compute total amount that can be withdraw
-                        if (completed.isGreaterThanOrEqualTo(1)) {
-                            // can withdraw
-                            totalClaimableAmtBN = totalClaimableAmtBN.plus(new BigNumber(amount));
-                            blkNumCountdown = new BigNumber(0);
-                            completed = new BigNumber(1);
-                        }
-
-                        // convert progress
+                        // convert progress to percentage
                         progress = completed.times(100).toFixed(2);
 
                         // record the data
@@ -200,14 +203,14 @@ function CompleteWithdrawalTable(props: any) {
                         <span><em>You have a claimable stake amount of <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                     </div>
                     <div className="btn-group">
-                        { data.length !== '0' && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Claim Stakes</button> }
-                        { data.length !== '0' && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
+                        { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Claim Stakes</button> }
+                        { data.length !== 0 && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
                     </div>
                 </div>
 
                 <div id="complete-withdraw-details" className="collapse" aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-accordion">
                     <div className="card-body">
-                        { data.length === '0' && <em>You have no amount ready for withdrawal yet.</em> }
+                        { data.length === 0 && <em>You have no amount ready for withdrawal yet.</em> }
                         <Table columns={columns} data={data} />
                     </div>
                 </div>
