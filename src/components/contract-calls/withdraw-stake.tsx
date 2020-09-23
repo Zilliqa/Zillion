@@ -74,10 +74,10 @@ function WithdrawStakeModal(props: any) {
         }
 
         // check if deleg has unwithdrawn rewards for this ssn address
-        if (hasRewardToWithdraw()) {
-            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
-            return null;
-        }
+        // if (hasRewardToWithdraw()) {
+        //     Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
+        //     return null;
+        // }
 
         // create tx params
 

@@ -555,6 +555,22 @@ body {
   fill: var(--primary-color);
 }
 
+.progress-bar-container {
+  background-color: #263238;
+  border-radius: .5rem;
+}
+
+.progress-bar-filler {
+  background-color: var(--primary-dark-color);
+  height: 4px;
+  border-radius: 1rem;
+  transition: 1s ease;
+}
+
+.progress-bar-label {
+  color: var(--primary-color);
+}
+
 .ssn-table-status-active {
   color: var(--primary-dark-color);
   font-size: 0.78em;
@@ -605,6 +621,45 @@ body {
 .Toastify__close-button {
   color: var(--primary-color);
   padding: 0 0.5em;
+}
+
+#complete-withdraw-accordion {
+  color: var(--text-color);
+  background-color: var(--secondary-color);
+}
+
+#complete-withdraw-accordion .card {
+  border: 0;
+  -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+}
+
+#complete-withdraw-accordion .card-header {
+  background-color: var(--secondary-color);
+}
+
+#complete-withdraw-accordion .card-header h2 {
+  font-size: 1em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#complete-withdraw-accordion .card-body {
+  background-color: var(--secondary-color);
+}
+
+#complete-withdraw-details h3 {
+  color: #6C6D7A;
+  font-size: 1em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#complete-withdraw-details span {
+  color: var(--text-color);
+  font-size: 1em;
+  font-weight: 500;
 }
 
 #content {
@@ -697,6 +752,7 @@ body {
 }
 
 #home-ssn-details, 
+#delegator-complete-withdraw-details,
 #dashboard-ssn-details,
 #dashboard-recent-txn,
 #staking-portfolio-details {
@@ -719,7 +775,8 @@ body {
   text-transform: uppercase;
 }
 
-#home-ssn-details table tbody, 
+#home-ssn-details table tbody,
+#delegator-complete-withdraw-details table tbody,
 #dashboard-ssn-details table tbody,
 #dashboard-recent-txn table tbody,
 #staking-portfolio-details table tbody {
@@ -743,6 +800,7 @@ body {
 }
 
 #home-ssn-details table tbody tr:nth-child(odd),
+#delegator-complete-withdraw-details table tbody tr:nth-child(odd),
 #dashboard-ssn-details table tbody tr:nth-child(odd),
 #dashboard-recent-txn table tbody tr:nth-child(odd),
 #staking-portfolio-details table tbody tr:nth-child(odd) {
@@ -751,6 +809,8 @@ body {
 
 #home-ssn-details .table td, 
 #home-ssn-details .table th,
+#delegator-complete-withdraw-details .table td,
+#delegator-complete-withdraw-details .table th,
 #dashboard-ssn-details .table td, 
 #dashboard-ssn-details .table th,
 #dashboard-recent-txn .table td,
@@ -761,6 +821,7 @@ body {
 }
 
 #home-ssn-details th,
+#delegator-complete-withdraw-details th,
 #dashboard-ssn-details th,
 #dashboard-recent-txn th,
 #staking-portfolio-details th {
