@@ -8,6 +8,9 @@ import { convertQaToCommaStr } from '../util/utils';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import * as ZilliqaAccount from '../account';
+import SpinnerNormal from './spinner-normal';
+import IconQuestionCircle from './icons/question-circle';
+import ReactTooltip from 'react-tooltip';
 
 const BigNumber = require('bignumber.js');
 
@@ -65,6 +68,7 @@ function CompleteWithdrawalTable(props: any) {
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
+    const [showSpinner, setShowSpinner] = useState(true);
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
     const [data, setData] = useState([] as any);
@@ -159,6 +163,7 @@ function CompleteWithdrawalTable(props: any) {
             })
             .finally(() => {
                 if (mountedRef.current) {
+                    setShowSpinner(false);
                     setData([...outputResult]);
                     setTotalClaimableAmt(totalClaimableAmtBN.toString());
                 }
@@ -170,6 +175,9 @@ function CompleteWithdrawalTable(props: any) {
     // load initial data
     useEffect(() => {
         getData();
+        return () => {
+            mountedRef.current = false;
+        };
     }, [getData])
 
     // poll data
@@ -179,16 +187,23 @@ function CompleteWithdrawalTable(props: any) {
 
     return (
         <>
-
+        
         <div id="complete-withdraw-accordion">
             <div className="card">
-
-                <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
-                    <h2 className="mt-3">Claimable Stake Amount: {convertQaToCommaStr(totalClaimableAmt)} ZIL</h2>
-                </div>
-                <div>
-                    { totalClaimableAmt !== '0' && <button className="btn btn-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> }
-                    <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button>
+                <h6 className="inner-section-heading px-4 pt-4">Withdrawals&nbsp;
+                    <a data-tip data-for="withdraw-question">
+                        <IconQuestionCircle width="16" height="16" className="section-icon" />
+                    </a>
+                </h6>
+                <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
+                <div className="card-header d-flex justify-content-between pb-4" id="complete-withdraw-accordion-header">
+                    <div>
+                        <span><em>You have a claimable stake amount of <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
+                    </div>
+                    <div className="btn-group">
+                        { totalClaimableAmt !== '0' && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Claim Stakes</button> }
+                        { totalClaimableAmt !== '0' && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
+                    </div>
                 </div>
 
                 <div id="complete-withdraw-details" className="collapse" aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-accordion">

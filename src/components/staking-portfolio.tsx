@@ -157,7 +157,7 @@ function StakingPortfolio(props: any) {
     return (
         <>
         { showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }
-        { portfolioTable.length === 0 && <div className="d-block text-left"><em>You have not deposited in any nodes yet.</em></div> }
+        { portfolioTable.length === 0 && <div className="d-block px-4 pb-3 text-left"><em>You have not deposited in any nodes yet.</em></div> }
         { portfolioTable.length > 0 && <Table columns={columns} data={portfolioTable} /> }
         </>
     );

@@ -29,6 +29,8 @@ import DelegatorStatsTable from './delegator-stats-table';
 import OperatorStatsTable from './operator-stats-table';
 import { useInterval } from '../util/use-interval';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
+import IconQuestionCircle from './icons/question-circle';
+import ReactTooltip from 'react-tooltip';
 
 
 interface NodeOptions {
@@ -367,24 +369,6 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (currRole === Role.DELEGATOR.toString()) &&
-
-                                    <>
-                                    {/* delegator complete withdrawal */}
-                                    <div id="delegator-complete-withdraw-details" className="p-4 dashboard-card container-fluid">
-                                        <div className="row">
-                                            <div className="col">
-                                                <h5 className="card-title mb-4">Complete Withdrawal</h5>
-                                            </div>
-                                        </div>
-                                        <div className="col-12">
-                                            <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
-                                        </div>
-                                    </div>
-                                    </>
-                                }
-
-                                {
                                     (currRole === Role.OPERATOR.toString()) &&
 
                                     <>
@@ -427,9 +411,23 @@ function Dashboard(props: any) {
                                             <div className="col">
                                                 <h5 className="card-title mb-4">My Staking Portfolio</h5>
                                             </div>
-                                            <div className="col-12 text-center">
-                                                { mountedRef.current && <StakingPortfolio impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                            <div className="col-12 px-4 text-center">
+                                                <div className="inner-section">
+                                                    <h6 className="inner-section-heading px-4 pt-4 pb-3" >Deposits <a data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></a></h6>
+                                                    { mountedRef.current && <StakingPortfolio impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                                </div>
                                             </div>
+                                            <div className="col-12 mt-2 p-4 text-center">
+                                                <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                            </div>
+                                            <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">
+                                                <span>This shows you the list of nodes which you have staked your deposit in.</span>
+                                            </ReactTooltip>
+                                            <ReactTooltip id="withdraw-question" place="bottom" type="dark" effect="solid">
+                                                <span>When you withdraw your stake deposits, the amount is not withdrawn immediately.</span>
+                                                <br/>
+                                                <span>The amount is processed at a certain block number and only available to claim once the block number is reached.</span>
+                                            </ReactTooltip>
                                         </div>
                                     </div>
                                     </>
