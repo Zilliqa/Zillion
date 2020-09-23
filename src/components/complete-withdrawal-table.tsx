@@ -10,7 +10,6 @@ import { fromBech32Address } from '@zilliqa-js/crypto';
 import * as ZilliqaAccount from '../account';
 import SpinnerNormal from './spinner-normal';
 import IconQuestionCircle from './icons/question-circle';
-import ReactTooltip from 'react-tooltip';
 
 const BigNumber = require('bignumber.js');
 
