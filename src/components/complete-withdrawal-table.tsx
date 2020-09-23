@@ -190,9 +190,9 @@ function CompleteWithdrawalTable(props: any) {
         <div id="complete-withdraw-accordion">
             <div className="card">
                 <h6 className="inner-section-heading px-4 pt-4">Withdrawals&nbsp;
-                    <a data-tip data-for="withdraw-question">
+                    <span data-tip data-for="withdraw-question">
                         <IconQuestionCircle width="16" height="16" className="section-icon" />
-                    </a>
+                    </span>
                 </h6>
                 <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
                 <div className="card-header d-flex justify-content-between pb-4" id="complete-withdraw-accordion-header">
