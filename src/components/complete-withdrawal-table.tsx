@@ -147,7 +147,7 @@ function CompleteWithdrawalTable(props: any) {
                         }
 
                         // convert progress
-                        progress = completed.times(100).toFixed(2)
+                        progress = completed.times(100).toFixed(2);
 
                         // record the data
                         outputResult.push({
@@ -200,14 +200,14 @@ function CompleteWithdrawalTable(props: any) {
                         <span><em>You have a claimable stake amount of <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                     </div>
                     <div className="btn-group">
-                        { totalClaimableAmt !== '0' && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Claim Stakes</button> }
-                        { totalClaimableAmt !== '0' && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
+                        { data.length !== '0' && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Claim Stakes</button> }
+                        { data.length !== '0' && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
                     </div>
                 </div>
 
                 <div id="complete-withdraw-details" className="collapse" aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-accordion">
                     <div className="card-body">
-                        { totalClaimableAmt === '0' && <em>You have no amount ready for withdrawal yet.</em> }
+                        { data.length === '0' && <em>You have no amount ready for withdrawal yet.</em> }
                         <Table columns={columns} data={data} />
                     </div>
                 </div>
