@@ -445,14 +445,7 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
                                         
                                         {/* complete withdrawal */}
-                                        <div id="delegator-complete-withdraw-details" className="col-12 mt-4 px-1 py-3 text-center">
-                                            <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
-                                        </div>
-                                        <ReactTooltip id="withdraw-question" place="bottom" type="dark" effect="solid">
-                                            <span>When you initiate a stake withdrawal, the amount is not withdrawn immediately.</span>
-                                            <br/>
-                                            <span>The amount is processed at a certain block number and only available to withdraw<br/>once the required block number is reached.</span>
-                                        </ReactTooltip>
+                                        <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                     </div>
                                     </>
                                 }
