@@ -143,6 +143,10 @@ function DelegateStakeModal(props: any) {
                         </div>
                         <div className="modal-body">
                             <Select
+                                value={
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === ssnAddress)
+                                    }
                                 placeholder="Select an operator to delegate the stake"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"

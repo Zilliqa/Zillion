@@ -161,6 +161,10 @@ function ReDelegateStakeModal(props: any) {
                         <div className="modal-body">
 
                             <Select 
+                                value={
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === fromSsn)
+                                    }
                                 placeholder="Select an operator to transfer from"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
@@ -168,6 +172,10 @@ function ReDelegateStakeModal(props: any) {
                                 onChange={handleFromAddress}  />
                             
                             <Select 
+                                value={
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === toSsn)
+                                    }
                                 placeholder="Select an operator to receive the delegated amount"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
