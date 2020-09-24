@@ -30,7 +30,7 @@ function WalletZilPay(props: any) {
 
         try {
             // Shell try ask user about access.
-            const connected = await zilPay.wallet.connect();
+            const connected = zilPay.wallet.connect();
 
             // Checking access.
             if (!connected) {
@@ -55,12 +55,8 @@ function WalletZilPay(props: any) {
             props.onSuccessCallback();
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
-            Alert('error', 'There is something wrong with accessing ZilPay.')
+            Alert('error', 'There is something wrong with accessing ZilPay.');
         }
-
-        // if no error
-        // call parent function to redirect to dashboard
-        props.onSuccessCallback();
     }
 
     return (
