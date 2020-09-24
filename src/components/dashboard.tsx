@@ -473,10 +473,13 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
+                                <div className="text-center">
+                                    <ToastContainer hideProgressBar={true}/>
+                                </div>
+
                             </div>
                         </div>
                     </div>
-                    <ToastContainer hideProgressBar={true}/>
                 </div>
             </div>
             <footer id="disclaimer" className="align-items-start">
@@ -485,7 +488,6 @@ function Dashboard(props: any) {
                 <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
                 </div>
             </footer>
-            
             <DisclaimerModal />
 
             <UpdateCommRateModal 
