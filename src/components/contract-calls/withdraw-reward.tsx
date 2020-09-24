@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
@@ -12,30 +12,22 @@ import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
-import { fromBech32Address } from '@zilliqa-js/crypto';
-import { computeDelegRewards } from '../../util/reward-calculator';
 const { BN } = require('@zilliqa-js/util');
 
-
-interface NodeOptions {
-    label: string,
-    value: string,
-}
 
 function WithdrawRewardModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
     const proxy = props.proxy;
-    const impl = props.impl;
+    // const impl = props.impl;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const { onSuccessCallback } = props;
 
-    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
+    // const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
     const nodeSelectorOptions = props.nodeSelectorOptions;
-    const [nodeOptions, setNodeoptions] = useState([] as NodeOptions[]);
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [txnId, setTxnId] = useState('');
@@ -112,37 +104,7 @@ function WithdrawRewardModal(props: any) {
         setSsnAddress(option.value);
     }
 
-    const filterNodeOptions = useCallback(async () => {
-        let nodeOptions: NodeOptions[] = [];
-        const contractState = await ZilliqaAccount.getImplState(impl, "deposit_amt_deleg");
-        
-        if (contractState === undefined || contractState === 'error') {
-            return null;
-        }
-
-        const depositDelegList = contractState.deposit_amt_deleg[userBase16Address];
-        
-        // loop the label, value pair parsed from dashboard
-        for (const item of nodeSelectorOptions) {
-            const ssnAddress = item.value;
-            if (ssnAddress in depositDelegList) {
-                const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-                if (delegRewards && delegRewards !== '0') {
-                    nodeOptions.push(item);
-                }
-            }
-        }
-
-        setNodeoptions([...nodeOptions]);
-
-    }, [impl, networkURL, nodeSelectorOptions, userBase16Address]);
-
-    // filter node options
-    // show only those that have been delegated by user and have rewards
-    useEffect(() => {
-        filterNodeOptions();
-    }, [filterNodeOptions]);
-
+    
     return (
         <div id="withdraw-reward-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawRewardModalLabel" aria-hidden="true">
             <div className="contract-calls-modal modal-dialog modal-lg" role="document">
@@ -168,19 +130,21 @@ function WithdrawRewardModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
+
                             <Select 
                                 value={
-                                    nodeOptions.filter((option: { label: string; value: string }) => 
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
                                         option.value === ssnAddress)
                                     }
                                 placeholder="Select an operator to claim the rewards"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
-                                options={nodeOptions}
+                                options={nodeSelectorOptions}
                                 onChange={handleChange}  />
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim</button>
                             </div>
+
                         </div>
                          </>
                      }

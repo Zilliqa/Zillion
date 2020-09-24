@@ -78,7 +78,7 @@ function CompleteWithdrawalTable(props: any) {
     const columns = useMemo(
         () => [
             {
-                Header: 'pending blocks til claim',
+                Header: 'pending blocks till claim',
                 accessor: 'blkNumCountdown'
             },
             {
@@ -199,7 +199,7 @@ function CompleteWithdrawalTable(props: any) {
                         <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                     </div>
                     <div className="btn-group">
-                        { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawal</button> }
+                        { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawals</button> }
                         { data.length !== 0 && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
                     </div>
                 </div>
