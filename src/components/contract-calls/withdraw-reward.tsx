@@ -121,17 +121,17 @@ function WithdrawRewardModal(props: any) {
         }
 
         const depositDelegList = contractState.deposit_amt_deleg[userBase16Address];
+        
         // loop the label, value pair parsed from dashboard
-        nodeSelectorOptions.forEach(async (item: { label: string, value: string; }) => {
+        for (const item of nodeSelectorOptions) {
             const ssnAddress = item.value;
             if (ssnAddress in depositDelegList) {
                 const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-
                 if (delegRewards && delegRewards !== '0') {
                     nodeOptions.push(item);
                 }
             }
-        })
+        }
 
         setNodeoptions([...nodeOptions]);
 
