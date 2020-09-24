@@ -60,6 +60,8 @@ function Dashboard(props: any) {
 
     const mountedRef = useRef(true);
 
+    const [minDelegStake, setMinDelegStake] = useState('');
+
     // used as info for the internal modal data
     // state is updated by OperatorStatsTable
     const [nodeDetails, setNodeDetails] = useState({
@@ -130,6 +132,27 @@ function Dashboard(props: any) {
     }, [currWalletAddress]);
 
 
+    // retrieve contract constants such as min stake
+    // passed to children components
+    const getContractConstants = useCallback(() => {
+        let minDelegStake = '0';
+
+        ZilliqaAccount.getImplState(impl, "mindelegstake")
+            .then((contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+                minDelegStake = contractState.mindelegstake;
+            })
+            .finally(() => {
+                if (!mountedRef.current) {
+                    return null;
+                }
+                setMinDelegStake(minDelegStake);
+            });
+    }, [impl])
+
+
     // generate options list
     // fetch node operator names and address 
     // for the dropdowns in the modals
@@ -196,10 +219,11 @@ function Dashboard(props: any) {
     useEffect(() => {
         getAccountBalance();
         getNodeOptionsList();
+        getContractConstants();
         return () => {
             mountedRef.current = false;
         }
-    }, [getAccountBalance, getNodeOptionsList]);
+    }, [getAccountBalance, getNodeOptionsList, getContractConstants]);
 
     // poll data
     useInterval(() => {
@@ -473,7 +497,7 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                <div className="text-center">
+                                <div className="px-2">
                                     <ToastContainer hideProgressBar={true}/>
                                 </div>
 
@@ -520,7 +544,8 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions} />
+                nodeSelectorOptions={nodeOptions}
+                minDelegStake={minDelegStake} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 
