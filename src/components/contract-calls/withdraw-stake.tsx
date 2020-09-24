@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
@@ -17,6 +17,12 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 
 const { BN } = require('@zilliqa-js/util');
 
+
+interface NodeOptions {
+    label: string,
+    value: string,
+}
+
 function WithdrawStakeModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
@@ -29,7 +35,9 @@ function WithdrawStakeModal(props: any) {
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
+    // const [nodeSelectorOptions, setNodeSelectorOptions] = useState([] as NodeOptions[]);
     const nodeSelectorOptions = props.nodeSelectorOptions;
+    const [nodeOptions, setNodeoptions] = useState([] as NodeOptions[]);
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [withdrawAmt, setWithdrawAmt] = useState(''); // in ZIL
@@ -163,6 +171,33 @@ function WithdrawStakeModal(props: any) {
         setSsnAddress(option.value);
     }
 
+    const filterNodeOptions = useCallback(async () => {
+        let nodeOptions: NodeOptions[] = [];
+        const contractState = await ZilliqaAccount.getImplState(impl, "deposit_amt_deleg");
+        
+        if (contractState === undefined || contractState === 'error') {
+            return null;
+        }
+
+        const depositDelegList = contractState.deposit_amt_deleg[userBase16Address];
+        // loop the label, value pair parsed from dashboard
+        nodeSelectorOptions.forEach((item: { label: string, value: string; }) => {
+            const ssnAddress = item.value;
+            if (ssnAddress in depositDelegList) {
+                nodeOptions.push(item);
+            }
+        })
+
+        setNodeoptions([...nodeOptions]);
+
+    }, [impl, nodeSelectorOptions, userBase16Address]);
+
+    // filter node options
+    // show only those that have been delegated by user
+    useEffect(() => {
+        filterNodeOptions();
+    }, [filterNodeOptions]);
+
     return (
         <div id="withdraw-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawStakeModalLabel" aria-hidden="true">
             <div className="contract-calls-modal modal-dialog modal-lg" role="document">
@@ -190,13 +225,13 @@ function WithdrawStakeModal(props: any) {
                         <div className="modal-body">
                             <Select
                                 value={
-                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                    nodeOptions.filter((option: { label: string; value: string }) => 
                                         option.value === ssnAddress)
                                     }
                                 placeholder="Select an operator to withdraw the stake"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
-                                options={nodeSelectorOptions}
+                                options={nodeOptions}
                                 onChange={handleChange} />
                             <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
                             <div className="d-flex">
