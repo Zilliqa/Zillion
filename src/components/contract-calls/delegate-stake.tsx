@@ -12,7 +12,8 @@ import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
-const { BN } = require('@zilliqa-js/util');
+const BigNumber = require('bignumber.js');
+const { BN, units } = require('@zilliqa-js/util');
 
 
 function DelegateStakeModal(props: any) {
@@ -22,6 +23,9 @@ function DelegateStakeModal(props: any) {
     const proxy = props.proxy;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
+    const minDelegStake = props.minDelegStake; // Qa
+    const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
+
     const { onSuccessCallback } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
@@ -38,10 +42,30 @@ function DelegateStakeModal(props: any) {
             return null;
         }
 
-        if (!delegAmt || !delegAmt.match(/\d/)) {
+        let delegAmtQa = '';
+
+        if (!delegAmt) {
             Alert('error', "Delegate amount is invalid.");
             return null;
+        } else {
+            try {
+                delegAmtQa = convertZilToQa(delegAmt);
+                const isLessThanMinDeleg = new BigNumber(delegAmtQa).isLessThan(minDelegStake);
+                
+
+                if (isLessThanMinDeleg) {
+                    Alert('error', "Minimum delegate amount is " + minDelegStakeDisplay + " ZIL");
+                    return null;
+                }
+
+            } catch (err) {
+                // user input is malformed
+                // cannot convert input zil amount to qa
+                Alert('error', "Minimum delegate amount is " + minDelegStakeDisplay + " ZIL");
+                return null;
+            }
         }
+
         // create tx params
 
         // toAddr: proxy address
@@ -51,7 +75,6 @@ function DelegateStakeModal(props: any) {
 
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-        const delegAmtQa = convertZilToQa(delegAmt);
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -143,6 +166,10 @@ function DelegateStakeModal(props: any) {
                         </div>
                         <div className="modal-body">
                             <Select
+                                value={
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === ssnAddress)
+                                    }
                                 placeholder="Select an operator to delegate the stake"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"

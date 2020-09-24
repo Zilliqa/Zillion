@@ -10,6 +10,7 @@ import { fromBech32Address } from '@zilliqa-js/crypto';
 import * as ZilliqaAccount from '../account';
 import SpinnerNormal from './spinner-normal';
 import IconQuestionCircle from './icons/question-circle';
+import ReactTooltip from 'react-tooltip';
 
 const BigNumber = require('bignumber.js');
 
@@ -78,18 +79,18 @@ function CompleteWithdrawalTable(props: any) {
     const columns = useMemo(
         () => [
             {
-                Header: 'pending blocks til claim',
+                Header: 'pending blocks till claim',
                 accessor: 'blkNumCountdown'
-            },
-            {
-                Header: 'amount (ZIL)',
-                accessor: 'amount',
-                Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.amount)}</span>
             },
             {
                 Header: 'progress',
                 accessor: 'progress',
                 Cell: ({ row }: any) => <span>{row.original.progress}%</span>
+            },
+            {
+                Header: 'amount (ZIL)',
+                accessor: 'amount',
+                Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.amount)}</span>
             }
         ], []
     );
@@ -113,14 +114,14 @@ function CompleteWithdrawalTable(props: any) {
 
                     const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocks()).minus(1);
 
-                    console.log("complete withdraw bnum req: %o", blkNumReq);
+                    // console.log("complete withdraw bnum req: %o", blkNumReq);
 
                     for (const blkNum in blkNumAmtMap) {
                         if (!blkNumAmtMap.hasOwnProperty(blkNum)) {
                             continue;
                         }
 
-                        console.log("complete withdraw blkNum: %o", blkNum);
+                        // console.log("complete withdraw blkNum: %o", blkNum);
 
                         const amount = blkNumAmtMap[blkNum];
                         let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
@@ -140,10 +141,10 @@ function CompleteWithdrawalTable(props: any) {
                             completed = new BigNumber(1).minus(processed);
                         }
 
-                        console.log("complete withdraw currentblknum: %o", currentBlkNum.toString());
-                        console.log("complete withdraw blkNumCheck: %o", blkNumCheck.toString());
-                        console.log("complete withdraw blkNumcountdown: %o", blkNumCountdown.toString());
-                        console.log("complete withdraw completed: %o", completed.toString());
+                        // console.log("complete withdraw currentblknum: %o", currentBlkNum.toString());
+                        // console.log("complete withdraw blkNumCheck: %o", blkNumCheck.toString());
+                        // console.log("complete withdraw blkNumcountdown: %o", blkNumCountdown.toString());
+                        // console.log("complete withdraw completed: %o", completed.toString());
 
                         // convert progress to percentage
                         progress = completed.times(100).toFixed(2);
@@ -185,34 +186,43 @@ function CompleteWithdrawalTable(props: any) {
 
     return (
         <>
-        
-        <div id="complete-withdraw-accordion">
-            <div className="card">
-                <h6 className="inner-section-heading px-4 pt-4">Pending Stake Withdrawals&nbsp;
-                    <span data-tip data-for="withdraw-question">
-                        <IconQuestionCircle width="16" height="16" className="section-icon" />
-                    </span>
-                </h6>
-                <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
-                <div className="card-header d-flex justify-content-between pb-4" id="complete-withdraw-accordion-header">
-                    <div>
-                        <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
-                    </div>
-                    <div className="btn-group">
-                        { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawal</button> }
-                        { data.length !== 0 && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
-                    </div>
-                </div>
+        { data.length !== 0 &&
 
-                <div id="complete-withdraw-details" className="collapse" aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-accordion">
-                    <div className="card-body">
-                        { data.length === 0 && <em>You have no ZILs ready for withdrawal yet.</em> }
-                        <Table columns={columns} data={data} />
+        <div id="delegator-complete-withdraw-details" className="col-12 mt-4 px-1 py-3">
+            <div id="complete-withdraw-accordion">
+                <div className="card text-center">
+                    <h6 className="inner-section-heading px-4 pt-4">Pending Stake Withdrawals&nbsp;
+                        <span data-tip data-for="withdraw-question">
+                            <IconQuestionCircle width="16" height="16" className="section-icon" />
+                        </span>
+                    </h6>
+                    <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
+                    <div className="card-header d-flex justify-content-between pb-4" id="complete-withdraw-accordion-header">
+                        <div>
+                            <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
+                        </div>
+                        <div className="btn-group">
+                            { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawals</button> }
+                            { data.length !== 0 && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
+                        </div>
                     </div>
-                </div>
 
+                    <div id="complete-withdraw-details" className="collapse" aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-accordion">
+                        <div className="card-body">
+                            { data.length === 0 && <em>You have no ZILs ready for withdrawal yet.</em> }
+                            <Table columns={columns} data={data} />
+                        </div>
+                    </div>
+
+                </div>
             </div>
+            <ReactTooltip id="withdraw-question" place="bottom" type="dark" effect="solid">
+                <span>When you initiate a stake withdrawal, the amount is not withdrawn immediately.</span>
+                <br/>
+                <span>The amount is processed at a certain block number and only available to withdraw<br/>once the required block number is reached.</span>
+            </ReactTooltip>
         </div>
+        }
 
         </>
     )

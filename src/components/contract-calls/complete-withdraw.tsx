@@ -96,7 +96,7 @@ function CompleteWithdrawModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="completeWithdrawModalLabel">Complete Stake Withdrawal</h5>
+                            <h5 className="modal-title" id="completeWithdrawModalLabel">Complete Stake Withdrawals</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>

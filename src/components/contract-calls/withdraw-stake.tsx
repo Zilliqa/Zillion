@@ -17,6 +17,7 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 
 const { BN } = require('@zilliqa-js/util');
 
+
 function WithdrawStakeModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
@@ -26,9 +27,7 @@ function WithdrawStakeModal(props: any) {
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
     const { onSuccessCallback } = props;
-
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
-
     const nodeSelectorOptions = props.nodeSelectorOptions;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
@@ -189,6 +188,10 @@ function WithdrawStakeModal(props: any) {
                         </div>
                         <div className="modal-body">
                             <Select
+                                value={
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === ssnAddress)
+                                    }
                                 placeholder="Select an operator to withdraw the stake"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"

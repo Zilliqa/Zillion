@@ -20,9 +20,12 @@ function WithdrawRewardModal(props: any) {
     const { accountType } = appContext;
 
     const proxy = props.proxy;
+    // const impl = props.impl;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const { onSuccessCallback } = props;
+
+    // const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
     const nodeSelectorOptions = props.nodeSelectorOptions;
 
@@ -101,6 +104,7 @@ function WithdrawRewardModal(props: any) {
         setSsnAddress(option.value);
     }
 
+    
     return (
         <div id="withdraw-reward-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawRewardModalLabel" aria-hidden="true">
             <div className="contract-calls-modal modal-dialog modal-lg" role="document">
@@ -126,7 +130,12 @@ function WithdrawRewardModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
+
                             <Select 
+                                value={
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === ssnAddress)
+                                    }
                                 placeholder="Select an operator to claim the rewards"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
@@ -135,6 +144,7 @@ function WithdrawRewardModal(props: any) {
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim</button>
                             </div>
+
                         </div>
                          </>
                      }

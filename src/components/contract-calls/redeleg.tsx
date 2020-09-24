@@ -10,9 +10,11 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
 import { ProxyCalls, OperationStatus, AccessMethod } from '../../util/enum';
+import { computeDelegRewards } from '../../util/reward-calculator';
 
-
+import { fromBech32Address } from '@zilliqa-js/crypto';
 const { BN } = require('@zilliqa-js/util');
+
 
 function ReDelegateStakeModal(props: any) {
     const appContext = useContext(AppContext);
@@ -20,10 +22,14 @@ function ReDelegateStakeModal(props: any) {
     
     const { 
         proxy,
+        impl,
         onSuccessCallback,
         ledgerIndex,
         networkURL,
-        nodeSelectorOptions } = props;
+        nodeSelectorOptions, 
+        currentDelegatedOptions } = props;
+
+    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
     const [fromSsn, setFromSsn] = useState('');
     const [toSsn, setToSsn] = useState('');
@@ -32,7 +38,40 @@ function ReDelegateStakeModal(props: any) {
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
-    const redeleg = () => {
+    
+    // checks if there are any unwithdrawn rewards or buffered deposit
+    const hasRewardToWithdraw = async () => {
+        const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
+        
+        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl, networkURL);
+
+        if (contract === undefined || contract === 'error') {
+            return false;
+        }
+
+        // compute rewards
+        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
+
+        if (delegRewards !== "0") {
+            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before transferring.");
+            return true;
+        }
+
+        // check if user has buffered deposits
+        if (contract.last_buf_deposit_cycle_deleg.hasOwnProperty(userBase16Address) &&
+            contract.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
+                const lastDepositCycleDeleg = parseInt(contract.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+                if (lastRewardCycle <= lastDepositCycleDeleg) {
+                    Alert('info', "You have buffered deposits in the selected node. Please wait for the next cycle before transferring.");
+                    return true;
+                }
+        }
+
+        return false;
+    }
+
+    const redeleg = async () => {
         if (!fromSsn || !toSsn) {
             Alert('error', "operator address should be bech32 or checksum format");
             return null;
@@ -40,6 +79,12 @@ function ReDelegateStakeModal(props: any) {
 
         if (!delegAmt || !delegAmt.match(/\d/)) {
             Alert('error', "Delegate amount is invalid.");
+            return null;
+        }
+
+        // check if deleg has unwithdrawn rewards or buffered deposits for the from ssn address
+        const hasRewards = await hasRewardToWithdraw();
+        if (hasRewards) {
             return null;
         }
 
@@ -55,7 +100,7 @@ function ReDelegateStakeModal(props: any) {
         // gas price, gas limit declared in account.ts
         let txParams = {
             toAddr: proxyChecksum,
-            amount: new BN(`${delegAmtQa}`),
+            amount: new BN(0),
             code: "",
             data: JSON.stringify({
                 _tag: ProxyCalls.REDELEGATE_STAKE,
@@ -161,13 +206,21 @@ function ReDelegateStakeModal(props: any) {
                         <div className="modal-body">
 
                             <Select 
+                                value={
+                                    currentDelegatedOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === fromSsn)
+                                    }
                                 placeholder="Select an operator to transfer from"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
-                                options={nodeSelectorOptions}
+                                options={currentDelegatedOptions}
                                 onChange={handleFromAddress}  />
                             
                             <Select 
+                                value={
+                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
+                                        option.value === toSsn)
+                                    }
                                 placeholder="Select an operator to receive the delegated amount"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"

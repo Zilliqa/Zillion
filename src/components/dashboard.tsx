@@ -31,6 +31,8 @@ import { useInterval } from '../util/use-interval';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
 import IconQuestionCircle from './icons/question-circle';
 import ReactTooltip from 'react-tooltip';
+import { computeDelegRewards } from '../util/reward-calculator';
+import BN from 'bn.js';
 
 
 interface NodeOptions {
@@ -60,6 +62,8 @@ function Dashboard(props: any) {
 
     const mountedRef = useRef(true);
 
+    const [minDelegStake, setMinDelegStake] = useState('');
+
     // used as info for the internal modal data
     // state is updated by OperatorStatsTable
     const [nodeDetails, setNodeDetails] = useState({
@@ -73,6 +77,8 @@ function Dashboard(props: any) {
     });
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
+    const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
+    const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -130,11 +136,34 @@ function Dashboard(props: any) {
     }, [currWalletAddress]);
 
 
+    // retrieve contract constants such as min stake
+    // passed to children components
+    const getContractConstants = useCallback(() => {
+        let minDelegStake = '0';
+
+        ZilliqaAccount.getImplState(impl, "mindelegstake")
+            .then((contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+                minDelegStake = contractState.mindelegstake;
+            })
+            .finally(() => {
+                if (!mountedRef.current) {
+                    return null;
+                }
+                setMinDelegStake(minDelegStake);
+            });
+    }, [impl])
+
+
     // generate options list
     // fetch node operator names and address 
     // for the dropdowns in the modals
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
+        let withdrawStakeOptions: NodeOptions[] = [];
+        let claimRewardsOptions: NodeOptions[] = [];
 
         ZilliqaAccount.getImplState(impl, "ssnlist")
             .then((contractState) => {
@@ -163,7 +192,54 @@ function Dashboard(props: any) {
                 setNodeOptions([...tempNodeOptions]);
             });
 
-    }, [impl]);
+        // get withdraw stake options
+        ZilliqaAccount.getImplState(impl, "deposit_amt_deleg")
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+
+                const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+                
+                if (!contractState.deposit_amt_deleg.hasOwnProperty[userBase16Address]) {
+                    return null;
+                }
+                
+                const depositDelegList = contractState.deposit_amt_deleg[userBase16Address];
+
+                for (const item of tempNodeOptions) {
+                    const ssnAddress = item.value;
+                    if (ssnAddress in depositDelegList) {
+                        // include the stake amount in the labels
+                        const delegAmt = depositDelegList[ssnAddress];
+
+                        // include the claimed rewards in the labels
+                        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
+                        
+
+                        withdrawStakeOptions.push({
+                            label: item.label + " (" + convertQaToCommaStr(delegAmt) + " ZIL)",
+                            value: item.value
+                        });
+
+                        if (delegRewards && delegRewards !== '0') {
+                            claimRewardsOptions.push({
+                                label: item.label + " (" + convertQaToCommaStr(delegRewards) + " ZIL)",
+                                value: item.value
+                            });
+                        }
+                    }
+                }
+            })
+            .finally(() => {
+                if (!mountedRef.current) {
+                    return null;
+                }
+                setWithdrawStakeOptions([...withdrawStakeOptions]);
+                setClaimedRewardsOptions([...claimRewardsOptions]);
+            });
+
+    }, [impl, currWalletAddress, networkURL]);
 
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
@@ -196,14 +272,16 @@ function Dashboard(props: any) {
     useEffect(() => {
         getAccountBalance();
         getNodeOptionsList();
+        getContractConstants();
         return () => {
             mountedRef.current = false;
         }
-    }, [getAccountBalance, getNodeOptionsList]);
+    }, [getAccountBalance, getNodeOptionsList, getContractConstants]);
 
     // poll data
     useInterval(() => {
         getAccountBalance();
+        getNodeOptionsList();
     }, mountedRef, refresh_rate_config);
 
 
@@ -247,6 +325,7 @@ function Dashboard(props: any) {
             const zilPay = (window as any).zilPay;
 
             if (zilPay) {
+                console.log("zil pay method ...");
                 const accountStreamChanged = zilPay.wallet.observableAccount();
                 const networkStreamChanged = zilPay.wallet.observableNetwork();
 
@@ -256,6 +335,7 @@ function Dashboard(props: any) {
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
                 accountStreamChanged.subscribe((account: any) => {
+                    console.log("zil pay account changing...");
                     initParams(account.base16, AccessMethod.ZILPAY);
                     setCurrWalletAddress(toBech32Address(account.base16));
                 });
@@ -365,14 +445,7 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
                                         
                                         {/* complete withdrawal */}
-                                        <div id="delegator-complete-withdraw-details" className="col-12 mt-4 px-1 py-3 text-center">
-                                            <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
-                                        </div>
-                                        <ReactTooltip id="withdraw-question" place="bottom" type="dark" effect="solid">
-                                            <span>When you initiate a stake withdrawal, the amount is not withdrawn immediately.</span>
-                                            <br/>
-                                            <span>The amount is processed at a certain block number and only available to withdraw<br/>once the required block number is reached.</span>
-                                        </ReactTooltip>
+                                        <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                     </div>
                                     </>
                                 }
@@ -473,10 +546,13 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
+                                <div className="px-2">
+                                    <ToastContainer hideProgressBar={true}/>
+                                </div>
+
                             </div>
                         </div>
                     </div>
-                    <ToastContainer hideProgressBar={true}/>
                 </div>
             </div>
             <footer id="disclaimer" className="align-items-start">
@@ -485,7 +561,6 @@ function Dashboard(props: any) {
                 <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
                 </div>
             </footer>
-            
             <DisclaimerModal />
 
             <UpdateCommRateModal 
@@ -518,7 +593,8 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions} />
+                nodeSelectorOptions={nodeOptions}
+                minDelegStake={minDelegStake} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 
@@ -526,7 +602,9 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions} />
+                currentDelegatedOptions = {withdrawStakeOptions}
+                nodeSelectorOptions={nodeOptions}
+                userAddress={currWalletAddress} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
@@ -534,7 +612,7 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions} 
+                nodeSelectorOptions={withdrawStakeOptions} 
                 userAddress={currWalletAddress} />
 
             <WithdrawRewardModal 
@@ -543,7 +621,8 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions} />
+                nodeSelectorOptions={claimedRewardsOptions}
+                userAddress={currWalletAddress} />
 
             <CompleteWithdrawModal 
                 proxy={proxy}
