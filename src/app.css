@@ -677,6 +677,7 @@ body {
 }
 
 #complete-withdraw-accordion .card-header {
+  border: 0;
   background-color: var(--secondary-color);
 }
 
@@ -792,8 +793,7 @@ body {
   background-position: right 0% top 50%;
 }
 
-#home-ssn-details, 
-#delegator-complete-withdraw-details,
+#home-ssn-details,
 #dashboard-ssn-details,
 #dashboard-recent-txn,
 #staking-portfolio-details {

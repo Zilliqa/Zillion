@@ -182,7 +182,7 @@ function WithdrawStakeModal(props: any) {
 
                         <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="withdrawStakeModalLabel">Withdraw Stake</h5>
+                            <h5 className="modal-title" id="withdrawStakeModalLabel">Initiate Stake Withdrawal</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -196,7 +196,7 @@ function WithdrawStakeModal(props: any) {
                                 onChange={handleChange} />
                             <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
                             <div className="d-flex">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawStake}>Withdraw</button>
+                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawStake}>Initiate</button>
                             </div>
                         </div>
                         </>

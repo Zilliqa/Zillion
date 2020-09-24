@@ -359,11 +359,20 @@ function Dashboard(props: any) {
                                     {/* delegator section */}
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract ml-2 mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Withdraw Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
-                                        {/* <button type="button" className="btn btn-primary mx-2" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Withdrawal</button> */}
+                                        
+                                        {/* complete withdrawal */}
+                                        <div id="delegator-complete-withdraw-details" className="col-12 mt-4 px-1 py-3 text-center">
+                                            <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                        </div>
+                                        <ReactTooltip id="withdraw-question" place="bottom" type="dark" effect="solid">
+                                            <span>When you initiate a stake withdrawal, the amount is not withdrawn immediately.</span>
+                                            <br/>
+                                            <span>The amount is processed at a certain block number and only available to withdraw<br/>once the required block number is reached.</span>
+                                        </ReactTooltip>
                                     </div>
                                     </>
                                 }
@@ -417,16 +426,8 @@ function Dashboard(props: any) {
                                                     { mountedRef.current && <StakingPortfolio impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
                                                 </div>
                                             </div>
-                                            <div className="col-12 mt-2 p-4 text-center">
-                                                <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
-                                            </div>
                                             <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">
                                                 <span>This shows you the list of nodes which you have staked your deposit in.</span>
-                                            </ReactTooltip>
-                                            <ReactTooltip id="withdraw-question" place="bottom" type="dark" effect="solid">
-                                                <span>When you withdraw your stake deposits, the amount is not withdrawn immediately.</span>
-                                                <br/>
-                                                <span>The amount is processed at a certain block number and only available to claim once the block number is reached.</span>
                                             </ReactTooltip>
                                         </div>
                                     </div>

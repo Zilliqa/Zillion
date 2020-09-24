@@ -28,7 +28,7 @@ function Table({ columns, data, tableId }: any) {
             initialState : {
                 sortBy: [
                     {
-                        id: "blkNumCheck",
+                        id: "blkNumCountdown",
                         desc: false
                     }
                 ]
@@ -78,11 +78,7 @@ function CompleteWithdrawalTable(props: any) {
     const columns = useMemo(
         () => [
             {
-                Header: 'block num required',
-                accessor: 'blkNumCheck'
-            },
-            {
-                Header: 'block num countdown',
+                Header: 'pending blocks til claim',
                 accessor: 'blkNumCountdown'
             },
             {
@@ -192,7 +188,7 @@ function CompleteWithdrawalTable(props: any) {
         
         <div id="complete-withdraw-accordion">
             <div className="card">
-                <h6 className="inner-section-heading px-4 pt-4">Withdrawals&nbsp;
+                <h6 className="inner-section-heading px-4 pt-4">Pending Stake Withdrawals&nbsp;
                     <span data-tip data-for="withdraw-question">
                         <IconQuestionCircle width="16" height="16" className="section-icon" />
                     </span>
@@ -200,17 +196,17 @@ function CompleteWithdrawalTable(props: any) {
                 <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
                 <div className="card-header d-flex justify-content-between pb-4" id="complete-withdraw-accordion-header">
                     <div>
-                        <span><em>You have a claimable stake amount of <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
+                        <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                     </div>
                     <div className="btn-group">
-                        { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Claim Stakes</button> }
+                        { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawal</button> }
                         { data.length !== 0 && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
                     </div>
                 </div>
 
                 <div id="complete-withdraw-details" className="collapse" aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-accordion">
                     <div className="card-body">
-                        { data.length === 0 && <em>You have no amount ready for withdrawal yet.</em> }
+                        { data.length === 0 && <em>You have no ZILs ready for withdrawal yet.</em> }
                         <Table columns={columns} data={data} />
                     </div>
                 </div>
