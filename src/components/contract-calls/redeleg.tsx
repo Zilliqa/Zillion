@@ -55,7 +55,7 @@ function ReDelegateStakeModal(props: any) {
         // gas price, gas limit declared in account.ts
         let txParams = {
             toAddr: proxyChecksum,
-            amount: new BN(`${delegAmtQa}`),
+            amount: new BN(0),
             code: "",
             data: JSON.stringify({
                 _tag: ProxyCalls.REDELEGATE_STAKE,
