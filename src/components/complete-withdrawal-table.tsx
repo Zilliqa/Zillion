@@ -82,14 +82,14 @@ function CompleteWithdrawalTable(props: any) {
                 accessor: 'blkNumCountdown'
             },
             {
-                Header: 'amount (ZIL)',
-                accessor: 'amount',
-                Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.amount)}</span>
-            },
-            {
                 Header: 'progress',
                 accessor: 'progress',
                 Cell: ({ row }: any) => <span>{row.original.progress}%</span>
+            },
+            {
+                Header: 'amount (ZIL)',
+                accessor: 'amount',
+                Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.amount)}</span>
             }
         ], []
     );

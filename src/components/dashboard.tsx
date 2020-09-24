@@ -603,7 +603,9 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions} />
+                currentDelegatedOptions = {withdrawStakeOptions}
+                nodeSelectorOptions={nodeOptions}
+                userAddress={currWalletAddress} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
