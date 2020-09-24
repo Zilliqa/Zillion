@@ -16,7 +16,7 @@ const BigNumber = require('bignumber.js');
 
 
 function DelegatorStatsTable(props: any) {
-    const proxy = props.proxy;
+    const impl = props.impl;
     const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
@@ -44,7 +44,7 @@ function DelegatorStatsTable(props: any) {
         let totalDeposits = '0';
 
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
             .then(async (contract) => {
 
                 if (contract === undefined || contract === 'error') {
@@ -70,7 +70,7 @@ function DelegatorStatsTable(props: any) {
                         totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
 
                         // compute zil rewards
-                        const delegRewards = new BN(await computeDelegRewards(proxy, networkURL, ssnAddress, userBase16Address)).toString();
+                        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
                         totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
                     }
 
@@ -132,7 +132,7 @@ function DelegatorStatsTable(props: any) {
 
             }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
-    }, [proxy, networkURL, userBase16Address]);
+    }, [impl, networkURL, userBase16Address]);
 
     // load initial data
     useEffect(() => {

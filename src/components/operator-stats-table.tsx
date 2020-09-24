@@ -12,8 +12,8 @@ import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 
 
 function OperatorStatsTable(props: any) {
-    const proxy = props.proxy;
-    const networkURL = props.network;
+    const impl = props.impl;
+    // const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
@@ -42,7 +42,7 @@ function OperatorStatsTable(props: any) {
         let commReward = '0';
         let receiver = '';
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(proxy, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl)
             .then((contract) => {
 
                 if (contract === undefined || contract === 'error') {
@@ -99,7 +99,7 @@ function OperatorStatsTable(props: any) {
 
             }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
 
-    }, [proxy, networkURL, userBase16Address, setNodeDetails]);
+    }, [impl, userBase16Address, setNodeDetails]);
 
     // load initial data
     useEffect(() => {

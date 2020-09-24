@@ -173,13 +173,13 @@ function Home(props: any) {
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
 
-                <LandingStatsTable proxy={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
 
                 <div id="home-ssn-details" className="container">
                   <div className="row p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
                     <div className="col-12 content">
-                        <SsnTable proxy={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                        <SsnTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
                     </div>
                   </div>
                 </div>
@@ -195,7 +195,7 @@ function Home(props: any) {
                 <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
                   <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span></div>
                   <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span></div>
-                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)} data-tip="Please use a Chrome browser and ensure your ZilPay is on Testnet network"><IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span></div>
+                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)} data-tip="Ensure your ZilPay is on Testnet network"><IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span></div>
                   <ReactTooltip place="bottom" type="light" effect="float" />
                 </div>
                 <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>

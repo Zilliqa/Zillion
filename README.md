@@ -10,14 +10,17 @@
     networks_config: {
         testnet: {
             proxy: "<proxy_checksum_address>",
+            impl: "<implementation_contract_checksum_address>",
             blockchain: "https://dev-api.zilliqa.com",
         },
         mainnet: {
             proxy: "<proxy_checksum_address>",
+            impl: "<implementation_contract_checksum_address>",
             blockchain: "https://api.zilliqa.com",
         },
         isolated_server: {
             proxy: "<proxy_checksum_address>",
+            impl: "<implementation_contract_checksum_address>",
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
         }
     },
