@@ -35,7 +35,6 @@ function WithdrawStakeModal(props: any) {
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
-    // const [nodeSelectorOptions, setNodeSelectorOptions] = useState([] as NodeOptions[]);
     const nodeSelectorOptions = props.nodeSelectorOptions;
     const [nodeOptions, setNodeoptions] = useState([] as NodeOptions[]);
 
@@ -197,6 +196,7 @@ function WithdrawStakeModal(props: any) {
     useEffect(() => {
         filterNodeOptions();
     }, [filterNodeOptions]);
+
 
     return (
         <div id="withdraw-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawStakeModalLabel" aria-hidden="true">

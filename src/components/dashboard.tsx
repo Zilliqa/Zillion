@@ -570,7 +570,8 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions} />
+                nodeSelectorOptions={nodeOptions}
+                userAddress={currWalletAddress} />
 
             <CompleteWithdrawModal 
                 proxy={proxy}
