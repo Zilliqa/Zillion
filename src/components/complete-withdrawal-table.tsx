@@ -140,10 +140,10 @@ function CompleteWithdrawalTable(props: any) {
                             completed = new BigNumber(1).minus(processed);
                         }
 
-                        console.log("complete withdraw currentblknum: %o", currentBlkNum.toString());
-                        console.log("complete withdraw blkNumCheck: %o", blkNumCheck.toString());
-                        console.log("complete withdraw blkNumcountdown: %o", blkNumCountdown.toString());
-                        console.log("complete withdraw completed: %o", completed.toString());
+                        // console.log("complete withdraw currentblknum: %o", currentBlkNum.toString());
+                        // console.log("complete withdraw blkNumCheck: %o", blkNumCheck.toString());
+                        // console.log("complete withdraw blkNumcountdown: %o", blkNumCountdown.toString());
+                        // console.log("complete withdraw completed: %o", completed.toString());
 
                         // convert progress to percentage
                         progress = completed.times(100).toFixed(2);

@@ -200,8 +200,12 @@ function Dashboard(props: any) {
                 }
 
                 const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+                
+                if (!contractState.deposit_amt_deleg.hasOwnProperty[userBase16Address]) {
+                    return null;
+                }
+                
                 const depositDelegList = contractState.deposit_amt_deleg[userBase16Address];
-                console.log(tempNodeOptions);
 
                 for (const item of tempNodeOptions) {
                     const ssnAddress = item.value;
@@ -321,6 +325,7 @@ function Dashboard(props: any) {
             const zilPay = (window as any).zilPay;
 
             if (zilPay) {
+                console.log("zil pay method ...");
                 const accountStreamChanged = zilPay.wallet.observableAccount();
                 const networkStreamChanged = zilPay.wallet.observableNetwork();
 
@@ -330,6 +335,7 @@ function Dashboard(props: any) {
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
                 accountStreamChanged.subscribe((account: any) => {
+                    console.log("zil pay account changing...");
                     initParams(account.base16, AccessMethod.ZILPAY);
                     setCurrWalletAddress(toBech32Address(account.base16));
                 });
