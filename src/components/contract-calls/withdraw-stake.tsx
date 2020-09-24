@@ -8,10 +8,12 @@ import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
+import { computeDelegRewards } from '../../util/reward-calculator';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+
 
 const { BN } = require('@zilliqa-js/util');
 
@@ -45,18 +47,24 @@ function WithdrawStakeModal(props: any) {
             return false;
         }
 
-        if (contract.last_withdraw_cycle_deleg.hasOwnProperty(userBase16Address)) {
-            const ssnRewardCycleList = contract.last_withdraw_cycle_deleg[userBase16Address];
-            
-            if (ssnRewardCycleList.hasOwnProperty(ssnChecksumAddress)) {
-                // last_withdraw_cycle_deleg[deleg][ssnaddr]
-                const lastRewardCycle = parseInt(contract.lastrewardcycle);
-                const lastWithdrawnCycle = parseInt(ssnRewardCycleList[ssnChecksumAddress]);
+        // compute rewards
+        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
 
-                if (lastWithdrawnCycle < lastRewardCycle) {
+        if (delegRewards !== "0") {
+            console.log("you have delegated rewards: %o", delegRewards);
+            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
+            return true;
+        }
+
+        // check if user has buffered deposits
+        if (contract.last_buf_deposit_cycle_deleg.hasOwnProperty(userBase16Address) &&
+            contract.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
+                const lastDepositCycleDeleg = parseInt(contract.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+                if (lastRewardCycle <= lastDepositCycleDeleg) {
+                    Alert('info', "You have buffered deposits in the selected node. Please wait for the next cycle before withdrawing the staked amount.");
                     return true;
                 }
-            }
         }
 
         return false;
@@ -73,9 +81,9 @@ function WithdrawStakeModal(props: any) {
             return null;
         }
 
-        // check if deleg has unwithdrawn rewards for this ssn address
-        if (hasRewardToWithdraw()) {
-            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
+        // check if deleg has unwithdrawn rewards or buffered deposits for this ssn address
+        const hasRewards = await hasRewardToWithdraw();
+        if (hasRewards) {
             return null;
         }
 
@@ -174,7 +182,7 @@ function WithdrawStakeModal(props: any) {
 
                         <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="withdrawStakeModalLabel">Withdraw Stake</h5>
+                            <h5 className="modal-title" id="withdrawStakeModalLabel">Initiate Stake Withdrawal</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -188,7 +196,7 @@ function WithdrawStakeModal(props: any) {
                                 onChange={handleChange} />
                             <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
                             <div className="d-flex">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawStake}>Withdraw</button>
+                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawStake}>Initiate</button>
                             </div>
                         </div>
                         </>

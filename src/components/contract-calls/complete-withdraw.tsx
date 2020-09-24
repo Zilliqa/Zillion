@@ -96,15 +96,16 @@ function CompleteWithdrawModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="completeWithdrawModalLabel">Complete Withdrawal</h5>
+                            <h5 className="modal-title" id="completeWithdrawModalLabel">Complete Stake Withdrawal</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p>Are you sure you want to do a complete withdrawal?</p>
-                            <button type="button" className="btn btn-user-action mr-2" onClick={completeWithdraw}>Withdraw</button>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" data-dismiss="modal" onClick={handleClose}>Cancel</button>
+                            <p>Are you sure you wish to withdraw all your pending stakes?</p>
+                            <div className="d-flex">
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={completeWithdraw}>Withdraw</button>
+                            </div>
                         </div>
                          </>
                      }
