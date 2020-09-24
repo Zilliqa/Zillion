@@ -166,7 +166,7 @@ function Dashboard(props: any) {
         let claimRewardsOptions: NodeOptions[] = [];
 
         ZilliqaAccount.getImplState(impl, "ssnlist")
-            .then((contractState) => {
+            .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
                 }
@@ -184,28 +184,21 @@ function Dashboard(props: any) {
                     }
                     tempNodeOptions.push(operatorOption);
                 }
-            })
-            .finally(() => {
-                if (!mountedRef.current) {
-                    return null;
-                }
-                setNodeOptions([...tempNodeOptions]);
-            });
 
-        // get withdraw stake options
-        ZilliqaAccount.getImplState(impl, "deposit_amt_deleg")
-            .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
-                    return null;
-                }
-
+                // get withdraw stake options
                 const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
-                
-                if (!contractState.deposit_amt_deleg.hasOwnProperty[userBase16Address]) {
+
+                const depostAmtDelegState = await ZilliqaAccount.getImplState(impl, "deposit_amt_deleg");
+
+                if (depostAmtDelegState === undefined || depostAmtDelegState === 'error') {
                     return null;
                 }
-                
-                const depositDelegList = contractState.deposit_amt_deleg[userBase16Address];
+
+                if (!depostAmtDelegState.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
+                    return null;
+                }
+
+                const depositDelegList = depostAmtDelegState.deposit_amt_deleg[userBase16Address];
 
                 for (const item of tempNodeOptions) {
                     const ssnAddress = item.value;
@@ -230,11 +223,13 @@ function Dashboard(props: any) {
                         }
                     }
                 }
+
             })
             .finally(() => {
                 if (!mountedRef.current) {
                     return null;
                 }
+                setNodeOptions([...tempNodeOptions]);
                 setWithdrawStakeOptions([...withdrawStakeOptions]);
                 setClaimedRewardsOptions([...claimRewardsOptions]);
             });
