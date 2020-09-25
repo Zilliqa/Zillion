@@ -34,7 +34,7 @@ import IconQuestionCircle from './icons/question-circle';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats } from '../util/interface';
 
 import BN from 'bn.js';
 
@@ -91,6 +91,7 @@ function Dashboard(props: any) {
     }
 
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
+    const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
@@ -145,6 +146,7 @@ function Dashboard(props: any) {
             })
             .finally(() => {
                 if (mountedRef.current) {
+                    console.log("updating wallet balance...");
                     setBalance(currBalance);
                 }
 
@@ -268,6 +270,60 @@ function Dashboard(props: any) {
     }, [impl, currWalletAddress, networkURL]);
 
 
+    const getDelegatorStakingPortfolio = useCallback(() => {
+        let output: DelegStakingPortfolioStats[] = [];
+
+        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'deposit_amt_deleg')
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+    
+                if (!contractState['deposit_amt_deleg'].hasOwnProperty(userBase16Address)) {
+                    return null;
+                }
+
+                // fetch ssnlist for the names
+                const ssnContractState = await ZilliqaAccount.getImplState(impl, 'ssnlist');
+                
+                if (!ssnContractState['ssnlist']) {
+                    return null;
+                }
+
+                const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
+                
+                for (const ssnAddress in depositDelegList) {
+                    if (!depositDelegList.hasOwnProperty(ssnAddress)) {
+                        continue;
+                    }
+                    
+                    // compute stake amount
+                    const delegAmt = new BN(depositDelegList[ssnAddress]);
+
+                    // compute rewards
+                    const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
+
+                    const data: DelegStakingPortfolioStats = {
+                        ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
+                        ssnAddress: toBech32Address(ssnAddress),
+                        delegAmt: delegAmt.toString(),
+                        rewards: delegRewards.toString(),
+                    }
+                    output.push(data);
+                }
+
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    console.log("updating delegator staking portfolio...");
+                    setDelegStakingStats([...output]);
+                }
+            }), PromiseArea.PROMISE_GET_STAKE_PORTFOLIO);
+    }, [impl, networkURL, currWalletAddress]);
+
+
     // generate options list
     // fetch node operator names and address 
     // for the dropdowns in the modals
@@ -383,6 +439,7 @@ function Dashboard(props: any) {
         getNodeOptionsList();
         getContractConstants();
         getDelegatorStats();
+        getDelegatorStakingPortfolio();
 
         return () => {
             mountedRef.current = false;
@@ -392,7 +449,8 @@ function Dashboard(props: any) {
         getAccountBalance, 
         getNodeOptionsList, 
         getContractConstants, 
-        getDelegatorStats
+        getDelegatorStats,
+        getDelegatorStakingPortfolio
     ]);
 
     // poll data
@@ -407,6 +465,7 @@ function Dashboard(props: any) {
         getNodeOptionsList();
         getContractConstants();
         getDelegatorStats();
+        getDelegatorStakingPortfolio();
     };
 
     const networkChanger = (net: string) => {
@@ -626,7 +685,12 @@ function Dashboard(props: any) {
                                             <div className="col-12 mt-2 px-4 text-center">
                                                 <div className="inner-section">
                                                     <h6 className="inner-section-heading px-4 pt-4 pb-3" >Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
-                                                    { mountedRef.current && <StakingPortfolio impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                                    <StakingPortfolio 
+                                                        impl={impl} 
+                                                        network={networkURL} 
+                                                        refresh={refresh_rate_config} 
+                                                        userAddress={currWalletAddress}
+                                                        data={delegStakingStats} />
                                                 </div>
                                             </div>
                                             <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">

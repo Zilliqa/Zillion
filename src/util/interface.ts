@@ -7,6 +7,14 @@ interface DelegStats {
     totalDeposits: string,
 }
 
+interface DelegStakingPortfolioStats {
+    ssnName: string,
+    ssnAddress: string,
+    delegAmt: string,
+    rewards: string,
+}
+
 export type {
     DelegStats,
+    DelegStakingPortfolioStats
 }
