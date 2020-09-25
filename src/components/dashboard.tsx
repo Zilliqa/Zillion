@@ -34,17 +34,21 @@ import IconQuestionCircle from './icons/question-circle';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions } from '../util/interface';
 
 import BN from 'bn.js';
 
 const BigNumber = require('bignumber.js');
 
-interface NodeOptions {
-    label: string,
-    value: string,
-}
 
+const initDelegStats: DelegStats = {
+    lastCycleAPY: '0',
+    zilRewards: '0',
+    gzilRewards: '0',
+    gzilBalance: '0',
+    totalPendingWithdrawal: '0',
+    totalDeposits: '0',
+}
 
 function Dashboard(props: any) {
 
@@ -80,15 +84,6 @@ function Dashboard(props: any) {
         numOfDeleg: '0',
         receiver: ''
     });
-
-    const initDelegStats: DelegStats = {
-        lastCycleAPY: '0',
-        zilRewards: '0',
-        gzilRewards: '0',
-        gzilBalance: '0',
-        totalPendingWithdrawal: '0',
-        totalDeposits: '0',
-    }
 
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
