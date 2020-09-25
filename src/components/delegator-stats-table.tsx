@@ -1,24 +1,11 @@
-import React, { useState } from 'react';
-import { PromiseArea, Constants } from '../util/enum';
+import React from 'react';
+import { PromiseArea } from '../util/enum';
 
-import { fromBech32Address } from '@zilliqa-js/crypto';
 import { convertQaToCommaStr, convertGzilToCommaStr } from '../util/utils';
 import Spinner from './spinner';
 
 
-const { BN } = require('@zilliqa-js/util');
-const BigNumber = require('bignumber.js');
-
-
 function DelegatorStatsTable(props: any) {
-    const impl = props.impl;
-    const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
-
-    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
-
-    const [showSpinner, setShowSpinner] = useState(true);
-
     const data = props.data;
 
 

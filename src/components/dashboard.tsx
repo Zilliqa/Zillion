@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
@@ -34,7 +34,7 @@ import IconQuestionCircle from './icons/question-circle';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 
 import BN from 'bn.js';
 
@@ -82,12 +82,14 @@ function Dashboard(props: any) {
 
     const mountedRef = useRef(true);
 
-    const [minDelegStake, setMinDelegStake] = useState('');
+    const [minDelegStake, setMinDelegStake] = useState('0');
+    const [totalStakeAmt, setTotalStakeAmt] = useState('0');
 
 
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
+    const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
@@ -152,8 +154,9 @@ function Dashboard(props: any) {
 
     // retrieve contract constants such as min stake
     // passed to children components
-    const getContractConstants = useCallback(() => {
+    const getContractConstants = useCallback(async () => {
         let minDelegStake = '0';
+        let totalStakeAmt = '0';
 
         ZilliqaAccount.getImplState(impl, "mindelegstake")
             .then((contractState) => {
@@ -167,6 +170,19 @@ function Dashboard(props: any) {
                     return null;
                 }
                 setMinDelegStake(minDelegStake);
+            });
+        
+        ZilliqaAccount.getImplState(impl, 'totalstakeamount')
+            .then((contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+                totalStakeAmt = contractState.totalstakeamount;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    setTotalStakeAmt(totalStakeAmt);
+                }
             });
 
     }, [impl]);
@@ -252,6 +268,8 @@ function Dashboard(props: any) {
         })
         .finally(() => {
             if (mountedRef.current) {
+                console.log("updating delegator stats...");
+
                 const data: DelegStats = {
                     lastCycleAPY: lastCycleAPY,
                     zilRewards: zilRewards,
@@ -460,6 +478,57 @@ function Dashboard(props: any) {
     }, [impl, currWalletAddress]);
 
 
+    /* fetch data for ssn panel */
+    const getSsnStats = useCallback(() => {
+        let output: SsnStats[] = [];
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+
+                for (const ssnAddress in contractState['ssnlist']) {
+                    const ssnArgs = contractState['ssnlist'][ssnAddress]['arguments'];
+                    let delegNum = '0';
+                    let status = SsnStatus.INACTIVE;
+
+                    // get ssn status
+                    if (ssnArgs[0]['constructor'] === 'True') {
+                        status = SsnStatus.ACTIVE;
+                    }
+
+                    // get number of delegators
+                    const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+
+                    if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                        delegNum = Object.keys(delegNumState['ssn_deleg_amt']).length.toString();
+                    }
+
+                    const data: SsnStats = {
+                        address: toBech32Address(ssnAddress),
+                        name: ssnArgs[3],
+                        apiUrl: ssnArgs[5],
+                        stakeAmt: ssnArgs[1],
+                        bufferedDeposits: ssnArgs[6],
+                        commRate: ssnArgs[7],
+                        commReward: ssnArgs[8],
+                        delegNum: delegNum,
+                        status: status,
+                    }
+
+                    output.push(data);
+                }
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    console.log("updateing dashboard ssn stats...");
+                    setSsnStats([...output]);
+                }
+            }), PromiseArea.PROMISE_GET_SSN_STATS);
+    }, [impl]);
+
+
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
     }
@@ -502,6 +571,8 @@ function Dashboard(props: any) {
             getOperatorStats();
         }
 
+        getSsnStats();
+
         return () => {
             mountedRef.current = false;
         }
@@ -513,7 +584,8 @@ function Dashboard(props: any) {
         getContractConstants, 
         getDelegatorStats,
         getDelegatorStakingPortfolio,
-        getOperatorStats
+        getOperatorStats,
+        getSsnStats
     ]);
 
     // poll data
@@ -529,6 +601,8 @@ function Dashboard(props: any) {
             getOperatorStats();
         }
 
+        getSsnStats();
+
     }, mountedRef, refresh_rate_config);
 
     // manual poll the data
@@ -543,7 +617,9 @@ function Dashboard(props: any) {
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
         }
-        
+
+        getSsnStats();
+
     };
 
     const networkChanger = (net: string) => {
@@ -806,7 +882,15 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
-                                            { mountedRef.current && <SsnTable impl={impl} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
+                                            <SsnTable 
+                                                impl={impl} 
+                                                network={networkURL} 
+                                                blockchainExplorer={blockchain_explorer_config} 
+                                                refresh={refresh_rate_config} 
+                                                currRole={currRole} 
+                                                data={ssnStats}
+                                                totalStakeAmt={totalStakeAmt}
+                                                />
                                         </div>
                                     </div>
                                 </div>

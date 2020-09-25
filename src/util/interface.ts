@@ -29,9 +29,22 @@ interface NodeOptions {
     value: string,
 }
 
+interface SsnStats {
+    address: string,
+    name: string,
+    apiUrl: string,
+    stakeAmt: string,
+    bufferedDeposits: string,
+    commRate: string,
+    commReward: string,
+    delegNum: string,
+    status: string,
+}
+
 export type {
     DelegStats,
     DelegStakingPortfolioStats,
     NodeOptions,
     OperatorStats,
+    SsnStats,
 }
