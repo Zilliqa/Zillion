@@ -34,7 +34,7 @@ import IconQuestionCircle from './icons/question-circle';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats } from '../util/interface';
 
 import BN from 'bn.js';
 
@@ -49,6 +49,17 @@ const initDelegStats: DelegStats = {
     totalPendingWithdrawal: '0',
     totalDeposits: '0',
 }
+
+const initOperatorStats: OperatorStats = {
+    name: '',
+    stakeAmt: '0',
+    bufferedDeposits: '0',
+    commRate: '0',
+    commReward: '0',
+    delegNum: '0',
+    receiver: '0',
+}
+
 
 function Dashboard(props: any) {
 
@@ -73,20 +84,10 @@ function Dashboard(props: any) {
 
     const [minDelegStake, setMinDelegStake] = useState('');
 
-    // used as info for the internal modal data
-    // state is updated by OperatorStatsTable
-    const [nodeDetails, setNodeDetails] = useState({
-        name: '',
-        stakeAmount: '0',
-        bufferedDeposit: '0',
-        commRate: '0',
-        commReward: '0',
-        numOfDeleg: '0',
-        receiver: ''
-    });
 
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
+    const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
@@ -171,13 +172,14 @@ function Dashboard(props: any) {
     }, [impl]);
 
 
+    /* fetch data for delegator stats panel */
     const getDelegatorStats = useCallback(() => {
-        let lastCycleAPY = '0';
-        let zilRewards = '0';
-        let gzilRewards = '0';
-        let gzilBalance = '0';
-        let totalPendingWithdrawal = '0';
-        let totalDeposits = '0';
+        let lastCycleAPY = initDelegStats.lastCycleAPY;
+        let zilRewards = initDelegStats.zilRewards;
+        let gzilRewards = initDelegStats.gzilRewards;
+        let gzilBalance = initDelegStats.gzilBalance;
+        let totalPendingWithdrawal = initDelegStats.totalPendingWithdrawal;
+        let totalDeposits = initDelegStats.totalDeposits;
         
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
@@ -265,6 +267,7 @@ function Dashboard(props: any) {
     }, [impl, currWalletAddress, networkURL]);
 
 
+    /* fetch data for delegator staking portfolio panel */
     const getDelegatorStakingPortfolio = useCallback(() => {
         let output: DelegStakingPortfolioStats[] = [];
 
@@ -399,6 +402,64 @@ function Dashboard(props: any) {
     }, [impl, currWalletAddress, networkURL]);
 
 
+    /* fetch data for operator stats panel */
+    const getOperatorStats = useCallback(() => {
+        let name = initOperatorStats.name;
+        let stakeAmt = initOperatorStats.stakeAmt;
+        let bufferedDeposits = initOperatorStats.bufferedDeposits;
+        let delegNum = initOperatorStats.delegNum;
+        let commRate = initOperatorStats.commRate;
+        let commReward = initOperatorStats.commReward;
+        let receiver = initOperatorStats.receiver;
+
+        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+
+                if (!contractState['ssnlist'].hasOwnProperty(userBase16Address)) {
+                    return null;
+                }
+
+                const ssnArgs = contractState['ssnlist'][userBase16Address]['arguments'];
+
+                // get number of delegators
+                const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+
+                if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                    delegNum = Object.keys(delegNumState['ssn_deleg_amt']).length.toString();
+                }
+
+                name = ssnArgs[3];
+                stakeAmt = ssnArgs[1];
+                bufferedDeposits = ssnArgs[6];
+                commRate = ssnArgs[7];
+                commReward = ssnArgs[8];
+                receiver = toBech32Address(ssnArgs[9])
+            })
+            .finally(() => {
+                
+                if (mountedRef.current) {
+                    console.log("updating operator stats...");
+                    const data: OperatorStats = {
+                        name: name,
+                        stakeAmt: stakeAmt,
+                        bufferedDeposits: bufferedDeposits,
+                        commRate: commRate,
+                        commReward: commReward,
+                        delegNum: delegNum,
+                        receiver: receiver,
+                    }
+                    setOperatorStats(data);
+                }
+
+            }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
+    }, [impl, currWalletAddress]);
+
+
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
     }
@@ -433,25 +494,41 @@ function Dashboard(props: any) {
         getAccountBalance();
         getNodeOptionsList();
         getContractConstants();
-        getDelegatorStats();
-        getDelegatorStakingPortfolio();
+
+        if (currRole === Role.DELEGATOR.toString()) {
+            getDelegatorStats();
+            getDelegatorStakingPortfolio();
+        } else if (currRole === Role.OPERATOR.toString()) {
+            getOperatorStats();
+        }
 
         return () => {
             mountedRef.current = false;
         }
 
     }, [
+        currRole,
         getAccountBalance, 
         getNodeOptionsList, 
         getContractConstants, 
         getDelegatorStats,
-        getDelegatorStakingPortfolio
+        getDelegatorStakingPortfolio,
+        getOperatorStats
     ]);
 
     // poll data
     useInterval(() => {
         getAccountBalance();
         getNodeOptionsList();
+        getContractConstants();
+
+        if (currRole === Role.DELEGATOR.toString()) {
+            getDelegatorStats();
+            getDelegatorStakingPortfolio();
+        } else if (currRole === Role.OPERATOR.toString()) {
+            getOperatorStats();
+        }
+
     }, mountedRef, refresh_rate_config);
 
     // manual poll the data
@@ -459,8 +536,14 @@ function Dashboard(props: any) {
         getAccountBalance();
         getNodeOptionsList();
         getContractConstants();
-        getDelegatorStats();
-        getDelegatorStakingPortfolio();
+
+        if (currRole === Role.DELEGATOR.toString()) {
+            getDelegatorStats();
+            getDelegatorStakingPortfolio();
+        } else if (currRole === Role.OPERATOR.toString()) {
+            getOperatorStats();
+        }
+        
     };
 
     const networkChanger = (net: string) => {
@@ -636,7 +719,7 @@ function Dashboard(props: any) {
                                     {/* node operator section */}
 
                                     <div className="p-4 mt-4 dashboard-card">
-                                        <h5 className="card-title mb-4">Hi {nodeDetails.name ? nodeDetails.name : 'Operator'}! What would you like to do today?</h5>
+                                        <h5 className="card-title mb-4">Hi {operatorStats.name ? operatorStats.name : 'Operator'}! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
@@ -706,7 +789,12 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Node Performance</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <OperatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
+                                                <OperatorStatsTable 
+                                                    impl={impl} 
+                                                    network={networkURL} 
+                                                    refresh={refresh_rate_config} 
+                                                    userAddress={currWalletAddress}
+                                                    data={operatorStats} />
                                             </div>
                                         </div>
                                     </div>
@@ -756,7 +844,7 @@ function Dashboard(props: any) {
                 proxy={proxy}
                 impl={impl} 
                 networkURL={networkURL} 
-                currentRate={nodeDetails.commRate} 
+                currentRate={operatorStats.commRate} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} />
 
@@ -764,7 +852,7 @@ function Dashboard(props: any) {
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                currentReceiver={nodeDetails.receiver} 
+                currentReceiver={operatorStats.receiver} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} />
 
@@ -772,7 +860,7 @@ function Dashboard(props: any) {
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                currentRewards={nodeDetails.commReward} 
+                currentRewards={operatorStats.commReward} 
                 onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} />
 

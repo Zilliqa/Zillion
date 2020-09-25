@@ -14,7 +14,24 @@ interface DelegStakingPortfolioStats {
     rewards: string,
 }
 
+interface OperatorStats {
+    name: string
+    stakeAmt: string,
+    bufferedDeposits: string,
+    commRate: string,
+    commReward: string,
+    delegNum: string,
+    receiver: string,
+}
+
+interface NodeOptions {
+    label: string,
+    value: string,
+}
+
 export type {
     DelegStats,
-    DelegStakingPortfolioStats
+    DelegStakingPortfolioStats,
+    NodeOptions,
+    OperatorStats,
 }
