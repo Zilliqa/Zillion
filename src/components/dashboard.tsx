@@ -37,6 +37,7 @@ import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 
 import BN from 'bn.js';
+import IconRefresh from './icons/refresh';
 
 const BigNumber = require('bignumber.js');
 
@@ -522,7 +523,7 @@ function Dashboard(props: any) {
             })
             .finally(() => {
                 if (mountedRef.current) {
-                    console.log("updateing dashboard ssn stats...");
+                    console.log("updating dashboard ssn stats...");
                     setSsnStats([...output]);
                 }
             }), PromiseArea.PROMISE_GET_SSN_STATS);
@@ -768,7 +769,12 @@ function Dashboard(props: any) {
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
-                                <button type="button" className="btn btn-secondary" onClick={updateData}>Refresh</button>
+                                <div className="d-flex justify-content-end">
+                                    <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip"><IconRefresh width="20" height="20" /></button>
+                                    <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
+                                        <span>refresh</span>
+                                    </ReactTooltip>
+                                </div>
 
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
