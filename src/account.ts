@@ -129,7 +129,6 @@ export const getBalance = async (address: string) => {
             console.error("error: getBalance undefined error");
             return "0";
         }
-        console.log(balance.result);
         return balance.result.balance;
     } catch (err) {
         console.error("error: getBalance - o%", err);

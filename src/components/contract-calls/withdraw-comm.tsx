@@ -17,7 +17,7 @@ function WithdrawCommModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, currentRewards, networkURL, onSuccessCallback, ledgerIndex } = props;
+    const { proxy, currentRewards, networkURL, ledgerIndex, updateData, updateRecentTransactions } = props;
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
 
@@ -60,9 +60,10 @@ function WithdrawCommModal(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashboard methods
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
         
         // reset state

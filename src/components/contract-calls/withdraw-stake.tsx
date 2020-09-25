@@ -26,7 +26,7 @@ function WithdrawStakeModal(props: any) {
     const impl = props.impl;
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
-    const { onSuccessCallback } = props;
+    const { updateData, updateRecentTransactions } = props;
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
     const nodeSelectorOptions = props.nodeSelectorOptions;
 
@@ -137,9 +137,10 @@ function WithdrawStakeModal(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashboard methods
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
         
         // reset state

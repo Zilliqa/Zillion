@@ -18,7 +18,7 @@ function UpdateReceiverAddress(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentReceiver, onSuccessCallback, ledgerIndex } = props;
+    const { proxy, networkURL, currentReceiver, ledgerIndex, updateData, updateRecentTransactions } = props;
     const [newAddress, setNewAddress] = useState('');
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -75,9 +75,10 @@ function UpdateReceiverAddress(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashboard methods
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
 
         // reset state
