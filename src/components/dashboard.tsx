@@ -945,68 +945,76 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 currentRate={operatorStats.commRate} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <UpdateReceiverAddress 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
                 currentReceiver={operatorStats.receiver} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawCommModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
                 currentRewards={operatorStats.commReward} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <DelegateStakeModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={nodeOptions}
-                minDelegStake={minDelegStake} />
+                minDelegStake={minDelegStake}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 currentDelegatedOptions = {withdrawStakeOptions}
                 nodeSelectorOptions={nodeOptions}
-                userAddress={currWalletAddress} />
+                userAddress={currWalletAddress}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={withdrawStakeOptions} 
-                userAddress={currWalletAddress} />
+                userAddress={currWalletAddress}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={claimedRewardsOptions}
-                userAddress={currWalletAddress} />
+                userAddress={currWalletAddress}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <CompleteWithdrawModal 
                 proxy={proxy}
                 impl={impl}  
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
                 
         </div>
         </>

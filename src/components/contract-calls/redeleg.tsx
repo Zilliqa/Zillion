@@ -23,11 +23,12 @@ function ReDelegateStakeModal(props: any) {
     const { 
         proxy,
         impl,
-        onSuccessCallback,
         ledgerIndex,
         networkURL,
         nodeSelectorOptions, 
-        currentDelegatedOptions } = props;
+        currentDelegatedOptions,
+        updateData,
+        updateRecentTransactions } = props;
 
     const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
@@ -150,9 +151,10 @@ function ReDelegateStakeModal(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashbaord methods
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
         
         // reset state

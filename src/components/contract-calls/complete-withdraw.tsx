@@ -20,7 +20,7 @@ function CompleteWithdrawModal(props: any) {
     const proxy = props.proxy;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
-    const { onSuccessCallback } = props;
+    const { updateData, updateRecentTransactions } = props;
 
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -63,9 +63,10 @@ function CompleteWithdrawModal(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashboard methods
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
         
         // reset state
