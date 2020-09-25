@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
+import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment } from '../util/enum';
@@ -27,13 +28,17 @@ import logo from "../static/logo.png";
 import DisclaimerModal from './disclaimer';
 import DelegatorStatsTable from './delegator-stats-table';
 import OperatorStatsTable from './operator-stats-table';
-import { useInterval } from '../util/use-interval';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
+
 import IconQuestionCircle from './icons/question-circle';
-import ReactTooltip from 'react-tooltip';
+
+import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
+import { DelegStats } from '../util/interface';
+
 import BN from 'bn.js';
 
+const BigNumber = require('bignumber.js');
 
 interface NodeOptions {
     label: string,
@@ -75,6 +80,17 @@ function Dashboard(props: any) {
         numOfDeleg: '0',
         receiver: ''
     });
+
+    const initDelegStats: DelegStats = {
+        lastCycleAPY: '0',
+        zilRewards: '0',
+        gzilRewards: '0',
+        gzilBalance: '0',
+        totalPendingWithdrawal: '0',
+        totalDeposits: '0',
+    }
+
+    const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
@@ -154,7 +170,102 @@ function Dashboard(props: any) {
                 }
                 setMinDelegStake(minDelegStake);
             });
-    }, [impl])
+
+    }, [impl]);
+
+
+    const getDelegatorStats = useCallback(() => {
+        let lastCycleAPY = '0';
+        let zilRewards = '0';
+        let gzilRewards = '0';
+        let gzilBalance = '0';
+        let totalPendingWithdrawal = '0';
+        let totalDeposits = '0';
+        
+        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'deposit_amt_deleg')
+        .then(async (contractState) => {
+            if (contractState === undefined || contractState === 'error') {
+                return null;
+            }
+
+            if (!contractState['deposit_amt_deleg'].hasOwnProperty(userBase16Address)) {
+                return null;
+            }
+
+            // TODO use calculator compute last cycle APY
+            let totalDepositsBN = new BigNumber(0);
+            let totalZilRewardsBN = new BigNumber(0);
+            const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
+
+            for (const ssnAddress in depositDelegList) {
+                if (!depositDelegList.hasOwnProperty(ssnAddress)) {
+                    continue;
+                }
+
+                // compute total deposits
+                const delegAmtQaBN = new BigNumber(depositDelegList[ssnAddress]);
+                totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
+
+                // compute zil rewards
+                const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
+                totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
+            }
+
+            totalDeposits = totalDepositsBN.toString();
+            zilRewards = totalZilRewardsBN.toString();
+
+            // compute gzil rewards
+            // converted to gzil when display
+            gzilRewards = totalZilRewardsBN;
+
+            // get gzil balance
+            const gzilAddressState = await ZilliqaAccount.getImplState(impl, 'gziladdr');
+            if (gzilAddressState.gziladdr) {
+                const gzilContractState = await ZilliqaAccount.getGzilContract(gzilAddressState['gziladdr']);
+                if (gzilContractState.balances) {
+                    const gzilBalanceMap = gzilContractState.balances;
+                    if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
+                        // compute user gzil balance
+                        gzilBalance = gzilBalanceMap[userBase16Address];
+                    }
+                }
+            }
+
+            // compute total pending withdrawal
+            const withdrawalPendingState = await ZilliqaAccount.getImplState(impl, 'withdrawal_pending');
+            if (withdrawalPendingState.withdrawal_pending) {
+                let totalPendingAmtBN = new BigNumber(0);
+                const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+                
+                for (const blkNum in blkNumPendingWithdrawal) {
+                    if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                        continue;
+                    }
+                    
+                    const pendingAmtQaBN = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                    totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmtQaBN);
+                }
+                totalPendingWithdrawal = totalPendingAmtBN.toString();
+            }
+
+        })
+        .finally(() => {
+            if (mountedRef.current) {
+                const data: DelegStats = {
+                    lastCycleAPY: lastCycleAPY,
+                    zilRewards: zilRewards,
+                    gzilRewards: gzilRewards,
+                    gzilBalance: gzilBalance,
+                    totalPendingWithdrawal: totalPendingWithdrawal,
+                    totalDeposits: totalDeposits,
+                }
+                setDelegStats(data);
+            }
+        }), PromiseArea.PROMISE_GET_DELEG_STATS);
+
+    }, [impl, currWalletAddress, networkURL]);
 
 
     // generate options list
@@ -236,9 +347,11 @@ function Dashboard(props: any) {
 
     }, [impl, currWalletAddress, networkURL]);
 
+
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
     }
+
 
     // update current role is used for ZilPay
     // due to account switch on the fly
@@ -263,15 +376,24 @@ function Dashboard(props: any) {
         setCurrRole(newRole);
     }, [impl, networkURL, loginRole]);
 
+
     // load initial data
     useEffect(() => {
         getAccountBalance();
         getNodeOptionsList();
         getContractConstants();
+        getDelegatorStats();
+
         return () => {
             mountedRef.current = false;
         }
-    }, [getAccountBalance, getNodeOptionsList, getContractConstants]);
+
+    }, [
+        getAccountBalance, 
+        getNodeOptionsList, 
+        getContractConstants, 
+        getDelegatorStats
+    ]);
 
     // poll data
     useInterval(() => {
@@ -279,6 +401,13 @@ function Dashboard(props: any) {
         getNodeOptionsList();
     }, mountedRef, refresh_rate_config);
 
+    // manual poll the data
+    const updateData = () => {
+        getAccountBalance();
+        getNodeOptionsList();
+        getContractConstants();
+        getDelegatorStats();
+    };
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
@@ -426,6 +555,7 @@ function Dashboard(props: any) {
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
+                                <button type="button" className="btn btn-secondary" onClick={updateData}>Refresh</button>
 
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
@@ -471,7 +601,12 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">Overview</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <DelegatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                                <DelegatorStatsTable 
+                                                    impl={impl} 
+                                                    network={networkURL} 
+                                                    refresh={refresh_rate_config} 
+                                                    userAddress={currWalletAddress}
+                                                    data={delegStats} />
                                             </div>
                                         </div>
                                     </div>
