@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
@@ -86,7 +86,6 @@ function Dashboard(props: any) {
     const [minDelegStake, setMinDelegStake] = useState('0');
     const [totalStakeAmt, setTotalStakeAmt] = useState('0');
 
-
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
@@ -95,6 +94,8 @@ function Dashboard(props: any) {
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
     const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
+
+    const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -606,8 +607,14 @@ function Dashboard(props: any) {
 
     }, mountedRef, refresh_rate_config);
 
+    const timeout = (delay: number) => {
+        return new Promise(res => setTimeout(res, delay));
+    }
+
     // manual poll the data
-    const updateData = () => {
+    const updateData = async () => {
+        setIsRefreshDisabled(true);
+
         getAccountBalance();
         getNodeOptionsList();
         getContractConstants();
@@ -621,6 +628,9 @@ function Dashboard(props: any) {
 
         getSsnStats();
 
+        // prevent users from spamming manual refresh
+        await timeout(Constants.MANUAL_REFRESH_DELAY);
+        setIsRefreshDisabled(false);
     };
 
     const networkChanger = (net: string) => {
@@ -770,7 +780,7 @@ function Dashboard(props: any) {
                         <div className="row">
                             <div className="col-12">
                                 <div className="d-flex justify-content-end">
-                                    <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip"><IconRefresh width="20" height="20" /></button>
+                                    <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
                                         <span>refresh</span>
                                     </ReactTooltip>
