@@ -130,7 +130,7 @@ function Home(props: any) {
                   const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
                   if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
-                      delegNum = Object.keys(delegNumState['ssn_deleg_amt']).length.toString();
+                      delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
                   }
 
                   const data: SsnStats = {

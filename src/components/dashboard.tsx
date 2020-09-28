@@ -68,7 +68,7 @@ function Dashboard(props: any) {
     const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
 
 
-    const [currWalletAddress, setCurrWalletAddress] = useState(address); // keep track of current wallet as zilpay have multiple wallets
+    const [currWalletAddress, setCurrWalletAddress] = useState(address ? address : ''); // keep track of current wallet as zilpay have multiple wallets
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
@@ -96,6 +96,7 @@ function Dashboard(props: any) {
     const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -144,6 +145,13 @@ function Dashboard(props: any) {
             .then((balance) => {
                 currBalance = balance;
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (mountedRef.current) {
                     console.log("updating wallet balance...");
@@ -167,6 +175,13 @@ function Dashboard(props: any) {
                 }
                 minDelegStake = contractState.mindelegstake;
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (!mountedRef.current) {
                     return null;
@@ -180,6 +195,13 @@ function Dashboard(props: any) {
                     return null;
                 }
                 totalStakeAmt = contractState.totalstakeamount;
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 if (mountedRef.current) {
@@ -268,6 +290,13 @@ function Dashboard(props: any) {
             }
 
         })
+        .catch((err) => {
+            console.error(err);
+            if (mountedRef.current) {
+                setIsError(true);
+            }
+            return null;
+        })
         .finally(() => {
             if (mountedRef.current) {
                 console.log("updating delegator stats...");
@@ -280,6 +309,7 @@ function Dashboard(props: any) {
                     totalPendingWithdrawal: totalPendingWithdrawal,
                     totalDeposits: totalDeposits,
                 }
+
                 setDelegStats(data);
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
@@ -332,6 +362,13 @@ function Dashboard(props: any) {
                     output.push(data);
                 }
 
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 if (mountedRef.current) {
@@ -410,6 +447,13 @@ function Dashboard(props: any) {
                 }
 
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (!mountedRef.current) {
                     return null;
@@ -450,7 +494,7 @@ function Dashboard(props: any) {
                 const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
                 if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
-                    delegNum = Object.keys(delegNumState['ssn_deleg_amt']).length.toString();
+                    delegNum = Object.keys(delegNumState['ssn_deleg_amt'][userBase16Address]).length.toString();
                 }
 
                 name = ssnArgs[3];
@@ -459,6 +503,13 @@ function Dashboard(props: any) {
                 commRate = ssnArgs[7];
                 commReward = ssnArgs[8];
                 receiver = toBech32Address(ssnArgs[9])
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 
@@ -504,7 +555,7 @@ function Dashboard(props: any) {
                     const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
                     if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
-                        delegNum = Object.keys(delegNumState['ssn_deleg_amt']).length.toString();
+                        delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
                     }
 
                     const data: SsnStats = {
@@ -521,6 +572,13 @@ function Dashboard(props: any) {
 
                     output.push(data);
                 }
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 if (mountedRef.current) {
@@ -659,6 +717,7 @@ function Dashboard(props: any) {
                 break;
         }
 
+        ZilliqaAccount.changeNetwork(url);
         updateNetwork(networkLabel);
         setNetworkURL(url);
         setProxy(networks_config[networkLabel].proxy);
@@ -674,11 +733,11 @@ function Dashboard(props: any) {
 
             if (zilPay) {
                 console.log("zil pay method ...");
-                const accountStreamChanged = zilPay.wallet.observableAccount();
-                const networkStreamChanged = zilPay.wallet.observableNetwork();
-
                 // switch to the zilpay network on load
                 networkChanger(zilPay.wallet.net);
+
+                const accountStreamChanged = zilPay.wallet.observableAccount();
+                const networkStreamChanged = zilPay.wallet.observableNetwork();
 
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
@@ -704,15 +763,14 @@ function Dashboard(props: any) {
             return;
         }
 
-        if (!isAuth) {
+        if (!isAuth || isError) {
             // redirect to login request
-            props.history.push("/notlogin");
+            props.history.push("/oops");
         }
+
         // eslint-disable-next-line
-    }, []);
+    }, [isError, isAuth, props.history]);
 
-
-    // change to correct network for account.ts
     // change to correct role for zilpay switch
     // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
     // because setState is async - have to execute these functions from useEffect
@@ -720,9 +778,11 @@ function Dashboard(props: any) {
     // when network change (zilpay switch network)
     useEffect(() => {
         console.log("unified change network");
-        ZilliqaAccount.changeNetwork(networkURL);
+        if (!currWalletAddress) {
+            return;
+        }
         updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
-    }, [currWalletAddress, networkURL, updateCurrentRole]);
+    }, [currWalletAddress, updateCurrentRole]);
 
     
     // prevent user from refreshing
@@ -793,7 +853,7 @@ function Dashboard(props: any) {
                                     {/* delegator section */}
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract ml-2 mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract ml-2 mr-4 shadown-none" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
