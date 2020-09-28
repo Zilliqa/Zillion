@@ -27,7 +27,7 @@ function WithdrawStakeModal(props: any) {
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
     const { updateData, updateRecentTransactions } = props;
-    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
+    const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
     const nodeSelectorOptions = props.nodeSelectorOptions;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address

@@ -68,7 +68,7 @@ function Dashboard(props: any) {
     const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
 
 
-    const [currWalletAddress, setCurrWalletAddress] = useState(address); // keep track of current wallet as zilpay have multiple wallets
+    const [currWalletAddress, setCurrWalletAddress] = useState(address ? address : ''); // keep track of current wallet as zilpay have multiple wallets
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
@@ -96,6 +96,7 @@ function Dashboard(props: any) {
     const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -144,6 +145,13 @@ function Dashboard(props: any) {
             .then((balance) => {
                 currBalance = balance;
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (mountedRef.current) {
                     console.log("updating wallet balance...");
@@ -167,6 +175,13 @@ function Dashboard(props: any) {
                 }
                 minDelegStake = contractState.mindelegstake;
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (!mountedRef.current) {
                     return null;
@@ -180,6 +195,13 @@ function Dashboard(props: any) {
                     return null;
                 }
                 totalStakeAmt = contractState.totalstakeamount;
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 if (mountedRef.current) {
@@ -268,6 +290,13 @@ function Dashboard(props: any) {
             }
 
         })
+        .catch((err) => {
+            console.error(err);
+            if (mountedRef.current) {
+                setIsError(true);
+            }
+            return null;
+        })
         .finally(() => {
             if (mountedRef.current) {
                 console.log("updating delegator stats...");
@@ -333,6 +362,13 @@ function Dashboard(props: any) {
                     output.push(data);
                 }
 
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 if (mountedRef.current) {
@@ -411,6 +447,13 @@ function Dashboard(props: any) {
                 }
 
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (!mountedRef.current) {
                     return null;
@@ -460,6 +503,13 @@ function Dashboard(props: any) {
                 commRate = ssnArgs[7];
                 commReward = ssnArgs[8];
                 receiver = toBech32Address(ssnArgs[9])
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 
@@ -522,6 +572,13 @@ function Dashboard(props: any) {
 
                     output.push(data);
                 }
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
             })
             .finally(() => {
                 if (mountedRef.current) {
@@ -706,13 +763,13 @@ function Dashboard(props: any) {
             return;
         }
 
-        if (!isAuth) {
+        if (!isAuth || isError) {
             // redirect to login request
-            props.history.push("/notlogin");
+            props.history.push("/oops");
         }
-        // eslint-disable-next-line
-    }, []);
 
+        // eslint-disable-next-line
+    }, [isError, isAuth, props.history]);
 
     // change to correct role for zilpay switch
     // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
@@ -721,6 +778,9 @@ function Dashboard(props: any) {
     // when network change (zilpay switch network)
     useEffect(() => {
         console.log("unified change network");
+        if (!currWalletAddress) {
+            return;
+        }
         updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
     }, [currWalletAddress, updateCurrentRole]);
 
