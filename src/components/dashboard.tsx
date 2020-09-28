@@ -33,6 +33,7 @@ import CompleteWithdrawalTable from './complete-withdrawal-table';
 import IconQuestionCircle from './icons/question-circle';
 
 import { useInterval } from '../util/use-interval';
+import { useStickyState } from '../util/use-sticky-state';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 
@@ -72,7 +73,7 @@ function Dashboard(props: any) {
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
-    const [recentTransactions, setRecentTransactions] = useState([] as any);
+    const [recentTransactions, setRecentTransactions] = useStickyState([] as any, "recent-txn");
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
