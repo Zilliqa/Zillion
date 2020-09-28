@@ -15,7 +15,7 @@ function Error404(props: any) {
                     <div className="cover-content col-12">
                         <div id="unauthenticated-section" className="text-center mx-auto">
                             <IconNotAuthenticated className="home-icon" width="400px" />
-                            <h3>Error</h3>  
+                            <h3>Error</h3>
                             <p>Sorry, something seems to be broken.<br/>Please re-connect to your wallet again.</p>
                             <button type="button" className="btn btn-user-action mx-2" onClick={directUser}>Log In</button>
                         </div>

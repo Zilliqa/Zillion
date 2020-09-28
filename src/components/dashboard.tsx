@@ -494,7 +494,7 @@ function Dashboard(props: any) {
                 const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
                 if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
-                    delegNum = Object.keys(delegNumState['ssn_deleg_amt']).length.toString();
+                    delegNum = Object.keys(delegNumState['ssn_deleg_amt'][userBase16Address]).length.toString();
                 }
 
                 name = ssnArgs[3];
@@ -555,7 +555,7 @@ function Dashboard(props: any) {
                     const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
                     if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
-                        delegNum = Object.keys(delegNumState['ssn_deleg_amt']).length.toString();
+                        delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
                     }
 
                     const data: SsnStats = {
@@ -853,7 +853,7 @@ function Dashboard(props: any) {
                                     {/* delegator section */}
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract ml-2 mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract ml-2 mr-4 shadown-none" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
                                         <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
