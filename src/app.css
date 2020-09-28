@@ -129,9 +129,10 @@ body {
 }
 
 .btn-inner-contract {
-  color: var(--primary-color);
-  background-color: var(--secondary-color);
-  border: 1px solid var(--primary-color);
+  color: #ffffff;
+  background-color: #6781F7;
+  border: 1px solid #ffffff;
+  border-radius: 4px !important;
   font-size: 1em;
   font-weight: 500;
   padding: 0 1.8em;
@@ -140,8 +141,32 @@ body {
 }
 
 .btn-inner-contract:hover {
-  color: var(--secondary-color);
-  background-color: var(--primary-color);
+  color: #6781F7;
+  background-color: #ffffff;
+}
+
+.btn-inner-contract-2 {
+  color: #6781F7;
+  background-color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 4px !important;
+  font-size: 1em;
+  font-weight: 500;
+  padding: 0 1.8em;
+  padding-top: 0.6em;
+  padding-bottom: 0.4em;
+}
+
+.btn-inner-contract-2:hover {
+  color: var(--text-secondary-color);
+  background-color: #f8f8ff;
+  border: 1px solid #f8f8ff;
+  border-radius: 4px !important;
+  font-size: 1em;
+  font-weight: 500;
+  padding: 0 1.8em;
+  padding-top: 0.6em;
+  padding-bottom: 0.4em;
 }
 
 .btn-primary {
@@ -396,7 +421,7 @@ body {
 }
 
 .inner-section-heading {
-  color: #979dac;
+  color: #f0f0f0;
   font-size: 0.8em;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -614,7 +639,7 @@ body {
 }
 
 .section-icon {
-  fill: #979dac;
+  fill: #f0f0f0;
   margin-top: -5px;
   margin-left: 2px;
 }
@@ -676,8 +701,9 @@ body {
 }
 
 #complete-withdraw-accordion {
-  color: var(--text-color);
-  background-color: var(--secondary-color);
+  border-radius: 6px;
+  background-color: #6781F7;
+  border: 2px solid #6781F7;
 }
 
 #complete-withdraw-accordion .btn-group {
@@ -686,12 +712,14 @@ body {
 
 #complete-withdraw-accordion .card {
   border: 0;
-  background-color: var(--secondary-color);
+  border-radius: 6px;
+  background-color: #6781F7;
 }
 
 #complete-withdraw-accordion .card-header {
   border: 0;
-  background-color: var(--secondary-color);
+  border-radius: 6px;
+  background-color: #6781F7;
 }
 
 #complete-withdraw-accordion .card-header h2 {
@@ -702,10 +730,12 @@ body {
 
 #complete-withdraw-accordion .card-body {
   background-color: var(--secondary-color);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
 }
 
 #complete-withdraw-details h3 {
-  color: #6C6D7A;
+  color: var(--text-color);
   font-size: 1em;
   font-weight: 500;
   text-transform: uppercase;
@@ -830,14 +860,15 @@ body {
 }
 
 #home-ssn-details table tbody,
-#delegator-complete-withdraw-details table tbody,
 #dashboard-ssn-details table tbody,
 #dashboard-recent-txn table tbody,
+#delegator-complete-withdraw-details table tbody,
 #staking-portfolio-details table tbody {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
 }
+
 
 #home-ssn-details table tbody a, 
 #dashboard-ssn-details table tbody a,
@@ -854,9 +885,9 @@ body {
 }
 
 #home-ssn-details table tbody tr:nth-child(odd),
-#delegator-complete-withdraw-details table tbody tr:nth-child(odd),
 #dashboard-ssn-details table tbody tr:nth-child(odd),
 #dashboard-recent-txn table tbody tr:nth-child(odd),
+#delegator-complete-withdraw-details table tbody tr:nth-child(odd),
 #staking-portfolio-details table tbody tr:nth-child(odd) {
   background-color: var(--primary-table-striped-color);
 }
@@ -875,9 +906,9 @@ body {
 }
 
 #home-ssn-details th,
-#delegator-complete-withdraw-details th,
 #dashboard-ssn-details th,
 #dashboard-recent-txn th,
+#delegator-complete-withdraw-details th,
 #staking-portfolio-details th {
   color: var(--primary-color);
   font-size: 0.85em;
