@@ -40,7 +40,7 @@ function WithdrawStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         
-        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl, networkURL);
+        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl);
 
         if (contract === undefined || contract === 'error') {
             return false;

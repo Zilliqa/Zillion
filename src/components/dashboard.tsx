@@ -280,6 +280,7 @@ function Dashboard(props: any) {
                     totalPendingWithdrawal: totalPendingWithdrawal,
                     totalDeposits: totalDeposits,
                 }
+
                 setDelegStats(data);
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
@@ -659,6 +660,7 @@ function Dashboard(props: any) {
                 break;
         }
 
+        ZilliqaAccount.changeNetwork(url);
         updateNetwork(networkLabel);
         setNetworkURL(url);
         setProxy(networks_config[networkLabel].proxy);
@@ -674,11 +676,11 @@ function Dashboard(props: any) {
 
             if (zilPay) {
                 console.log("zil pay method ...");
-                const accountStreamChanged = zilPay.wallet.observableAccount();
-                const networkStreamChanged = zilPay.wallet.observableNetwork();
-
                 // switch to the zilpay network on load
                 networkChanger(zilPay.wallet.net);
+
+                const accountStreamChanged = zilPay.wallet.observableAccount();
+                const networkStreamChanged = zilPay.wallet.observableNetwork();
 
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
@@ -712,7 +714,6 @@ function Dashboard(props: any) {
     }, []);
 
 
-    // change to correct network for account.ts
     // change to correct role for zilpay switch
     // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
     // because setState is async - have to execute these functions from useEffect
@@ -720,9 +721,8 @@ function Dashboard(props: any) {
     // when network change (zilpay switch network)
     useEffect(() => {
         console.log("unified change network");
-        ZilliqaAccount.changeNetwork(networkURL);
         updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
-    }, [currWalletAddress, networkURL, updateCurrentRole]);
+    }, [currWalletAddress, updateCurrentRole]);
 
     
     // prevent user from refreshing

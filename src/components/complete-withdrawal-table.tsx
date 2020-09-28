@@ -65,7 +65,7 @@ function Table({ columns, data, tableId }: any) {
 
 function CompleteWithdrawalTable(props: any) {
     const impl = props.impl;
-    const networkURL = props.network;
+    // const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
     const [showSpinner, setShowSpinner] = useState(true);
@@ -100,7 +100,7 @@ function CompleteWithdrawalTable(props: any) {
         let totalClaimableAmtBN = new BigNumber(0); // Qa
         let progress = '0';
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl)
             .then(async (contract) => {
 
                 if (contract === undefined || contract === "error") {
@@ -169,7 +169,7 @@ function CompleteWithdrawalTable(props: any) {
             }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
 
 
-    }, [impl, networkURL, userBase16Address]);
+    }, [impl, userBase16Address]);
 
     // load initial data
     useEffect(() => {
