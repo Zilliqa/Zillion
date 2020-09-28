@@ -853,10 +853,10 @@ function Dashboard(props: any) {
                                     {/* delegator section */}
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract ml-2 mr-4 shadown-none" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
+                                        <button type="button" className="btn btn-contract ml-2 mr-4 shadow-none" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
                                         
                                         {/* complete withdrawal */}
                                         <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
@@ -872,9 +872,9 @@ function Dashboard(props: any) {
 
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi {operatorStats.name ? operatorStats.name : 'Operator'}! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
                                     </div>
                                     </>
                                 }
