@@ -130,7 +130,7 @@ body {
 
 .btn-inner-contract {
   color: #ffffff;
-  background-color: #6781F7;
+  background-color: #5e60ce;
   border: 1px solid #ffffff;
   border-radius: 4px !important;
   font-size: 1em;
@@ -141,12 +141,12 @@ body {
 }
 
 .btn-inner-contract:hover {
-  color: #6781F7;
+  color: #5e60ce;
   background-color: #ffffff;
 }
 
 .btn-inner-contract-2 {
-  color: #6781F7;
+  color: #5e60ce;
   background-color: #ffffff;
   border: 1px solid #ffffff;
   border-radius: 4px !important;
@@ -702,8 +702,8 @@ body {
 
 #complete-withdraw-accordion {
   border-radius: 6px;
-  background-color: #6781F7;
-  border: 2px solid #6781F7;
+  background-color: #5e60ce;
+  border: 2px solid #5e60ce;
 }
 
 #complete-withdraw-accordion .btn-group {
@@ -713,13 +713,14 @@ body {
 #complete-withdraw-accordion .card {
   border: 0;
   border-radius: 6px;
-  background-color: #6781F7;
+  background-color: #5e60ce;
 }
 
 #complete-withdraw-accordion .card-header {
   border: 0;
   border-radius: 6px;
-  background-color: #6781F7;
+  background-color: #5e60ce;
+  padding-bottom: 2.5rem;
 }
 
 #complete-withdraw-accordion .card-header h2 {

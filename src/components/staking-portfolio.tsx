@@ -22,7 +22,7 @@ function Table({ columns, data }: any) {
         });
     
     return (
-        <table className="table" {...getTableProps()}>
+        <table className="table table-responsive-lg" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>

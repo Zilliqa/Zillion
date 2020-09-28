@@ -37,7 +37,7 @@ function Table({ columns, data, tableId }: any) {
         }, useSortBy);
 
     return (
-        <table id={tableId} className="table" {...getTableProps()}>
+        <table id={tableId} className="table table-responsive-lg" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -197,7 +197,7 @@ function CompleteWithdrawalTable(props: any) {
                         </span>
                     </h6>
                     <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
-                    <div className="card-header d-flex justify-content-between pb-4" id="complete-withdraw-accordion-header">
+                    <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
                         <div>
                             <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                         </div>

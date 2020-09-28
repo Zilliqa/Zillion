@@ -32,7 +32,7 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
         }, useSortBy);
     
     return (
-        <table id={tableId} className="table table-responsive" {...getTableProps()}>
+        <table id={tableId} className="table table-responsive-lg " {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -139,7 +139,7 @@ function SsnTable(props: any) {
         // list the hidden column accessor names
         let hiddenColumns = [];
         if (role !== undefined && role === Role.DELEGATOR) {
-            hiddenColumns.push("ssnCommReward");
+            hiddenColumns.push("commReward", "apiUrl");
         }
         return hiddenColumns;
     }
