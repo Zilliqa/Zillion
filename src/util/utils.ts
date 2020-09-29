@@ -1,5 +1,5 @@
 import { fromBech32Address } from '@zilliqa-js/crypto';
-import { Explorer, NetworkURL } from './enum';
+import { Explorer, NetworkURL, Network } from './enum';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
@@ -63,6 +63,22 @@ export const convertGzilToCommaStr = (inputVal: string) => {
     const decimalPlaces = new BigNumber(10**15);
     const gzil = new BigNumber(inputVal).dividedBy(decimalPlaces).toFixed(3);
     return gzil.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+}
+
+export const convertNetworkUrlToLabel = (url: string) => {
+    let label = '';
+    switch (url) {
+        case NetworkURL.MAINNET:
+            label = Network.MAINNET;        
+            break;
+        case NetworkURL.TESTNET:
+            label = Network.TESTNET;
+            break;
+        default:
+            label = Network.TESTNET;
+            break;
+    }
+    return label;
 }
 
 export const getTxnLink = (txnId: string, networkURL: string) => {

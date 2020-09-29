@@ -33,12 +33,12 @@ import CompleteWithdrawalTable from './complete-withdrawal-table';
 import IconQuestionCircle from './icons/question-circle';
 
 import { useInterval } from '../util/use-interval';
-import { useStickyState } from '../util/use-sticky-state';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 
 import BN from 'bn.js';
 import IconRefresh from './icons/refresh';
+import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 const BigNumber = require('bignumber.js');
 
@@ -73,7 +73,6 @@ function Dashboard(props: any) {
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
-    const [recentTransactions, setRecentTransactions] = useStickyState([] as any, "recent-txn");
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
@@ -98,6 +97,9 @@ function Dashboard(props: any) {
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
+
+    const [recentTransactions, setRecentTransactions] = useState([] as any)
+    const [demo, setDemo] = useState([] as any);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -591,7 +593,10 @@ function Dashboard(props: any) {
 
 
     const updateRecentTransactions = (txnId: string) => {
-        setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
+        let temp = JSON.parse(JSON.stringify(recentTransactions)).reverse();
+        temp.push({txnId: txnId});
+        setRecentTransactions([...temp].reverse());
+        storeLocalItem(currWalletAddress, networkURL, 'recent-txn', temp.reverse());
     }
 
 
@@ -691,6 +696,19 @@ function Dashboard(props: any) {
         await timeout(Constants.MANUAL_REFRESH_DELAY);
         setIsRefreshDisabled(false);
     };
+
+    const updateDemo = (txn: string) => {
+        let temp = JSON.parse(JSON.stringify(recentTransactions));
+        temp.push({txnId: txn});
+        setRecentTransactions([...temp]);
+        storeLocalItem(currWalletAddress, networkURL, 'recent-txn', [...temp]);
+    }
+
+    // re-hydrate data from localstorage
+    useEffect(() => {
+        let txns = getLocalItem(currWalletAddress, networkURL, 'recent-txn', [] as any); 
+        setRecentTransactions(txns);
+    }, [currWalletAddress, networkURL]);
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
@@ -858,7 +876,7 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
-                                        
+                                        <button type="button" className="btn btn-contract mr-4" onClick={() => {updateDemo(Math.random().toString(36).substr(2, 20).toUpperCase())}}>Generate Txn</button>
                                         {/* complete withdrawal */}
                                         <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                     </div>
