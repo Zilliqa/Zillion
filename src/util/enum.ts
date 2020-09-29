@@ -84,3 +84,14 @@ export enum ProxyCalls {
     WITHDRAW_STAKE_AMT = "WithdrawStakeAmt",
     WITHDRAW_STAKE_REWARDS = "WithdrawStakeRewards",
 }
+
+export enum TransactionType {
+    CLAIM_REWRDS = "Claim Rewards",
+    COMPLETE_STAKE_WITHDRAW = "Complete Stake Withdrawal",
+    DELEGATE_STAKE = "Delegate Stake",
+    INITIATE_STAKE_WITHDRAW = "Initiate Stake Withdrawal",
+    TRANSFER_STAKE = "Transfer Stake",
+    UPDATE_COMM_RATE = "Update Commission Rate",
+    UPDATE_RECV_ADDR = "Update Receiving Address",
+    WITHDRAW_COMM = "Withdraw Commission"
+}

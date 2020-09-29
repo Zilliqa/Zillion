@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
@@ -592,9 +592,9 @@ function Dashboard(props: any) {
     }, [impl]);
 
 
-    const updateRecentTransactions = (txnId: string) => {
+    const updateRecentTransactions = (type: TransactionType, txnId: string) => {
         let temp = JSON.parse(JSON.stringify(recentTransactions)).reverse();
-        temp.push({txnId: txnId});
+        temp.push({type: type, txnId: txnId});
         setRecentTransactions([...temp].reverse());
         storeLocalItem(currWalletAddress, networkURL, 'recent-txn', temp.reverse());
     }

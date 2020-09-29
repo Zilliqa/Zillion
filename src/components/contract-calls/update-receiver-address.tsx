@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import { bech32ToChecksum } from '../../util/utils';
-import { AccessMethod, OperationStatus, ProxyCalls } from "../../util/enum";
+import { AccessMethod, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import * as ZilliqaAccount from "../../account";
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
@@ -77,7 +77,7 @@ function UpdateReceiverAddress(props: any) {
         // txn success
         // invoke dashboard methods
         if (txnId) {
-            updateRecentTransactions(txnId);
+            updateRecentTransactions(TransactionType.UPDATE_RECV_ADDR, txnId);
             updateData();
         }
 
