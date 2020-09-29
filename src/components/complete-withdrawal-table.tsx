@@ -37,7 +37,7 @@ function Table({ columns, data, tableId }: any) {
         }, useSortBy);
 
     return (
-        <table id={tableId} className="table" {...getTableProps()}>
+        <table id={tableId} className="table table-responsive-lg" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -65,7 +65,7 @@ function Table({ columns, data, tableId }: any) {
 
 function CompleteWithdrawalTable(props: any) {
     const impl = props.impl;
-    const networkURL = props.network;
+    // const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
 
     const [showSpinner, setShowSpinner] = useState(true);
@@ -100,7 +100,7 @@ function CompleteWithdrawalTable(props: any) {
         let totalClaimableAmtBN = new BigNumber(0); // Qa
         let progress = '0';
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl)
             .then(async (contract) => {
 
                 if (contract === undefined || contract === "error") {
@@ -169,7 +169,7 @@ function CompleteWithdrawalTable(props: any) {
             }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
 
 
-    }, [impl, networkURL, userBase16Address]);
+    }, [impl, userBase16Address]);
 
     // load initial data
     useEffect(() => {
@@ -197,13 +197,13 @@ function CompleteWithdrawalTable(props: any) {
                         </span>
                     </h6>
                     <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
-                    <div className="card-header d-flex justify-content-between pb-4" id="complete-withdraw-accordion-header">
+                    <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
                         <div>
                             <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                         </div>
                         <div className="btn-group">
                             { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawals</button> }
-                            { data.length !== 0 && <button className="btn btn-user-action mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
+                            { data.length !== 0 && <button className="btn btn-inner-contract-2 mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
                         </div>
                     </div>
 

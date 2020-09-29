@@ -2,7 +2,7 @@
  * Modified for Zilliqa
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
-import { NetworkURL, OperationStatus, AccessMethod } from './util/enum';
+import { NetworkURL, OperationStatus, AccessMethod, Constants } from './util/enum';
 import ZilliqaLedger from './ledger';
 
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
@@ -16,15 +16,15 @@ const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
 const { Blockchain } = require('@zilliqa-js/blockchain');
 const { Contracts } = require('@zilliqa-js/contract');
-const { units, bytes } = require('@zilliqa-js/util');
+const { bytes } = require('@zilliqa-js/util');
 
 const bip39 = require('bip39');
 const hdkey = require('hdkey');
 
 let CHAIN_ID = 1;
 let MSG_VERSION = 1;
+let GAS_PRICE = Constants.DEFAULT_GAS_PRICE; // 1000000000 Qa
 
-const GAS_PRICE = units.toQa('1000', units.Units.Li);
 const GAS_LIMIT = 25000;
 const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
 
@@ -72,6 +72,9 @@ export const changeNetwork = function(networkURL: string) {
             break;
         }
     }
+
+    // set to correct min gas price
+    setMinimumGasPrice();
 }
 
 export const addWalletByKeystore = async (keystore: string, passphrase: string) => {
@@ -129,7 +132,6 @@ export const getBalance = async (address: string) => {
             console.error("error: getBalance undefined error");
             return "0";
         }
-        console.log(balance.result);
         return balance.result.balance;
     } catch (err) {
         console.error("error: getBalance - o%", err);
@@ -494,4 +496,20 @@ const handleZilPaySign = async (txParams: any) => {
         console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
         return OperationStatus.ERROR;
     }
+}
+
+// retrieve and set the minimum gas price for current selected network
+const setMinimumGasPrice = async () => {
+    // assume network has been set
+    const minimumGasPrice = await zilliqa.blockchain.getMinimumGasPrice();
+
+    if (minimumGasPrice.result === undefined) {
+        // something is wrong with the api
+        GAS_PRICE = Constants.DEFAULT_GAS_PRICE;
+    } else {
+        console.log("min gas price from api: %o", minimumGasPrice.result);
+        GAS_PRICE = minimumGasPrice.result;
+    }
+
+    return GAS_PRICE;
 }

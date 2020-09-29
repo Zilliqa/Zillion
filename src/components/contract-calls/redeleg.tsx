@@ -23,13 +23,14 @@ function ReDelegateStakeModal(props: any) {
     const { 
         proxy,
         impl,
-        onSuccessCallback,
         ledgerIndex,
         networkURL,
         nodeSelectorOptions, 
-        currentDelegatedOptions } = props;
+        currentDelegatedOptions,
+        updateData,
+        updateRecentTransactions } = props;
 
-    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
+    const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
 
     const [fromSsn, setFromSsn] = useState('');
     const [toSsn, setToSsn] = useState('');
@@ -43,7 +44,7 @@ function ReDelegateStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         
-        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl, networkURL);
+        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl);
 
         if (contract === undefined || contract === 'error') {
             return false;
@@ -150,9 +151,10 @@ function ReDelegateStakeModal(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashbaord methods
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
         
         // reset state

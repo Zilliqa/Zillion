@@ -1,17 +1,11 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import { useTable } from 'react-table';
-import { trackPromise } from 'react-promise-tracker';
 
-import * as ZilliqaAccount from "../account";
-import { computeDelegRewards } from '../util/reward-calculator'
-import { PromiseArea, Constants } from '../util/enum';
+import { PromiseArea } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
-import { useInterval } from '../util/use-interval';
-import SpinnerNormal from './spinner-normal';
 
-import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
-
-const { BN } = require('@zilliqa-js/util');
+import { DelegStakingPortfolioStats } from '../util/interface';
+import Spinner from './spinner';
 
 
 function Table({ columns, data }: any) {
@@ -28,7 +22,7 @@ function Table({ columns, data }: any) {
         });
     
     return (
-        <table className="table" {...getTableProps()}>
+        <table className="table table-responsive-lg" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -55,16 +49,8 @@ function Table({ columns, data }: any) {
 }
 
 function StakingPortfolio(props: any) {
-    const impl = props.impl;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
-
-    const [showSpinner, setShowSpinner] = useState(true);
-    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
-    const [portfolioTable, setPortfolioTable] = useState([] as any);
-
-    // prevent react update state on unmounted component 
-    const mountedRef = useRef(true);
+    const data: DelegStakingPortfolioStats[] = props.data;
 
     const columns = useMemo(
         () => [
@@ -90,75 +76,11 @@ function StakingPortfolio(props: any) {
         ], [networkURL]
     );
 
-    const getData = useCallback(() => {
-        let outputResult: { ssnName: string; ssnAddress: string; delegAmt: string; rewards: string; }[] = [];
-
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
-            .then(async (contract) => {
-                if (contract === undefined || contract === 'error') {
-                    return null;
-                }
-        
-                if (contract.hasOwnProperty('deposit_amt_deleg') && contract.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
-                    const depositDelegList = contract.deposit_amt_deleg[userBase16Address];
-                    for (const ssnAddress in depositDelegList) {
-                        if (!depositDelegList.hasOwnProperty(ssnAddress)) {
-                            continue;
-                        }
-
-                        // compute stake amount
-                        const delegAmt = new BN(depositDelegList[ssnAddress]);
-
-                        // compute rewards
-                        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-
-                        const portfolioData = {
-                            ssnName: contract.ssnlist[ssnAddress].arguments[3],
-                            ssnAddress: toBech32Address(ssnAddress),
-                            delegAmt: delegAmt.toString(),
-                            rewards: delegRewards.toString()
-                        }
-
-                        outputResult.push(portfolioData);
-                    }
-                }
-
-            })
-            .finally(() => {
-
-                if (!mountedRef.current) {
-                    return null;
-                }
-
-                setShowSpinner(false);
-
-                if (mountedRef.current) {
-                    console.log('updating delegator portfolio...');
-                    setPortfolioTable([...outputResult]);
-                }
-
-            }), PromiseArea.PROMISE_GET_STAKE_PORTFOLIO);
-
-    }, [impl, networkURL, userBase16Address]);
-
-    // load initial data
-    useEffect(() => {
-        getData();
-        return () => {
-            mountedRef.current = false;
-        };
-    }, [getData]);
-
-    // poll data
-    useInterval(() => {
-        getData();
-    }, mountedRef, refresh);
-
     return (
         <>
-        { showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }
-        { portfolioTable.length === 0 && <div className="d-block px-4 pb-3 text-left"><em>You have not deposited in any nodes yet.</em></div> }
-        { portfolioTable.length > 0 && <Table columns={columns} data={portfolioTable} /> }
+        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_STAKE_PORTFOLIO} />
+        { data.length === 0 && <div className="d-block px-4 pb-3 text-left"><em>You have not deposited in any nodes yet.</em></div> }
+        { data.length > 0 && <Table columns={columns} data={data} /> }
         </>
     );
 }

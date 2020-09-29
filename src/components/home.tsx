@@ -1,8 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { withRouter } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
+import { trackPromise } from 'react-promise-tracker';
 
-import { AccessMethod, Environment, Network, Role, NetworkURL } from '../util/enum';
+import { AccessMethod, Environment, Network, Role, NetworkURL, SsnStatus, PromiseArea } from '../util/enum';
 import AppContext from "../contexts/appContext";
 import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
@@ -18,6 +19,10 @@ import IconZilPayLine from './icons/zil-pay-line';
 
 import ZillionLogo from '../static/zillion.svg';
 import LandingStatsTable from './landing-stats-table';
+import { SsnStats } from '../util/interface';
+
+import { toBech32Address } from '@zilliqa-js/crypto';
+import { useInterval } from '../util/use-interval';
 
 
 function Home(props: any) {
@@ -32,6 +37,12 @@ function Home(props: any) {
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState(Network.TESTNET);
+
+  // for populating ssn table
+  const [totalStakeAmt, setTotalStakeAmt] = useState('0');
+  const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
+
+  const mountedRef = useRef(true);
 
   // trigger show wallets to choose
   const resetWalletsClicked = () => {
@@ -74,6 +85,80 @@ function Home(props: any) {
     setAccessMethod('');
   }
 
+  /* fetch data for contract constants */
+  const getContractConstants = useCallback(() => {
+    let totalStakeAmt = '0';
+    let impl = networks_config[selectedNetwork].impl;
+
+    ZilliqaAccount.getImplState(impl, 'totalstakeamount')
+    .then((contractState) => {
+        if (contractState === undefined || contractState === 'error') {
+            return null;
+        }
+        totalStakeAmt = contractState.totalstakeamount;
+    })
+    .finally(() => {
+        if (mountedRef.current) {
+            setTotalStakeAmt(totalStakeAmt);
+        }
+    });
+  }, [networks_config, selectedNetwork]);
+
+  
+  /* fetch data for ssn panel */
+  const getSsnStats = useCallback(() => {
+      let output: SsnStats[] = [];
+      let impl = networks_config[selectedNetwork].impl;
+
+      trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+          .then(async (contractState) => {
+              if (contractState === undefined || contractState === 'error') {
+                  return null;
+              }
+
+              for (const ssnAddress in contractState['ssnlist']) {
+                  const ssnArgs = contractState['ssnlist'][ssnAddress]['arguments'];
+                  let delegNum = '0';
+                  let status = SsnStatus.INACTIVE;
+
+                  // get ssn status
+                  if (ssnArgs[0]['constructor'] === 'True') {
+                      status = SsnStatus.ACTIVE;
+                  }
+
+                  // get number of delegators
+                  const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+
+                  if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                      delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
+                  }
+
+                  const data: SsnStats = {
+                      address: toBech32Address(ssnAddress),
+                      name: ssnArgs[3],
+                      apiUrl: ssnArgs[5],
+                      stakeAmt: ssnArgs[1],
+                      bufferedDeposits: ssnArgs[6],
+                      commRate: ssnArgs[7],
+                      commReward: ssnArgs[8],
+                      delegNum: delegNum,
+                      status: status,
+                  }
+
+                  output.push(data);
+              }
+          })
+          .finally(() => {
+
+              if (mountedRef.current) {
+                  console.log("updating main ssn stats...");
+                  setSsnStats([...output]);
+              }
+          }), PromiseArea.PROMISE_GET_SSN_STATS);
+
+  }, [networks_config, selectedNetwork]);
+
+    
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
       case AccessMethod.KEYSTORE: 
@@ -129,6 +214,22 @@ function Home(props: any) {
     window.onbeforeunload = null;
   }, []);
 
+
+  // load initial data
+  useEffect(() => {
+    getContractConstants();
+    getSsnStats();
+    return () => {
+      mountedRef.current = false;
+    }
+  }, [getContractConstants, getSsnStats])
+
+  // poll data
+  useInterval(() => {
+    getContractConstants();
+    getSsnStats();
+  }, mountedRef, refresh_rate_config);
+
   return (
     <div className="cover">
       <div className="container-fluid">
@@ -179,7 +280,12 @@ function Home(props: any) {
                   <div className="row p-4">
                     <h2 className="mb-4">Staked Seed Nodes</h2>
                     <div className="col-12 content">
-                        <SsnTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                        <SsnTable 
+                          impl={networks_config[selectedNetwork].impl} 
+                          network={networks_config[selectedNetwork].blockchain} 
+                          refresh={refresh_rate_config}
+                          data={ssnStats}
+                          totalStakeAmt={totalStakeAmt} />
                     </div>
                   </div>
                 </div>

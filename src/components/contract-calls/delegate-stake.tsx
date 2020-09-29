@@ -26,7 +26,7 @@ function DelegateStakeModal(props: any) {
     const minDelegStake = props.minDelegStake; // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
 
-    const { onSuccessCallback } = props;
+    const { updateData, updateRecentTransactions } = props;
 
     const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     
@@ -115,9 +115,10 @@ function DelegateStakeModal(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashboard functions to update recent transactions and poll data
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
         
         // reset state

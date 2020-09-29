@@ -17,7 +17,7 @@ function UpdateCommRateModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, networkURL, currentRate, onSuccessCallback, ledgerIndex } = props;
+    const { proxy, networkURL, currentRate, ledgerIndex, updateData, updateRecentTransactions } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
@@ -82,9 +82,10 @@ function UpdateCommRateModal(props: any) {
 
     const handleClose = () => {
         // txn success
-        // update dashboard recent transactions
+        // invoke dashboard methods
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
 
         // reset state

@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
+import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
@@ -27,17 +28,37 @@ import logo from "../static/logo.png";
 import DisclaimerModal from './disclaimer';
 import DelegatorStatsTable from './delegator-stats-table';
 import OperatorStatsTable from './operator-stats-table';
-import { useInterval } from '../util/use-interval';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
+
 import IconQuestionCircle from './icons/question-circle';
-import ReactTooltip from 'react-tooltip';
+
+import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
+
 import BN from 'bn.js';
+import IconRefresh from './icons/refresh';
+
+const BigNumber = require('bignumber.js');
 
 
-interface NodeOptions {
-    label: string,
-    value: string,
+const initDelegStats: DelegStats = {
+    lastCycleAPY: '0',
+    zilRewards: '0',
+    gzilRewards: '0',
+    gzilBalance: '0',
+    totalPendingWithdrawal: '0',
+    totalDeposits: '0',
+}
+
+const initOperatorStats: OperatorStats = {
+    name: '',
+    stakeAmt: '0',
+    bufferedDeposits: '0',
+    commRate: '0',
+    commReward: '0',
+    delegNum: '0',
+    receiver: '0',
 }
 
 
@@ -47,7 +68,7 @@ function Dashboard(props: any) {
     const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
 
 
-    const [currWalletAddress, setCurrWalletAddress] = useState(address); // keep track of current wallet as zilpay have multiple wallets
+    const [currWalletAddress, setCurrWalletAddress] = useState(address ? address : ''); // keep track of current wallet as zilpay have multiple wallets
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
@@ -62,23 +83,20 @@ function Dashboard(props: any) {
 
     const mountedRef = useRef(true);
 
-    const [minDelegStake, setMinDelegStake] = useState('');
+    const [minDelegStake, setMinDelegStake] = useState('0');
+    const [totalStakeAmt, setTotalStakeAmt] = useState('0');
 
-    // used as info for the internal modal data
-    // state is updated by OperatorStatsTable
-    const [nodeDetails, setNodeDetails] = useState({
-        name: '',
-        stakeAmount: '0',
-        bufferedDeposit: '0',
-        commRate: '0',
-        commReward: '0',
-        numOfDeleg: '0',
-        receiver: ''
-    });
+    const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
+    const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
+    const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
+    const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
     const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
+
+    const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -127,8 +145,16 @@ function Dashboard(props: any) {
             .then((balance) => {
                 currBalance = balance;
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (mountedRef.current) {
+                    console.log("updating wallet balance...");
                     setBalance(currBalance);
                 }
 
@@ -138,8 +164,9 @@ function Dashboard(props: any) {
 
     // retrieve contract constants such as min stake
     // passed to children components
-    const getContractConstants = useCallback(() => {
+    const getContractConstants = useCallback(async () => {
         let minDelegStake = '0';
+        let totalStakeAmt = '0';
 
         ZilliqaAccount.getImplState(impl, "mindelegstake")
             .then((contractState) => {
@@ -148,13 +175,208 @@ function Dashboard(props: any) {
                 }
                 minDelegStake = contractState.mindelegstake;
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (!mountedRef.current) {
                     return null;
                 }
                 setMinDelegStake(minDelegStake);
             });
-    }, [impl])
+        
+        ZilliqaAccount.getImplState(impl, 'totalstakeamount')
+            .then((contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+                totalStakeAmt = contractState.totalstakeamount;
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    setTotalStakeAmt(totalStakeAmt);
+                }
+            });
+
+    }, [impl]);
+
+
+    /* fetch data for delegator stats panel */
+    const getDelegatorStats = useCallback(() => {
+        let lastCycleAPY = initDelegStats.lastCycleAPY;
+        let zilRewards = initDelegStats.zilRewards;
+        let gzilRewards = initDelegStats.gzilRewards;
+        let gzilBalance = initDelegStats.gzilBalance;
+        let totalPendingWithdrawal = initDelegStats.totalPendingWithdrawal;
+        let totalDeposits = initDelegStats.totalDeposits;
+        
+        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'deposit_amt_deleg')
+        .then(async (contractState) => {
+            if (contractState === undefined || contractState === 'error') {
+                return null;
+            }
+
+            if (!contractState['deposit_amt_deleg'].hasOwnProperty(userBase16Address)) {
+                return null;
+            }
+
+            // TODO use calculator compute last cycle APY
+            let totalDepositsBN = new BigNumber(0);
+            let totalZilRewardsBN = new BigNumber(0);
+            const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
+
+            for (const ssnAddress in depositDelegList) {
+                if (!depositDelegList.hasOwnProperty(ssnAddress)) {
+                    continue;
+                }
+
+                // compute total deposits
+                const delegAmtQaBN = new BigNumber(depositDelegList[ssnAddress]);
+                totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
+
+                // compute zil rewards
+                const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
+                totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
+            }
+
+            totalDeposits = totalDepositsBN.toString();
+            zilRewards = totalZilRewardsBN.toString();
+
+            // compute gzil rewards
+            // converted to gzil when display
+            gzilRewards = totalZilRewardsBN;
+
+            // get gzil balance
+            const gzilAddressState = await ZilliqaAccount.getImplState(impl, 'gziladdr');
+            if (gzilAddressState.gziladdr) {
+                const gzilContractState = await ZilliqaAccount.getGzilContract(gzilAddressState['gziladdr']);
+                if (gzilContractState.balances) {
+                    const gzilBalanceMap = gzilContractState.balances;
+                    if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
+                        // compute user gzil balance
+                        gzilBalance = gzilBalanceMap[userBase16Address];
+                    }
+                }
+            }
+
+            // compute total pending withdrawal
+            const withdrawalPendingState = await ZilliqaAccount.getImplState(impl, 'withdrawal_pending');
+            if (withdrawalPendingState.withdrawal_pending) {
+                let totalPendingAmtBN = new BigNumber(0);
+                const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+                
+                for (const blkNum in blkNumPendingWithdrawal) {
+                    if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                        continue;
+                    }
+                    
+                    const pendingAmtQaBN = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                    totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmtQaBN);
+                }
+                totalPendingWithdrawal = totalPendingAmtBN.toString();
+            }
+
+        })
+        .catch((err) => {
+            console.error(err);
+            if (mountedRef.current) {
+                setIsError(true);
+            }
+            return null;
+        })
+        .finally(() => {
+            if (mountedRef.current) {
+                console.log("updating delegator stats...");
+
+                const data: DelegStats = {
+                    lastCycleAPY: lastCycleAPY,
+                    zilRewards: zilRewards,
+                    gzilRewards: gzilRewards,
+                    gzilBalance: gzilBalance,
+                    totalPendingWithdrawal: totalPendingWithdrawal,
+                    totalDeposits: totalDeposits,
+                }
+
+                setDelegStats(data);
+            }
+        }), PromiseArea.PROMISE_GET_DELEG_STATS);
+
+    }, [impl, currWalletAddress, networkURL]);
+
+
+    /* fetch data for delegator staking portfolio panel */
+    const getDelegatorStakingPortfolio = useCallback(() => {
+        let output: DelegStakingPortfolioStats[] = [];
+
+        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'deposit_amt_deleg')
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+    
+                if (!contractState['deposit_amt_deleg'].hasOwnProperty(userBase16Address)) {
+                    return null;
+                }
+
+                // fetch ssnlist for the names
+                const ssnContractState = await ZilliqaAccount.getImplState(impl, 'ssnlist');
+                
+                if (!ssnContractState['ssnlist']) {
+                    return null;
+                }
+
+                const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
+                
+                for (const ssnAddress in depositDelegList) {
+                    if (!depositDelegList.hasOwnProperty(ssnAddress)) {
+                        continue;
+                    }
+                    
+                    // compute stake amount
+                    const delegAmt = new BN(depositDelegList[ssnAddress]);
+
+                    // compute rewards
+                    const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
+
+                    const data: DelegStakingPortfolioStats = {
+                        ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
+                        ssnAddress: toBech32Address(ssnAddress),
+                        delegAmt: delegAmt.toString(),
+                        rewards: delegRewards.toString(),
+                    }
+                    output.push(data);
+                }
+
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    console.log("updating delegator staking portfolio...");
+                    setDelegStakingStats([...output]);
+                }
+            }), PromiseArea.PROMISE_GET_STAKE_PORTFOLIO);
+    }, [impl, networkURL, currWalletAddress]);
 
 
     // generate options list
@@ -225,6 +447,13 @@ function Dashboard(props: any) {
                 }
 
             })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
             .finally(() => {
                 if (!mountedRef.current) {
                     return null;
@@ -236,9 +465,134 @@ function Dashboard(props: any) {
 
     }, [impl, currWalletAddress, networkURL]);
 
+
+    /* fetch data for operator stats panel */
+    const getOperatorStats = useCallback(() => {
+        let name = initOperatorStats.name;
+        let stakeAmt = initOperatorStats.stakeAmt;
+        let bufferedDeposits = initOperatorStats.bufferedDeposits;
+        let delegNum = initOperatorStats.delegNum;
+        let commRate = initOperatorStats.commRate;
+        let commReward = initOperatorStats.commReward;
+        let receiver = initOperatorStats.receiver;
+
+        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+
+                if (!contractState['ssnlist'].hasOwnProperty(userBase16Address)) {
+                    return null;
+                }
+
+                const ssnArgs = contractState['ssnlist'][userBase16Address]['arguments'];
+
+                // get number of delegators
+                const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+
+                if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                    delegNum = Object.keys(delegNumState['ssn_deleg_amt'][userBase16Address]).length.toString();
+                }
+
+                name = ssnArgs[3];
+                stakeAmt = ssnArgs[1];
+                bufferedDeposits = ssnArgs[6];
+                commRate = ssnArgs[7];
+                commReward = ssnArgs[8];
+                receiver = toBech32Address(ssnArgs[9])
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
+            .finally(() => {
+                
+                if (mountedRef.current) {
+                    console.log("updating operator stats...");
+                    const data: OperatorStats = {
+                        name: name,
+                        stakeAmt: stakeAmt,
+                        bufferedDeposits: bufferedDeposits,
+                        commRate: commRate,
+                        commReward: commReward,
+                        delegNum: delegNum,
+                        receiver: receiver,
+                    }
+                    setOperatorStats(data);
+                }
+
+            }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
+    }, [impl, currWalletAddress]);
+
+
+    /* fetch data for ssn panel */
+    const getSsnStats = useCallback(() => {
+        let output: SsnStats[] = [];
+
+        trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+
+                for (const ssnAddress in contractState['ssnlist']) {
+                    const ssnArgs = contractState['ssnlist'][ssnAddress]['arguments'];
+                    let delegNum = '0';
+                    let status = SsnStatus.INACTIVE;
+
+                    // get ssn status
+                    if (ssnArgs[0]['constructor'] === 'True') {
+                        status = SsnStatus.ACTIVE;
+                    }
+
+                    // get number of delegators
+                    const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+
+                    if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                        delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
+                    }
+
+                    const data: SsnStats = {
+                        address: toBech32Address(ssnAddress),
+                        name: ssnArgs[3],
+                        apiUrl: ssnArgs[5],
+                        stakeAmt: ssnArgs[1],
+                        bufferedDeposits: ssnArgs[6],
+                        commRate: ssnArgs[7],
+                        commReward: ssnArgs[8],
+                        delegNum: delegNum,
+                        status: status,
+                    }
+
+                    output.push(data);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    console.log("updating dashboard ssn stats...");
+                    setSsnStats([...output]);
+                }
+            }), PromiseArea.PROMISE_GET_SSN_STATS);
+    }, [impl]);
+
+
     const updateRecentTransactions = (txnId: string) => {
         setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
     }
+
 
     // update current role is used for ZilPay
     // due to account switch on the fly
@@ -263,22 +617,79 @@ function Dashboard(props: any) {
         setCurrRole(newRole);
     }, [impl, networkURL, loginRole]);
 
+
     // load initial data
     useEffect(() => {
         getAccountBalance();
         getNodeOptionsList();
         getContractConstants();
+
+        if (currRole === Role.DELEGATOR.toString()) {
+            getDelegatorStats();
+            getDelegatorStakingPortfolio();
+        } else if (currRole === Role.OPERATOR.toString()) {
+            getOperatorStats();
+        }
+
+        getSsnStats();
+
         return () => {
             mountedRef.current = false;
         }
-    }, [getAccountBalance, getNodeOptionsList, getContractConstants]);
+
+    }, [
+        currRole,
+        getAccountBalance, 
+        getNodeOptionsList, 
+        getContractConstants, 
+        getDelegatorStats,
+        getDelegatorStakingPortfolio,
+        getOperatorStats,
+        getSsnStats
+    ]);
 
     // poll data
     useInterval(() => {
         getAccountBalance();
         getNodeOptionsList();
+        getContractConstants();
+
+        if (currRole === Role.DELEGATOR.toString()) {
+            getDelegatorStats();
+            getDelegatorStakingPortfolio();
+        } else if (currRole === Role.OPERATOR.toString()) {
+            getOperatorStats();
+        }
+
+        getSsnStats();
+
     }, mountedRef, refresh_rate_config);
 
+    const timeout = (delay: number) => {
+        return new Promise(res => setTimeout(res, delay));
+    }
+
+    // manual poll the data
+    const updateData = async () => {
+        setIsRefreshDisabled(true);
+
+        getAccountBalance();
+        getNodeOptionsList();
+        getContractConstants();
+
+        if (currRole === Role.DELEGATOR.toString()) {
+            getDelegatorStats();
+            getDelegatorStakingPortfolio();
+        } else if (currRole === Role.OPERATOR.toString()) {
+            getOperatorStats();
+        }
+
+        getSsnStats();
+
+        // prevent users from spamming manual refresh
+        await timeout(Constants.MANUAL_REFRESH_DELAY);
+        setIsRefreshDisabled(false);
+    };
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
@@ -306,6 +717,7 @@ function Dashboard(props: any) {
                 break;
         }
 
+        ZilliqaAccount.changeNetwork(url);
         updateNetwork(networkLabel);
         setNetworkURL(url);
         setProxy(networks_config[networkLabel].proxy);
@@ -321,11 +733,11 @@ function Dashboard(props: any) {
 
             if (zilPay) {
                 console.log("zil pay method ...");
-                const accountStreamChanged = zilPay.wallet.observableAccount();
-                const networkStreamChanged = zilPay.wallet.observableNetwork();
-
                 // switch to the zilpay network on load
                 networkChanger(zilPay.wallet.net);
+
+                const accountStreamChanged = zilPay.wallet.observableAccount();
+                const networkStreamChanged = zilPay.wallet.observableNetwork();
 
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
@@ -351,15 +763,14 @@ function Dashboard(props: any) {
             return;
         }
 
-        if (!isAuth) {
+        if (!isAuth || isError) {
             // redirect to login request
-            props.history.push("/notlogin");
+            props.history.push("/oops");
         }
+
         // eslint-disable-next-line
-    }, []);
+    }, [isError, isAuth, props.history]);
 
-
-    // change to correct network for account.ts
     // change to correct role for zilpay switch
     // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
     // because setState is async - have to execute these functions from useEffect
@@ -367,9 +778,11 @@ function Dashboard(props: any) {
     // when network change (zilpay switch network)
     useEffect(() => {
         console.log("unified change network");
-        ZilliqaAccount.changeNetwork(networkURL);
+        if (!currWalletAddress) {
+            return;
+        }
         updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
-    }, [currWalletAddress, networkURL, updateCurrentRole]);
+    }, [currWalletAddress, updateCurrentRole]);
 
     
     // prevent user from refreshing
@@ -426,6 +839,12 @@ function Dashboard(props: any) {
                     <div className="container-xl">
                         <div className="row">
                             <div className="col-12">
+                                <div className="d-flex justify-content-end">
+                                    <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
+                                    <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
+                                        <span>refresh</span>
+                                    </ReactTooltip>
+                                </div>
 
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
@@ -434,10 +853,10 @@ function Dashboard(props: any) {
                                     {/* delegator section */}
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract ml-2 mr-4" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
+                                        <button type="button" className="btn btn-contract ml-2 mr-4 shadow-none" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
                                         
                                         {/* complete withdrawal */}
                                         <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
@@ -452,10 +871,10 @@ function Dashboard(props: any) {
                                     {/* node operator section */}
 
                                     <div className="p-4 mt-4 dashboard-card">
-                                        <h5 className="card-title mb-4">Hi {nodeDetails.name ? nodeDetails.name : 'Operator'}! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
-                                        <button type="button" className="btn btn-contract mr-4" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
+                                        <h5 className="card-title mb-4">Hi {operatorStats.name ? operatorStats.name : 'Operator'}! What would you like to do today?</h5>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static">Update Commission</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static">Update Receiving Address</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static">Withdraw Commission</button>
                                     </div>
                                     </>
                                 }
@@ -471,7 +890,12 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">Overview</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <DelegatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                                <DelegatorStatsTable 
+                                                    impl={impl} 
+                                                    network={networkURL} 
+                                                    refresh={refresh_rate_config} 
+                                                    userAddress={currWalletAddress}
+                                                    data={delegStats} />
                                             </div>
                                         </div>
                                     </div>
@@ -491,7 +915,12 @@ function Dashboard(props: any) {
                                             <div className="col-12 mt-2 px-4 text-center">
                                                 <div className="inner-section">
                                                     <h6 className="inner-section-heading px-4 pt-4 pb-3" >Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
-                                                    { mountedRef.current && <StakingPortfolio impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} /> }
+                                                    <StakingPortfolio 
+                                                        impl={impl} 
+                                                        network={networkURL} 
+                                                        refresh={refresh_rate_config} 
+                                                        userAddress={currWalletAddress}
+                                                        data={delegStakingStats} />
                                                 </div>
                                             </div>
                                             <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">
@@ -512,7 +941,12 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Node Performance</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <OperatorStatsTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} setParentNodeDetails={setNodeDetails} />
+                                                <OperatorStatsTable 
+                                                    impl={impl} 
+                                                    network={networkURL} 
+                                                    refresh={refresh_rate_config} 
+                                                    userAddress={currWalletAddress}
+                                                    data={operatorStats} />
                                             </div>
                                         </div>
                                     </div>
@@ -524,7 +958,15 @@ function Dashboard(props: any) {
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
                                         </div>
                                         <div className="col-12 text-center">
-                                            { mountedRef.current && <SsnTable impl={impl} network={networkURL} blockchainExplorer={blockchain_explorer_config} refresh={refresh_rate_config} currRole={currRole} /> }
+                                            <SsnTable 
+                                                impl={impl} 
+                                                network={networkURL} 
+                                                blockchainExplorer={blockchain_explorer_config} 
+                                                refresh={refresh_rate_config} 
+                                                currRole={currRole} 
+                                                data={ssnStats}
+                                                totalStakeAmt={totalStakeAmt}
+                                                />
                                         </div>
                                     </div>
                                 </div>
@@ -562,69 +1004,77 @@ function Dashboard(props: any) {
                 proxy={proxy}
                 impl={impl} 
                 networkURL={networkURL} 
-                currentRate={nodeDetails.commRate} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                currentRate={operatorStats.commRate} 
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <UpdateReceiverAddress 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                currentReceiver={nodeDetails.receiver} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                currentReceiver={operatorStats.receiver} 
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawCommModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                currentRewards={nodeDetails.commReward} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                currentRewards={operatorStats.commReward} 
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <DelegateStakeModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={nodeOptions}
-                minDelegStake={minDelegStake} />
+                minDelegStake={minDelegStake}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 currentDelegatedOptions = {withdrawStakeOptions}
                 nodeSelectorOptions={nodeOptions}
-                userAddress={currWalletAddress} />
+                userAddress={currWalletAddress}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={withdrawStakeOptions} 
-                userAddress={currWalletAddress} />
+                userAddress={currWalletAddress}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={claimedRewardsOptions}
-                userAddress={currWalletAddress} />
+                userAddress={currWalletAddress}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
 
             <CompleteWithdrawModal 
                 proxy={proxy}
                 impl={impl}  
                 networkURL={networkURL} 
-                onSuccessCallback={updateRecentTransactions} 
-                ledgerIndex={ledgerIndex} />
+                ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
                 
         </div>
         </>

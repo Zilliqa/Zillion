@@ -1,16 +1,11 @@
-import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
-import { trackPromise } from 'react-promise-tracker';
 
-import { PromiseArea, SsnStatus, Role, Constants } from '../util/enum';
+import { PromiseArea, SsnStatus, Role } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
-import * as Account from "../account";
-
-import { toBech32Address } from '@zilliqa-js/crypto';
-
-import { useInterval } from '../util/use-interval';
-import SpinnerNormal from './spinner-normal';
+import { SsnStats } from '../util/interface';
+import Spinner from './spinner';
 
 
 function Table({ columns, data, tableId, hiddenColumns }: any) {
@@ -29,7 +24,7 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
                 hiddenColumns: hiddenColumns,
                 sortBy: [
                     {
-                        id: 'ssnStakeAmt',
+                        id: 'stakeAmt',
                         desc: true
                     }
                 ] 
@@ -37,7 +32,7 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
         }, useSortBy);
     
     return (
-        <table id={tableId} className="table table-responsive" {...getTableProps()}>
+        <table id={tableId} className="table table-responsive-lg " {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -64,85 +59,79 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
 }
 
 function SsnTable(props: any) {
-    const impl = props.impl;
     const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const role = props.currRole;
     
-    const [data, setData] = useState([] as any);
-    const [totalStakeAmount, setTotalStakeAmount] = useState('');
-    const [showSpinner, setShowSpinner] = useState(true);
-    
-    // prevent react update state on unmounted component 
-    const mountedRef = useRef(true);
+    const data: SsnStats[] = props.data;
+    const totalStakeAmt = props.totalStakeAmt;
 
     const columns = useMemo(
         () => [
             {
                 Header: 'name',
-                accessor: 'ssnName'
+                accessor: 'name'
             },
             {
                 Header: 'address',
-                accessor: 'ssnAddress',
+                accessor: 'address',
                 className: 'ssn-address',
                 Cell: ({ row }: any) => 
                     <>
-                    <a data-tip={row.original.ssnAddress} href={getAddressLink(row.original.ssnAddress, networkURL)} target="_blank" rel="noopener noreferrer">
-                        {getTruncatedAddress(row.original.ssnAddress)}
+                    <a data-tip={row.original.address} href={getAddressLink(row.original.address, networkURL)} target="_blank" rel="noopener noreferrer">
+                        {getTruncatedAddress(row.original.address)}
                     </a>
                     <ReactTooltip place="bottom" type="dark" effect="float" />
                     </>
             },
             {
                 Header: 'api endpoint',
-                accessor: 'ssnApiURL',
-                Cell: ({ row }: any) => <span className="ssn-table-api-url">{row.original.ssnApiURL}</span>
+                accessor: 'apiUrl',
+                Cell: ({ row }: any) => <span className="ssn-table-api-url">{row.original.apiUrl}</span>
             },
             {
                 Header: 'stake amount (ZIL)',
-                accessor: 'ssnStakeAmt',
+                accessor: 'stakeAmt',
                 Cell: ({ row }: any) => 
                     <>
-                    <span>{convertQaToCommaStr(row.original.ssnStakeAmt)} ({computeStakeAmtPercent(row.original.ssnStakeAmt, totalStakeAmount).toFixed(2)}&#37;)</span>
+                    <span>{convertQaToCommaStr(row.original.stakeAmt)} ({computeStakeAmtPercent(row.original.stakeAmt, totalStakeAmt).toFixed(2)}&#37;)</span>
                     </>
             },
             {
                 Header: 'buffered deposit (ZIL)',
-                accessor: 'ssnBufferedDeposit',
+                accessor: 'bufferedDeposits',
                 Cell: ({ row }: any) =>
                     <>
-                    <span>{convertQaToCommaStr(row.original.ssnBufferedDeposit)}</span>
+                    <span>{convertQaToCommaStr(row.original.bufferedDeposits)}</span>
                     </>
             },
             {
                 Header: 'Comm. Rate (%)',
-                accessor: 'ssnCommRate',
+                accessor: 'commRate',
                 Cell: ({ row }: any) =>
-                    <span>{convertToProperCommRate(row.original.ssnCommRate).toFixed(2)}</span>
+                    <span>{convertToProperCommRate(row.original.commRate).toFixed(2)}</span>
             },
             {
                 Header: 'Comm. Reward (ZIL)',
-                accessor: 'ssnCommReward',
+                accessor: 'commReward',
                 Cell: ({ row }: any) => 
-                    <span className="ssn-table-comm-reward">{convertQaToCommaStr(row.original.ssnCommReward)}</span>
+                    <span className="ssn-table-comm-reward">{convertQaToCommaStr(row.original.commReward)}</span>
             },
             {
                 Header: 'Delegators',
-                accessor: 'ssnDeleg'
+                accessor: 'delegNum'
             },
             {
                 Header: 'Status',
-                accessor: 'ssnStatus',
+                accessor: 'status',
                 Cell: ({ row }: any) => 
                         <>
-                        <div className={ row.original.ssnStatus === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive' }>
-                            {row.original.ssnStatus}
+                        <div className={ row.original.status === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive' }>
+                            {row.original.status}
                         </div>
                         </>
             }
             // eslint-disable-next-line
-        ],[totalStakeAmount, role]
+        ],[totalStakeAmt, role]
     )
 
     const getHiddenColumns = () => {
@@ -150,91 +139,15 @@ function SsnTable(props: any) {
         // list the hidden column accessor names
         let hiddenColumns = [];
         if (role !== undefined && role === Role.DELEGATOR) {
-            hiddenColumns.push("ssnCommReward");
+            hiddenColumns.push("commReward", "apiUrl");
         }
         return hiddenColumns;
     }
     
-    const getData = useCallback(() => {
-        let outputResult: { ssnAddress: string; ssnName: any; ssnStakeAmt: string; ssnBufferedDeposit: string; ssnCommRate: any; ssnCommReward: string; ssnDeleg: number; }[] = [];
-        let totalStakeAmount = '0';
-
-        trackPromise(Account.getSsnImplContractDirect(impl, networkURL).then((implContract) => {
-            if (implContract === 'error') {
-                return null;
-            }
-
-            // get total stake amount
-            if (implContract.hasOwnProperty('totalstakeamount')) {
-                totalStakeAmount = implContract.totalstakeamount
-            }
-
-            // get node operator details
-            for (const key in implContract.ssnlist) {
-                if (implContract.ssnlist.hasOwnProperty(key) && key.startsWith("0x")) {
-                    let delegAmt = 0;
-                    let status = SsnStatus.INACTIVE;
-                    const ssnArgs = implContract.ssnlist[key].arguments;
-
-                    // get ssn status
-                    if (ssnArgs[0].constructor === 'True') {
-                        status = SsnStatus.ACTIVE;
-                    }
-
-                    // get number of delegators
-                    if (implContract.hasOwnProperty("ssn_deleg_amt") && implContract.ssn_deleg_amt.hasOwnProperty(key)) {
-                        delegAmt = Object.keys(implContract.ssn_deleg_amt[key]).length;
-                    }
-
-                    const nodeJson = {
-                        ssnAddress: toBech32Address(key),
-                        ssnName: ssnArgs[3],
-                        ssnApiURL: ssnArgs[5],
-                        ssnStakeAmt: ssnArgs[1],
-                        ssnBufferedDeposit: ssnArgs[6],
-                        ssnCommRate: ssnArgs[7],
-                        ssnCommReward: ssnArgs[8],
-                        ssnDeleg: delegAmt,
-                        ssnStatus: status
-                    }
-                    outputResult.push(nodeJson);
-                }
-            }
-        })
-        .finally(() => {
-            if(!mountedRef.current) {
-                return null;
-            }
-
-            setShowSpinner(false);
-
-            if (mountedRef.current) {
-                console.log("updating ssn table...")
-                setTotalStakeAmount(totalStakeAmount);
-                setData([...outputResult]);
-            }
-
-        }), PromiseArea.PROMISE_GET_CONTRACT);
-
-    }, [impl, networkURL]);
-
-    // load inital data
-    useEffect(() => {
-        getData();
-        return () => {
-            mountedRef.current = false;
-        };
-    }, [getData]);
-
-    useInterval(() => {
-        console.log("ssn page stats table");
-        getData();
-    }, mountedRef, refresh);
-
     return (
         <>
-        { showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> }
-        <Table columns={columns} data={data} className={props.tableId} hiddenColumns={getHiddenColumns()}></Table>
+        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_SSN_STATS} />
+        <Table columns={columns} data={data} className={props.tableId} hiddenColumns={getHiddenColumns()} />
         </>
     );
 }

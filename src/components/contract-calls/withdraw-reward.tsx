@@ -23,7 +23,7 @@ function WithdrawRewardModal(props: any) {
     // const impl = props.impl;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
-    const { onSuccessCallback } = props;
+    const { updateData, updateRecentTransactions } = props;
 
     // const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
@@ -86,7 +86,8 @@ function WithdrawRewardModal(props: any) {
         // txn success
         // update dashboard recent transactions
         if (txnId) {
-            onSuccessCallback(txnId);
+            updateRecentTransactions(txnId);
+            updateData();
         }
         
         // reset state
