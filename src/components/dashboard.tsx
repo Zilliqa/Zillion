@@ -5,7 +5,7 @@ import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink, getTxnLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import StakingPortfolio from './staking-portfolio';
@@ -39,6 +39,7 @@ import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, Ssn
 import BN from 'bn.js';
 import IconRefresh from './icons/refresh';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
+import IconBell from './icons/bell';
 
 const BigNumber = require('bignumber.js');
 
@@ -698,10 +699,7 @@ function Dashboard(props: any) {
     };
 
     const updateDemo = (txn: string) => {
-        let temp = JSON.parse(JSON.stringify(recentTransactions));
-        temp.push({txnId: txn});
-        setRecentTransactions([...temp]);
-        storeLocalItem(currWalletAddress, networkURL, 'recent-txn', [...temp]);
+        updateRecentTransactions(TransactionType.COMPLETE_STAKE_WITHDRAW, txn);
     }
 
     // re-hydrate data from localstorage
@@ -818,6 +816,20 @@ function Dashboard(props: any) {
         }
     }, []);
 
+    const openSidebar = () => {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar !== null) {
+            sidebar.style.width = "250px";
+        }
+    };
+
+    const closeSidebar = () => {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar !== null) {
+            sidebar.style.width = "0";
+        }
+    };
+
 
     // eslint-disable-next-line
     return (
@@ -835,17 +847,63 @@ function Dashboard(props: any) {
                     </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
+
+                    {/* wallet address */}
                     <li className="nav-item">
                         <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>
                     </li>
+                    
+                    {/* balance */}
                     <li className="nav-item">
                         <p className="px-1">{balance ? convertQaToCommaStr(balance) : '0.000'} ZIL</p>
                     </li>
+
+                    {/* network */}
                     <li className="nav-item">
                         { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
                         { networkURL === NetworkURL.MAINNET && <p className="px-1">Mainnet</p> }
                         { networkURL === NetworkURL.ISOLATED_SERVER && <p className="px-1">Isolated Server</p> }
                     </li>
+
+                    {/* txn notifications */}
+                    <li className="nav-item">
+                        <div id="txn-notify-dropdown" className="dropdown">
+                            <button className="btn btn-dropdown caret-off dropdown-toggle" type="button" id="txn-notify-dropdown-btn" data-tip data-for="notification-tip" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <IconBell width="20" height="20" className="dropdown-toggle-icon" />
+                            </button>
+                            <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
+                                <span>Recent Transactions</span>
+                            </ReactTooltip>
+                            <div className="dropdown-menu dropdown-menu-right notification" aria-labelledby="txn-notify-dropdown-btn">
+                                <div className="notification-heading">
+                                    <h2>Recent Transactions</h2>
+                                </div>
+                                <div className="divider"></div>
+
+                                <div className="notification-wrapper">
+
+                                    { recentTransactions.length === 0 &&
+                                        <p><em>No recent transactions found.</em></p> }
+
+                                    { recentTransactions.map((item: { type: string; txnId: string; }) => 
+
+                                        <a key={item.txnId} href={getTxnLink(item.txnId, networkURL)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
+                                            <div className="notification-item">
+                                                <h3 className="item-title">{item.type}</h3>
+                                                <p className="item-info"><strong>Transaction ID</strong><br/>
+                                                    <span className="txn-id">{item.txnId}</span>
+                                                </p>
+                                            </div>
+                                        </a>
+
+                                    )}
+                                
+                                </div>
+
+                            </div>
+                        </div>
+                    </li>
+
                     <li className="nav-item">
                         <button type="button" className="btn btn-sign-out mx-2" onClick={cleanUp}>Sign Out</button>
                     </li>
@@ -864,6 +922,8 @@ function Dashboard(props: any) {
                                         <span>refresh</span>
                                     </ReactTooltip>
                                 </div>
+
+                                <button type="button" className="btn btn-secondary" onClick={openSidebar}>Open</button>
 
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
@@ -1010,6 +1070,16 @@ function Dashboard(props: any) {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div id="sidebar">
+                <button type="button" className="close" aria-label="Close" onClick={closeSidebar}>
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h2>nav item</h2>
+                <h2>nav item</h2>
+                <h2>nav item</h2>
+                <h2>nav item</h2>
+                <h2>nav item</h2>
             </div>
             <footer id="disclaimer" className="align-items-start">
                 <div className="p-2">
