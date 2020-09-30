@@ -1133,6 +1133,13 @@ body {
   stroke: var(--primary-hover-color);
 }
 
+#txn-notify-dropdown .dropdown-notify-icon {
+  fill: var(--primary-color);
+  position: relative;
+  top: -4px;
+  left: -9px;
+}
+
 #txn-notify-dropdown .caret-off::before {
   display: none;
 }
@@ -1142,7 +1149,7 @@ body {
 }
 
 #txn-notify-dropdown .notification {
-  width: 420px;
+  width: 480px;
   padding-top: 0.8em;
   padding-left: 0.8em;
   padding-right: 0.25em;
@@ -1155,9 +1162,18 @@ body {
 
 #txn-notify-dropdown .notification-heading h2 {
   color: #f8f8ff;
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: 500;
   text-transform: capitalize;
+}
+
+#txn-notify-dropdown .notification-subheading {
+  color: #eceff1;
+  font-size: 0.75em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 1.2em;
 }
 
 #txn-notify-dropdown .notification-wrapper {
@@ -1180,12 +1196,13 @@ body {
   padding: 1em;
   margin-right: 0.8em;
   margin-top: 0.8em;
+  transition: 0.5s ease;
 }
 
 #txn-notify-dropdown .notification-item:hover {
+  color: var(--secondary-color);
   border: 1px solid var(--primary-color);
   border-radius: 6px;
-  background-color: var(--primary-table-striped-color);
 }
 
 #txn-notify-dropdown .notification-item .item-title {

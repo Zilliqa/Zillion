@@ -31,15 +31,15 @@ import OperatorStatsTable from './operator-stats-table';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
 
 import IconQuestionCircle from './icons/question-circle';
+import IconRefresh from './icons/refresh';
+import IconBell from './icons/bell';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
+import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import BN from 'bn.js';
-import IconRefresh from './icons/refresh';
-import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
-import IconBell from './icons/bell';
 
 const BigNumber = require('bignumber.js');
 
@@ -100,7 +100,6 @@ function Dashboard(props: any) {
     const [isError, setIsError] = useState(false);
 
     const [recentTransactions, setRecentTransactions] = useState([] as any)
-    const [demo, setDemo] = useState([] as any);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -140,7 +139,6 @@ function Dashboard(props: any) {
         setProxy(networks_config[networkLabel].proxy);
         setImpl(networks_config[networkLabel].impl);
     }, [updateNetwork, networks_config]);
-
 
     const getAccountBalance = useCallback(() => {
         let currBalance = '0';
@@ -594,8 +592,20 @@ function Dashboard(props: any) {
 
 
     const updateRecentTransactions = (type: TransactionType, txnId: string) => {
-        let temp = JSON.parse(JSON.stringify(recentTransactions)).reverse();
+        let temp = JSON.parse(JSON.stringify(recentTransactions));
+        if ((temp.length + 1) > 10) {
+            // suppose we add a new element
+            // restrict number of elements as local storage has limits
+            // recent txn is always in newest to oldest
+            // remove last element - last element = oldest txn
+            temp.pop();
+        }
+        // reverse so that order is oldest to newest
+        // add new item as last element
+        temp = temp.reverse();
         temp.push({type: type, txnId: txnId});
+
+        // restore order back
         setRecentTransactions([...temp].reverse());
         storeLocalItem(currWalletAddress, networkURL, 'recent-txn', temp.reverse());
     }
@@ -697,10 +707,6 @@ function Dashboard(props: any) {
         await timeout(Constants.MANUAL_REFRESH_DELAY);
         setIsRefreshDisabled(false);
     };
-
-    const updateDemo = (txn: string) => {
-        updateRecentTransactions(TransactionType.COMPLETE_STAKE_WITHDRAW, txn);
-    }
 
     // re-hydrate data from localstorage
     useEffect(() => {
@@ -816,20 +822,6 @@ function Dashboard(props: any) {
         }
     }, []);
 
-    const openSidebar = () => {
-        const sidebar = document.getElementById("sidebar");
-        if (sidebar !== null) {
-            sidebar.style.width = "250px";
-        }
-    };
-
-    const closeSidebar = () => {
-        const sidebar = document.getElementById("sidebar");
-        if (sidebar !== null) {
-            sidebar.style.width = "0";
-        }
-    };
-
 
     // eslint-disable-next-line
     return (
@@ -868,12 +860,16 @@ function Dashboard(props: any) {
                     {/* txn notifications */}
                     <li className="nav-item">
                         <div id="txn-notify-dropdown" className="dropdown">
-                            <button className="btn btn-dropdown caret-off dropdown-toggle" type="button" id="txn-notify-dropdown-btn" data-tip data-for="notification-tip" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <IconBell width="20" height="20" className="dropdown-toggle-icon" />
+                            <button 
+                                type="button" 
+                                id="txn-notify-dropdown-btn"
+                                className="btn btn-dropdown caret-off dropdown-toggle shadow-none" 
+                                data-tip data-for="notification-tip" 
+                                aria-haspopup="true" 
+                                aria-expanded="false"
+                                data-toggle="dropdown">
+                                    <IconBell width="20" height="20" className="dropdown-toggle-icon" />
                             </button>
-                            <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
-                                <span>Recent Transactions</span>
-                            </ReactTooltip>
                             <div className="dropdown-menu dropdown-menu-right notification" aria-labelledby="txn-notify-dropdown-btn">
                                 <div className="notification-heading">
                                     <h2>Recent Transactions</h2>
@@ -885,10 +881,21 @@ function Dashboard(props: any) {
                                     { recentTransactions.length === 0 &&
                                         <p><em>No recent transactions found.</em></p> }
 
-                                    { recentTransactions.map((item: { type: string; txnId: string; }) => 
+                                    { recentTransactions.map((item: { type: string; txnId: string; }, index: number) => 
+
+                                        <>
+
+                                        { index === 0 &&
+                                            <h3 className="notification-subheading">Latest</h3>
+                                        }
+
+                                        {
+                                          index === 1 &&
+                                            <h3 className="notification-subheading">Others</h3>
+                                        }
 
                                         <a key={item.txnId} href={getTxnLink(item.txnId, networkURL)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
-                                            <div className="notification-item">
+                                            <div key={item.txnId} className="notification-item">
                                                 <h3 className="item-title">{item.type}</h3>
                                                 <p className="item-info"><strong>Transaction ID</strong><br/>
                                                     <span className="txn-id">{item.txnId}</span>
@@ -896,11 +903,17 @@ function Dashboard(props: any) {
                                             </div>
                                         </a>
 
+                                        </>
+
                                     )}
                                 
                                 </div>
 
                             </div>
+
+                            <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
+                                <span>Recent Transactions</span>
+                            </ReactTooltip>
                         </div>
                     </li>
 
@@ -922,9 +935,7 @@ function Dashboard(props: any) {
                                         <span>refresh</span>
                                     </ReactTooltip>
                                 </div>
-
-                                <button type="button" className="btn btn-secondary" onClick={openSidebar}>Open</button>
-
+                                
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
 
@@ -936,7 +947,7 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
-                                        <button type="button" className="btn btn-contract mr-4" onClick={() => {updateDemo(Math.random().toString(36).substr(2, 20).toUpperCase())}}>Generate Txn</button>
+
                                         {/* complete withdrawal */}
                                         <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                     </div>
@@ -1050,18 +1061,6 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                <div id="dashboard-recent-txn" className="p-4 dashboard-card container-fluid">
-                                    <div className="row">
-                                        <div className="col">
-                                            <h5 className="card-title mb-4">Recent Transactions</h5>
-                                        </div>
-                                        <div className="col-12 text-left">
-                                            { recentTransactions.length === 0 && <p><em>No recent transactions.</em></p> }
-                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL} /> }
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div className="px-2">
                                     <ToastContainer hideProgressBar={true}/>
                                 </div>
@@ -1071,16 +1070,7 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
-            <div id="sidebar">
-                <button type="button" className="close" aria-label="Close" onClick={closeSidebar}>
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                <h2>nav item</h2>
-                <h2>nav item</h2>
-                <h2>nav item</h2>
-                <h2>nav item</h2>
-                <h2>nav item</h2>
-            </div>
+
             <footer id="disclaimer" className="align-items-start">
                 <div className="p-2">
                 <span className="mx-3">&copy; 2020 Zilliqa</span> 
