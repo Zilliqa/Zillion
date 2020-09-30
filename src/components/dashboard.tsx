@@ -5,7 +5,7 @@ import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, getTxnLink } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink, getTxnLink, convertZilToQa } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -41,10 +41,10 @@ import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 import BN from 'bn.js';
 
 const BigNumber = require('bignumber.js');
-
+const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString();
 
 const initDelegStats: DelegStats = {
-    lastCycleAPY: '0',
+    globalAPY: '0',
     zilRewards: '0',
     gzilRewards: '0',
     gzilBalance: '0',
@@ -215,7 +215,7 @@ function Dashboard(props: any) {
 
     /* fetch data for delegator stats panel */
     const getDelegatorStats = useCallback(() => {
-        let lastCycleAPY = initDelegStats.lastCycleAPY;
+        let globalAPY = initDelegStats.globalAPY;
         let zilRewards = initDelegStats.zilRewards;
         let gzilRewards = initDelegStats.gzilRewards;
         let gzilBalance = initDelegStats.gzilBalance;
@@ -234,7 +234,15 @@ function Dashboard(props: any) {
                 return null;
             }
 
-            // TODO use calculator compute last cycle APY
+            // compute global APY
+            const totalStakeAmtState = await ZilliqaAccount.getImplState(impl, 'totalstakeamount');
+            if (totalStakeAmtState['totalstakeamount']) {
+                let temp = new BigNumber(totalStakeAmtState['totalstakeamount']);
+                if (!temp.isEqualTo(0)) {
+                    globalAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2).toString();
+                }
+            }
+
             let totalDepositsBN = new BigNumber(0);
             let totalZilRewardsBN = new BigNumber(0);
             const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
@@ -303,7 +311,7 @@ function Dashboard(props: any) {
                 console.log("updating delegator stats...");
 
                 const data: DelegStats = {
-                    lastCycleAPY: lastCycleAPY,
+                    globalAPY: globalAPY,
                     zilRewards: zilRewards,
                     gzilRewards: gzilRewards,
                     gzilBalance: gzilBalance,
