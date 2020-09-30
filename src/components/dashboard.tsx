@@ -7,7 +7,6 @@ import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink, getTxnLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
-import RecentTransactionsTable from './recent-transactions-table';
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
@@ -883,7 +882,7 @@ function Dashboard(props: any) {
 
                                     { recentTransactions.map((item: { type: string; txnId: string; }, index: number) => 
 
-                                        <>
+                                        <div key={item.txnId}>
 
                                         { index === 0 &&
                                             <h3 className="notification-subheading">Latest</h3>
@@ -894,8 +893,8 @@ function Dashboard(props: any) {
                                             <h3 className="notification-subheading">Others</h3>
                                         }
 
-                                        <a key={item.txnId} href={getTxnLink(item.txnId, networkURL)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
-                                            <div key={item.txnId} className="notification-item">
+                                        <a href={getTxnLink(item.txnId, networkURL)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
+                                            <div className="notification-item">
                                                 <h3 className="item-title">{item.type}</h3>
                                                 <p className="item-info"><strong>Transaction ID</strong><br/>
                                                     <span className="txn-id">{item.txnId}</span>
@@ -903,7 +902,7 @@ function Dashboard(props: any) {
                                             </div>
                                         </a>
 
-                                        </>
+                                        </div>
 
                                     )}
                                 
@@ -932,7 +931,7 @@ function Dashboard(props: any) {
                                 <div className="d-flex justify-content-end">
                                     <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
-                                        <span>refresh</span>
+                                        <span>Refresh</span>
                                     </ReactTooltip>
                                 </div>
                                 
