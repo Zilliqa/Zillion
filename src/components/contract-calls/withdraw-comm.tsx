@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
-import { OperationStatus, AccessMethod, ProxyCalls } from "../../util/enum";
+import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from "../../util/enum";
 import { bech32ToChecksum, convertQaToCommaStr } from '../../util/utils';
 import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
@@ -62,7 +62,7 @@ function WithdrawCommModal(props: any) {
         // txn success
         // invoke dashboard methods
         if (txnId) {
-            updateRecentTransactions(txnId);
+            updateRecentTransactions(TransactionType.WITHDRAW_COMM, txnId);
             updateData();
         }
         

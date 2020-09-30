@@ -9,7 +9,7 @@ import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
-import { ProxyCalls, OperationStatus, AccessMethod } from '../../util/enum';
+import { ProxyCalls, OperationStatus, AccessMethod, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
@@ -153,7 +153,7 @@ function ReDelegateStakeModal(props: any) {
         // txn success
         // invoke dashbaord methods
         if (txnId) {
-            updateRecentTransactions(txnId);
+            updateRecentTransactions(TransactionType.TRANSFER_STAKE, txnId);
             updateData();
         }
         

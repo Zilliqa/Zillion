@@ -81,6 +81,10 @@ function RecentTransactionsTable(props: any) {
                         <a href={getTxnLink(row.original.txnId, networkURL)} target="_blank" rel="noopener noreferrer">{row.original.txnId}</a>
                     );
                 }
+            },
+            {
+                Header: 'Operation',
+                accessor: 'type',
             }
         ], [networkURL]
     );

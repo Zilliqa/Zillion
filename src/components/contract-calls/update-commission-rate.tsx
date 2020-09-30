@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from '../../contexts/appContext';
-import { OperationStatus, AccessMethod, ProxyCalls } from "../../util/enum";
+import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from "../../util/enum";
 import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate } from '../../util/utils';
 import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
@@ -84,7 +84,7 @@ function UpdateCommRateModal(props: any) {
         // txn success
         // invoke dashboard methods
         if (txnId) {
-            updateRecentTransactions(txnId);
+            updateRecentTransactions(TransactionType.UPDATE_COMM_RATE, txnId);
             updateData();
         }
 

@@ -4,8 +4,8 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink } from '../util/utils';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
+import { convertQaToCommaStr, getAddressLink, getTxnLink } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import RecentTransactionsTable from './recent-transactions-table';
 import StakingPortfolio from './staking-portfolio';
@@ -31,13 +31,15 @@ import OperatorStatsTable from './operator-stats-table';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
 
 import IconQuestionCircle from './icons/question-circle';
+import IconRefresh from './icons/refresh';
+import IconBell from './icons/bell';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
+import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import BN from 'bn.js';
-import IconRefresh from './icons/refresh';
 
 const BigNumber = require('bignumber.js');
 
@@ -72,7 +74,6 @@ function Dashboard(props: any) {
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
-    const [recentTransactions, setRecentTransactions] = useState([] as any);
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
@@ -97,6 +98,8 @@ function Dashboard(props: any) {
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
+
+    const [recentTransactions, setRecentTransactions] = useState([] as any)
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
@@ -136,7 +139,6 @@ function Dashboard(props: any) {
         setProxy(networks_config[networkLabel].proxy);
         setImpl(networks_config[networkLabel].impl);
     }, [updateNetwork, networks_config]);
-
 
     const getAccountBalance = useCallback(() => {
         let currBalance = '0';
@@ -589,8 +591,23 @@ function Dashboard(props: any) {
     }, [impl]);
 
 
-    const updateRecentTransactions = (txnId: string) => {
-        setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
+    const updateRecentTransactions = (type: TransactionType, txnId: string) => {
+        let temp = JSON.parse(JSON.stringify(recentTransactions));
+        if ((temp.length + 1) > 10) {
+            // suppose we add a new element
+            // restrict number of elements as local storage has limits
+            // recent txn is always in newest to oldest
+            // remove last element - last element = oldest txn
+            temp.pop();
+        }
+        // reverse so that order is oldest to newest
+        // add new item as last element
+        temp = temp.reverse();
+        temp.push({type: type, txnId: txnId});
+
+        // restore order back
+        setRecentTransactions([...temp].reverse());
+        storeLocalItem(currWalletAddress, networkURL, 'recent-txn', temp.reverse());
     }
 
 
@@ -690,6 +707,12 @@ function Dashboard(props: any) {
         await timeout(Constants.MANUAL_REFRESH_DELAY);
         setIsRefreshDisabled(false);
     };
+
+    // re-hydrate data from localstorage
+    useEffect(() => {
+        let txns = getLocalItem(currWalletAddress, networkURL, 'recent-txn', [] as any); 
+        setRecentTransactions(txns);
+    }, [currWalletAddress, networkURL]);
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
@@ -816,17 +839,84 @@ function Dashboard(props: any) {
                     </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
+
+                    {/* wallet address */}
                     <li className="nav-item">
                         <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>
                     </li>
+                    
+                    {/* balance */}
                     <li className="nav-item">
                         <p className="px-1">{balance ? convertQaToCommaStr(balance) : '0.000'} ZIL</p>
                     </li>
+
+                    {/* network */}
                     <li className="nav-item">
                         { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
                         { networkURL === NetworkURL.MAINNET && <p className="px-1">Mainnet</p> }
                         { networkURL === NetworkURL.ISOLATED_SERVER && <p className="px-1">Isolated Server</p> }
                     </li>
+
+                    {/* txn notifications */}
+                    <li className="nav-item">
+                        <div id="txn-notify-dropdown" className="dropdown">
+                            <button 
+                                type="button" 
+                                id="txn-notify-dropdown-btn"
+                                className="btn btn-dropdown caret-off dropdown-toggle shadow-none" 
+                                data-tip data-for="notification-tip" 
+                                aria-haspopup="true" 
+                                aria-expanded="false"
+                                data-toggle="dropdown">
+                                    <IconBell width="20" height="20" className="dropdown-toggle-icon" />
+                            </button>
+                            <div className="dropdown-menu dropdown-menu-right notification" aria-labelledby="txn-notify-dropdown-btn">
+                                <div className="notification-heading">
+                                    <h2>Recent Transactions</h2>
+                                </div>
+                                <div className="divider"></div>
+
+                                <div className="notification-wrapper">
+
+                                    { recentTransactions.length === 0 &&
+                                        <p><em>No recent transactions found.</em></p> }
+
+                                    { recentTransactions.map((item: { type: string; txnId: string; }, index: number) => 
+
+                                        <>
+
+                                        { index === 0 &&
+                                            <h3 className="notification-subheading">Latest</h3>
+                                        }
+
+                                        {
+                                          index === 1 &&
+                                            <h3 className="notification-subheading">Others</h3>
+                                        }
+
+                                        <a key={item.txnId} href={getTxnLink(item.txnId, networkURL)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
+                                            <div key={item.txnId} className="notification-item">
+                                                <h3 className="item-title">{item.type}</h3>
+                                                <p className="item-info"><strong>Transaction ID</strong><br/>
+                                                    <span className="txn-id">{item.txnId}</span>
+                                                </p>
+                                            </div>
+                                        </a>
+
+                                        </>
+
+                                    )}
+                                
+                                </div>
+
+                            </div>
+
+                            <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
+                                <span>Recent Transactions</span>
+                            </ReactTooltip>
+                        </div>
+                    </li>
+
                     <li className="nav-item">
                         <button type="button" className="btn btn-sign-out mx-2" onClick={cleanUp}>Sign Out</button>
                     </li>
@@ -845,7 +935,7 @@ function Dashboard(props: any) {
                                         <span>refresh</span>
                                     </ReactTooltip>
                                 </div>
-
+                                
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
 
@@ -857,7 +947,7 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
-                                        
+
                                         {/* complete withdrawal */}
                                         <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
                                     </div>
@@ -971,18 +1061,6 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                <div id="dashboard-recent-txn" className="p-4 dashboard-card container-fluid">
-                                    <div className="row">
-                                        <div className="col">
-                                            <h5 className="card-title mb-4">Recent Transactions</h5>
-                                        </div>
-                                        <div className="col-12 text-left">
-                                            { recentTransactions.length === 0 && <p><em>No recent transactions.</em></p> }
-                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL} /> }
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div className="px-2">
                                     <ToastContainer hideProgressBar={true}/>
                                 </div>
@@ -992,6 +1070,7 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
+
             <footer id="disclaimer" className="align-items-start">
                 <div className="p-2">
                 <span className="mx-3">&copy; 2020 Zilliqa</span> 
