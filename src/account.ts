@@ -11,6 +11,7 @@ import TransportWebAuthn from "@ledgerhq/hw-transport-webauthn";
 import { HTTPProvider } from '@zilliqa-js/core';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
+import BN from 'bn.js';
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
@@ -455,7 +456,7 @@ const handleNormalSign = async (txParams: any) => {
             toAddr: txParams.toAddr,
             amount: txParams.amount,
             data: txParams.data,
-            gasPrice: GAS_PRICE,
+            gasPrice: new BN(GAS_PRICE),
             gasLimit: GAS_LIMIT,
             version: bytes.pack(CHAIN_ID, MSG_VERSION),
         },
@@ -466,7 +467,8 @@ const handleNormalSign = async (txParams: any) => {
         const txn = await zilliqa.blockchain.createTransaction(zilliqaTxn);
         return txn.id;
     } catch (err) {
-        console.error("error handleNormalSign - something is wrong with broadcasting the transaction: %o", JSON.stringify(err));
+        console.error("error handleNormalSign - something is wrong with broadcasting the transaction: ");
+        console.error(err);
         return OperationStatus.ERROR;
     }
 }
