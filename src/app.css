@@ -128,6 +128,14 @@ body {
   }
 }
 
+.btn-notify-dropdown {
+  width: 34px;
+  height: 34px;
+  border-radius: 25px;
+  background-color: var(--secondary-color);
+  padding: 0em;
+}
+
 .btn-inner-contract {
   color: #ffffff;
   background-color: #5e60ce;
@@ -298,10 +306,6 @@ body {
   background-color: var(--secondary-color);
 }
 
-.btn-wallet-access:hover span {
-  /* color: #000000; */
-}
-
 .btn-wallet-access .home-icon {
   fill: var(--primary-color);
   width: 40px;
@@ -393,6 +397,24 @@ body {
 
 .dashboard-spinner {
   color: #00cba5;
+}
+
+.dropdown-toggle-icon {
+  stroke: var(--primary-color);
+  z-index: 1;
+}
+
+.dropdown-toggle-icon:hover {
+  stroke: var(--primary-hover-color);
+}
+
+.dropdown-notify-icon {
+  fill: #ffd166;
+  position: absolute;
+  padding: 0;
+  margin-top: 10px;
+  margin-left: -8px;
+  z-index: 2;
 }
 
 .close span {
@@ -1101,59 +1123,14 @@ body {
   color: var(--hyperlink-hover-color);
 }
 
-#staking-table {
-  font-size: 0.85em;
-}
-
-#staking-table th {
-  border-top: #ffffff;
-  color: #3b76ef;
-  font-size: 0.9em;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-#staking-table tbody > tr > :nth-child(1){
-  color:#3b76ef;
-}
-
-#txn-notify-dropdown .btn-dropdown {
-  width: 34px;
-  height: 34px;
-  border-radius: 25px;
-  background-color: var(--secondary-color);
-  padding: 0em;
-}
-
-#txn-notify-dropdown .dropdown-toggle-icon {
-  stroke: var(--primary-color);
-}
-
-#txn-notify-dropdown .dropdown-toggle-icon:hover {
-  stroke: var(--primary-hover-color);
-}
-
-#txn-notify-dropdown .dropdown-notify-icon {
-  fill: var(--primary-color);
-  position: relative;
-  top: -4px;
-  left: -9px;
-}
-
-#txn-notify-dropdown .caret-off::before {
-  display: none;
-}
-
-#txn-notify-dropdown .caret-off::after {
-  display: none;
-}
-
 #txn-notify-dropdown .notification {
-  width: 480px;
-  padding-top: 0.8em;
-  padding-left: 0.8em;
-  padding-right: 0.25em;
+  /* width: 480px; */
+  padding-top: 1.2em;
+  padding-left: 1.2em;
+  padding-right: 1em;
+  padding-bottom: 0.8em;
   background-color: var(--secondary-color);
+  border-radius: 6px;
 
   -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
   -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
@@ -1162,8 +1139,9 @@ body {
 
 #txn-notify-dropdown .notification-heading h2 {
   color: #f8f8ff;
-  font-size: 1em;
+  font-size: 1.1em;
   font-weight: 500;
+  margin-bottom: 1em;
   text-transform: capitalize;
 }
 
@@ -1213,7 +1191,7 @@ body {
 
 #txn-notify-dropdown .notification-item .item-info {
   color: var(--hyperlink-color);
-  font-size: 0.80em;
+  font-size: 0.95em;
   font-weight: 400;
   margin-bottom: 0;
 }

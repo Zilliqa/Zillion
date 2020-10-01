@@ -5,7 +5,7 @@ import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, getTxnLink, convertZilToQa } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink, convertZilToQa } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -32,11 +32,16 @@ import CompleteWithdrawalTable from './complete-withdrawal-table';
 import IconQuestionCircle from './icons/question-circle';
 import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
+import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
+
+import RecentTxnDropdown from './recent-txn';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/animations/shift-away-subtle.css';
 
 import BN from 'bn.js';
 
@@ -85,9 +90,11 @@ function Dashboard(props: any) {
 
     const [minDelegStake, setMinDelegStake] = useState('0');
     const [totalStakeAmt, setTotalStakeAmt] = useState('0');
+    const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
+    const [delegPendingStakeWithdrawalStats, setDelegPendingStakeWithdrawalStats] = useState([] as any);
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
     const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
@@ -97,6 +104,8 @@ function Dashboard(props: any) {
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
+    const [isTxnNotify, setIsTxnNotify] = useState(false);
+    const [ariaExpanded, setAriaExpanded] = useState(false);
 
     const [recentTransactions, setRecentTransactions] = useState([] as any)
 
@@ -138,6 +147,11 @@ function Dashboard(props: any) {
         setProxy(networks_config[networkLabel].proxy);
         setImpl(networks_config[networkLabel].impl);
     }, [updateNetwork, networks_config]);
+
+    // set recent txn indicator icon
+    const handleTxnNotify = () => {
+        setIsTxnNotify(false);
+    }
 
     const getAccountBalance = useCallback(() => {
         let currBalance = '0';
@@ -214,6 +228,7 @@ function Dashboard(props: any) {
 
 
     /* fetch data for delegator stats panel */
+    /* fetch data for delegator pending stake withdrawal */
     const getDelegatorStats = useCallback(() => {
         let globalAPY = initDelegStats.globalAPY;
         let zilRewards = initDelegStats.zilRewards;
@@ -221,6 +236,10 @@ function Dashboard(props: any) {
         let gzilBalance = initDelegStats.gzilBalance;
         let totalPendingWithdrawal = initDelegStats.totalPendingWithdrawal;
         let totalDeposits = initDelegStats.totalDeposits;
+
+        let totalClaimableAmtBN = new BigNumber(0); // Qa
+        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
+        let progress = '0';
         
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
@@ -282,19 +301,59 @@ function Dashboard(props: any) {
             }
 
             // compute total pending withdrawal
+            // compute pending withdrawal progress
             const withdrawalPendingState = await ZilliqaAccount.getImplState(impl, 'withdrawal_pending');
             if (withdrawalPendingState.withdrawal_pending) {
                 let totalPendingAmtBN = new BigNumber(0);
-                const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+
+                if (withdrawalPendingState.withdrawal_pending.hasOwnProperty(userBase16Address)) {
+                    const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+
+                    // get min bnum req
+                    const blkNumReqState = await ZilliqaAccount.getImplState(impl, 'bnum_req');
+                    const blkNumReq = blkNumReqState['bnum_req'];
+
+                    const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocks()).minus(1);
                 
-                for (const blkNum in blkNumPendingWithdrawal) {
-                    if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
-                        continue;
+                    for (const blkNum in blkNumPendingWithdrawal) {
+                        if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                            continue;
+                        }
+
+                        // compute each pending stake withdrawal progress
+                        let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                        let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
+                        let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
+                        let completed = new BigNumber(0);
+
+                        // compute progress using blk num countdown ratio
+                        if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                            // can withdraw
+                            totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                            blkNumCountdown = new BigNumber(0);
+                            completed = new BigNumber(1);
+                        } else {
+                            // still have pending blks
+                            // 1 - (countdown/blk_req)
+                            const processed = blkNumCountdown.dividedBy(blkNumReq);
+                            completed = new BigNumber(1).minus(processed);
+                        }
+
+                        // convert progress to percentage
+                        progress = completed.times(100).toFixed(2);
+
+                        // record the stake withdrawal progress
+                        pendingStakeWithdrawalList.push({
+                            amount: pendingAmt.toString(),
+                            blkNumCountdown: blkNumCountdown.toString(),
+                            blkNumCheck: blkNumCheck.toString(),
+                            progress: progress.toString(),
+                        })
+                        
+                        totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmt);
                     }
-                    
-                    const pendingAmtQaBN = new BigNumber(blkNumPendingWithdrawal[blkNum]);
-                    totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmtQaBN);
                 }
+
                 totalPendingWithdrawal = totalPendingAmtBN.toString();
             }
 
@@ -320,6 +379,9 @@ function Dashboard(props: any) {
                 }
 
                 setDelegStats(data);
+                setDelegPendingStakeWithdrawalStats([...pendingStakeWithdrawalList]);
+                setTotalClaimableAmt(totalClaimableAmtBN.toString());
+                
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
@@ -615,8 +677,10 @@ function Dashboard(props: any) {
         // restore order back
         setRecentTransactions([...temp].reverse());
         storeLocalItem(currWalletAddress, networkURL, 'recent-txn', temp.reverse());
-    }
 
+        // set recent txn indicator icon
+        setIsTxnNotify(true);
+    }
 
     // update current role is used for ZilPay
     // due to account switch on the fly
@@ -841,9 +905,6 @@ function Dashboard(props: any) {
 
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
-                    <li className="nav-item active">
-                        <button type="button" className="nav-link btn nav-btn" onClick={getAccountBalance}>Dashboard <span className="sr-only">(current)</span></button>
-                    </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
 
@@ -866,62 +927,33 @@ function Dashboard(props: any) {
 
                     {/* txn notifications */}
                     <li className="nav-item">
-                        <div id="txn-notify-dropdown" className="dropdown">
-                            <button 
-                                type="button" 
-                                id="txn-notify-dropdown-btn"
-                                className="btn btn-dropdown caret-off dropdown-toggle shadow-none" 
-                                data-tip data-for="notification-tip" 
-                                aria-haspopup="true" 
-                                aria-expanded="false"
-                                data-toggle="dropdown">
-                                    <IconBell width="20" height="20" className="dropdown-toggle-icon" />
-                            </button>
-                            <div className="dropdown-menu dropdown-menu-right notification" aria-labelledby="txn-notify-dropdown-btn">
-                                <div className="notification-heading">
-                                    <h2>Recent Transactions</h2>
-                                </div>
-                                <div className="divider"></div>
-
-                                <div className="notification-wrapper">
-
-                                    { recentTransactions.length === 0 &&
-                                        <p><em>No recent transactions found.</em></p> }
-
-                                    { recentTransactions.map((item: { type: string; txnId: string; }, index: number) => 
-
-                                        <div key={item.txnId}>
-
-                                        { index === 0 &&
-                                            <h3 className="notification-subheading">Latest</h3>
-                                        }
-
-                                        {
-                                          index === 1 &&
-                                            <h3 className="notification-subheading">Others</h3>
-                                        }
-
-                                        <a href={getTxnLink(item.txnId, networkURL)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
-                                            <div className="notification-item">
-                                                <h3 className="item-title">{item.type}</h3>
-                                                <p className="item-info"><strong>Transaction ID</strong><br/>
-                                                    <span className="txn-id">{item.txnId}</span>
-                                                </p>
-                                            </div>
-                                        </a>
-
+                        <Tippy 
+                            content={<RecentTxnDropdown data={recentTransactions} network={networkURL} />} 
+                            trigger="click"
+                            arrow={false}
+                            interactive={true}
+                            placement="bottom-end"
+                            appendTo="parent"
+                            animation="shift-away-subtle"
+                            onMount={() => setAriaExpanded(true)}
+                            onHide={() => setAriaExpanded(false)}>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-notify-dropdown shadow-none" 
+                                    onClick={handleTxnNotify} 
+                                    aria-haspopup="true" 
+                                    aria-expanded={ariaExpanded}
+                                    data-tip
+                                    data-for="notification-tip">
+                                        <div className="dropdown-notify-wrapper">
+                                            <IconBell width="16" height="16" className="dropdown-toggle-icon" />
+                                            { isTxnNotify && <IconCheckboxBlankCircle width="10" height="10" className="dropdown-notify-icon" /> }
                                         </div>
-
-                                    )}
-                                
-                                </div>
-
-                            </div>
-
-                            <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
-                                <span>Recent Transactions</span>
-                            </ReactTooltip>
-                        </div>
+                                </button>
+                        </Tippy>
+                        <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
+                            <span>Recent Transactions</span>
+                        </ReactTooltip>
                     </li>
 
                     <li className="nav-item">
@@ -956,7 +988,13 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
 
                                         {/* complete withdrawal */}
-                                        <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                        <CompleteWithdrawalTable 
+                                            impl={impl} 
+                                            network={networkURL} 
+                                            refresh={refresh_rate_config} 
+                                            userAddress={currWalletAddress}
+                                            data={delegPendingStakeWithdrawalStats}
+                                            totalClaimableAmt={totalClaimableAmt} />
                                     </div>
                                     </>
                                 }
