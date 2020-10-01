@@ -1,18 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { trackPromise } from 'react-promise-tracker';
+import React, {useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
-
-import { Constants, PromiseArea } from '../util/enum';
-import { useInterval } from '../util/use-interval';
-import { convertQaToCommaStr } from '../util/utils';
-
-import { fromBech32Address } from '@zilliqa-js/crypto';
-import * as ZilliqaAccount from '../account';
-import SpinnerNormal from './spinner-normal';
-import IconQuestionCircle from './icons/question-circle';
 import ReactTooltip from 'react-tooltip';
 
-const BigNumber = require('bignumber.js');
+import IconQuestionCircle from './icons/question-circle';
+import Spinner from './spinner';
+import { PromiseArea } from '../util/enum';
+import { convertQaToCommaStr } from '../util/utils';
 
 
 function Table({ columns, data, tableId }: any) {
@@ -64,17 +57,8 @@ function Table({ columns, data, tableId }: any) {
 }
 
 function CompleteWithdrawalTable(props: any) {
-    const impl = props.impl;
-    // const networkURL = props.network;
-    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
-
-    const [showSpinner, setShowSpinner] = useState(true);
-    const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
-
-    const [data, setData] = useState([] as any);
-    const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
-
-    const mountedRef = useRef(true);
+    const data = props.data;
+    const totalClaimableAmt = props.totalClaimableAmt
 
     const columns = useMemo(
         () => [
@@ -95,95 +79,6 @@ function CompleteWithdrawalTable(props: any) {
         ], []
     );
 
-    const getData = useCallback(() => {
-        let outputResult: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
-        let totalClaimableAmtBN = new BigNumber(0); // Qa
-        let progress = '0';
-
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl)
-            .then(async (contract) => {
-
-                if (contract === undefined || contract === "error") {
-                    return null;
-                }
-
-                if (contract.withdrawal_pending.hasOwnProperty(userBase16Address)) {
-                    // deleg has pending withdrawals
-                    const blkNumAmtMap = contract.withdrawal_pending[userBase16Address];
-                    const blkNumReq = contract.bnum_req;
-
-                    const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocks()).minus(1);
-
-                    // console.log("complete withdraw bnum req: %o", blkNumReq);
-
-                    for (const blkNum in blkNumAmtMap) {
-                        if (!blkNumAmtMap.hasOwnProperty(blkNum)) {
-                            continue;
-                        }
-
-                        // console.log("complete withdraw blkNum: %o", blkNum);
-
-                        const amount = blkNumAmtMap[blkNum];
-                        let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
-                        let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
-                        let completed = new BigNumber(0);
-
-                        // compute progress using blk num countdown ratio
-                        if (blkNumCountdown.isLessThanOrEqualTo(0)) {
-                            // can withdraw
-                            totalClaimableAmtBN = totalClaimableAmtBN.plus(new BigNumber(amount));
-                            blkNumCountdown = new BigNumber(0);
-                            completed = new BigNumber(1);
-                        } else {
-                            // still have pending blks
-                            // 1 - (countdown/blk_req)
-                            const processed = blkNumCountdown.dividedBy(blkNumReq);
-                            completed = new BigNumber(1).minus(processed);
-                        }
-
-                        // console.log("complete withdraw currentblknum: %o", currentBlkNum.toString());
-                        // console.log("complete withdraw blkNumCheck: %o", blkNumCheck.toString());
-                        // console.log("complete withdraw blkNumcountdown: %o", blkNumCountdown.toString());
-                        // console.log("complete withdraw completed: %o", completed.toString());
-
-                        // convert progress to percentage
-                        progress = completed.times(100).toFixed(2);
-
-                        // record the data
-                        outputResult.push({
-                            amount: amount.toString(),
-                            blkNumCountdown: blkNumCountdown.toString(),
-                            blkNumCheck: blkNumCheck.toString(),
-                            progress: progress.toString(),
-                        });
-                    }
-                }
-
-            })
-            .finally(() => {
-                if (mountedRef.current) {
-                    setShowSpinner(false);
-                    setData([...outputResult]);
-                    setTotalClaimableAmt(totalClaimableAmtBN.toString());
-                }
-            }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
-
-
-    }, [impl, userBase16Address]);
-
-    // load initial data
-    useEffect(() => {
-        getData();
-        return () => {
-            mountedRef.current = false;
-        };
-    }, [getData])
-
-    // poll data
-    useInterval(() => {
-        getData();
-    }, mountedRef, refresh);
-
     return (
         <>
         { data.length !== 0 &&
@@ -196,7 +91,9 @@ function CompleteWithdrawalTable(props: any) {
                             <IconQuestionCircle width="16" height="16" className="section-icon" />
                         </span>
                     </h6>
-                    <div className="align-items-center">{ showSpinner && <SpinnerNormal class="spinner-border dashboard-spinner" /> }</div>
+                    <div className="text-center">
+                        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} />
+                    </div>
                     <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
                         <div>
                             <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>

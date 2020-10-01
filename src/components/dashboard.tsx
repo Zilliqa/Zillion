@@ -90,9 +90,11 @@ function Dashboard(props: any) {
 
     const [minDelegStake, setMinDelegStake] = useState('0');
     const [totalStakeAmt, setTotalStakeAmt] = useState('0');
+    const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
+    const [delegPendingStakeWithdrawalStats, setDelegPendingStakeWithdrawalStats] = useState([] as any);
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
     const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
@@ -226,6 +228,7 @@ function Dashboard(props: any) {
 
 
     /* fetch data for delegator stats panel */
+    /* fetch data for delegator pending stake withdrawal */
     const getDelegatorStats = useCallback(() => {
         let globalAPY = initDelegStats.globalAPY;
         let zilRewards = initDelegStats.zilRewards;
@@ -233,6 +236,10 @@ function Dashboard(props: any) {
         let gzilBalance = initDelegStats.gzilBalance;
         let totalPendingWithdrawal = initDelegStats.totalPendingWithdrawal;
         let totalDeposits = initDelegStats.totalDeposits;
+
+        let totalClaimableAmtBN = new BigNumber(0); // Qa
+        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
+        let progress = '0';
         
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
@@ -294,19 +301,59 @@ function Dashboard(props: any) {
             }
 
             // compute total pending withdrawal
+            // compute pending withdrawal progress
             const withdrawalPendingState = await ZilliqaAccount.getImplState(impl, 'withdrawal_pending');
             if (withdrawalPendingState.withdrawal_pending) {
                 let totalPendingAmtBN = new BigNumber(0);
-                const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+
+                if (withdrawalPendingState.withdrawal_pending.hasOwnProperty(userBase16Address)) {
+                    const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+
+                    // get min bnum req
+                    const blkNumReqState = await ZilliqaAccount.getImplState(impl, 'bnum_req');
+                    const blkNumReq = blkNumReqState['bnum_req'];
+
+                    const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocks()).minus(1);
                 
-                for (const blkNum in blkNumPendingWithdrawal) {
-                    if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
-                        continue;
+                    for (const blkNum in blkNumPendingWithdrawal) {
+                        if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                            continue;
+                        }
+
+                        // compute each pending stake withdrawal progress
+                        let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                        let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
+                        let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
+                        let completed = new BigNumber(0);
+
+                        // compute progress using blk num countdown ratio
+                        if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                            // can withdraw
+                            totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                            blkNumCountdown = new BigNumber(0);
+                            completed = new BigNumber(1);
+                        } else {
+                            // still have pending blks
+                            // 1 - (countdown/blk_req)
+                            const processed = blkNumCountdown.dividedBy(blkNumReq);
+                            completed = new BigNumber(1).minus(processed);
+                        }
+
+                        // convert progress to percentage
+                        progress = completed.times(100).toFixed(2);
+
+                        // record the stake withdrawal progress
+                        pendingStakeWithdrawalList.push({
+                            amount: pendingAmt.toString(),
+                            blkNumCountdown: blkNumCountdown.toString(),
+                            blkNumCheck: blkNumCheck.toString(),
+                            progress: progress.toString(),
+                        })
+                        
+                        totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmt);
                     }
-                    
-                    const pendingAmtQaBN = new BigNumber(blkNumPendingWithdrawal[blkNum]);
-                    totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmtQaBN);
                 }
+
                 totalPendingWithdrawal = totalPendingAmtBN.toString();
             }
 
@@ -332,6 +379,9 @@ function Dashboard(props: any) {
                 }
 
                 setDelegStats(data);
+                setDelegPendingStakeWithdrawalStats([...pendingStakeWithdrawalList]);
+                setTotalClaimableAmt(totalClaimableAmtBN.toString());
+                
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
@@ -938,7 +988,13 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
 
                                         {/* complete withdrawal */}
-                                        <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                        <CompleteWithdrawalTable 
+                                            impl={impl} 
+                                            network={networkURL} 
+                                            refresh={refresh_rate_config} 
+                                            userAddress={currWalletAddress}
+                                            data={delegPendingStakeWithdrawalStats}
+                                            totalClaimableAmt={totalClaimableAmt} />
                                     </div>
                                     </>
                                 }
