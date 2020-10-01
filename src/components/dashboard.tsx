@@ -41,6 +41,7 @@ import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import RecentTxnDropdown from './recent-txn';
 import Tippy from '@tippyjs/react';
+import 'tippy.js/animations/shift-away-subtle.css';
 
 import BN from 'bn.js';
 
@@ -886,6 +887,7 @@ function Dashboard(props: any) {
                             interactive={true}
                             placement="bottom-end"
                             appendTo="parent"
+                            animation="shift-away-subtle"
                             onMount={() => setAriaExpanded(true)}
                             onHide={() => setAriaExpanded(false)}>
                                 <button 
