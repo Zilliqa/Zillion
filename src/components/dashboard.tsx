@@ -855,9 +855,6 @@ function Dashboard(props: any) {
 
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
-                    <li className="nav-item active">
-                        <button type="button" className="nav-link btn nav-btn" onClick={getAccountBalance}>Dashboard <span className="sr-only">(current)</span></button>
-                    </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
 
@@ -892,7 +889,7 @@ function Dashboard(props: any) {
                             onHide={() => setAriaExpanded(false)}>
                                 <button 
                                     type="button" 
-                                    className="btn btn-notify-dropdown" 
+                                    className="btn btn-notify-dropdown shadow-none" 
                                     onClick={handleTxnNotify} 
                                     aria-haspopup="true" 
                                     aria-expanded={ariaExpanded}
