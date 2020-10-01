@@ -109,6 +109,8 @@ function Dashboard(props: any) {
 
     const [recentTransactions, setRecentTransactions] = useState([] as any)
 
+    const [theme, setTheme] = useState('dark');
+
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
         appContext.cleanUp();
@@ -893,6 +895,17 @@ function Dashboard(props: any) {
         }
     }, []);
 
+    const toggleMode = () => {
+        if (theme === 'dark') {
+          // initial theme is dark
+          // set to light on toggle
+          setTheme('light');
+          document.documentElement.setAttribute('data-theme', 'light');
+        } else {
+          setTheme('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    }
 
     // eslint-disable-next-line
     return (
@@ -954,6 +967,10 @@ function Dashboard(props: any) {
                         <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
                             <span>Recent Transactions</span>
                         </ReactTooltip>
+                    </li>
+
+                    <li className="nav-item">
+                        <button type="button" className="btn btn-secondary" onClick={toggleMode}>Toggle Colors!</button>
                     </li>
 
                     <li className="nav-item">

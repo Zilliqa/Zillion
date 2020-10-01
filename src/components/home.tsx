@@ -18,6 +18,7 @@ import IconLedgerLine from './icons/ledger-line';
 import IconZilPayLine from './icons/zil-pay-line';
 
 import ZillionLogo from '../static/zillion.svg';
+import ZillionLightLogo from '../static/light/zillion.svg';
 import LandingStatsTable from './landing-stats-table';
 import { SsnStats } from '../util/interface';
 
@@ -41,6 +42,8 @@ function Home(props: any) {
   // for populating ssn table
   const [totalStakeAmt, setTotalStakeAmt] = useState('0');
   const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
+
+  const [theme, setTheme] = useState('dark');
 
   const mountedRef = useRef(true);
 
@@ -230,11 +233,31 @@ function Home(props: any) {
     getSsnStats();
   }, mountedRef, refresh_rate_config);
 
+  const toggleMode = () => {
+    if (theme === 'dark') {
+      // initial theme is dark
+      // set to light on toggle
+      setTheme('light');
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      setTheme('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }
+
+  const toggleZillionLogo = () => {
+    if (theme === 'dark') {
+      return <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4" />;
+    } else {
+      return <img src={ZillionLightLogo} alt="zillion" width="480px" className="mt-2 mb-4" />;
+    }
+  }
+
   return (
     <div className="cover">
       <div className="container-fluid">
         <div className="row align-items-center">
-          <div className="cover-content col-12 text-center text-light">
+          <div className="cover-content col-12 text-center">
             <div id="banner" className="mb-4 text-center">
               <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
             </div>
@@ -258,10 +281,12 @@ function Home(props: any) {
                 <span className="mr-2">{selectedNetwork}</span>
               }
 
+              <button type="button" className="btn btn-secondary" onClick={toggleMode}>Toggle Colors!</button>
+
             </div>
 
             <div className="heading">
-              <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4" />
+              <>{toggleZillionLogo()}</>
               <p className="tagline">Staking with Zilliqa. Simplified</p>
             </div>
 
