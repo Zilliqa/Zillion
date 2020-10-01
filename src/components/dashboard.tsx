@@ -5,7 +5,7 @@ import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, getTxnLink, convertZilToQa } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink, convertZilToQa } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -32,11 +32,15 @@ import CompleteWithdrawalTable from './complete-withdrawal-table';
 import IconQuestionCircle from './icons/question-circle';
 import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
+import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
 
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
+
+import RecentTxnDropdown from './recent-txn';
+import Tippy from '@tippyjs/react';
 
 import BN from 'bn.js';
 
@@ -97,6 +101,8 @@ function Dashboard(props: any) {
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
+    const [isTxnNotify, setIsTxnNotify] = useState(false);
+    const [ariaExpanded, setAriaExpanded] = useState(false);
 
     const [recentTransactions, setRecentTransactions] = useState([] as any)
 
@@ -138,6 +144,11 @@ function Dashboard(props: any) {
         setProxy(networks_config[networkLabel].proxy);
         setImpl(networks_config[networkLabel].impl);
     }, [updateNetwork, networks_config]);
+
+    // set recent txn indicator icon
+    const handleTxnNotify = () => {
+        setIsTxnNotify(false);
+    }
 
     const getAccountBalance = useCallback(() => {
         let currBalance = '0';
@@ -615,8 +626,10 @@ function Dashboard(props: any) {
         // restore order back
         setRecentTransactions([...temp].reverse());
         storeLocalItem(currWalletAddress, networkURL, 'recent-txn', temp.reverse());
-    }
 
+        // set recent txn indicator icon
+        setIsTxnNotify(true);
+    }
 
     // update current role is used for ZilPay
     // due to account switch on the fly
@@ -866,62 +879,32 @@ function Dashboard(props: any) {
 
                     {/* txn notifications */}
                     <li className="nav-item">
-                        <div id="txn-notify-dropdown" className="dropdown">
-                            <button 
-                                type="button" 
-                                id="txn-notify-dropdown-btn"
-                                className="btn btn-dropdown caret-off dropdown-toggle shadow-none" 
-                                data-tip data-for="notification-tip" 
-                                aria-haspopup="true" 
-                                aria-expanded="false"
-                                data-toggle="dropdown">
-                                    <IconBell width="20" height="20" className="dropdown-toggle-icon" />
-                            </button>
-                            <div className="dropdown-menu dropdown-menu-right notification" aria-labelledby="txn-notify-dropdown-btn">
-                                <div className="notification-heading">
-                                    <h2>Recent Transactions</h2>
-                                </div>
-                                <div className="divider"></div>
-
-                                <div className="notification-wrapper">
-
-                                    { recentTransactions.length === 0 &&
-                                        <p><em>No recent transactions found.</em></p> }
-
-                                    { recentTransactions.map((item: { type: string; txnId: string; }, index: number) => 
-
-                                        <div key={item.txnId}>
-
-                                        { index === 0 &&
-                                            <h3 className="notification-subheading">Latest</h3>
-                                        }
-
-                                        {
-                                          index === 1 &&
-                                            <h3 className="notification-subheading">Others</h3>
-                                        }
-
-                                        <a href={getTxnLink(item.txnId, networkURL)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
-                                            <div className="notification-item">
-                                                <h3 className="item-title">{item.type}</h3>
-                                                <p className="item-info"><strong>Transaction ID</strong><br/>
-                                                    <span className="txn-id">{item.txnId}</span>
-                                                </p>
-                                            </div>
-                                        </a>
-
+                        <Tippy 
+                            content={<RecentTxnDropdown data={recentTransactions} network={networkURL} />} 
+                            trigger="click"
+                            arrow={false}
+                            interactive={true}
+                            placement="bottom-end"
+                            appendTo="parent"
+                            onMount={() => setAriaExpanded(true)}
+                            onHide={() => setAriaExpanded(false)}>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-notify-dropdown" 
+                                    onClick={handleTxnNotify} 
+                                    aria-haspopup="true" 
+                                    aria-expanded={ariaExpanded}
+                                    data-tip
+                                    data-for="notification-tip">
+                                        <div className="dropdown-notify-wrapper">
+                                            <IconBell width="16" height="16" className="dropdown-toggle-icon" />
+                                            { isTxnNotify && <IconCheckboxBlankCircle width="10" height="10" className="dropdown-notify-icon" /> }
                                         </div>
-
-                                    )}
-                                
-                                </div>
-
-                            </div>
-
-                            <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
-                                <span>Recent Transactions</span>
-                            </ReactTooltip>
-                        </div>
+                                </button>
+                        </Tippy>
+                        <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
+                            <span>Recent Transactions</span>
+                        </ReactTooltip>
                     </li>
 
                     <li className="nav-item">
