@@ -7,7 +7,7 @@ import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
-import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
+import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 
@@ -139,7 +139,7 @@ function WithdrawStakeModal(props: any) {
         // txn success
         // invoke dashboard methods
         if (txnId) {
-            updateRecentTransactions(txnId);
+            updateRecentTransactions(TransactionType.INITIATE_STAKE_WITHDRAW, txnId);
             updateData();
         }
         

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useTable } from 'react-table';
+import { useTable, useSortBy } from 'react-table';
 
 import { PromiseArea } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
@@ -18,8 +18,17 @@ function Table({ columns, data }: any) {
     } = useTable(
         {
             columns,
-            data
-        });
+            data,
+            initialState : {
+                pageIndex: 0,
+                sortBy: [
+                    {
+                        id: 'delegAmt',
+                        desc: true
+                    }
+                ]
+            }
+        }, useSortBy);
     
     return (
         <table className="table table-responsive-lg" {...getTableProps()}>

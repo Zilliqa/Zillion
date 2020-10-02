@@ -7,7 +7,7 @@ import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
-import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
+import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -117,7 +117,7 @@ function DelegateStakeModal(props: any) {
         // txn success
         // invoke dashboard functions to update recent transactions and poll data
         if (txnId) {
-            updateRecentTransactions(txnId);
+            updateRecentTransactions(TransactionType.DELEGATE_STAKE, txnId);
             updateData();
         }
         

@@ -6,7 +6,7 @@ import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum } from '../../util/utils';
-import { OperationStatus, AccessMethod, ProxyCalls } from '../../util/enum';
+import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -65,7 +65,7 @@ function CompleteWithdrawModal(props: any) {
         // txn success
         // invoke dashboard methods
         if (txnId) {
-            updateRecentTransactions(txnId);
+            updateRecentTransactions(TransactionType.COMPLETE_STAKE_WITHDRAW, txnId);
             updateData();
         }
         

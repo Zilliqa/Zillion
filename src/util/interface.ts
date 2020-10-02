@@ -1,5 +1,5 @@
 interface DelegStats {
-    lastCycleAPY: string,
+    globalAPY: string,
     zilRewards: string,
     gzilRewards: string,
     gzilBalance: string,

@@ -14,8 +14,8 @@ function DelegatorStatsTable(props: any) {
         <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} />
         <div className="row px-2 pb-3 align-items-center justify-content-center">
             <div className="d-block deleg-stats-card">
-                <h3>Last Cycle APY</h3>
-                <span>WIP</span>
+                <h3>EST. Realtime APY</h3>
+                <span>{data.globalAPY}%</span>
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Total Deposits</h3>

@@ -4,10 +4,9 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink } from '../util/utils';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
+import { convertQaToCommaStr, getAddressLink, convertZilToQa } from '../util/utils';
 import * as ZilliqaAccount from "../account";
-import RecentTransactionsTable from './recent-transactions-table';
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
@@ -31,19 +30,30 @@ import OperatorStatsTable from './operator-stats-table';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
 
 import IconQuestionCircle from './icons/question-circle';
+import IconRefresh from './icons/refresh';
+import IconBell from './icons/bell';
+import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
 
+import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
+import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
+
+import RecentTxnDropdown from './recent-txn';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/animations/shift-away-subtle.css';
 
 import BN from 'bn.js';
-import IconRefresh from './icons/refresh';
+import IconSun from './icons/sun';
+import IconMoon from './icons/moon';
+
 
 const BigNumber = require('bignumber.js');
-
+const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString();
 
 const initDelegStats: DelegStats = {
-    lastCycleAPY: '0',
+    globalAPY: '0',
     zilRewards: '0',
     gzilRewards: '0',
     gzilBalance: '0',
@@ -72,7 +82,6 @@ function Dashboard(props: any) {
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
-    const [recentTransactions, setRecentTransactions] = useState([] as any);
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
@@ -85,9 +94,11 @@ function Dashboard(props: any) {
 
     const [minDelegStake, setMinDelegStake] = useState('0');
     const [totalStakeAmt, setTotalStakeAmt] = useState('0');
+    const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
+    const [delegPendingStakeWithdrawalStats, setDelegPendingStakeWithdrawalStats] = useState([] as any);
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
     const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
@@ -97,12 +108,18 @@ function Dashboard(props: any) {
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
+    const [isTxnNotify, setIsTxnNotify] = useState(false);
+    const [ariaExpanded, setAriaExpanded] = useState(false);
+
+    const [recentTransactions, setRecentTransactions] = useState([] as any)
+
+    const darkMode = useDarkMode(true);
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
         appContext.cleanUp();
         console.log("directing to dashboard");
-        props.history.replace("/");
+        props.history.push("/");
     }
 
     // eslint-disable-next-line
@@ -137,6 +154,10 @@ function Dashboard(props: any) {
         setImpl(networks_config[networkLabel].impl);
     }, [updateNetwork, networks_config]);
 
+    // set recent txn indicator icon
+    const handleTxnNotify = () => {
+        setIsTxnNotify(false);
+    }
 
     const getAccountBalance = useCallback(() => {
         let currBalance = '0';
@@ -213,13 +234,18 @@ function Dashboard(props: any) {
 
 
     /* fetch data for delegator stats panel */
+    /* fetch data for delegator pending stake withdrawal */
     const getDelegatorStats = useCallback(() => {
-        let lastCycleAPY = initDelegStats.lastCycleAPY;
+        let globalAPY = initDelegStats.globalAPY;
         let zilRewards = initDelegStats.zilRewards;
         let gzilRewards = initDelegStats.gzilRewards;
         let gzilBalance = initDelegStats.gzilBalance;
         let totalPendingWithdrawal = initDelegStats.totalPendingWithdrawal;
         let totalDeposits = initDelegStats.totalDeposits;
+
+        let totalClaimableAmtBN = new BigNumber(0); // Qa
+        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
+        let progress = '0';
         
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
@@ -233,7 +259,15 @@ function Dashboard(props: any) {
                 return null;
             }
 
-            // TODO use calculator compute last cycle APY
+            // compute global APY
+            const totalStakeAmtState = await ZilliqaAccount.getImplState(impl, 'totalstakeamount');
+            if (totalStakeAmtState['totalstakeamount']) {
+                let temp = new BigNumber(totalStakeAmtState['totalstakeamount']);
+                if (!temp.isEqualTo(0)) {
+                    globalAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2).toString();
+                }
+            }
+
             let totalDepositsBN = new BigNumber(0);
             let totalZilRewardsBN = new BigNumber(0);
             const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
@@ -273,19 +307,59 @@ function Dashboard(props: any) {
             }
 
             // compute total pending withdrawal
+            // compute pending withdrawal progress
             const withdrawalPendingState = await ZilliqaAccount.getImplState(impl, 'withdrawal_pending');
             if (withdrawalPendingState.withdrawal_pending) {
                 let totalPendingAmtBN = new BigNumber(0);
-                const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+
+                if (withdrawalPendingState.withdrawal_pending.hasOwnProperty(userBase16Address)) {
+                    const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
+
+                    // get min bnum req
+                    const blkNumReqState = await ZilliqaAccount.getImplState(impl, 'bnum_req');
+                    const blkNumReq = blkNumReqState['bnum_req'];
+
+                    const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocks()).minus(1);
                 
-                for (const blkNum in blkNumPendingWithdrawal) {
-                    if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
-                        continue;
+                    for (const blkNum in blkNumPendingWithdrawal) {
+                        if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                            continue;
+                        }
+
+                        // compute each pending stake withdrawal progress
+                        let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                        let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
+                        let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
+                        let completed = new BigNumber(0);
+
+                        // compute progress using blk num countdown ratio
+                        if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                            // can withdraw
+                            totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                            blkNumCountdown = new BigNumber(0);
+                            completed = new BigNumber(1);
+                        } else {
+                            // still have pending blks
+                            // 1 - (countdown/blk_req)
+                            const processed = blkNumCountdown.dividedBy(blkNumReq);
+                            completed = new BigNumber(1).minus(processed);
+                        }
+
+                        // convert progress to percentage
+                        progress = completed.times(100).toFixed(2);
+
+                        // record the stake withdrawal progress
+                        pendingStakeWithdrawalList.push({
+                            amount: pendingAmt.toString(),
+                            blkNumCountdown: blkNumCountdown.toString(),
+                            blkNumCheck: blkNumCheck.toString(),
+                            progress: progress.toString(),
+                        })
+                        
+                        totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmt);
                     }
-                    
-                    const pendingAmtQaBN = new BigNumber(blkNumPendingWithdrawal[blkNum]);
-                    totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmtQaBN);
                 }
+
                 totalPendingWithdrawal = totalPendingAmtBN.toString();
             }
 
@@ -302,7 +376,7 @@ function Dashboard(props: any) {
                 console.log("updating delegator stats...");
 
                 const data: DelegStats = {
-                    lastCycleAPY: lastCycleAPY,
+                    globalAPY: globalAPY,
                     zilRewards: zilRewards,
                     gzilRewards: gzilRewards,
                     gzilBalance: gzilBalance,
@@ -311,6 +385,9 @@ function Dashboard(props: any) {
                 }
 
                 setDelegStats(data);
+                setDelegPendingStakeWithdrawalStats([...pendingStakeWithdrawalList]);
+                setTotalClaimableAmt(totalClaimableAmtBN.toString());
+                
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
@@ -589,10 +666,36 @@ function Dashboard(props: any) {
     }, [impl]);
 
 
-    const updateRecentTransactions = (txnId: string) => {
-        setRecentTransactions([...recentTransactions.reverse(), {txnId: txnId}].reverse());
+    const toggleTheme = () => {
+        if (darkMode.value === true) {
+          darkMode.disable();
+        } else {
+          darkMode.enable();
+        }
     }
 
+
+    const updateRecentTransactions = (type: TransactionType, txnId: string) => {
+        let temp = JSON.parse(JSON.stringify(recentTransactions));
+        if ((temp.length + 1) > 10) {
+            // suppose we add a new element
+            // restrict number of elements as local storage has limits
+            // recent txn is always in newest to oldest
+            // remove last element - last element = oldest txn
+            temp.pop();
+        }
+        // reverse so that order is oldest to newest
+        // add new item as last element
+        temp = temp.reverse();
+        temp.push({type: type, txnId: txnId});
+
+        // restore order back
+        setRecentTransactions([...temp].reverse());
+        storeLocalItem(currWalletAddress, proxy, networkURL, 'recent-txn', temp.reverse());
+
+        // set recent txn indicator icon
+        setIsTxnNotify(true);
+    }
 
     // update current role is used for ZilPay
     // due to account switch on the fly
@@ -690,6 +793,12 @@ function Dashboard(props: any) {
         await timeout(Constants.MANUAL_REFRESH_DELAY);
         setIsRefreshDisabled(false);
     };
+
+    // re-hydrate data from localstorage
+    useEffect(() => {
+        let txns = getLocalItem(currWalletAddress, proxy, networkURL, 'recent-txn', [] as any); 
+        setRecentTransactions(txns);
+    }, [currWalletAddress, proxy, networkURL]);
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
@@ -799,7 +908,6 @@ function Dashboard(props: any) {
         }
     }, []);
 
-
     // eslint-disable-next-line
     return (
         <>
@@ -811,22 +919,67 @@ function Dashboard(props: any) {
 
             <div className="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul className="navbar-nav mr-auto">
-                    <li className="nav-item active">
-                        <button type="button" className="nav-link btn nav-btn" onClick={getAccountBalance}>Dashboard <span className="sr-only">(current)</span></button>
-                    </li>
                 </ul>
                 <ul className="navbar-nav navbar-right">
+
+                    {/* wallet address */}
                     <li className="nav-item">
                         <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>
                     </li>
+                    
+                    {/* balance */}
                     <li className="nav-item">
                         <p className="px-1">{balance ? convertQaToCommaStr(balance) : '0.000'} ZIL</p>
                     </li>
+
+                    {/* network */}
                     <li className="nav-item">
                         { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
                         { networkURL === NetworkURL.MAINNET && <p className="px-1">Mainnet</p> }
                         { networkURL === NetworkURL.ISOLATED_SERVER && <p className="px-1">Isolated Server</p> }
                     </li>
+
+                    <li className="nav-item">
+                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme}>
+                        { 
+                            darkMode.value === true ? 
+                            <IconSun width="16" height="16"/> : 
+                            <IconMoon width="16" height="16"/>
+                        }
+                        </button>
+                    </li>
+
+                    {/* txn notifications */}
+                    <li className="nav-item">
+                        <Tippy 
+                            content={<RecentTxnDropdown data={recentTransactions} network={networkURL} />} 
+                            trigger="click"
+                            arrow={false}
+                            interactive={true}
+                            placement="bottom-end"
+                            appendTo="parent"
+                            animation="shift-away-subtle"
+                            onMount={() => setAriaExpanded(true)}
+                            onHide={() => setAriaExpanded(false)}>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-notify-dropdown shadow-none" 
+                                    onClick={handleTxnNotify} 
+                                    aria-haspopup="true" 
+                                    aria-expanded={ariaExpanded}
+                                    data-tip
+                                    data-for="notification-tip">
+                                        <div className="dropdown-notify-wrapper">
+                                            <IconBell width="16" height="16" className="dropdown-toggle-icon" />
+                                            { isTxnNotify && <IconCheckboxBlankCircle width="10" height="10" className="dropdown-notify-icon" /> }
+                                        </div>
+                                </button>
+                        </Tippy>
+                        <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
+                            <span>Recent Transactions</span>
+                        </ReactTooltip>
+                    </li>
+
                     <li className="nav-item">
                         <button type="button" className="btn btn-sign-out mx-2" onClick={cleanUp}>Sign Out</button>
                     </li>
@@ -842,10 +995,10 @@ function Dashboard(props: any) {
                                 <div className="d-flex justify-content-end">
                                     <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
-                                        <span>refresh</span>
+                                        <span>Refresh</span>
                                     </ReactTooltip>
                                 </div>
-
+                                
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
 
@@ -857,9 +1010,15 @@ function Dashboard(props: any) {
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
                                         <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
-                                        
+
                                         {/* complete withdrawal */}
-                                        <CompleteWithdrawalTable impl={impl} network={networkURL} refresh={refresh_rate_config} userAddress={currWalletAddress} />
+                                        <CompleteWithdrawalTable 
+                                            impl={impl} 
+                                            network={networkURL} 
+                                            refresh={refresh_rate_config} 
+                                            userAddress={currWalletAddress}
+                                            data={delegPendingStakeWithdrawalStats}
+                                            totalClaimableAmt={totalClaimableAmt} />
                                     </div>
                                     </>
                                 }
@@ -914,7 +1073,7 @@ function Dashboard(props: any) {
                                             </div>
                                             <div className="col-12 mt-2 px-4 text-center">
                                                 <div className="inner-section">
-                                                    <h6 className="inner-section-heading px-4 pt-4 pb-3" >Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
+                                                    <h6 className="inner-section-heading px-4 pt-4 pb-3">Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
                                                     <StakingPortfolio 
                                                         impl={impl} 
                                                         network={networkURL} 
@@ -971,18 +1130,6 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                <div id="dashboard-recent-txn" className="p-4 dashboard-card container-fluid">
-                                    <div className="row">
-                                        <div className="col">
-                                            <h5 className="card-title mb-4">Recent Transactions</h5>
-                                        </div>
-                                        <div className="col-12 text-left">
-                                            { recentTransactions.length === 0 && <p><em>No recent transactions.</em></p> }
-                                            { recentTransactions.length !== 0 && mountedRef.current && <RecentTransactionsTable data={recentTransactions} network={networkURL} /> }
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div className="px-2">
                                     <ToastContainer hideProgressBar={true}/>
                                 </div>
@@ -992,10 +1139,11 @@ function Dashboard(props: any) {
                     </div>
                 </div>
             </div>
+
             <footer id="disclaimer" className="align-items-start">
                 <div className="p-2">
                 <span className="mx-3">&copy; 2020 Zilliqa</span> 
-                <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
+                <button type="button" className="btn shadow-none" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
                 </div>
             </footer>
             <DisclaimerModal />
