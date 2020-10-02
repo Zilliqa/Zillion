@@ -86,7 +86,7 @@ function WithdrawRewardModal(props: any) {
         // txn success
         // update dashboard recent transactions
         if (txnId) {
-            updateRecentTransactions(TransactionType.CLAIM_REWRDS, txnId);
+            updateRecentTransactions(TransactionType.CLAIM_REWARDS, txnId);
             updateData();
         }
         
