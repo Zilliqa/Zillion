@@ -1,5 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 
+
+const setTheme = (darkMode: boolean) => {
+    if (darkMode) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+}
+
 const useDarkMode = (initialValue = true) => {
     const [darkMode, setDarkMode] = useState(() => {
         // try to load from local storage or if the document element has already been set
@@ -10,16 +19,23 @@ const useDarkMode = (initialValue = true) => {
             // try to get from existing attribute
             const currTheme = document.documentElement.getAttribute('data-theme');
 
-            if (item) {
-                return JSON.parse(item);
+            if (item !== null) {
+                const localStorageTheme = JSON.parse(item);
+
+                // source of truth from local storage
+                // fix flashing bug if default is dark mode but storage is light mode
+                setTheme(localStorageTheme)
+                return localStorageTheme;
 
             } else if (currTheme !== null && currTheme !== '') {
+                // source of truth from document attribute
+                var isDarkMode = true;
                 if (currTheme === 'dark') {
-                    return true;
+                    isDarkMode = true;
                 } else {
-                    return false;
+                    isDarkMode = false;
                 }
-
+                return isDarkMode;
             } else {
                 return initialValue
             }
