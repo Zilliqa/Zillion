@@ -691,7 +691,7 @@ function Dashboard(props: any) {
 
         // restore order back
         setRecentTransactions([...temp].reverse());
-        storeLocalItem(currWalletAddress, networkURL, 'recent-txn', temp.reverse());
+        storeLocalItem(currWalletAddress, proxy, networkURL, 'recent-txn', temp.reverse());
 
         // set recent txn indicator icon
         setIsTxnNotify(true);
@@ -796,9 +796,9 @@ function Dashboard(props: any) {
 
     // re-hydrate data from localstorage
     useEffect(() => {
-        let txns = getLocalItem(currWalletAddress, networkURL, 'recent-txn', [] as any); 
+        let txns = getLocalItem(currWalletAddress, proxy, networkURL, 'recent-txn', [] as any); 
         setRecentTransactions(txns);
-    }, [currWalletAddress, networkURL]);
+    }, [currWalletAddress, proxy, networkURL]);
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
