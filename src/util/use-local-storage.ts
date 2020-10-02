@@ -11,40 +11,48 @@ import { convertNetworkUrlToLabel } from "./utils";
  * }
  * 
  * wallet: bech32 address
+ * proxy: checksum address
  * network: blockchain url will convert to label later
  * key: storage key
  * value: storage value
  * 
 */
-export function storeLocalItem(wallet: string, network: string, key: string, value: any) {
+export function storeLocalItem(wallet: string, proxy: string, network: string, key: string, value: any) {
     network = convertNetworkUrlToLabel(network);
     const storedValue: any = window.localStorage.getItem(wallet);
     let currStorageMap: any;
 
+    if (proxy === null || proxy === "") {
+        proxy = "proxy";
+    } else {
+        proxy = proxy.substring(0, 10);
+    }
+    const accessKey = network + "-" + proxy;
+
     if (storedValue !== null) {
         let localStorageMap = JSON.parse(storedValue);
         
-        if (localStorageMap.hasOwnProperty(network) && key in localStorageMap[network]) {
+        if (localStorageMap.hasOwnProperty(accessKey) && key in localStorageMap[accessKey]) {
             // update the respective section only
-            localStorageMap[network][key] = value;
+            localStorageMap[accessKey][key] = value;
 
-        } else if (!localStorageMap.hasOwnProperty(network)) {
+        } else if (!localStorageMap.hasOwnProperty(accessKey)) {
             // first time this particular wallet address is storing on this network
-            localStorageMap[network] = {};
-            localStorageMap[network][key] = value;
+            localStorageMap[accessKey] = {};
+            localStorageMap[accessKey][key] = value;
 
         } else {
             // first time this particular wallet address is storing this value
             localStorageMap = {};
-            localStorageMap[network] = {};
-            localStorageMap[network][key] = value; 
+            localStorageMap[accessKey] = {};
+            localStorageMap[accessKey][key] = value; 
         }
         currStorageMap = localStorageMap;
 
     } else {
         currStorageMap = {};
-        currStorageMap[network] = {};
-        currStorageMap[network][key] = value;
+        currStorageMap[accessKey] = {};
+        currStorageMap[accessKey][key] = value;
     }
 
     window.localStorage.setItem(wallet, JSON.stringify(currStorageMap));
@@ -55,17 +63,25 @@ export function storeLocalItem(wallet: string, network: string, key: string, val
  * returns defaultValue if item does not exist
  * 
  * wallet: bech32 address
+ * proxy: checksum address
  * network: blockchain url will convert to label later
  * key: storage key
 */
-export function getLocalItem(wallet: string, network: string, key: string, defaultValue: any) {
+export function getLocalItem(wallet: string, proxy: string, network: string, key: string, defaultValue: any) {
     network = convertNetworkUrlToLabel(network);
     const storedValue: any = window.localStorage.getItem(wallet);
 
+    if (proxy === null || proxy === "") {
+        proxy = "proxy";
+    } else {
+        proxy = proxy.substring(0, 10);
+    }
+    const accessKey = network + "-" + proxy;
+
     if (storedValue !== null) {
         const localStorageMap = JSON.parse(storedValue);
-        if (localStorageMap.hasOwnProperty(network) && key in localStorageMap[network]) {
-            return localStorageMap[network][key];
+        if (localStorageMap.hasOwnProperty(accessKey) && key in localStorageMap[accessKey]) {
+            return localStorageMap[accessKey][key];
         }
     }
     return defaultValue;
