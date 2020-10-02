@@ -16,13 +16,17 @@ import WalletZilPay from './wallet-zilpay';
 import IconKeystoreLine from './icons/keystore-line';
 import IconLedgerLine from './icons/ledger-line';
 import IconZilPayLine from './icons/zil-pay-line';
+import IconSun from './icons/sun';
+import IconMoon from './icons/moon';
 
 import ZillionLogo from '../static/zillion.svg';
+import ZillionLightLogo from '../static/light/zillion.svg';
 import LandingStatsTable from './landing-stats-table';
 import { SsnStats } from '../util/interface';
 
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { useInterval } from '../util/use-interval';
+import useDarkMode from '../util/use-dark-mode';
 
 
 function Home(props: any) {
@@ -41,6 +45,8 @@ function Home(props: any) {
   // for populating ssn table
   const [totalStakeAmt, setTotalStakeAmt] = useState('0');
   const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
+
+  const darkMode = useDarkMode(true);
 
   const mountedRef = useRef(true);
 
@@ -196,6 +202,22 @@ function Home(props: any) {
     );
   }
 
+  const toggleTheme = () => {
+    if (darkMode.value === true) {
+      darkMode.disable();
+    } else {
+      darkMode.enable();
+    }
+  }
+
+  const toggleZillionLogo = () => {
+    if (darkMode.value === true) {
+      return <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4" />;
+    } else {
+      return <img src={ZillionLightLogo} alt="zillion" width="480px" className="mt-2 mb-4" />;
+    }
+  }
+
   useEffect(() => {
     if (environment_config === Environment.PROD) {
       setSelectedNetwork(Network.MAINNET);
@@ -234,12 +256,22 @@ function Home(props: any) {
     <div className="cover">
       <div className="container-fluid">
         <div className="row align-items-center">
-          <div className="cover-content col-12 text-center text-light">
+          <div className="cover-content col-12 text-center">
             <div id="banner" className="mb-4 text-center">
               <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
             </div>
 
-            <div id="home-mini-navbar" className="d-flex flex-column align-items-end mt-4 mr-4">
+            <div id="home-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
+
+              <div>
+                <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>
+                  { 
+                    darkMode.value === true ? 
+                      <IconSun width="20" height="20"/> : 
+                      <IconMoon width="20" height="20"/>
+                  }
+                </button>
+              </div>
 
               {
                 environment_config === Environment.DEV && 
@@ -261,7 +293,7 @@ function Home(props: any) {
             </div>
 
             <div className="heading">
-              <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4" />
+              <>{toggleZillionLogo()}</>
               <p className="tagline">Staking with Zilliqa. Simplified</p>
             </div>
 
@@ -325,7 +357,7 @@ function Home(props: any) {
           <footer id="disclaimer" className="align-items-start">
             <div className="p-2">
               <span className="ml-4 mx-3">&copy; 2020 Zilliqa</span> 
-              <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
+              <button type="button" className="btn shadow-none" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
             </div>
           </footer>
           <DisclaimerModal />

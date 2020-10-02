@@ -34,6 +34,7 @@ import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
 import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
 
+import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
@@ -44,6 +45,9 @@ import Tippy from '@tippyjs/react';
 import 'tippy.js/animations/shift-away-subtle.css';
 
 import BN from 'bn.js';
+import IconSun from './icons/sun';
+import IconMoon from './icons/moon';
+
 
 const BigNumber = require('bignumber.js');
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString();
@@ -109,11 +113,13 @@ function Dashboard(props: any) {
 
     const [recentTransactions, setRecentTransactions] = useState([] as any)
 
+    const darkMode = useDarkMode(true);
+
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
         appContext.cleanUp();
         console.log("directing to dashboard");
-        props.history.replace("/");
+        props.history.push("/");
     }
 
     // eslint-disable-next-line
@@ -660,6 +666,15 @@ function Dashboard(props: any) {
     }, [impl]);
 
 
+    const toggleTheme = () => {
+        if (darkMode.value === true) {
+          darkMode.disable();
+        } else {
+          darkMode.enable();
+        }
+    }
+
+
     const updateRecentTransactions = (type: TransactionType, txnId: string) => {
         let temp = JSON.parse(JSON.stringify(recentTransactions));
         if ((temp.length + 1) > 10) {
@@ -893,7 +908,6 @@ function Dashboard(props: any) {
         }
     }, []);
 
-
     // eslint-disable-next-line
     return (
         <>
@@ -923,6 +937,16 @@ function Dashboard(props: any) {
                         { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
                         { networkURL === NetworkURL.MAINNET && <p className="px-1">Mainnet</p> }
                         { networkURL === NetworkURL.ISOLATED_SERVER && <p className="px-1">Isolated Server</p> }
+                    </li>
+
+                    <li className="nav-item">
+                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme}>
+                        { 
+                            darkMode.value === true ? 
+                            <IconSun width="16" height="16"/> : 
+                            <IconMoon width="16" height="16"/>
+                        }
+                        </button>
                     </li>
 
                     {/* txn notifications */}
@@ -1049,7 +1073,7 @@ function Dashboard(props: any) {
                                             </div>
                                             <div className="col-12 mt-2 px-4 text-center">
                                                 <div className="inner-section">
-                                                    <h6 className="inner-section-heading px-4 pt-4 pb-3" >Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
+                                                    <h6 className="inner-section-heading px-4 pt-4 pb-3">Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
                                                     <StakingPortfolio 
                                                         impl={impl} 
                                                         network={networkURL} 
@@ -1119,7 +1143,7 @@ function Dashboard(props: any) {
             <footer id="disclaimer" className="align-items-start">
                 <div className="p-2">
                 <span className="mx-3">&copy; 2020 Zilliqa</span> 
-                <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
+                <button type="button" className="btn shadow-none" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
                 </div>
             </footer>
             <DisclaimerModal />
