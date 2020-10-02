@@ -1,12 +1,17 @@
 import React from 'react';
 import DisclaimerModal from './disclaimer';
 import IconNotAuthenticated from './icons/not-authenticated';
+import useDarkMode from '../util/use-dark-mode';
 
 function Error404(props: any) {
 
     const directUser = () => {
         props.history.replace("/");
     };
+
+    // need this to set the correct theme
+    // eslint-disable-next-line
+    const darkMode = useDarkMode(true);
 
     return (
         <div className="cover">
