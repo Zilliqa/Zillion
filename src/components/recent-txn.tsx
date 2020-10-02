@@ -1,5 +1,5 @@
 import React from 'react';
-import { getTxnLink } from '../util/utils';
+import { getTxnLink, getTransactionText } from '../util/utils';
 
 function RecentTxnDropdown(props: any) {
     const data = props.data;
@@ -16,7 +16,7 @@ function RecentTxnDropdown(props: any) {
                     { data.length === 0 &&
                         <p><em>No recent transactions found.</em></p> }
 
-                    { data.map((item: { type: string, txnId: string }, index: number) =>
+                    { data.map((item: { type: number, txnId: string }, index: number) =>
                         <div key={item.txnId}>
 
                             { 
@@ -31,7 +31,7 @@ function RecentTxnDropdown(props: any) {
 
                             <a href={getTxnLink(item.txnId, network)} className="notification-item-link" target="_blank" rel="noopener noreferrer">
                                 <div className="notification-item">
-                                    <h3 className="item-title">{item.type}</h3>
+                                    <h3 className="item-title">{getTransactionText(item.type)}</h3>
                                     <p className="item-info"><strong>Transaction ID</strong><br/>
                                         <span className="txn-id">{item.txnId}</span>
                                     </p>

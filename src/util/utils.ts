@@ -1,5 +1,5 @@
 import { fromBech32Address } from '@zilliqa-js/crypto';
-import { Explorer, NetworkURL, Network } from './enum';
+import { Explorer, NetworkURL, Network, TransactionType } from './enum';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
@@ -124,4 +124,27 @@ export const getTruncatedAddress = (address: string) => {
     const front = address.substring(0, 6);
     const end = address.substring(addressLen-4);
     return front.concat("...", end);
+}
+
+export const getTransactionText = (txnType: TransactionType) => {
+    switch (txnType) {
+        case TransactionType.CLAIM_REWARDS:
+            return "Claim Rewards";
+        case TransactionType.COMPLETE_STAKE_WITHDRAW:
+            return "Complete Stake Withdrawal";
+        case TransactionType.DELEGATE_STAKE:
+            return "Delegate Stake";
+        case TransactionType.INITIATE_STAKE_WITHDRAW:
+            return "Initiate Stake Withdrawal";
+        case TransactionType.TRANSFER_STAKE:
+            return "Transfer Stake";
+        case TransactionType.UPDATE_COMM_RATE:
+            return "Update Commission Rate";
+        case TransactionType.UPDATE_RECV_ADDR:
+            return "Update Receiving Address";
+        case TransactionType.WITHDRAW_COMM:
+            return "Withdraw Commission";
+        default:
+            return "Error";
+    }
 }
