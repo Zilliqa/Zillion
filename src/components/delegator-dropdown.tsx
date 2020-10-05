@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TransferStakeModalData, WithdrawStakeModalData, ClaimedRewardModalData } from '../util/interface';
 
 function DelegatorDropdown(props: any) {
     const [showMenu, setShowMenu] = useState(false);
@@ -7,7 +8,8 @@ function DelegatorDropdown(props: any) {
     // modal data is a state variable on dashboard
     // delegAmt, rewards in Qa
     const { 
-        setClaimedRewardModalData, 
+        setClaimedRewardModalData,
+        setTransferStakeModalData, 
         setWithdrawStakeModalData,
         ssnName,
         ssnAddress,
@@ -16,7 +18,7 @@ function DelegatorDropdown(props: any) {
     } = props;
 
     const handleClaimRewards = () => {
-        setClaimedRewardModalData((prevData: any) => ({
+        setClaimedRewardModalData((prevData: ClaimedRewardModalData) => ({
             ...prevData,
             ssnName: ssnName,
             ssnAddress: ssnAddress,
@@ -24,8 +26,17 @@ function DelegatorDropdown(props: any) {
         }));
     };
 
+    const handleTransferStake = () => {
+        setTransferStakeModalData((prevData: TransferStakeModalData) => ({
+            ...prevData,
+            ssnName: ssnName,
+            ssnAddress: ssnAddress,
+            delegAmt: delegAmt,
+        }));
+    };
+
     const handleWithdrawStake = () => {
-        setWithdrawStakeModalData((prevData: any) => ({
+        setWithdrawStakeModalData((prevData: WithdrawStakeModalData) => ({
             ...prevData,
             ssnName: ssnName,
             ssnAddress: ssnAddress,
@@ -58,6 +69,16 @@ function DelegatorDropdown(props: any) {
                     data-backdrop="static"
                     onClick={handleWithdrawStake}>
                         Initiate Stake Withdrawal
+                </button>
+                <button 
+                    type="button" 
+                    className="btn btn-contract shadow-none" 
+                    data-toggle="modal" 
+                    data-target="#redeleg-stake-modal" 
+                    data-keyboard="false" 
+                    data-backdrop="static"
+                    onClick={handleTransferStake}>
+                        Transfer Stake
                 </button>
             </div>
         </div>

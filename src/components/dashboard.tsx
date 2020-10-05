@@ -37,7 +37,7 @@ import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import RecentTxnDropdown from './recent-txn';
@@ -76,6 +76,12 @@ const initOperatorStats: OperatorStats = {
     commReward: '0',
     delegNum: '0',
     receiver: '0',
+}
+
+const initTransferStakeModalData: TransferStakeModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    delegAmt: '0'
 }
 
 const initWithdrawStakeModalData: WithdrawStakeModalData = {
@@ -123,6 +129,7 @@ function Dashboard(props: any) {
     
     // data for each contract modal
     const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
+    const [transferStakeModalData, setTransferStakeModalData] = useState<TransferStakeModalData>(initTransferStakeModalData);
     const [withdrawStakeModalData, setWithdrawStakeModalData] = useState<WithdrawStakeModalData>(initWithdrawStakeModalData);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
@@ -1033,7 +1040,6 @@ function Dashboard(props: any) {
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
                                         <button type="button" className="btn btn-contract ml-2 mr-4 shadow-none" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
 
                                         {/* complete withdrawal */}
                                         <CompleteWithdrawalTable 
@@ -1105,6 +1111,7 @@ function Dashboard(props: any) {
                                                         userAddress={currWalletAddress}
                                                         data={delegStakingStats}
                                                         setClaimedRewardModalData={setClaimedRewardModalData}
+                                                        setTransferStakeModalData={setTransferStakeModalData}
                                                         setWithdrawStakeModalData={setWithdrawStakeModalData} />
                                                 </div>
                                             </div>
@@ -1220,7 +1227,8 @@ function Dashboard(props: any) {
                 nodeSelectorOptions={nodeOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions} />
+                updateRecentTransactions={updateRecentTransactions}
+                transferStakeModalData={transferStakeModalData} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 

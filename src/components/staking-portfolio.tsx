@@ -66,6 +66,7 @@ function StakingPortfolio(props: any) {
     // to be passed to delegator dropdown
     const { 
         setClaimedRewardModalData,
+        setTransferStakeModalData,
         setWithdrawStakeModalData
      } = props;
 
@@ -97,6 +98,7 @@ function StakingPortfolio(props: any) {
                     <>
                     <DelegatorDropdown
                         setClaimedRewardModalData={setClaimedRewardModalData}
+                        setTransferStakeModalData={setTransferStakeModalData}
                         setWithdrawStakeModalData={setWithdrawStakeModalData}
                         ssnName={row.original.ssnName}
                         ssnAddress={row.original.ssnAddress}
@@ -104,7 +106,7 @@ function StakingPortfolio(props: any) {
                         rewards={row.original.rewards} />
                     </>
             }
-        ], [networkURL, setClaimedRewardModalData, setWithdrawStakeModalData]
+        ], [networkURL, setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
     );
 
     return (

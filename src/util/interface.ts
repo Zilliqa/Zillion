@@ -47,6 +47,12 @@ interface SsnStats {
     status: string,
 }
 
+interface TransferStakeModalData {
+    ssnName: string,
+    ssnAddress: string,
+    delegAmt: string,
+}
+
 interface WithdrawStakeModalData {
     ssnName: string,
     ssnAddress: string,
@@ -60,5 +66,6 @@ export type {
     NodeOptions,
     OperatorStats,
     SsnStats,
+    TransferStakeModalData,
     WithdrawStakeModalData
 }

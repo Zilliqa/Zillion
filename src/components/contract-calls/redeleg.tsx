@@ -26,13 +26,13 @@ function ReDelegateStakeModal(props: any) {
         ledgerIndex,
         networkURL,
         nodeSelectorOptions, 
-        currentDelegatedOptions,
+        transferStakeModalData,
         updateData,
         updateRecentTransactions } = props;
 
     const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
 
-    const [fromSsn, setFromSsn] = useState('');
+    const fromSsn = transferStakeModalData.ssnAddress; // bech32
     const [toSsn, setToSsn] = useState('');
     const [delegAmt, setDelegAmt] = useState(''); // in ZIL
 
@@ -83,9 +83,12 @@ function ReDelegateStakeModal(props: any) {
             return null;
         }
 
+        setIsPending(OperationStatus.PENDING);
+
         // check if deleg has unwithdrawn rewards or buffered deposits for the from ssn address
         const hasRewards = await hasRewardToWithdraw();
         if (hasRewards) {
+            setIsPending('');
             return null;
         }
 
@@ -125,8 +128,6 @@ function ReDelegateStakeModal(props: any) {
             })
         };
 
-        setIsPending(OperationStatus.PENDING);
-
         if (accountType === AccessMethod.LEDGER) {
             Alert('info', "Accessing the ledger device for keys.");
             Alert('info', "Please follow the instructions on the device.");
@@ -162,15 +163,10 @@ function ReDelegateStakeModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setFromSsn('');
             setToSsn('');
             setTxnId('');
             setDelegAmt('')
         }, 150);
-    }
-
-    const handleFromAddress = (option: any) => {
-        setFromSsn(option.value);
     }
 
     const handleToAddress = (option: any) => {
@@ -207,16 +203,9 @@ function ReDelegateStakeModal(props: any) {
                         </div>
                         <div className="modal-body">
 
-                            <Select 
-                                value={
-                                    currentDelegatedOptions.filter((option: { label: string; value: string }) => 
-                                        option.value === fromSsn)
-                                    }
-                                placeholder="Select an operator to transfer from"
-                                className="node-options-container mb-4"
-                                classNamePrefix="node-options"
-                                options={currentDelegatedOptions}
-                                onChange={handleFromAddress}  />
+                            <p>{transferStakeModalData.ssnName}</p>
+                            <p>{transferStakeModalData.ssnAddress}</p>
+                            <p>{transferStakeModalData.delegAmt}</p>
                             
                             <Select 
                                 value={
