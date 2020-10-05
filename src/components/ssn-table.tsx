@@ -4,7 +4,7 @@ import { useTable, useSortBy } from 'react-table';
 
 import { PromiseArea, SsnStatus, Role } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
-import { SsnStats } from '../util/interface';
+import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
 
 
@@ -64,6 +64,18 @@ function SsnTable(props: any) {
     
     const data: SsnStats[] = props.data;
     const totalStakeAmt = props.totalStakeAmt;
+    const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
+    const setDelegStakeModalData = props.setDelegStakeModalData;
+
+    const handleStake = (name: string, address: string, commRate: string) => {
+        // set dashboard state variable
+        setDelegStakeModalData((prevData: DelegateStakeModalData) => ({
+            ...prevData,
+            ssnName: name,
+            ssnAddress: address,
+            commRate: commRate,
+        }));
+    }
 
     const columns = useMemo(
         () => [
@@ -129,6 +141,23 @@ function SsnTable(props: any) {
                             {row.original.status}
                         </div>
                         </>
+            },
+            {
+                Header: 'Stake',
+                accessor: 'stake',
+                Cell: ({ row }: any) =>
+                    <>
+                    <button 
+                        type="button" 
+                        className="btn btn-contract shadow-none" 
+                        data-toggle="modal" 
+                        data-target="#delegate-stake-modal" 
+                        data-keyboard="false" 
+                        data-backdrop="static"
+                        onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}>
+                            Delegate Stake
+                    </button>
+                    </>
             }
             // eslint-disable-next-line
         ],[totalStakeAmt, role]
@@ -140,6 +169,9 @@ function SsnTable(props: any) {
         let hiddenColumns = [];
         if (role !== undefined && role === Role.DELEGATOR) {
             hiddenColumns.push("commReward", "apiUrl");
+        }
+        if (showStakeBtn === false || role === Role.OPERATOR) {
+            hiddenColumns.push("stake");
         }
         return hiddenColumns;
     }

@@ -37,7 +37,7 @@ import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import RecentTxnDropdown from './recent-txn';
@@ -52,12 +52,6 @@ import IconMoon from './icons/moon';
 const BigNumber = require('bignumber.js');
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString();
 
-
-const initClaimedRewardModalData: ClaimedRewardModalData = {
-    ssnName: '',
-    ssnAddress: '',
-    rewards: '0'
-}
 
 const initDelegStats: DelegStats = {
     globalAPY: '0',
@@ -76,6 +70,18 @@ const initOperatorStats: OperatorStats = {
     commReward: '0',
     delegNum: '0',
     receiver: '0',
+}
+
+const initClaimedRewardModalData: ClaimedRewardModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    rewards: '0'
+}
+
+const initDelegStakeModalData: DelegateStakeModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    commRate: '0'
 }
 
 const initTransferStakeModalData: TransferStakeModalData = {
@@ -129,6 +135,7 @@ function Dashboard(props: any) {
     
     // data for each contract modal
     const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
+    const [delegStakeModalData, setDelegStakeModalData] = useState<DelegateStakeModalData>(initDelegStakeModalData);
     const [transferStakeModalData, setTransferStakeModalData] = useState<TransferStakeModalData>(initTransferStakeModalData);
     const [withdrawStakeModalData, setWithdrawStakeModalData] = useState<WithdrawStakeModalData>(initWithdrawStakeModalData);
 
@@ -1158,6 +1165,8 @@ function Dashboard(props: any) {
                                                 currRole={currRole} 
                                                 data={ssnStats}
                                                 totalStakeAmt={totalStakeAmt}
+                                                showStakeBtn={true}
+                                                setDelegStakeModalData={setDelegStakeModalData}
                                                 />
                                         </div>
                                     </div>
@@ -1216,7 +1225,8 @@ function Dashboard(props: any) {
                 nodeSelectorOptions={nodeOptions}
                 minDelegStake={minDelegStake}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions} />
+                updateRecentTransactions={updateRecentTransactions}
+                delegStakeModalData={delegStakeModalData} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 

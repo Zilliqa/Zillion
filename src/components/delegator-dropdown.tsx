@@ -49,7 +49,7 @@ function DelegatorDropdown(props: any) {
             <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdown-menu-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Test
             </button>
-            <div className="dropdown-menu" aria-labelledby="dropdown-menu-btn">
+            <div className="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown-menu-btn">
                 <button 
                     type="button" 
                     className="btn btn-contract shadow-none" 

@@ -4,6 +4,12 @@ interface ClaimedRewardModalData {
     rewards: string,
 }
 
+interface DelegateStakeModalData {
+    ssnName: string,
+    ssnAddress: string,
+    commRate: string,
+}
+
 interface DelegStats {
     globalAPY: string,
     zilRewards: string,
@@ -61,6 +67,7 @@ interface WithdrawStakeModalData {
 
 export type {
     ClaimedRewardModalData,
+    DelegateStakeModalData,
     DelegStats,
     DelegStakingPortfolioStats,
     NodeOptions,
