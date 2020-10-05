@@ -105,6 +105,12 @@ function Dashboard(props: any) {
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
     const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
+    
+    const [claimedRewardsModalData, setClaimedRewardModalData] = useState({
+        ssnName: '',
+        ssnAddress: '',
+        rewards: '0'
+    });
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -1086,7 +1092,8 @@ function Dashboard(props: any) {
                                                         network={networkURL} 
                                                         refresh={refresh_rate_config} 
                                                         userAddress={currWalletAddress}
-                                                        data={delegStakingStats} />
+                                                        data={delegStakingStats}
+                                                        setClaimedRewardModalData={setClaimedRewardModalData} />
                                                 </div>
                                             </div>
                                             <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">
@@ -1221,7 +1228,8 @@ function Dashboard(props: any) {
                 nodeSelectorOptions={claimedRewardsOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions} />
+                updateRecentTransactions={updateRecentTransactions}
+                claimedRewardsModalData={claimedRewardsModalData} />
 
             <CompleteWithdrawModal 
                 proxy={proxy}

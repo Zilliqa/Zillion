@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -23,13 +23,13 @@ function WithdrawRewardModal(props: any) {
     // const impl = props.impl;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
-    const { updateData, updateRecentTransactions } = props;
+    const { claimedRewardsModalData, updateData, updateRecentTransactions } = props;
 
     // const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
 
     const nodeSelectorOptions = props.nodeSelectorOptions;
+    const ssnAddress = claimedRewardsModalData.ssnAddress; // bech32
 
-    const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
@@ -95,14 +95,12 @@ function WithdrawRewardModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setSsnAddress('');
             setTxnId('');
         }, 150);
     }
 
     const handleChange = (option: any) => {
         console.log(option.value);
-        setSsnAddress(option.value);
     }
 
     
@@ -125,25 +123,31 @@ function WithdrawRewardModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards</h5>
+                            <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards Confirmation</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-
-                            <Select 
-                                value={
-                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
-                                        option.value === ssnAddress)
-                                    }
-                                placeholder="Select an operator to claim the rewards"
-                                className="node-options-container mb-4"
-                                classNamePrefix="node-options"
-                                options={nodeSelectorOptions}
-                                onChange={handleChange}  />
-                            <div className="d-flex">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim</button>
+                            <table className="modal-confirm-table-details table table-responsive-lg text-center">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Address</th>
+                                        <th scope="col">Rewards (ZIL)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{claimedRewardsModalData.ssnName}</td>
+                                        <td>{claimedRewardsModalData.ssnAddress}</td>
+                                        <td>{convertQaToCommaStr(claimedRewardsModalData.rewards)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</p>
+                            <div className="d-flex mt-4">
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
                             </div>
 
                         </div>

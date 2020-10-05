@@ -573,6 +573,29 @@ input:focus {
   opacity: 1;
 }
 
+.modal-confirm-table-details {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--primary-table-font-color);
+  margin-bottom: 3em;
+}
+
+.modal-confirm-table-details td,
+.modal-confirm-table-details thead th {
+  border: 0;
+}
+
+.modal-confirm-table-details tbody tr:nth-child(odd) {
+  background-color: var(--primary-table-striped-color);
+}
+
+.modal-confirm-table-details th {
+  color: var(--primary-color);
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 .modal-processing h2, .modal-sent h2 {
   color: var(--primary-color);
   font-size: 1.2em;
