@@ -1,5 +1,4 @@
 import React, { useState, useContext } from 'react';
-import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
@@ -20,14 +19,10 @@ function WithdrawRewardModal(props: any) {
     const { accountType } = appContext;
 
     const proxy = props.proxy;
-    // const impl = props.impl;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const { claimedRewardsModalData, updateData, updateRecentTransactions } = props;
 
-    // const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
-
-    const nodeSelectorOptions = props.nodeSelectorOptions;
     const ssnAddress = claimedRewardsModalData.ssnAddress; // bech32
 
     const [txnId, setTxnId] = useState('');
@@ -98,11 +93,7 @@ function WithdrawRewardModal(props: any) {
             setTxnId('');
         }, 150);
     }
-
-    const handleChange = (option: any) => {
-        console.log(option.value);
-    }
-
+    
     
     return (
         <div id="withdraw-reward-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawRewardModalLabel" aria-hidden="true">

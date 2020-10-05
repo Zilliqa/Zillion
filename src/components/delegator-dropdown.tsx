@@ -3,11 +3,15 @@ import React, { useState } from 'react';
 function DelegatorDropdown(props: any) {
     const [showMenu, setShowMenu] = useState(false);
 
-    // rewards in Qa
+    // from staking-portfolio
+    // modal data is a state variable on dashboard
+    // delegAmt, rewards in Qa
     const { 
         setClaimedRewardModalData, 
+        setWithdrawStakeModalData,
         ssnName,
         ssnAddress,
+        delegAmt,
         rewards,
     } = props;
 
@@ -17,6 +21,15 @@ function DelegatorDropdown(props: any) {
             ssnName: ssnName,
             ssnAddress: ssnAddress,
             rewards: rewards,
+        }));
+    };
+
+    const handleWithdrawStake = () => {
+        setWithdrawStakeModalData((prevData: any) => ({
+            ...prevData,
+            ssnName: ssnName,
+            ssnAddress: ssnAddress,
+            delegAmt: delegAmt,
         }));
     };
 
@@ -35,6 +48,16 @@ function DelegatorDropdown(props: any) {
                     data-backdrop="static"
                     onClick={handleClaimRewards}>
                         Claim Rewards
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-contract shadow-none" 
+                    data-toggle="modal" 
+                    data-target="#withdraw-stake-modal" 
+                    data-keyboard="false" 
+                    data-backdrop="static"
+                    onClick={handleWithdrawStake}>
+                        Initiate Stake Withdrawal
                 </button>
             </div>
         </div>
