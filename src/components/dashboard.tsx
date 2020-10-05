@@ -914,7 +914,12 @@ function Dashboard(props: any) {
     return (
         <>
         <nav className="navbar navbar-expand-lg navbar-dark">
-            <a className="navbar-brand" href="#" onClick={getAccountBalance}><span><img className="logo mx-auto" src={logo} alt="zilliqa_logo"/><span className="navbar-title">ZILLIQA STAKING</span></span></a>
+            <button type="button" className="btn navbar-brand shadow-none p-0 pl-2">
+                <span>
+                    <img className="logo mx-auto" src={logo} alt="zilliqa_logo"/>
+                    <span className="navbar-title">ZILLIQA STAKING</span>
+                </span>
+            </button>
             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
             </button>
