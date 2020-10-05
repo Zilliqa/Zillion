@@ -78,9 +78,12 @@ function WithdrawStakeModal(props: any) {
             return null;
         }
 
+        setIsPending(OperationStatus.PENDING);
+
         // check if deleg has unwithdrawn rewards or buffered deposits for this ssn address
         const hasRewards = await hasRewardToWithdraw();
         if (hasRewards) {
+            setIsPending('');
             return null;
         }
 
@@ -112,8 +115,6 @@ function WithdrawStakeModal(props: any) {
                 ]
             })
         };
-
-        setIsPending(OperationStatus.PENDING);
         
         if (accountType === AccessMethod.LEDGER) {
             Alert('info', "Accessing the ledger device for keys.");
