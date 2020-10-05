@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TransferStakeModalData, WithdrawStakeModalData, ClaimedRewardModalData } from '../util/interface';
+import IconAdd from './icons/add';
 
 function DelegatorDropdown(props: any) {
     const [showMenu, setShowMenu] = useState(false);
@@ -45,14 +46,14 @@ function DelegatorDropdown(props: any) {
     };
 
     return (
-        <div className="dropdown dropright">
-            <button className="btn btn-secondary dropdown-toggle" data-display="static" type="button" id="dropdown-menu-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Test
+        <div id="delegator-dropdown" className="dropdown dropright">
+            <button className="btn dropdown-toggle" data-display="static" type="button" id="dropdown-menu-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <IconAdd width="20" height="20" className="dropdown-toggle-icon" />
             </button>
-            <div className="dropdown-menu" aria-labelledby="dropdown-menu-btn">
+            <div className="dropdown-menu delegator-menu" aria-labelledby="dropdown-menu-btn">
                 <button 
                     type="button" 
-                    className="btn btn-contract shadow-none" 
+                    className="btn btn-contract-small shadow-none" 
                     data-toggle="modal" 
                     data-target="#withdraw-reward-modal" 
                     data-keyboard="false" 
@@ -62,7 +63,7 @@ function DelegatorDropdown(props: any) {
                 </button>
                 <button
                     type="button"
-                    className="btn btn-contract shadow-none" 
+                    className="btn btn-contract-small shadow-none" 
                     data-toggle="modal" 
                     data-target="#withdraw-stake-modal" 
                     data-keyboard="false" 
@@ -72,7 +73,7 @@ function DelegatorDropdown(props: any) {
                 </button>
                 <button 
                     type="button" 
-                    className="btn btn-contract shadow-none" 
+                    className="btn btn-contract-small shadow-none" 
                     data-toggle="modal" 
                     data-target="#redeleg-stake-modal" 
                     data-keyboard="false" 
