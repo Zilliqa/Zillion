@@ -570,7 +570,8 @@ function Dashboard(props: any) {
                 // get number of delegators
                 const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
-                if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
+                    userBase16Address in delegNumState['ssn_deleg_amt']) {
                     delegNum = Object.keys(delegNumState['ssn_deleg_amt'][userBase16Address]).length.toString();
                 }
 
@@ -631,7 +632,8 @@ function Dashboard(props: any) {
                     // get number of delegators
                     const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
-                    if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                    if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
+                        ssnAddress in delegNumState['ssn_deleg_amt']) {
                         delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
                     }
 
