@@ -149,13 +149,13 @@ function SsnTable(props: any) {
                     <>
                     <button 
                         type="button" 
-                        className="btn btn-contract shadow-none" 
+                        className="btn btn-contract-small shadow-none" 
                         data-toggle="modal" 
                         data-target="#delegate-stake-modal" 
                         data-keyboard="false" 
                         data-backdrop="static"
                         onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}>
-                            Delegate Stake
+                            Stake
                     </button>
                     </>
             }

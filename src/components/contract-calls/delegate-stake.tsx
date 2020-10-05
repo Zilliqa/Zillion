@@ -151,17 +151,24 @@ function DelegateStakeModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="delegateStakeModalLabel">Delegate Stake</h5>
+                            <h5 className="modal-title" id="delegateStakeModalLabel">Stake</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p>{delegStakeModalData.ssnName}</p>
-                            <p>{delegStakeModalData.ssnAddress}</p>
-                            <p>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}</p>
-                            <input type="text" className="mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
-                            <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after delegation to pay for gas fees for future transactions such as withdrawal.</em></small></p>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{delegStakeModalData.ssnName}</h3>
+                                    <span>{delegStakeModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Commission Rate</h3>
+                                    <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
+                                </div>
+                            </div>
+                            <input type="text" className="mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount in ZIL" />
+                            <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after staking to pay for gas fees for future transactions such as withdrawal.</em></small></p>
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={delegateStake}>Stake</button>
                             </div>
