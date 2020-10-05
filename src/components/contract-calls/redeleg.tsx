@@ -8,7 +8,7 @@ import AppContext from '../../contexts/appContext';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr } from '../../util/utils';
 import { ProxyCalls, OperationStatus, AccessMethod, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -202,17 +202,24 @@ function ReDelegateStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-
-                            <p>{transferStakeModalData.ssnName}</p>
-                            <p>{transferStakeModalData.ssnAddress}</p>
-                            <p>{transferStakeModalData.delegAmt}</p>
-                            
+                            <h2 className="node-details-subheading">From</h2>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{transferStakeModalData.ssnName}</h3>
+                                    <span>{transferStakeModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Current Deposit</h3>
+                                    <span>{convertQaToCommaStr(transferStakeModalData.delegAmt)} ZIL</span>
+                                </div>
+                            </div>
+                            <h2 className="node-details-subheading">To</h2>
                             <Select 
                                 value={
                                     nodeSelectorOptions.filter((option: { label: string; value: string }) => 
                                         option.value === toSsn)
                                     }
-                                placeholder="Select an operator to receive the delegated amount"
+                                placeholder="Select an operator to receive the transferred amount"
                                 className="node-options-container mb-4"
                                 classNamePrefix="node-options"
                                 options={nodeSelectorOptions}

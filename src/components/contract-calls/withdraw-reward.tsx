@@ -114,29 +114,23 @@ function WithdrawRewardModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards Confirmation</h5>
+                            <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <table className="modal-confirm-table-details table table-responsive-lg text-center">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Address</th>
-                                        <th scope="col">Rewards (ZIL)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{claimedRewardsModalData.ssnName}</td>
-                                        <td>{claimedRewardsModalData.ssnAddress}</td>
-                                        <td>{convertQaToCommaStr(claimedRewardsModalData.rewards)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</p>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{claimedRewardsModalData.ssnName}</h3>
+                                    <span>{claimedRewardsModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Rewards</h3>
+                                    <span>{convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</span>
+                                </div>
+                            </div>
+                            <p><small><em>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</em></small></p>
                             <div className="d-flex mt-4">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
                             </div>

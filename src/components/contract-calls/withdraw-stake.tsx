@@ -181,22 +181,16 @@ function WithdrawStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <table className="modal-confirm-table-details table table-responsive-lg text-center">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Address</th>
-                                        <th scope="col">Deposit (ZIL)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{withdrawStakeModalData.ssnName}</td>
-                                        <td>{withdrawStakeModalData.ssnAddress}</td>
-                                        <td>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{withdrawStakeModalData.ssnName}</h3>
+                                    <span>{withdrawStakeModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Deposit</h3>
+                                    <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
+                                </div>
+                            </div>
                             <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto mt-2" onClick={withdrawStake}>Initiate</button>
