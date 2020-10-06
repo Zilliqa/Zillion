@@ -295,10 +295,9 @@ input:focus {
 }
 
 .btn-contract-small {
-  color: var(--primary-color);
-  background-color: var(--secondary-color);
-  background-color: transparent;
-  border: 1px solid var(--primary-dark-color);
+  color: var(--secondary-color);
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
   font-size: 1em;
   font-weight: 500;
   padding-bottom: 0.3em;
@@ -308,8 +307,8 @@ input:focus {
 
 .btn-contract-small:hover {
   color: var(--secondary-color);
-  background-color: var(--primary-color);
-  border: 1px solid var(--secondary-color);
+  background-color: var(--primary-hover-color);
+  border: 1px solid var(--primary-hover-color);
 }
 
 .btn-sign-in {
@@ -909,6 +908,10 @@ input:focus {
   border-radius: 6px;
   background-color: #5e60ce;
   border: 2px solid #5e60ce;
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
 }
 
 #complete-withdraw-accordion .btn-group {
@@ -919,6 +922,10 @@ input:focus {
   border: 0;
   border-radius: 6px;
   background-color: #5e60ce;
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
 }
 
 #complete-withdraw-accordion .card-header {

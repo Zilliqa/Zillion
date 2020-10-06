@@ -1044,18 +1044,14 @@ function Dashboard(props: any) {
 
                                     <>
                                     {/* delegator section */}
-                                    <div className="p-4 mt-4 dashboard-card">
-                                        <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-
-                                        {/* complete withdrawal */}
-                                        <CompleteWithdrawalTable 
-                                            impl={impl} 
-                                            network={networkURL} 
-                                            refresh={refresh_rate_config} 
-                                            userAddress={currWalletAddress}
-                                            data={delegPendingStakeWithdrawalStats}
-                                            totalClaimableAmt={totalClaimableAmt} />
-                                    </div>
+                                    {/* complete withdrawal */}
+                                    <CompleteWithdrawalTable 
+                                        impl={impl} 
+                                        network={networkURL} 
+                                        refresh={refresh_rate_config} 
+                                        userAddress={currWalletAddress}
+                                        data={delegPendingStakeWithdrawalStats}
+                                        totalClaimableAmt={totalClaimableAmt} />
                                     </>
                                 }
 

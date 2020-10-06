@@ -55,7 +55,7 @@ function DelegatorDropdown(props: any) {
                 data-toggle="dropdown" 
                 aria-haspopup="true" 
                 aria-expanded="false">
-                Edit
+                Manage
             </button>
             <div className="dropdown-menu delegator-menu" aria-labelledby="dropdown-menu-btn">
                 <button 
