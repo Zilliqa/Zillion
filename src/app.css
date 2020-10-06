@@ -890,6 +890,21 @@ input:focus {
   color: var(--primary-color);
 }
 
+#disclaimer .btn:hover {
+  color: var(--primary-hover-color);
+}
+
+#disclaimer .footer-link {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+#disclaimer .footer-link:hover {
+  color: var(--primary-hover-color);
+  text-decoration: none;
+}
+
 #disclaimer-modal .modal-body {
   color: var(--text-color);
 }
