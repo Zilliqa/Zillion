@@ -1007,7 +1007,7 @@ function Dashboard(props: any) {
                         <div className="row">
                             <div className="col-12">
                                 <div className="d-flex justify-content-end">
-                                    <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
+                                    <button type="button" className="btn btn-user-secondary-action shadow-none" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
                                         <span>Refresh</span>
                                     </ReactTooltip>
