@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TransferStakeModalData, WithdrawStakeModalData, ClaimedRewardModalData } from '../util/interface';
-import IconAdd from './icons/add';
+
 
 function DelegatorDropdown(props: any) {
-    const [showMenu, setShowMenu] = useState(false);
-
     // from staking-portfolio
     // modal data is a state variable on dashboard
     // delegAmt, rewards in Qa
@@ -57,7 +55,7 @@ function DelegatorDropdown(props: any) {
                 aria-expanded="false">
                 Manage
             </button>
-            <div className="dropdown-menu delegator-menu" aria-labelledby="dropdown-menu-btn">
+            <div className="dropdown-menu delegator-menu animate__animated animate__fadeIn" aria-labelledby="dropdown-menu-btn">
                 <button 
                     type="button" 
                     className="btn btn-deleg-action shadow-none" 
