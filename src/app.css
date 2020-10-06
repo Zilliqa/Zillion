@@ -1175,11 +1175,23 @@ input:focus {
 }
 
 #landing-stats, 
-#delegator-stats-details,
 #operator-stats-details {
   color: var(--text-color);
   font-size: 0.85em;
   margin-top: 4em;
+
+  border-radius: 10px;
+  background-color: var(--primary-section-bg-color);
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+}
+
+#delegator-stats-details {
+  color: var(--text-color);
+  font-size: 0.85em;
+  margin-top: 2em; /* do not need so much */
 
   border-radius: 10px;
   background-color: var(--primary-section-bg-color);

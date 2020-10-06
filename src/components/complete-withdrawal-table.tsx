@@ -83,7 +83,7 @@ function CompleteWithdrawalTable(props: any) {
         <>
         { data.length !== 0 &&
 
-        <div id="delegator-complete-withdraw-details" className="col-12 mt-4 px-1 py-3">
+        <div id="delegator-complete-withdraw-details" className="col-12 mt-2 px-1 py-3">
             <div id="complete-withdraw-accordion">
                 <div className="card text-center">
                     <h6 className="inner-section-heading px-4 pt-4">Pending Stake Withdrawals&nbsp;

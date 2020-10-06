@@ -1038,13 +1038,15 @@ function Dashboard(props: any) {
                                         <span>Refresh</span>
                                     </ReactTooltip>
                                 </div>
+
                                 
+                                {/* delegator section */}
+                                {/* complete withdrawal */}
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
 
-                                    <>
-                                    {/* delegator section */}
-                                    {/* complete withdrawal */}
+                                    
+
                                     <CompleteWithdrawalTable 
                                         impl={impl} 
                                         network={networkURL} 
@@ -1052,7 +1054,6 @@ function Dashboard(props: any) {
                                         userAddress={currWalletAddress}
                                         data={delegPendingStakeWithdrawalStats}
                                         totalClaimableAmt={totalClaimableAmt} />
-                                    </>
                                 }
 
                                 {
