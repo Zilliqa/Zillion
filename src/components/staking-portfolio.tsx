@@ -6,6 +6,7 @@ import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 
 import { DelegStakingPortfolioStats } from '../util/interface';
 import Spinner from './spinner';
+import DelegatorDropdown from './delegator-dropdown';
 
 
 function Table({ columns, data }: any) {
@@ -61,6 +62,14 @@ function StakingPortfolio(props: any) {
     const networkURL = props.network;
     const data: DelegStakingPortfolioStats[] = props.data;
 
+    // from dashboard
+    // to be passed to delegator dropdown
+    const { 
+        setClaimedRewardModalData,
+        setTransferStakeModalData,
+        setWithdrawStakeModalData
+     } = props;
+
     const columns = useMemo(
         () => [
             {
@@ -81,8 +90,23 @@ function StakingPortfolio(props: any) {
                 Header: 'rewards (ZIL)',
                 accessor: 'rewards',
                 Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.rewards)}</span>
+            },
+            {
+                Header: 'actions',
+                accessor: 'actions',
+                Cell: ({ row }: any) =>
+                    <>
+                    <DelegatorDropdown
+                        setClaimedRewardModalData={setClaimedRewardModalData}
+                        setTransferStakeModalData={setTransferStakeModalData}
+                        setWithdrawStakeModalData={setWithdrawStakeModalData}
+                        ssnName={row.original.ssnName}
+                        ssnAddress={row.original.ssnAddress}
+                        delegAmt={row.original.delegAmt}
+                        rewards={row.original.rewards} />
+                    </>
             }
-        ], [networkURL]
+        ], [networkURL, setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
     );
 
     return (

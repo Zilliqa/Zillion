@@ -39,7 +39,7 @@ import IconMoon from './icons/moon';
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import Footer from './footer';
@@ -54,6 +54,7 @@ import BN from 'bn.js';
 
 const BigNumber = require('bignumber.js');
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString();
+
 
 const initDelegStats: DelegStats = {
     globalAPY: '0',
@@ -73,6 +74,31 @@ const initOperatorStats: OperatorStats = {
     delegNum: '0',
     receiver: '0',
 }
+
+const initClaimedRewardModalData: ClaimedRewardModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    rewards: '0'
+}
+
+const initDelegStakeModalData: DelegateStakeModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    commRate: '0'
+}
+
+const initTransferStakeModalData: TransferStakeModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    delegAmt: '0'
+}
+
+const initWithdrawStakeModalData: WithdrawStakeModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    delegAmt: '0'
+}
+
 
 
 function Dashboard(props: any) {
@@ -99,6 +125,7 @@ function Dashboard(props: any) {
     const [totalStakeAmt, setTotalStakeAmt] = useState('0');
     const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
+    // data for each panel section
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
     const [delegPendingStakeWithdrawalStats, setDelegPendingStakeWithdrawalStats] = useState([] as any);
@@ -108,6 +135,12 @@ function Dashboard(props: any) {
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
     const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
+    
+    // data for each contract modal
+    const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
+    const [delegStakeModalData, setDelegStakeModalData] = useState<DelegateStakeModalData>(initDelegStakeModalData);
+    const [transferStakeModalData, setTransferStakeModalData] = useState<TransferStakeModalData>(initTransferStakeModalData);
+    const [withdrawStakeModalData, setWithdrawStakeModalData] = useState<WithdrawStakeModalData>(initWithdrawStakeModalData);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -1018,29 +1051,22 @@ function Dashboard(props: any) {
                                         <span>Refresh</span>
                                     </ReactTooltip>
                                 </div>
+
                                 
+                                {/* delegator section */}
+                                {/* complete withdrawal */}
                                 {
                                     (currRole === Role.DELEGATOR.toString()) &&
 
-                                    <>
-                                    {/* delegator section */}
-                                    <div className="p-4 mt-4 dashboard-card">
-                                        <h5 className="card-title mb-4">Hi Delegator! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract ml-2 mr-4 shadow-none" data-toggle="modal" data-target="#delegate-stake-modal" data-keyboard="false" data-backdrop="static">Delegate Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#redeleg-stake-modal" data-keyboard="false" data-backdrop="static">Transfer Stake</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-stake-modal" data-keyboard="false" data-backdrop="static">Initiate Stake Withdrawal</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-reward-modal" data-keyboard="false" data-backdrop="static">Claim Rewards</button>
+                                    
 
-                                        {/* complete withdrawal */}
-                                        <CompleteWithdrawalTable 
-                                            impl={impl} 
-                                            network={networkURL} 
-                                            refresh={refresh_rate_config} 
-                                            userAddress={currWalletAddress}
-                                            data={delegPendingStakeWithdrawalStats}
-                                            totalClaimableAmt={totalClaimableAmt} />
-                                    </div>
-                                    </>
+                                    <CompleteWithdrawalTable 
+                                        impl={impl} 
+                                        network={networkURL} 
+                                        refresh={refresh_rate_config} 
+                                        userAddress={currWalletAddress}
+                                        data={delegPendingStakeWithdrawalStats}
+                                        totalClaimableAmt={totalClaimableAmt} />
                                 }
 
                                 {
@@ -1099,7 +1125,10 @@ function Dashboard(props: any) {
                                                         network={networkURL} 
                                                         refresh={refresh_rate_config} 
                                                         userAddress={currWalletAddress}
-                                                        data={delegStakingStats} />
+                                                        data={delegStakingStats}
+                                                        setClaimedRewardModalData={setClaimedRewardModalData}
+                                                        setTransferStakeModalData={setTransferStakeModalData}
+                                                        setWithdrawStakeModalData={setWithdrawStakeModalData} />
                                                 </div>
                                             </div>
                                             <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">
@@ -1145,6 +1174,8 @@ function Dashboard(props: any) {
                                                 currRole={currRole} 
                                                 data={ssnStats}
                                                 totalStakeAmt={totalStakeAmt}
+                                                showStakeBtn={true}
+                                                setDelegStakeModalData={setDelegStakeModalData}
                                                 />
                                         </div>
                                     </div>
@@ -1198,7 +1229,8 @@ function Dashboard(props: any) {
                 nodeSelectorOptions={nodeOptions}
                 minDelegStake={minDelegStake}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions} />
+                updateRecentTransactions={updateRecentTransactions}
+                delegStakeModalData={delegStakeModalData} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 
@@ -1209,7 +1241,8 @@ function Dashboard(props: any) {
                 nodeSelectorOptions={nodeOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions} />
+                updateRecentTransactions={updateRecentTransactions}
+                transferStakeModalData={transferStakeModalData} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
@@ -1219,7 +1252,8 @@ function Dashboard(props: any) {
                 nodeSelectorOptions={withdrawStakeOptions} 
                 userAddress={currWalletAddress}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions} />
+                updateRecentTransactions={updateRecentTransactions}
+                withdrawStakeModalData={withdrawStakeModalData} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
@@ -1229,7 +1263,8 @@ function Dashboard(props: any) {
                 nodeSelectorOptions={claimedRewardsOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions} />
+                updateRecentTransactions={updateRecentTransactions}
+                claimedRewardsModalData={claimedRewardsModalData} />
 
             <CompleteWithdrawModal 
                 proxy={proxy}

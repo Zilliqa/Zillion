@@ -83,7 +83,7 @@ function CompleteWithdrawalTable(props: any) {
         <>
         { data.length !== 0 &&
 
-        <div id="delegator-complete-withdraw-details" className="col-12 mt-4 px-1 py-3">
+        <div id="delegator-complete-withdraw-details" className="col-12 mt-2 px-1 py-3">
             <div id="complete-withdraw-accordion">
                 <div className="card text-center">
                     <h6 className="inner-section-heading px-4 pt-4">Pending Stake Withdrawals&nbsp;
@@ -99,8 +99,8 @@ function CompleteWithdrawalTable(props: any) {
                             <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                         </div>
                         <div className="btn-group">
-                            { data.length !== 0 && <button className="btn btn-inner-contract mr-4" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawals</button> }
-                            { data.length !== 0 && <button className="btn btn-inner-contract-2 mr-4" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
+                            { data.length !== 0 && <button className="btn btn-inner-contract mr-4 shadow-none" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawals</button> }
+                            { data.length !== 0 && <button className="btn btn-inner-contract-2 mr-4 shadow-none" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
                         </div>
                     </div>
 
