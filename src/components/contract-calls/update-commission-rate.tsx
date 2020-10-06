@@ -124,7 +124,12 @@ function UpdateCommRateModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p>Current Commission Rate: {currentRate ? convertToProperCommRate(currentRate).toFixed(2) : '0.00'}&#37;</p>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel">
+                                    <h3>Current Commission Rate</h3>
+                                    <span>{currentRate ? convertToProperCommRate(currentRate).toFixed(2) : '0.00'}&#37;</span>
+                                </div>
+                            </div>
                             <input type="text" className="mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" maxLength={9} />
                             <div className="d-flex mt-2">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={updateCommRate}>Update</button>

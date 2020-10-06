@@ -116,7 +116,12 @@ function UpdateReceiverAddress(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p>Current Receiving Address: {currentReceiver ? currentReceiver : 'none'}</p>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel">
+                                    <h3>Current Receiving Address</h3>
+                                    <span>{currentReceiver ? currentReceiver : 'none'}</span>
+                                </div>
+                            </div>
                             <input type="text" className="mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in bech32 format" />
                             <div className="d-flex mt-2">
                             <button type="button" className="btn btn-user-action mx-auto" onClick={updateAddress}>Update</button>
