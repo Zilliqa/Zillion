@@ -22,8 +22,8 @@
 window['config'] = {
     networks_config: {
         testnet: {
-            proxy: "0xeeB4158d111dc9aC900ecd75168596289E0Bda02",
-            impl: "0x81dA48797790CcE8A50B1475f372C22eFcDd9AeC",
+            proxy: "0x05d7e121E205A84Bf1da2D60aC8A2484800FfFB3",
+            impl: "0x05C2DdeC2E4449160436130CB4F9b84dE9f7eE5b",
             blockchain: "https://dev-api.zilliqa.com",
             node_status: "https://testnet-viewer.zilliqa.com",
         },
