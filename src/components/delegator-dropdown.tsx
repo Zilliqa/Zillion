@@ -47,13 +47,20 @@ function DelegatorDropdown(props: any) {
 
     return (
         <div id="delegator-dropdown" className="dropdown dropright">
-            <button className="btn dropdown-toggle" data-display="static" type="button" id="dropdown-menu-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <IconAdd width="20" height="20" className="dropdown-toggle-icon" />
+            <button 
+                className="btn btn-contract-small dropdown-toggle shadow-none" 
+                data-display="static" 
+                type="button" 
+                id="dropdown-menu-btn" 
+                data-toggle="dropdown" 
+                aria-haspopup="true" 
+                aria-expanded="false">
+                Edit
             </button>
             <div className="dropdown-menu delegator-menu" aria-labelledby="dropdown-menu-btn">
                 <button 
                     type="button" 
-                    className="btn btn-contract-small shadow-none" 
+                    className="btn btn-deleg-action shadow-none" 
                     data-toggle="modal" 
                     data-target="#withdraw-reward-modal" 
                     data-keyboard="false" 
@@ -61,25 +68,25 @@ function DelegatorDropdown(props: any) {
                     onClick={handleClaimRewards}>
                         Claim Rewards
                 </button>
-                <button
-                    type="button"
-                    className="btn btn-contract-small shadow-none" 
-                    data-toggle="modal" 
-                    data-target="#withdraw-stake-modal" 
-                    data-keyboard="false" 
-                    data-backdrop="static"
-                    onClick={handleWithdrawStake}>
-                        Initiate Stake Withdrawal
-                </button>
                 <button 
                     type="button" 
-                    className="btn btn-contract-small shadow-none" 
+                    className="btn btn-deleg-action shadow-none" 
                     data-toggle="modal" 
                     data-target="#redeleg-stake-modal" 
                     data-keyboard="false" 
                     data-backdrop="static"
                     onClick={handleTransferStake}>
                         Transfer Stake
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-deleg-action shadow-none" 
+                    data-toggle="modal" 
+                    data-target="#withdraw-stake-modal" 
+                    data-keyboard="false" 
+                    data-backdrop="static"
+                    onClick={handleWithdrawStake}>
+                        Initiate Stake Withdrawal
                 </button>
             </div>
         </div>

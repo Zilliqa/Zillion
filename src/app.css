@@ -270,11 +270,28 @@ input:focus {
 
 #delegator-dropdown .delegator-menu {
   width: 200px;
+  border: 0;
+  border-radius: 6px;
+
   background-color: var(--secondary-color);
 
-  -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
-  -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
-  box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  -webkit-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+}
+
+#delegator-dropdown .delegator-menu .btn-deleg-action {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--primary-color);
+  width: 100%;
+  padding: 0.5em 1em;
+  text-align: left;
+}
+
+#delegator-dropdown .delegator-menu .btn-deleg-action:hover {
+  color: var(--secondary-color);
+  background-color: var(--primary-color);
 }
 
 .btn-contract-small {
