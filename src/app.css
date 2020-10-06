@@ -1147,22 +1147,26 @@ input:focus {
   text-transform: uppercase;
 }
 
-#home-ssn-details .info {
+#home-ssn-details .info,
+#dashboard-ssn-details .info {
   font-size: 1em;
   font-weight: 500;
 }
 
-#home-ssn-details .info svg {
+#home-ssn-details .info svg,
+#dashboard-ssn-details .info svg {
   stroke: var(--text-color);
   margin-top: -4px;
   margin-right: 6px;
 }
 
-#home-ssn-details .info-link {
+#home-ssn-details .info-link,
+#dashboard-ssn-details .info-link {
   color: var(--hyperlink-color);
 }
 
-#home-ssn-details .info-link:hover {
+#home-ssn-details .info-link:hover,
+#dashboard-ssn-details .info-link:hover {
   color: var(--hyperlink-hover-color);
   text-decoration: none;
 }

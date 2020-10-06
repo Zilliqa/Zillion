@@ -1164,6 +1164,16 @@ function Dashboard(props: any) {
                                     <div className="row">
                                         <div className="col">
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
+                                            <p className="info mt-4">Please refer to our&nbsp; 
+                                                <a className="info-link" href={networks_config[convertNetworkUrlToLabel(networkURL)].node_status ? 
+                                                    networks_config[convertNetworkUrlToLabel(networkURL)].node_status : 
+                                                    "https://zilliqa.com/"} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer">
+                                                        Staking Viewer 
+                                                </a> 
+                                                &nbsp;for more information on the nodes' statuses.
+                                            </p>
                                         </div>
                                         <div className="col-12 text-center">
                                             <SsnTable 
