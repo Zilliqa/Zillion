@@ -3,6 +3,9 @@
  * blockchain_explorer_config: [viewblock (default) | devex]
  * - domain link to blockchain explorer
  * 
+ * node_status
+ *  - link to staking viewer
+ * 
  * refresh_rate_config: [time in milliseconds]
  * - interval at which contract data and wallet's info are updated
  * 
@@ -22,16 +25,19 @@ window['config'] = {
             proxy: "0xeeB4158d111dc9aC900ecd75168596289E0Bda02",
             impl: "0x81dA48797790CcE8A50B1475f372C22eFcDd9AeC",
             blockchain: "https://dev-api.zilliqa.com",
+            node_status: "https://testnet-viewer.zilliqa.com",
         },
         mainnet: {
             proxy: "",
             impl: "",
             blockchain: "https://api.zilliqa.com",
+            node_status: "https://staking-viewer.zilliqa.com",
         },
         isolated_server: {
             proxy: "0x0578B8e9D9c2493D4a2E98f364c7ed311F7a0d71",
             impl: "",
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
+            node_status: "",
         }
     },
     blockchain_explorer_config: "viewblock",

@@ -5,7 +5,7 @@ import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, convertZilToQa } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -33,6 +33,8 @@ import IconQuestionCircle from './icons/question-circle';
 import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
 import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
+import IconSun from './icons/sun';
+import IconMoon from './icons/moon';
 
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
@@ -40,13 +42,14 @@ import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
+import Footer from './footer';
 import RecentTxnDropdown from './recent-txn';
 import Tippy from '@tippyjs/react';
+import '../tippy.css';
 import 'tippy.js/animations/shift-away-subtle.css';
 
+
 import BN from 'bn.js';
-import IconSun from './icons/sun';
-import IconMoon from './icons/moon';
 
 
 const BigNumber = require('bignumber.js');
@@ -156,6 +159,9 @@ function Dashboard(props: any) {
 
     // set recent txn indicator icon
     const handleTxnNotify = () => {
+        if (!isTxnNotify) {
+            return;
+        }
         setIsTxnNotify(false);
     }
 
@@ -429,6 +435,7 @@ function Dashboard(props: any) {
 
                     // compute rewards
                     const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
+                    console.log("test :%o", delegRewards);
 
                     const data: DelegStakingPortfolioStats = {
                         ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
@@ -816,12 +823,18 @@ function Dashboard(props: any) {
             case NetworkLabel.TESTNET:
                 networkLabel = NetworkLabel.TESTNET;
                 url = NetworkURL.TESTNET;
+                if (environment_config === Environment.PROD) {
+                    // warn users not to switch to testnet on production
+                    Alert("warn", "Testnet is not supported. Please switch to Mainnet via ZilPay.");
+                }
                 break;
             case NetworkLabel.ISOLATED_SERVER:
             case NetworkLabel.PRIVATE:
+                networkLabel = NetworkLabel.ISOLATED_SERVER;
+                url = NetworkURL.ISOLATED_SERVER;
                 if (environment_config === Environment.PROD) {
                     // warn users not to switch to testnet on production
-                    Alert("warn", "Testnet is not supported. Please switch to Mainnet from ZilPay.");
+                    Alert("warn", "Private network is not supported. Please switch to Mainnet via ZilPay.");
                 }
                 break;
             default:
@@ -960,12 +973,12 @@ function Dashboard(props: any) {
                     <li className="nav-item">
                         <Tippy 
                             content={<RecentTxnDropdown data={recentTransactions} network={networkURL} />} 
+                            animation="shift-away-subtle"
                             trigger="click"
                             arrow={false}
                             interactive={true}
                             placement="bottom-end"
                             appendTo="parent"
-                            animation="shift-away-subtle"
                             onMount={() => setAriaExpanded(true)}
                             onHide={() => setAriaExpanded(false)}>
                                 <button 
@@ -1000,7 +1013,7 @@ function Dashboard(props: any) {
                         <div className="row">
                             <div className="col-12">
                                 <div className="d-flex justify-content-end">
-                                    <button type="button" className="btn btn-user-secondary-action" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
+                                    <button type="button" className="btn btn-user-secondary-action shadow-none" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
                                         <span>Refresh</span>
                                     </ReactTooltip>
@@ -1147,12 +1160,7 @@ function Dashboard(props: any) {
                 </div>
             </div>
 
-            <footer id="disclaimer" className="align-items-start">
-                <div className="p-2">
-                <span className="mx-3">&copy; 2020 Zilliqa</span> 
-                <button type="button" className="btn shadow-none" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
-                </div>
-            </footer>
+            <Footer networkLabel={convertNetworkUrlToLabel(networkURL)} />
             <DisclaimerModal />
 
             <UpdateCommRateModal 

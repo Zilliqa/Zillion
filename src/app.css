@@ -304,6 +304,7 @@ input:focus {
   fill: var(--primary-color);
   color: var(--primary-color);
   background-color: var(--secondary-color);
+  background-color: transparent;
   font-size: 1em;
   font-weight: 500;
 }
@@ -888,6 +889,21 @@ input:focus {
   font-size: 0.85em;
   font-weight: 500;
   color: var(--primary-color);
+}
+
+#disclaimer .btn:hover {
+  color: var(--primary-hover-color);
+}
+
+#disclaimer .footer-link {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+#disclaimer .footer-link:hover {
+  color: var(--primary-hover-color);
+  text-decoration: none;
 }
 
 #disclaimer-modal .modal-body {
