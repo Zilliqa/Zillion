@@ -42,7 +42,9 @@ import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import RecentTxnDropdown from './recent-txn';
 import Tippy from '@tippyjs/react';
+import '../tippy.css';
 import 'tippy.js/animations/shift-away-subtle.css';
+
 
 import BN from 'bn.js';
 import IconSun from './icons/sun';
@@ -156,6 +158,9 @@ function Dashboard(props: any) {
 
     // set recent txn indicator icon
     const handleTxnNotify = () => {
+        if (!isTxnNotify) {
+            return;
+        }
         setIsTxnNotify(false);
     }
 
@@ -429,6 +434,7 @@ function Dashboard(props: any) {
 
                     // compute rewards
                     const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
+                    console.log("test :%o", delegRewards);
 
                     const data: DelegStakingPortfolioStats = {
                         ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
@@ -960,12 +966,12 @@ function Dashboard(props: any) {
                     <li className="nav-item">
                         <Tippy 
                             content={<RecentTxnDropdown data={recentTransactions} network={networkURL} />} 
+                            animation="shift-away-subtle"
                             trigger="click"
                             arrow={false}
                             interactive={true}
                             placement="bottom-end"
                             appendTo="parent"
-                            animation="shift-away-subtle"
                             onMount={() => setAriaExpanded(true)}
                             onHide={() => setAriaExpanded(false)}>
                                 <button 
