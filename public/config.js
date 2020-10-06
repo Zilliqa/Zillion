@@ -3,6 +3,9 @@
  * blockchain_explorer_config: [viewblock (default) | devex]
  * - domain link to blockchain explorer
  * 
+ * node_status
+ *  - link to staking viewer
+ * 
  * refresh_rate_config: [time in milliseconds]
  * - interval at which contract data and wallet's info are updated
  * 
