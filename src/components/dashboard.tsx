@@ -834,7 +834,7 @@ function Dashboard(props: any) {
                 url = NetworkURL.ISOLATED_SERVER;
                 if (environment_config === Environment.PROD) {
                     // warn users not to switch to testnet on production
-                    Alert("warn", "Testnet is not supported. Please switch to Mainnet via ZilPay.");
+                    Alert("warn", "Private network is not supported. Please switch to Mainnet via ZilPay.");
                 }
                 break;
             default:
