@@ -823,12 +823,18 @@ function Dashboard(props: any) {
             case NetworkLabel.TESTNET:
                 networkLabel = NetworkLabel.TESTNET;
                 url = NetworkURL.TESTNET;
+                if (environment_config === Environment.PROD) {
+                    // warn users not to switch to testnet on production
+                    Alert("warn", "Testnet is not supported. Please switch to Mainnet via ZilPay.");
+                }
                 break;
             case NetworkLabel.ISOLATED_SERVER:
             case NetworkLabel.PRIVATE:
+                networkLabel = NetworkLabel.ISOLATED_SERVER;
+                url = NetworkURL.ISOLATED_SERVER;
                 if (environment_config === Environment.PROD) {
                     // warn users not to switch to testnet on production
-                    Alert("warn", "Testnet is not supported. Please switch to Mainnet from ZilPay.");
+                    Alert("warn", "Testnet is not supported. Please switch to Mainnet via ZilPay.");
                 }
                 break;
             default:
