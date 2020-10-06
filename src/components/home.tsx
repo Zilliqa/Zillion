@@ -311,8 +311,22 @@ function Home(props: any) {
                 <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
 
                 <div id="home-ssn-details" className="container">
-                  <div className="row p-4">
-                    <h2 className="mb-4">Staked Seed Nodes</h2>
+                  <div className="row pl-2 pt-4">
+                    <div className="col text-left">
+                      <h2>Staked Seed Nodes</h2>
+                      <p className="info mt-4 mb-0">Please refer to our&nbsp; 
+                          <a className="info-link" href={networks_config[selectedNetwork].node_status ? 
+                              networks_config[selectedNetwork].node_status : 
+                              "https://zilliqa.com/"} 
+                                target="_blank" 
+                                rel="noopener noreferrer">
+                                   Staking Viewer 
+                          </a> 
+                        &nbsp;for more information on the nodes' statuses.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="row">
                     <div className="col-12 content">
                         <SsnTable 
                           impl={networks_config[selectedNetwork].impl} 
