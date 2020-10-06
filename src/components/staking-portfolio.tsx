@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
+import ReactTooltip from 'react-tooltip';
 
 import { PromiseArea } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink, convertQaToZilFull } from '../util/utils';
 
 import { DelegStakingPortfolioStats } from '../util/interface';
 import Spinner from './spinner';
@@ -89,7 +90,11 @@ function StakingPortfolio(props: any) {
             {
                 Header: 'rewards (ZIL)',
                 accessor: 'rewards',
-                Cell: ({ row }: any) => <span>{convertQaToCommaStr(row.original.rewards)}</span>
+                Cell: ({ row }: any) => 
+                    <>
+                    <span data-for="rewards-tip" data-tip={convertQaToZilFull(row.original.rewards)}>{convertQaToCommaStr(row.original.rewards)}</span>
+                    <ReactTooltip id="rewards-tip" place="bottom" type="dark" effect="solid" />
+                    </>
             },
             {
                 Header: 'actions',

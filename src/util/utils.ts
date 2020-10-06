@@ -58,6 +58,17 @@ export const convertQaToCommaStr = (inputVal: string) => {
     return zilProperDecimalStr.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
 }
 
+// show the full zil amount
+export const convertQaToZilFull = (amount: string) => {
+    let result = "0.00";
+    try {
+        result = units.fromQa(new BN(amount), units.Units.Zil);
+    } catch (err) {
+        result = "0.00";
+    }
+    return result;
+}
+
 // convert gzil amount in 15 decimal places to a comma represented string
 export const convertGzilToCommaStr = (inputVal: string) => {
     const decimalPlaces = new BigNumber(10**15);
