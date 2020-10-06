@@ -5,7 +5,7 @@ import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, convertZilToQa } from '../util/utils';
+import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -33,6 +33,8 @@ import IconQuestionCircle from './icons/question-circle';
 import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
 import IconCheckboxBlankCircle from './icons/checkbox-blank-circle';
+import IconSun from './icons/sun';
+import IconMoon from './icons/moon';
 
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
@@ -40,6 +42,7 @@ import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
+import Footer from './footer';
 import RecentTxnDropdown from './recent-txn';
 import Tippy from '@tippyjs/react';
 import '../tippy.css';
@@ -47,8 +50,6 @@ import 'tippy.js/animations/shift-away-subtle.css';
 
 
 import BN from 'bn.js';
-import IconSun from './icons/sun';
-import IconMoon from './icons/moon';
 
 
 const BigNumber = require('bignumber.js');
@@ -1153,12 +1154,7 @@ function Dashboard(props: any) {
                 </div>
             </div>
 
-            <footer id="disclaimer" className="align-items-start">
-                <div className="p-2">
-                <span className="mx-3">&copy; 2020 Zilliqa</span> 
-                <button type="button" className="btn shadow-none" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
-                </div>
-            </footer>
+            <Footer networkLabel={convertNetworkUrlToLabel(networkURL)} />
             <DisclaimerModal />
 
             <UpdateCommRateModal 
