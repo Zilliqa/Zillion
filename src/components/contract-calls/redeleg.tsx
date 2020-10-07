@@ -1,5 +1,6 @@
-import React, { useState, useContext } from 'react';
-import Select from 'react-select';
+import React, { useState, useContext, useMemo } from 'react';
+import { useTable, useSortBy } from 'react-table';
+import ReactTooltip from 'react-tooltip';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
@@ -8,12 +9,67 @@ import AppContext from '../../contexts/appContext';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr } from '../../util/utils';
-import { ProxyCalls, OperationStatus, AccessMethod, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt } from '../../util/utils';
+import { ProxyCalls, OperationStatus, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
+
+
 const { BN } = require('@zilliqa-js/util');
+
+
+function Table({ columns, data, tableId, handleNodeSelect }: any) {
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        rows,
+        prepareRow,
+    } = useTable(
+        {
+            columns, 
+            data,
+            initialState : {
+                sortBy: [
+                    {
+                        id: "delegNum",
+                        desc: true
+                    },
+                    {
+                        id: "stakeAmt",
+                        desc: true
+                    }
+                ]
+            }
+        }, useSortBy);
+
+    return (
+        <table id={tableId} className="table table-responsive-md" {...getTableProps()}>
+            <thead>
+                {headerGroups.map(headerGroup => (
+                    <tr {...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers.map(column => (
+                            <th scope="col" {...column.getHeaderProps()}>{column.render('Header')}</th>
+                        ))}
+                    </tr>
+                ))}
+            </thead>
+            <tbody {...getTableBodyProps()}>
+                {rows.map((row, i) => {
+                    prepareRow(row)
+                    return (
+                        <tr {...row.getRowProps()} onClick={() => handleNodeSelect(row.original)}>
+                            {row.cells.map(cell => {
+                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                            })}
+                        </tr>
+                    )
+                })}
+            </tbody>
+        </table>
+    );
+}
 
 
 function ReDelegateStakeModal(props: any) {
@@ -34,10 +90,12 @@ function ReDelegateStakeModal(props: any) {
 
     const fromSsn = transferStakeModalData.ssnAddress; // bech32
     const [toSsn, setToSsn] = useState('');
+    const [toSsnName, setToSsnName] = useState('');
     const [delegAmt, setDelegAmt] = useState(''); // in ZIL
 
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+    const [showNodeSelector, setShowNodeSelector] = useState(false);
 
     
     // checks if there are any unwithdrawn rewards or buffered deposit
@@ -76,7 +134,7 @@ function ReDelegateStakeModal(props: any) {
         let delegAmtQa;
 
         if (!fromSsn || !toSsn) {
-            Alert('error', "operator address should be bech32 or checksum format");
+            Alert('error', "Please select a node.");
             return null;
         }
 
@@ -110,6 +168,14 @@ function ReDelegateStakeModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
+        const currentAmtQa = transferStakeModalData.delegAmt;
+
+        // check if redelg more than current deleg amount
+        if (new BN(delegAmtQa).gt(new BN(currentAmtQa))) {
+            Alert('info', "You only have " + convertQaToCommaStr(currentAmtQa) + " ZIL to transfer." );
+            setIsPending('');
+            return null;
+        }
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -138,14 +204,7 @@ function ReDelegateStakeModal(props: any) {
             })
         };
 
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
-
-        if (accountType === AccessMethod.ZILPAY) {
-            Alert('info', "Please follow the instructions on ZilPay.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
@@ -174,18 +233,68 @@ function ReDelegateStakeModal(props: any) {
         toast.dismiss();
         setTimeout(() => {
             setToSsn('');
+            setToSsnName('');
             setTxnId('');
-            setDelegAmt('')
+            setDelegAmt('');
+            setShowNodeSelector(false);
         }, 150);
     }
 
-    const handleToAddress = (option: any) => {
-        setToSsn(option.value);
+    // row contains a json from react-table, similar to the react-table header declaration
+    const handleNodeSelect = (row: any) => {
+        setToSsn(row.address);
+        setToSsnName(row.name);
+        // reset the view
+        toggleNodeSelector();
     }
 
     const handleDelegAmt = (e: any) => {
         setDelegAmt(e.target.value);
     }
+
+    const toggleNodeSelector = () => {
+        console.log("toggle node selector: %o", showNodeSelector);
+        setShowNodeSelector(!showNodeSelector);
+    }
+
+    const columns = useMemo(
+        () => [
+            {
+                Header: 'name',
+                accessor: 'name'
+            },
+            {
+                Header: 'address',
+                accessor: 'address',
+                Cell: ({ row }: any) => 
+                    <>
+                    <span data-tip={row.original.address}>
+                        {getTruncatedAddress(row.original.address)}
+                    </span>
+                    <ReactTooltip place="bottom" type="dark" effect="float" />
+                    </>
+            },
+            {
+                Header: 'Delegators',
+                accessor: 'delegNum',
+            },
+            {
+                Header: 'Stake Amount',
+                accessor: 'stakeAmt',
+                Cell: ({ row }: any) => 
+                    <>
+                    <span>{convertQaToCommaStr(row.original.stakeAmt)}</span>
+                    </>
+            },
+            {
+                Header: 'Comm. Rate (%)',
+                accessor: 'commRate',
+                Cell: ({ row }: any) =>
+                    <span>{convertToProperCommRate(row.original.commRate).toFixed(2)}</span>
+            }
+            // eslint-disable-next-line
+        ], []
+    )
 
     return (
         <div id="redeleg-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="redelegModalLabel" aria-hidden="true">
@@ -212,39 +321,67 @@ function ReDelegateStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <h2 className="node-details-subheading">From</h2>
-                            <div className="row node-details-wrapper mb-4">
-                                <div className="col node-details-panel mr-4">
-                                    <h3>{transferStakeModalData.ssnName}</h3>
-                                    <span>{transferStakeModalData.ssnAddress}</span>
-                                </div>
-                                <div className="col node-details-panel">
-                                    <h3>Current Deposit</h3>
-                                    <span>{convertQaToCommaStr(transferStakeModalData.delegAmt)} ZIL</span>
-                                </div>
-                            </div>
-                            <h2 className="node-details-subheading">To</h2>
-                            <Select 
-                                value={
-                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
-                                        option.value === toSsn)
+                            {
+                                !showNodeSelector &&
+                                <>
+                                    {/* sender */}
+                                    <h2 className="node-details-subheading">From</h2>
+                                    <div className="row node-details-wrapper mb-4">
+                                        <div className="col node-details-panel mr-4">
+                                            <h3>{transferStakeModalData.ssnName}</h3>
+                                            <span>{transferStakeModalData.ssnAddress}</span>
+                                        </div>
+                                        <div className="col node-details-panel">
+                                            <h3>Current Deposit</h3>
+                                            <span>{convertQaToCommaStr(transferStakeModalData.delegAmt)} ZIL</span>
+                                        </div>
+                                    </div>
+
+                                    {/* recipient*/}
+                                    <h2 className="node-details-subheading">To</h2>
+                                    
+                                    {!toSsn &&
+                                        <button type="button" className="mb-4 btn btn-contract btn-block shadow-none" onClick={() => toggleNodeSelector()}>Select a node</button>
                                     }
-                                placeholder="Select an operator to receive the transferred amount"
-                                className="node-options-container mb-4"
-                                classNamePrefix="node-options"
-                                options={nodeSelectorOptions}
-                                onChange={handleToAddress}  />
 
-                            <div className="input-group mb-4">
-                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer" />
-                                <div className="input-group-append">
-                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
-                                </div>
-                            </div>
+                                    { toSsn &&
+                                        <>
+                                        <div className="row node-details-wrapper mb-4">
+                                            <div className="col node-details-panel">
+                                                <h3>{toSsnName}</h3>
+                                                <span>{toSsn}</span>
+                                                <button type="button" className="btn btn-change-node shadow-none" onClick={() => toggleNodeSelector()}>Change</button>
+                                            </div>
+                                        </div>
 
-                            <div className="d-flex">
-                                <button type="button" className="btn btn-user-action mt-2 mx-auto shadow-none" onClick={redeleg}>Transfer Stake</button>
-                            </div>
+                                        <div className="input-group mb-4">
+                                            <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer" />
+                                            <div className="input-group-append">
+                                                <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                            </div>
+                                        </div>
+                                        </>
+                                    }
+
+                                    <div className="d-flex">
+                                        <button type="button" className="btn btn-user-action mt-2 mx-auto shadow-none" onClick={redeleg}>Transfer Stake</button>
+                                    </div>
+                                </>
+                            }
+
+                            {
+                                showNodeSelector &&
+
+                                <>
+                                    <h2 className="node-details-subheading mb-2">Select a node to transfer to</h2>
+                                    <div id="transfer-stake-details">
+                                        <Table columns={columns} data={nodeSelectorOptions} handleNodeSelect={handleNodeSelect}/>
+                                    </div>
+                                    <div className="d-flex">
+                                        <button type="button" className="btn btn-user-action-cancel mt-4 mx-auto shadow-none" onClick={() => toggleNodeSelector()}>Back</button>
+                                    </div>
+                                </>
+                            }
 
                         </div>
                         </>

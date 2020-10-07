@@ -1,5 +1,6 @@
 import { fromBech32Address } from '@zilliqa-js/crypto';
-import { Explorer, NetworkURL, Network, TransactionType } from './enum';
+import { Explorer, NetworkURL, Network, TransactionType, AccessMethod } from './enum';
+import Alert from '../components/alert';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
@@ -157,5 +158,20 @@ export const getTransactionText = (txnType: TransactionType) => {
             return "Withdraw Commission";
         default:
             return "Error";
+    }
+}
+
+// show information to prompt users
+// for used during contract calls
+export const showWalletsPrompt = (accountType: string) => {
+    if (accountType === AccessMethod.LEDGER) {
+        Alert('info', "Accessing the ledger device for keys.");
+        Alert('info', "Please follow the instructions on the device.");
+        return;
+    }
+
+    if (accountType === AccessMethod.ZILPAY) {
+        Alert('info', "Please follow the instructions on ZilPay.");
+        return;
     }
 }

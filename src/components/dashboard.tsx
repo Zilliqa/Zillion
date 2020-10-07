@@ -511,11 +511,26 @@ function Dashboard(props: any) {
                         continue;
                     }
 
-                    const operatorName = contractState.ssnlist[operatorAddr].arguments[3];
+                    const ssnArgs = contractState.ssnlist[operatorAddr].arguments;
+                    const operatorName = ssnArgs[3];
                     const operatorBech32Addr = toBech32Address(operatorAddr);
+
+                    
+                    // get number of delegators
+                    const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+                    let delegNum = '0';
+
+                    if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
+                        operatorAddr in delegNumState['ssn_deleg_amt']) {
+                        delegNum = Object.keys(delegNumState['ssn_deleg_amt'][operatorAddr]).length.toString();
+                    }
+
                     const operatorOption: NodeOptions = {
-                        label: operatorName + ": " + operatorBech32Addr,
-                        value: operatorAddr
+                        address: operatorBech32Addr,
+                        name: operatorName,
+                        stakeAmt: ssnArgs[1],
+                        delegNum: delegNum,
+                        commRate: ssnArgs[7],
                     }
                     tempNodeOptions.push(operatorOption);
                 }

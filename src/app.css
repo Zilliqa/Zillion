@@ -683,6 +683,7 @@ input:focus {
 
 .modal-body .node-details-wrapper .node-details-panel {
   border-radius: 6px;
+  border: 1px solid var(--primary-table-striped-color);
   padding-top: 1.2em;
   padding-left: 1.2em;
   padding-right: 1.2em;
@@ -1407,6 +1408,54 @@ input:focus {
 #staking-portfolio-details .inner-section-heading .section-icon {
   fill: var(--primary-table-inner-heading-color)
 }
+
+#transfer-stake-details {
+  font-size: 0.85em;
+}
+
+#transfer-stake-details {
+  height: 300px;
+  overflow-y: scroll;
+}
+
+#transfer-stake-details table tbody {
+  font-weight: 500;
+  color: var(--primary-table-font-color);
+}
+
+#transfer-stake-details table tbody tr:nth-child(odd) {
+  background-color: var(--primary-table-striped-color);
+}
+
+#redeleg-stake-modal .btn-change-node {
+  font-size: 1em;
+  padding: 0;
+  margin-left: 1.5em;
+  color: var(--primary-color);
+}
+
+#redeleg-stake-modal .btn-change-node:hover {
+  color: var(--primary-dark-color);
+}
+
+#transfer-stake-details table tbody tr:hover {
+  cursor: pointer;
+  color: var(--secondary-color);
+  background-color: var(--primary-color) !important;
+}
+
+#transfer-stake-details .table td,
+#transfer-stake-details .table th {
+  border: 0;
+}
+
+#transfer-stake-details th {
+  color: var(--primary-color);
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 
 #txn-notify-dropdown .notification {
   /* width: 480px; */

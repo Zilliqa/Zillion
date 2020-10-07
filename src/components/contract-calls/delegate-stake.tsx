@@ -5,8 +5,8 @@ import { toast } from 'react-toastify';
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertToProperCommRate } from '../../util/utils';
-import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt } from '../../util/utils';
+import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -91,11 +91,7 @@ function DelegateStakeModal(props: any) {
         };
 
         setIsPending(OperationStatus.PENDING);
-        
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
