@@ -1442,6 +1442,7 @@ input:focus {
   cursor: pointer;
   color: var(--secondary-color);
   background-color: var(--primary-color) !important;
+  transition: 0.5s ease;
 }
 
 #transfer-stake-details .table td,
