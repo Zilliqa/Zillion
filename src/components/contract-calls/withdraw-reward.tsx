@@ -5,12 +5,13 @@ import { toast } from 'react-toastify';
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertQaToCommaStr } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
+const BigNumber = require('bignumber.js');
 const { BN } = require('@zilliqa-js/util');
 
 
@@ -115,7 +116,7 @@ function WithdrawRewardModal(props: any) {
                          <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -127,12 +128,12 @@ function WithdrawRewardModal(props: any) {
                                 </div>
                                 <div className="col node-details-panel">
                                     <h3>Rewards</h3>
-                                    <span>{convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</span>
+                                    <span>{ new BigNumber(claimedRewardsModalData.rewards).isGreaterThanOrEqualTo(10**9) ? convertQaToCommaStr(claimedRewardsModalData.rewards) : convertQaToZilFull(claimedRewardsModalData.rewards)} ZIL</span>
                                 </div>
                             </div>
                             <p><small><em>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</em></small></p>
                             <div className="d-flex mt-4">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
+                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
                             </div>
 
                         </div>

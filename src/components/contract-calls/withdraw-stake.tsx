@@ -68,14 +68,25 @@ function WithdrawStakeModal(props: any) {
     }
 
     const withdrawStake = async () => {
+        let withdrawAmtQa;
+
         if (!ssnAddress) {
             Alert('error', "operator address should be bech32 or checksum format");
             return null;
         }
 
-        if (!withdrawAmt || !withdrawAmt.match(/\d/)) {
+        if (!withdrawAmt) {
             Alert('error', "Withdraw amount is invalid.");
             return null;
+        } else {
+            try {
+                withdrawAmtQa = convertZilToQa(withdrawAmt);
+            } catch (err) {
+                // user input is malformed
+                // cannot convert input zil amount to qa
+                Alert('error', "Withdraw amount is invalid.");
+                return null;
+            }
         }
 
         setIsPending(OperationStatus.PENDING);
@@ -92,7 +103,14 @@ function WithdrawStakeModal(props: any) {
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-        const withdrawAmtQa = convertZilToQa(withdrawAmt);
+        const delegAmtQa = withdrawStakeModalData.delegAmt;
+
+        // check if withdraw more than delegated
+        if (new BN(withdrawAmtQa).gt(new BN(delegAmtQa))) {
+            Alert('info', "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
+            setIsPending('');
+            return null;
+        }
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -176,7 +194,7 @@ function WithdrawStakeModal(props: any) {
                         <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="withdrawStakeModalLabel">Initiate Stake Withdrawal</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -191,9 +209,14 @@ function WithdrawStakeModal(props: any) {
                                     <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
                                 </div>
                             </div>
-                            <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter stake amount to withdraw" />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                </div>
+                            </div>
                             <div className="d-flex">
-                                <button type="button" className="btn btn-user-action mx-auto mt-2" onClick={withdrawStake}>Initiate</button>
+                                <button type="button" className="btn btn-user-action mx-auto mt-2 shadow-none" onClick={withdrawStake}>Initiate</button>
                             </div>
                         </div>
                         </>

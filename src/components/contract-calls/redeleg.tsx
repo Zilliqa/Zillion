@@ -73,14 +73,25 @@ function ReDelegateStakeModal(props: any) {
     }
 
     const redeleg = async () => {
+        let delegAmtQa;
+
         if (!fromSsn || !toSsn) {
             Alert('error', "operator address should be bech32 or checksum format");
             return null;
         }
 
-        if (!delegAmt || !delegAmt.match(/\d/)) {
-            Alert('error', "Delegate amount is invalid.");
+        if (!delegAmt) {
+            Alert('error', "Transfer amount is invalid.");
             return null;
+        } else {
+            try {
+                delegAmtQa = convertZilToQa(delegAmt);
+            } catch (err) {
+                // user input is malformed
+                // cannot convert input zil amount to qa
+                Alert('error', "Transfer amount is invalid.");
+                return null;
+            }
         }
 
         setIsPending(OperationStatus.PENDING);
@@ -99,7 +110,6 @@ function ReDelegateStakeModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
-        const delegAmtQa = convertZilToQa(delegAmt);
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -197,7 +207,7 @@ function ReDelegateStakeModal(props: any) {
                         <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="withdrawRewardModalLabel">Transfer Stake</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -225,10 +235,15 @@ function ReDelegateStakeModal(props: any) {
                                 options={nodeSelectorOptions}
                                 onChange={handleToAddress}  />
 
-                            <input type="text" className="mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer in ZIL" />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer" />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                </div>
+                            </div>
 
-                            <div className="d-flex mt-4">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={redeleg}>Transfer Stake</button>
+                            <div className="d-flex">
+                                <button type="button" className="btn btn-user-action mt-2 mx-auto shadow-none" onClick={redeleg}>Transfer Stake</button>
                             </div>
 
                         </div>

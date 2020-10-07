@@ -133,8 +133,6 @@ function Dashboard(props: any) {
     const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
-    const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
-    const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
     
     // data for each contract modal
     const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
@@ -501,8 +499,6 @@ function Dashboard(props: any) {
     // for the dropdowns in the modals
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
-        let withdrawStakeOptions: NodeOptions[] = [];
-        let claimRewardsOptions: NodeOptions[] = [];
 
         ZilliqaAccount.getImplState(impl, "ssnlist")
             .then(async (contractState) => {
@@ -523,46 +519,6 @@ function Dashboard(props: any) {
                     }
                     tempNodeOptions.push(operatorOption);
                 }
-
-                // get withdraw stake options
-                const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
-
-                const depostAmtDelegState = await ZilliqaAccount.getImplState(impl, "deposit_amt_deleg");
-
-                if (depostAmtDelegState === undefined || depostAmtDelegState === 'error') {
-                    return null;
-                }
-
-                if (!depostAmtDelegState.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
-                    return null;
-                }
-
-                const depositDelegList = depostAmtDelegState.deposit_amt_deleg[userBase16Address];
-
-                for (const item of tempNodeOptions) {
-                    const ssnAddress = item.value;
-                    if (ssnAddress in depositDelegList) {
-                        // include the stake amount in the labels
-                        const delegAmt = depositDelegList[ssnAddress];
-
-                        // include the claimed rewards in the labels
-                        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-                        
-
-                        withdrawStakeOptions.push({
-                            label: item.label + " (" + convertQaToCommaStr(delegAmt) + " ZIL)",
-                            value: item.value
-                        });
-
-                        if (delegRewards && delegRewards !== '0') {
-                            claimRewardsOptions.push({
-                                label: item.label + " (" + convertQaToCommaStr(delegRewards) + " ZIL)",
-                                value: item.value
-                            });
-                        }
-                    }
-                }
-
             })
             .catch((err) => {
                 console.error(err);
@@ -576,11 +532,9 @@ function Dashboard(props: any) {
                     return null;
                 }
                 setNodeOptions([...tempNodeOptions]);
-                setWithdrawStakeOptions([...withdrawStakeOptions]);
-                setClaimedRewardsOptions([...claimRewardsOptions]);
             });
 
-    }, [impl, currWalletAddress, networkURL]);
+    }, [impl]);
 
 
     /* fetch data for operator stats panel */
@@ -1247,7 +1201,6 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                currentDelegatedOptions = {withdrawStakeOptions}
                 nodeSelectorOptions={nodeOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
@@ -1259,7 +1212,6 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={withdrawStakeOptions} 
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
@@ -1270,7 +1222,6 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={claimedRewardsOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}

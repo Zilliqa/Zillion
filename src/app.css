@@ -616,9 +616,49 @@ input:focus {
   box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
 }
 
-.modal .contract-calls-modal .modal-body > input[type=text]:-moz-placeholder {
-  color: var(--primary-color);
+.modal .contract-calls-modal .modal-body .form-control {
+  color: var(--text-color);
+  font-size: 1em !important;
+  height: 50px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  border: none;
+  background-color: var(--secondary-color);
+  padding: 0.9em 1em !important;
+}
+
+.modal .contract-calls-modal .modal-body .form-control:focus {
+  outline-color: var(--primary-color);
+  outline-style: solid;
+  outline-width: thin;
+}
+
+.modal .contract-calls-modal .modal-body .form-control::placeholder {
+  color: var(--placeholder-text-color);
+}
+
+.modal .contract-calls-modal .modal-body .form-control:-moz-placeholder {
+  color: var(--placeholder-text-color);
   opacity: 1;
+}
+
+.modal .contract-calls-modal .modal-body .form-control::-moz-placeholder {
+  color: var(--placeholder-text-color);
+  opacity: 1;
+}
+
+.modal .contract-calls-modal .modal-body .input-group {
+  -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+  box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+}
+
+.modal .contract-calls-modal .modal-body .input-group > .input-group-append > .input-group-text {
+  font-size: 0.8em;
+  font-weight: 500;
+  color: var(--primary-color);
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
 }
 
 .modal-body .node-details-wrapper {
