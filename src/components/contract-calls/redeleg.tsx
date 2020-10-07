@@ -225,10 +225,15 @@ function ReDelegateStakeModal(props: any) {
                                 options={nodeSelectorOptions}
                                 onChange={handleToAddress}  />
 
-                            <input type="text" className="mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer in ZIL" />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer" />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                </div>
+                            </div>
 
-                            <div className="d-flex mt-4">
-                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={redeleg}>Transfer Stake</button>
+                            <div className="d-flex">
+                                <button type="button" className="btn btn-user-action mt-2 mx-auto shadow-none" onClick={redeleg}>Transfer Stake</button>
                             </div>
 
                         </div>

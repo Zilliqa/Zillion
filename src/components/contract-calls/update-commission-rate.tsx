@@ -130,7 +130,12 @@ function UpdateCommRateModal(props: any) {
                                     <span>{currentRate ? convertToProperCommRate(currentRate).toFixed(2) : '0.00'}&#37;</span>
                                 </div>
                             </div>
-                            <input type="text" className="mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" maxLength={9} />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate" maxLength={9} />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">%</span>
+                                </div>
+                            </div>
                             <div className="d-flex mt-2">
                                 <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={updateCommRate}>Update</button>
                             </div>

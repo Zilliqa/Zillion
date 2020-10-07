@@ -191,7 +191,12 @@ function WithdrawStakeModal(props: any) {
                                     <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
                                 </div>
                             </div>
-                            <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter stake amount to withdraw" />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                </div>
+                            </div>
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto mt-2 shadow-none" onClick={withdrawStake}>Initiate</button>
                             </div>
