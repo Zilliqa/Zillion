@@ -12,16 +12,19 @@
             proxy: "<proxy_checksum_address>",
             impl: "<implementation_contract_checksum_address>",
             blockchain: "https://dev-api.zilliqa.com",
+            node_status: "https://testnet-viewer.zilliqa.com",
         },
         mainnet: {
             proxy: "<proxy_checksum_address>",
             impl: "<implementation_contract_checksum_address>",
             blockchain: "https://api.zilliqa.com",
+            node_status: "https://staking-viewer.zilliqa.com",
         },
         isolated_server: {
             proxy: "<proxy_checksum_address>",
             impl: "<implementation_contract_checksum_address>",
             blockchain: "https://zilliqa-isolated-server.zilliqa.com",
+            node_status: "",
         }
     },
     blockchain_explorer_config: "viewblock",

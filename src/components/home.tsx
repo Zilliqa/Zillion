@@ -8,6 +8,7 @@ import AppContext from "../contexts/appContext";
 import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
 import * as ZilliqaAccount from "../account";
+import Footer from './footer';
 
 import WalletKeystore from './wallet-keystore';
 import WalletLedger from './wallet-ledger';
@@ -135,7 +136,8 @@ function Home(props: any) {
                   // get number of delegators
                   const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
 
-                  if (delegNumState.hasOwnProperty('ssn_deleg_amt')) {
+                  if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
+                      ssnAddress in delegNumState['ssn_deleg_amt']) {
                       delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
                   }
 
@@ -309,8 +311,22 @@ function Home(props: any) {
                 <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
 
                 <div id="home-ssn-details" className="container">
-                  <div className="row p-4">
-                    <h2 className="mb-4">Staked Seed Nodes</h2>
+                  <div className="row pl-2 pt-4">
+                    <div className="col text-left">
+                      <h2>Staked Seed Nodes</h2>
+                      <p className="info mt-4 mb-0">Please refer to our&nbsp; 
+                          <a className="info-link" href={networks_config[selectedNetwork].node_status ? 
+                              networks_config[selectedNetwork].node_status : 
+                              "https://zilliqa.com/"} 
+                                target="_blank" 
+                                rel="noopener noreferrer">
+                                   Staking Viewer 
+                          </a> 
+                        &nbsp;for more information on the nodes' statuses.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="row">
                     <div className="col-12 content">
                         <SsnTable 
                           impl={networks_config[selectedNetwork].impl} 
@@ -331,9 +347,26 @@ function Home(props: any) {
                 { /* no wallets selected - show wallets to connect */ }
                 <p className="wallet-connect-text animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
                 <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
-                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}><IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span></div>
-                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.LEDGER)}><IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span></div>
-                  <div className="btn-wallet-access d-block" onClick={() => handleAccessMethod(AccessMethod.ZILPAY)} data-tip="Ensure your ZilPay is on Testnet network"><IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span></div>
+
+                  <div 
+                    className="btn-wallet-access d-block" 
+                    onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}>
+                      <IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span>
+                  </div>
+
+                  <div 
+                    className="btn-wallet-access d-block" 
+                    onClick={() => handleAccessMethod(AccessMethod.LEDGER)}>
+                      <IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span>
+                  </div>
+
+                  <div 
+                    className="btn-wallet-access d-block" 
+                    onClick={() => handleAccessMethod(AccessMethod.ZILPAY)} 
+                    data-tip={ environment_config === Environment.PROD ? "Ensure your ZilPay is on Mainnet network" : "Ensure your ZilPay is on Testnet network" }>
+                      <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
+                  </div>
+                  
                   <ReactTooltip place="bottom" type="light" effect="float" />
                 </div>
                 <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
@@ -354,12 +387,7 @@ function Home(props: any) {
               </>
             }
           </div>
-          <footer id="disclaimer" className="align-items-start">
-            <div className="p-2">
-              <span className="ml-4 mx-3">&copy; 2020 Zilliqa</span> 
-              <button type="button" className="btn shadow-none" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
-            </div>
-          </footer>
+          <Footer networkLabel={selectedNetwork} />
           <DisclaimerModal />
         </div>
       </div>

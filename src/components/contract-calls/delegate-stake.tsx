@@ -1,12 +1,11 @@
 import React, { useState, useContext } from 'react';
-import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertToProperCommRate } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -26,11 +25,9 @@ function DelegateStakeModal(props: any) {
     const minDelegStake = props.minDelegStake; // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
 
-    const { updateData, updateRecentTransactions } = props;
+    const { delegStakeModalData, updateData, updateRecentTransactions } = props;
 
-    const [ssnAddress, setSsnAddress] = useState(''); // checksum address
-    
-    const nodeSelectorOptions = props.nodeSelectorOptions;
+    const ssnAddress = delegStakeModalData.ssnAddress; // bech32
 
     const [delegAmt, setDelegAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
@@ -126,7 +123,6 @@ function DelegateStakeModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setSsnAddress('');
             setDelegAmt('');
             setTxnId('');
         }, 150);
@@ -134,11 +130,6 @@ function DelegateStakeModal(props: any) {
 
     const handleDelegAmt = (e: any) => {
         setDelegAmt(e.target.value);
-    }
-
-    const handleChange = (option: any) => {
-        console.log(option.value);
-        setSsnAddress(option.value);
     }
 
     return (
@@ -160,24 +151,24 @@ function DelegateStakeModal(props: any) {
 
                          <>
                         <div className="modal-header">
-                            <h5 className="modal-title" id="delegateStakeModalLabel">Delegate Stake</h5>
+                            <h5 className="modal-title" id="delegateStakeModalLabel">Stake</h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div className="modal-body">
-                            <Select
-                                value={
-                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
-                                        option.value === ssnAddress)
-                                    }
-                                placeholder="Select an operator to delegate the stake"
-                                className="node-options-container mb-4"
-                                classNamePrefix="node-options"
-                                options={nodeSelectorOptions}
-                                onChange={handleChange} />
-                            <input type="text" className="mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter delegate amount in ZIL" />
-                            <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after delegation to pay for gas fees for future transactions such as withdrawal.</em></small></p>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{delegStakeModalData.ssnName}</h3>
+                                    <span>{delegStakeModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Commission Rate</h3>
+                                    <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
+                                </div>
+                            </div>
+                            <input type="text" className="mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount in ZIL" />
+                            <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after staking to pay for gas fees for future transactions such as withdrawal.</em></small></p>
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={delegateStake}>Stake</button>
                             </div>

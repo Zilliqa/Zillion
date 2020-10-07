@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { ToastContainer } from 'react-toastify';
 
 import AppContext from '../contexts/appContext';
-import { AccessMethod } from '../util/enum';
+import { AccessMethod, Environment } from '../util/enum';
 import Alert from './alert';
 
 
@@ -12,6 +12,9 @@ function WalletZilPay(props: any) {
     const { initParams, updateAuth, updateNetwork, updateRole } = appContext;
 
     const role = props.role;
+
+    // config.js from public folder
+    const { environment_config } = (window as { [key: string]: any })['config'];
 
     const unlockWallet = async () => {
 
@@ -62,7 +65,12 @@ function WalletZilPay(props: any) {
     return (
         <div className="wallet-access">
             <h2>Access wallet using ZilPay</h2>
-            <p className="my-4"><strong>Note:</strong> We remind all users to set your ZilPay network to <strong>Testnet</strong></p>
+            
+            { environment_config === Environment.PROD ? 
+                <p className="my-4"><strong>Note:</strong> We remind all users to set your ZilPay network to <strong>Mainnet</strong></p> :
+                <p className="my-4"><strong>Note:</strong> We remind all users to set your ZilPay network to <strong>Testnet</strong></p>
+            }
+            
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             <ToastContainer hideProgressBar={true} />

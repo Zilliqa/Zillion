@@ -1,12 +1,11 @@
 import React, { useState, useContext } from 'react';
-import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 import { fromBech32Address } from '@zilliqa-js/crypto';
@@ -26,11 +25,10 @@ function WithdrawStakeModal(props: any) {
     const impl = props.impl;
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
-    const { updateData, updateRecentTransactions } = props;
+    const { withdrawStakeModalData, updateData, updateRecentTransactions } = props;
     const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
-    const nodeSelectorOptions = props.nodeSelectorOptions;
 
-    const [ssnAddress, setSsnAddress] = useState(''); // checksum address
+    const ssnAddress = withdrawStakeModalData.ssnAddress; // bech32
     const [withdrawAmt, setWithdrawAmt] = useState(''); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -80,9 +78,12 @@ function WithdrawStakeModal(props: any) {
             return null;
         }
 
+        setIsPending(OperationStatus.PENDING);
+
         // check if deleg has unwithdrawn rewards or buffered deposits for this ssn address
         const hasRewards = await hasRewardToWithdraw();
         if (hasRewards) {
+            setIsPending('');
             return null;
         }
 
@@ -114,8 +115,6 @@ function WithdrawStakeModal(props: any) {
                 ]
             })
         };
-
-        setIsPending(OperationStatus.PENDING);
         
         if (accountType === AccessMethod.LEDGER) {
             Alert('info', "Accessing the ledger device for keys.");
@@ -148,7 +147,6 @@ function WithdrawStakeModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setSsnAddress('');
             setWithdrawAmt('');
             setTxnId('');
         }, 150);
@@ -156,11 +154,6 @@ function WithdrawStakeModal(props: any) {
 
     const handleWithdrawAmt = (e: any) => {
         setWithdrawAmt(e.target.value);
-    }
-
-    const handleChange = (option: any) => {
-        console.log(option.value);
-        setSsnAddress(option.value);
     }
 
     return (
@@ -188,19 +181,19 @@ function WithdrawStakeModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <Select
-                                value={
-                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
-                                        option.value === ssnAddress)
-                                    }
-                                placeholder="Select an operator to withdraw the stake"
-                                className="node-options-container mb-4"
-                                classNamePrefix="node-options"
-                                options={nodeSelectorOptions}
-                                onChange={handleChange} />
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{withdrawStakeModalData.ssnName}</h3>
+                                    <span>{withdrawStakeModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Deposit</h3>
+                                    <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
+                                </div>
+                            </div>
                             <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
                             <div className="d-flex">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawStake}>Initiate</button>
+                                <button type="button" className="btn btn-user-action mx-auto mt-2" onClick={withdrawStake}>Initiate</button>
                             </div>
                         </div>
                         </>

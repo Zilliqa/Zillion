@@ -1,12 +1,11 @@
 import React, { useState, useContext } from 'react';
-import Select from 'react-select';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr } from '../../util/utils';
 import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -20,16 +19,12 @@ function WithdrawRewardModal(props: any) {
     const { accountType } = appContext;
 
     const proxy = props.proxy;
-    // const impl = props.impl;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
-    const { updateData, updateRecentTransactions } = props;
+    const { claimedRewardsModalData, updateData, updateRecentTransactions } = props;
 
-    // const userBase16Address = fromBech32Address(props.userAddress).toLowerCase();
+    const ssnAddress = claimedRewardsModalData.ssnAddress; // bech32
 
-    const nodeSelectorOptions = props.nodeSelectorOptions;
-
-    const [ssnAddress, setSsnAddress] = useState(''); // checksum address
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
@@ -95,16 +90,10 @@ function WithdrawRewardModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setSsnAddress('');
             setTxnId('');
         }, 150);
     }
-
-    const handleChange = (option: any) => {
-        console.log(option.value);
-        setSsnAddress(option.value);
-    }
-
+    
     
     return (
         <div id="withdraw-reward-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawRewardModalLabel" aria-hidden="true">
@@ -131,19 +120,19 @@ function WithdrawRewardModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-
-                            <Select 
-                                value={
-                                    nodeSelectorOptions.filter((option: { label: string; value: string }) => 
-                                        option.value === ssnAddress)
-                                    }
-                                placeholder="Select an operator to claim the rewards"
-                                className="node-options-container mb-4"
-                                classNamePrefix="node-options"
-                                options={nodeSelectorOptions}
-                                onChange={handleChange}  />
-                            <div className="d-flex">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim</button>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel mr-4">
+                                    <h3>{claimedRewardsModalData.ssnName}</h3>
+                                    <span>{claimedRewardsModalData.ssnAddress}</span>
+                                </div>
+                                <div className="col node-details-panel">
+                                    <h3>Rewards</h3>
+                                    <span>{convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</span>
+                                </div>
+                            </div>
+                            <p><small><em>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</em></small></p>
+                            <div className="d-flex mt-4">
+                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
                             </div>
 
                         </div>
