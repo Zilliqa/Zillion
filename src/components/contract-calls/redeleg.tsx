@@ -9,8 +9,8 @@ import AppContext from '../../contexts/appContext';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress } from '../../util/utils';
-import { ProxyCalls, OperationStatus, AccessMethod, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt } from '../../util/utils';
+import { ProxyCalls, OperationStatus, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
@@ -204,14 +204,7 @@ function ReDelegateStakeModal(props: any) {
             })
         };
 
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
-
-        if (accountType === AccessMethod.ZILPAY) {
-            Alert('info', "Please follow the instructions on ZilPay.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {

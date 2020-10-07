@@ -2,8 +2,8 @@ import React, { useState, useContext } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import { bech32ToChecksum } from '../../util/utils';
-import { AccessMethod, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
+import { bech32ToChecksum, showWalletsPrompt } from '../../util/utils';
+import { OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import * as ZilliqaAccount from "../../account";
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
@@ -54,10 +54,7 @@ function UpdateReceiverAddress(props: any) {
 
         setIsPending(OperationStatus.PENDING);
         
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
