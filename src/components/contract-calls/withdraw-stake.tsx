@@ -68,14 +68,25 @@ function WithdrawStakeModal(props: any) {
     }
 
     const withdrawStake = async () => {
+        let withdrawAmtQa;
+
         if (!ssnAddress) {
             Alert('error', "operator address should be bech32 or checksum format");
             return null;
         }
 
-        if (!withdrawAmt || !withdrawAmt.match(/\d/)) {
+        if (!withdrawAmt) {
             Alert('error', "Withdraw amount is invalid.");
             return null;
+        } else {
+            try {
+                withdrawAmtQa = convertZilToQa(withdrawAmt);
+            } catch (err) {
+                // user input is malformed
+                // cannot convert input zil amount to qa
+                Alert('error', "Withdraw amount is invalid.");
+                return null;
+            }
         }
 
         setIsPending(OperationStatus.PENDING);
@@ -92,7 +103,14 @@ function WithdrawStakeModal(props: any) {
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-        const withdrawAmtQa = convertZilToQa(withdrawAmt);
+        const delegAmtQa = withdrawStakeModalData.delegAmt;
+
+        // check if withdraw more than delegated
+        if (new BN(withdrawAmtQa).gt(new BN(delegAmtQa))) {
+            Alert('info', "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
+            setIsPending('');
+            return null;
+        }
 
         // gas price, gas limit declared in account.ts
         let txParams = {
