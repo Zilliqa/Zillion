@@ -36,11 +36,6 @@ interface OperatorStats {
     receiver: string,
 }
 
-interface NodeOptions {
-    label: string,
-    value: string,
-}
-
 interface SsnStats {
     address: string,
     name: string,
@@ -51,6 +46,14 @@ interface SsnStats {
     commReward: string,
     delegNum: string,
     status: string,
+}
+
+interface NodeOptions {
+    address: string,
+    name: string,
+    stakeAmt: string,
+    delegNum: string,
+    commRate: string,
 }
 
 interface TransferStakeModalData {
