@@ -42,7 +42,7 @@ function DelegateStakeModal(props: any) {
         let delegAmtQa = '';
 
         if (!delegAmt) {
-            Alert('error', "Delegate amount is invalid.");
+            Alert('error', "Stake amount is invalid.");
             return null;
         } else {
             try {
@@ -51,14 +51,14 @@ function DelegateStakeModal(props: any) {
                 
 
                 if (isLessThanMinDeleg) {
-                    Alert('error', "Minimum delegate amount is " + minDelegStakeDisplay + " ZIL");
+                    Alert('error', "Minimum stake amount is " + minDelegStakeDisplay + " ZIL");
                     return null;
                 }
 
             } catch (err) {
                 // user input is malformed
                 // cannot convert input zil amount to qa
-                Alert('error', "Minimum delegate amount is " + minDelegStakeDisplay + " ZIL");
+                Alert('error', "Minimum stake amount is " + minDelegStakeDisplay + " ZIL");
                 return null;
             }
         }

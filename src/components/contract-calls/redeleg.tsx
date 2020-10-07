@@ -73,14 +73,25 @@ function ReDelegateStakeModal(props: any) {
     }
 
     const redeleg = async () => {
+        let delegAmtQa;
+
         if (!fromSsn || !toSsn) {
             Alert('error', "operator address should be bech32 or checksum format");
             return null;
         }
 
-        if (!delegAmt || !delegAmt.match(/\d/)) {
-            Alert('error', "Delegate amount is invalid.");
+        if (!delegAmt) {
+            Alert('error', "Transfer amount is invalid.");
             return null;
+        } else {
+            try {
+                delegAmtQa = convertZilToQa(delegAmt);
+            } catch (err) {
+                // user input is malformed
+                // cannot convert input zil amount to qa
+                Alert('error', "Transfer amount is invalid.");
+                return null;
+            }
         }
 
         setIsPending(OperationStatus.PENDING);
@@ -99,7 +110,6 @@ function ReDelegateStakeModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
-        const delegAmtQa = convertZilToQa(delegAmt);
 
         // gas price, gas limit declared in account.ts
         let txParams = {
