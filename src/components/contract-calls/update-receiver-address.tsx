@@ -111,7 +111,7 @@ function UpdateReceiverAddress(props: any) {
                         <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="updateRecvAddrModalLabel">Update Receiving Address</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -124,7 +124,7 @@ function UpdateReceiverAddress(props: any) {
                             </div>
                             <input type="text" className="mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in bech32 format" />
                             <div className="d-flex mt-2">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={updateAddress}>Update</button>
+                            <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={updateAddress}>Update</button>
                             </div>
                         </div>
                         </>

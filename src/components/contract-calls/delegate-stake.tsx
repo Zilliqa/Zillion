@@ -152,7 +152,7 @@ function DelegateStakeModal(props: any) {
                          <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="delegateStakeModalLabel">Stake</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -176,7 +176,7 @@ function DelegateStakeModal(props: any) {
                                 </ul>
                             </div>
                             <div className="d-flex">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={delegateStake}>Stake</button>
+                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={delegateStake}>Stake</button>
                             </div>
                         </div>
                          </>

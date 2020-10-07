@@ -115,7 +115,7 @@ function WithdrawRewardModal(props: any) {
                          <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -132,7 +132,7 @@ function WithdrawRewardModal(props: any) {
                             </div>
                             <p><small><em>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</em></small></p>
                             <div className="d-flex mt-4">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
+                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
                             </div>
 
                         </div>

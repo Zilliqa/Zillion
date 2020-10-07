@@ -96,7 +96,7 @@ function WithdrawCommModal(props: any) {
                             <>
                             <div className="modal-header">
                                 <h5 className="modal-title" id="withdrawCommModalLabel">Withdraw Commission</h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                                <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
@@ -109,7 +109,7 @@ function WithdrawCommModal(props: any) {
                                 </div>
                                 <p>Are you sure you wish to withdraw <strong>{currentRewards ? convertQaToCommaStr(currentRewards) : '0.000'}</strong> ZIL</p>
                                 <div className="d-flex mt-2">
-                                    <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawComm}>Withdraw</button>
+                                    <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawComm}>Withdraw</button>
                                 </div>
                             </div>
                             </>
