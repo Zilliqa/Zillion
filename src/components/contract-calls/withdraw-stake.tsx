@@ -14,7 +14,7 @@ import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
 
-const { BN } = require('@zilliqa-js/util');
+const { BN, units } = require('@zilliqa-js/util');
 
 
 function WithdrawStakeModal(props: any) {
@@ -25,6 +25,8 @@ function WithdrawStakeModal(props: any) {
     const impl = props.impl;
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
+    const minDelegStake = props.minDelegStake; // Qa
+    const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const { withdrawStakeModalData, updateData, updateRecentTransactions } = props;
     const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
 
@@ -104,10 +106,17 @@ function WithdrawStakeModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         const delegAmtQa = withdrawStakeModalData.delegAmt;
+        const leftOverQa = new BN(delegAmtQa).sub(new BN(withdrawAmtQa));
 
         // check if withdraw more than delegated
         if (new BN(withdrawAmtQa).gt(new BN(delegAmtQa))) {
             Alert('info', "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
+            setIsPending('');
+            return null;
+        } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
+            // check leftover amount
+            // if less than min stake amount
+            Alert('info', "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or withdraw ALL.");
             setIsPending('');
             return null;
         }

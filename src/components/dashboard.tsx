@@ -1230,7 +1230,8 @@ function Dashboard(props: any) {
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                withdrawStakeModalData={withdrawStakeModalData} />
+                withdrawStakeModalData={withdrawStakeModalData}
+                minDelegStake={minDelegStake} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
