@@ -167,7 +167,12 @@ function DelegateStakeModal(props: any) {
                                     <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
                                 </div>
                             </div>
-                            <input type="text" className="mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount in ZIL" />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount" />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                </div>
+                            </div>
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
