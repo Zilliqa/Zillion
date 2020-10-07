@@ -168,6 +168,14 @@ function ReDelegateStakeModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
+        const currentAmtQa = transferStakeModalData.delegAmt;
+
+        // check if redelg more than current deleg amount
+        if (new BN(delegAmtQa).gt(new BN(currentAmtQa))) {
+            Alert('info', "You only have " + convertQaToCommaStr(currentAmtQa) + " ZIL to transfer." );
+            setIsPending('');
+            return null;
+        }
 
         // gas price, gas limit declared in account.ts
         let txParams = {
