@@ -167,8 +167,14 @@ function DelegateStakeModal(props: any) {
                                     <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
                                 </div>
                             </div>
-                            <input type="text" className="mb-2" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount in ZIL" />
-                            <p><small><em>Please ensure you have at least <strong>100 ZIL</strong> after staking to pay for gas fees for future transactions such as withdrawal.</em></small></p>
+                            <input type="text" className="mb-4" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount in ZIL" />
+                            <div className="mb-4">
+                                <small><strong>Notes</strong></small>
+                                <ul>
+                                    <li><small>Minimum staking amount is <strong>{minDelegStakeDisplay}</strong> ZIL.</small></li>
+                                    <li><small>Please ensure you have at least <strong>100 ZIL</strong> after staking to pay for gas fees for future transactions such as withdrawal.</small></li>
+                                </ul>
+                            </div>
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={delegateStake}>Stake</button>
                             </div>
