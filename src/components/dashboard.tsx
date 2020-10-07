@@ -1161,7 +1161,7 @@ function Dashboard(props: any) {
                                 </div>
 
                                 <div className="px-2">
-                                    <ToastContainer hideProgressBar={true}/>
+                                    <ToastContainer hideProgressBar={true} autoClose={8000}/>
                                 </div>
 
                             </div>

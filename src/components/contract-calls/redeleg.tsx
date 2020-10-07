@@ -108,6 +108,25 @@ function ReDelegateStakeModal(props: any) {
             return false;
         }
 
+        // corner case check
+        // if user has buffered deposits
+        // happens if user first time deposit
+        // reward is zero but contract side warn has unwithdrawn rewards
+        // user cannot withdraw zero rewards from UI
+        if (contract.buff_deposit_deleg.hasOwnProperty(userBase16Address) &&
+            contract.buff_deposit_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
+                const buffDepositMap: any = contract.buff_deposit_deleg[userBase16Address][ssnChecksumAddress];
+                const lastCycleDelegNum = Object.keys(buffDepositMap).sort().pop() || '0';
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+
+                if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
+                    // deposit still in buffer 
+                    // have to wait for 2 cycles to receive rewards to clear buffer
+                    Alert('info', "You have buffered deposits in the selected node. Please wait for your rewards to be issued before transferring.");
+                    return true;
+                }
+        }
+
         // compute rewards
         const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
 
@@ -116,6 +135,8 @@ function ReDelegateStakeModal(props: any) {
             return true;
         }
 
+        // secondary buffered deposits check
+        // different map
         // check if user has buffered deposits
         if (contract.last_buf_deposit_cycle_deleg.hasOwnProperty(userBase16Address) &&
             contract.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
