@@ -60,7 +60,7 @@ function WithdrawStakeModal(props: any) {
                 if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
                     // deposit still in buffer 
                     // have to wait for 2 cycles to receive rewards to clear buffer
-                    Alert('info', "You have buffered deposits in the selected node. Please wait for 2 more cycles for your rewards to be issued before transferring.");
+                    Alert('info', "You have buffered deposits in the selected node. Please wait for 2 more cycles for your rewards to be issued before withdrawing.");
                     return true;
                 }
         }
