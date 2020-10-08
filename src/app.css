@@ -1435,7 +1435,9 @@ input:focus {
 }
 
 #toast-msg-container {
-  padding: 0.8em;
+  padding-left: 0.8em;
+  padding-top: 0.8em;
+  padding-bottom: 0.8em;
 }
 
 #toast-msg-container .toast-msg-header {
