@@ -23,11 +23,11 @@ function WalletZilPay(props: any) {
 
         // Checking on ZilPay inject and wallet state.
         if (!zilPay) {
-            Alert('warn', 'Please install ZilPay wallet.');
+            Alert('warn', 'ZilPay Not Installed', 'Please install ZilPay wallet.');
             return null;
 
         } else if (!zilPay.wallet.isEnable) {
-            Alert('warn', 'Please unlock wallet.');
+            Alert('warn', 'Locked Wallet', 'Please unlock wallet.');
             return null;
         }
 
@@ -37,7 +37,7 @@ function WalletZilPay(props: any) {
 
             // Checking access.
             if (!connected) {
-                Alert('error', 'Rejected access!');
+                Alert('error', 'Locked Wallet', 'Please allow ZilPay to access this app.');
                 return null;
             }
 
@@ -58,7 +58,7 @@ function WalletZilPay(props: any) {
             props.onSuccessCallback();
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
-            Alert('error', 'There is something wrong with accessing ZilPay.');
+            Alert('error', 'Unable to access ZilPay', 'Please check if there is a new ZilPay version or clear your browser cache.');
         }
     }
 

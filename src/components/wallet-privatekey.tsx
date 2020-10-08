@@ -15,7 +15,7 @@ function WalletPrivatekey(props: any) {
     const [privateKey, setPrivatekey] = useState('');
 
     const handleError = () => {
-        Alert('error', 'There is something wrong in decrypting. Please ensure there are no additional spaces at the end.');
+        Alert('error', 'Wallet Decrypt Error', 'Please ensure there are no additional spaces at the end.');
     }
 
     const handlePrivatekey = (e: any) => {

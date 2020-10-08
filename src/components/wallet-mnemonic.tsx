@@ -17,7 +17,7 @@ function MnemonicWallet(props: any) {
     const [password, setPassword] = useState('');
 
     const handleError = () => {
-        Alert('error', 'There is something wrong in decrypting. Please ensure there are no carriage returns.');
+        Alert('error', 'Wallet Decrypt Error', 'Please ensure there are no carriage returns.');
     }
 
     const handleMnemonic = (e: any) => {

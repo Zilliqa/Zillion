@@ -3,19 +3,33 @@ import { toast } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
 
-function Alert(type: string, message: string) {
+// header: short heading desc of the message, e.g. wallet locked
+// advice: action on what to do, e.g. please unlock your wallet
+function ToastMsg({header, advice}: any) {
+    return (
+        <div>
+            <h3>{header}</h3>
+            <span>{advice}</span>
+        </div>
+    );
+}
+
+// type is not used currently
+// prepare for future use cases
+function Alert(type: string, header: string, advice: string) {
     switch (type) {
         case 'info':
-            return toast.info(<div>{message}</div>);
+            return toast.info(<ToastMsg header={header} advice={advice} />);
         case 'error':
-            return toast.error(<div>{message}</div>);
+            return toast.error(<ToastMsg header={header} advice={advice} />);
         case 'success':
-            return toast.success(<div>{message}</div>);
+            return toast.success(<ToastMsg header={header} advice={advice} />);
         case 'warn':
-            return toast.warn(<div>{message}</div>);
+            return toast.warn(<ToastMsg header={header} advice={advice} />);
         default:
-            return toast(message);
+            return toast(<ToastMsg header={header} advice={advice} />);
     }
+    
 }
 
 export default Alert;

@@ -818,7 +818,7 @@ function Dashboard(props: any) {
         switch (net) {
             case NetworkLabel.MAINNET:
                 // do nothing
-                Alert("info", "You are on Mainnet.");
+                Alert("info", "Info", "You are on Mainnet.");
                 networkLabel = NetworkLabel.MAINNET;
                 url = NetworkURL.MAINNET;
                 break;
@@ -827,7 +827,7 @@ function Dashboard(props: any) {
                 url = NetworkURL.TESTNET;
                 if (environment_config === Environment.PROD) {
                     // warn users not to switch to testnet on production
-                    Alert("warn", "Testnet is not supported. Please switch to Mainnet via ZilPay.");
+                    Alert("warn", "Testnet not supported", "Please switch to Mainnet via ZilPay.");
                 }
                 break;
             case NetworkLabel.ISOLATED_SERVER:
@@ -836,7 +836,7 @@ function Dashboard(props: any) {
                 url = NetworkURL.ISOLATED_SERVER;
                 if (environment_config === Environment.PROD) {
                     // warn users not to switch to testnet on production
-                    Alert("warn", "Private network is not supported. Please switch to Mainnet via ZilPay.");
+                    Alert("warn", "Private network not supported", "Please switch to Mainnet via ZilPay.");
                 }
                 break;
             default:
@@ -920,7 +920,7 @@ function Dashboard(props: any) {
                 toast.dismiss();
             }, 5000);
             return (
-                Alert("warn", "The app auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.")
+                Alert("warn", "Warning", "The app auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.")
             );
         }
     }, []);

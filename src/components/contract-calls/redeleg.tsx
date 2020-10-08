@@ -121,7 +121,7 @@ function ReDelegateStakeModal(props: any) {
         const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
 
         if (delegRewards !== "0") {
-            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before transferring.");
+            Alert('info', "Unwithdraw Rewards Found", "Please withdraw the rewards before transferring.");
             return true;
         }
 
@@ -133,7 +133,7 @@ function ReDelegateStakeModal(props: any) {
                 const lastDepositCycleDeleg = parseInt(contract.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
                 const lastRewardCycle = parseInt(contract.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
-                    Alert('info', "You have buffered deposits in the selected node. Please wait for the next cycle before transferring.");
+                    Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before transferring.");
                     return true;
                 }
         }
@@ -152,7 +152,7 @@ function ReDelegateStakeModal(props: any) {
                 if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
                     // deposit still in buffer 
                     // have to wait for 2 cycles to receive rewards to clear buffer
-                    Alert('info', "You have buffered deposits in the selected node. Please wait for 2 more cycles for your rewards to be issued before transferring.");
+                    Alert('info', "Buffered Deposits Found", "Please wait for 2 more cycles for your rewards to be issued before transferring.");
                     return true;
                 }
         }
@@ -164,12 +164,12 @@ function ReDelegateStakeModal(props: any) {
         let delegAmtQa;
 
         if (!fromSsn || !toSsn) {
-            Alert('error', "Please select a node.");
+            Alert('error', "Invalid Node", "Please select a node.");
             return null;
         }
 
         if (!delegAmt) {
-            Alert('error', "Transfer amount is invalid.");
+            Alert('error', "Invalid Transfer Amount", "Transfer amount cannot be empty.");
             return null;
         } else {
             try {
@@ -177,7 +177,7 @@ function ReDelegateStakeModal(props: any) {
             } catch (err) {
                 // user input is malformed
                 // cannot convert input zil amount to qa
-                Alert('error', "Transfer amount is invalid.");
+                Alert('error', "Invalid Transfer Amount", "Please enter an appropriate amount e.g. '10.00'");
                 return null;
             }
         }
@@ -203,13 +203,13 @@ function ReDelegateStakeModal(props: any) {
 
         // check if redeleg more than current deleg amount
         if (new BN(delegAmtQa).gt(new BN(currentAmtQa))) {
-            Alert('info', "You only have " + convertQaToCommaStr(currentAmtQa) + " ZIL to transfer." );
+            Alert('info', "Invalid Transfer Amount", "You only have " + convertQaToCommaStr(currentAmtQa) + " ZIL to transfer." );
             setIsPending('');
             return null;
         } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
             // check leftover amount
             // if less than min stake amount
-            Alert('info', "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or transfer ALL.");
+            Alert('info', "Invalid Transfer Amount", "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or transfer ALL.");
             setIsPending('');
             return null;
         }
@@ -247,7 +247,7 @@ function ReDelegateStakeModal(props: any) {
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Sign Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result)
                 }

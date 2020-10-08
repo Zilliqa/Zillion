@@ -65,7 +65,7 @@ function LedgerWallet(props: any) {
 
         } catch (err) {
             console.error("error getting ledger index: %o", ledgerIndex);
-            Alert('error', 'There is something wrong with accessing the ledger. Have you unlock the PIN code?');
+            Alert('error', 'Unable to access ledger', 'Have you unlock the PIN code?');
         }
     }
 
@@ -74,7 +74,7 @@ function LedgerWallet(props: any) {
 
         if (typeof ledgerAccounts[hwIndex] === undefined) {
             console.error("no such ledger wallet index: %o", hwIndex);
-            Alert('error', 'There is something wrong with the selected account. Are you sure it is correct?');
+            Alert('error', 'Unable to access account', 'Are you sure it is correct?');
             return null;
         }
 
@@ -100,7 +100,7 @@ function LedgerWallet(props: any) {
             props.onSuccessCallback();
         } catch (err) {
             console.error("error unlocking ledger...:%o", err);
-            Alert('error', 'There is something wrong with accessing the ledger. Have you unlock the PIN code?');
+            Alert('error', 'Unable to access ledger', 'Have you unlock the PIN code?');
         }
     }
 

@@ -34,7 +34,7 @@ class WalletKeystore extends Component<any, any> {
     }
 
     handleError = () => {
-        Alert('error', 'There is something wrong in decrypting. Ensure your passphrase is correct.')
+        Alert('error', 'Keystore Decrypt Error', 'Please ensure your passphrase is correct.')
     }
 
     unlockWallet = () => {
