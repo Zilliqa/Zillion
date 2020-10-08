@@ -19,7 +19,9 @@ import { fromBech32Address } from '@zilliqa-js/crypto';
 const { BN, units } = require('@zilliqa-js/util');
 
 
-function Table({ columns, data, tableId, handleNodeSelect }: any) {
+// hide the data that contains the sender address
+// no point to transfer to same person
+function Table({ columns, data, tableId, senderAddress, handleNodeSelect }: any) {
     const {
         getTableProps,
         getTableBodyProps,
@@ -59,11 +61,16 @@ function Table({ columns, data, tableId, handleNodeSelect }: any) {
                 {rows.map((row, i) => {
                     prepareRow(row)
                     return (
-                        <tr {...row.getRowProps()} onClick={() => handleNodeSelect(row.original)}>
-                            {row.cells.map(cell => {
-                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                            })}
-                        </tr>
+                        <>
+                        {
+                            (row.original as any).address !== senderAddress &&
+                            <tr {...row.getRowProps()} onClick={() => handleNodeSelect(row.original)}>
+                                {row.cells.map(cell => {
+                                    return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                                })}
+                            </tr>
+                        }
+                        </>
                     )
                 })}
             </tbody>
@@ -405,7 +412,7 @@ function ReDelegateStakeModal(props: any) {
                                 <>
                                     <h2 className="node-details-subheading mb-2">Select a node to transfer to</h2>
                                     <div id="transfer-stake-details">
-                                        <Table columns={columns} data={nodeSelectorOptions} handleNodeSelect={handleNodeSelect}/>
+                                        <Table columns={columns} data={nodeSelectorOptions} senderAddress={transferStakeModalData.ssnAddress} handleNodeSelect={handleNodeSelect}/>
                                     </div>
                                     <div className="d-flex">
                                         <button type="button" className="btn btn-user-action-cancel mt-4 mx-auto shadow-none" onClick={() => toggleNodeSelector()}>Back</button>
