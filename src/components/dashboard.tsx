@@ -466,7 +466,7 @@ function Dashboard(props: any) {
 
                     // compute rewards
                     const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-                    console.log("test :%o", delegRewards);
+                    console.log("rewards :%o", delegRewards);
 
                     const data: DelegStakingPortfolioStats = {
                         ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
