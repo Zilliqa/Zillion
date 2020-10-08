@@ -25,7 +25,7 @@ function UpdateReceiverAddress(props: any) {
 
     const updateAddress = async () => {
         if (!newAddress) {
-            Alert('error', "receiving address should be bech32 or checksum format");
+            Alert('error', "Invalid Address", "Receiving address should be bech32 or checksum format.");
             return null;
         }
 
@@ -60,7 +60,7 @@ function UpdateReceiverAddress(props: any) {
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result);
                 }

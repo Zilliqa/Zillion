@@ -1,5 +1,4 @@
 import React, { useState, useContext} from 'react';
-import { ToastContainer } from 'react-toastify';
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import * as Account from '../account';
@@ -15,7 +14,7 @@ function WalletPrivatekey(props: any) {
     const [privateKey, setPrivatekey] = useState('');
 
     const handleError = () => {
-        Alert('error', 'There is something wrong in decrypting. Please ensure there are no additional spaces at the end.');
+        Alert('error', 'Wallet Decrypt Error', 'Please ensure there are no additional spaces at the end.');
     }
 
     const handlePrivatekey = (e: any) => {
@@ -55,7 +54,6 @@ function WalletPrivatekey(props: any) {
             </div>
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
-            <ToastContainer hideProgressBar={true} />
         </div>
     );
 

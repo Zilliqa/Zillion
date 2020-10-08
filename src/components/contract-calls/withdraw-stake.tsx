@@ -51,7 +51,7 @@ function WithdrawStakeModal(props: any) {
 
         if (delegRewards !== "0") {
             console.log("you have delegated rewards: %o", delegRewards);
-            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
+            Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before withdrawing the staked amount.");
             return true;
         }
 
@@ -61,7 +61,7 @@ function WithdrawStakeModal(props: any) {
                 const lastDepositCycleDeleg = parseInt(contract.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
                 const lastRewardCycle = parseInt(contract.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
-                    Alert('info', "You have buffered deposits in the selected node. Please wait for the next cycle before withdrawing the staked amount.");
+                    Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before withdrawing the staked amount.");
                     return true;
                 }
         }
@@ -80,7 +80,7 @@ function WithdrawStakeModal(props: any) {
                 if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
                     // deposit still in buffer 
                     // have to wait for 2 cycles to receive rewards to clear buffer
-                    Alert('info', "You have buffered deposits in the selected node. Please wait for 2 more cycles for your rewards to be issued before withdrawing.");
+                    Alert('info', "Buffered Deposits Found", "Please wait for 2 more cycles for your rewards to be issued before withdrawing.");
                     return true;
                 }
         }
@@ -92,12 +92,12 @@ function WithdrawStakeModal(props: any) {
         let withdrawAmtQa;
 
         if (!ssnAddress) {
-            Alert('error', "operator address should be bech32 or checksum format");
+            Alert('error', "Invalid Node", "node address should be bech32 or checksum format.");
             return null;
         }
 
         if (!withdrawAmt) {
-            Alert('error', "Withdraw amount is invalid.");
+            Alert('error', "Invalid Withdraw Amount", "Withdraw amount cannot be empty.");
             return null;
         } else {
             try {
@@ -105,7 +105,7 @@ function WithdrawStakeModal(props: any) {
             } catch (err) {
                 // user input is malformed
                 // cannot convert input zil amount to qa
-                Alert('error', "Withdraw amount is invalid.");
+                Alert('error', "Invalid Withdraw Amount", "Please check your withdraw amount again.");
                 return null;
             }
         }
@@ -129,13 +129,13 @@ function WithdrawStakeModal(props: any) {
 
         // check if withdraw more than delegated
         if (new BN(withdrawAmtQa).gt(new BN(delegAmtQa))) {
-            Alert('info', "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
+            Alert('info', "Invalid Withdraw Amount", "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
             setIsPending('');
             return null;
         } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
             // check leftover amount
             // if less than min stake amount
-            Alert('info', "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or withdraw ALL.");
+            Alert('info', "Invalid Withdraw Amount", "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or withdraw ALL.");
             setIsPending('');
             return null;
         }
@@ -168,7 +168,7 @@ function WithdrawStakeModal(props: any) {
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result)
                 }

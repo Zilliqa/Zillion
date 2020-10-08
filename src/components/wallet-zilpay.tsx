@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { ToastContainer } from 'react-toastify';
 
 import AppContext from '../contexts/appContext';
 import { AccessMethod, Environment } from '../util/enum';
@@ -23,11 +22,11 @@ function WalletZilPay(props: any) {
 
         // Checking on ZilPay inject and wallet state.
         if (!zilPay) {
-            Alert('warn', 'Please install ZilPay wallet.');
+            Alert('warn', 'ZilPay Not Installed', 'Please install ZilPay wallet.');
             return null;
 
         } else if (!zilPay.wallet.isEnable) {
-            Alert('warn', 'Please unlock wallet.');
+            Alert('warn', 'Locked Wallet', 'Please unlock wallet on ZilPay.');
             return null;
         }
 
@@ -37,7 +36,7 @@ function WalletZilPay(props: any) {
 
             // Checking access.
             if (!connected) {
-                Alert('error', 'Rejected access!');
+                Alert('error', 'Locked Wallet', 'Please allow ZilPay to access this app.');
                 return null;
             }
 
@@ -58,11 +57,12 @@ function WalletZilPay(props: any) {
             props.onSuccessCallback();
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
-            Alert('error', 'There is something wrong with accessing ZilPay.');
+            Alert('error', 'Unable to access ZilPay', 'Please check if there is a new ZilPay version or clear your browser cache.');
         }
     }
 
     return (
+        <>
         <div className="wallet-access">
             <h2>Access wallet using ZilPay</h2>
             
@@ -73,8 +73,8 @@ function WalletZilPay(props: any) {
             
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
-            <ToastContainer hideProgressBar={true} />
         </div>
+        </>
     );
 }
 

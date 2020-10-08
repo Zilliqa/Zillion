@@ -165,13 +165,13 @@ export const getTransactionText = (txnType: TransactionType) => {
 // for used during contract calls
 export const showWalletsPrompt = (accountType: string) => {
     if (accountType === AccessMethod.LEDGER) {
-        Alert('info', "Accessing the ledger device for keys.");
-        Alert('info', "Please follow the instructions on the device.");
+        Alert('info', "Info", "Accessing the ledger device for keys.");
+        Alert('info', "Info", "Please follow the instructions on the device.");
         return;
     }
 
     if (accountType === AccessMethod.ZILPAY) {
-        Alert('info', "Please follow the instructions on ZilPay.");
+        Alert('info', "Info", "Please follow the instructions on ZilPay.");
         return;
     }
 }
