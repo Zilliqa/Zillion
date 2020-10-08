@@ -2,8 +2,8 @@ import React, { useState, useContext } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import { bech32ToChecksum } from '../../util/utils';
-import { AccessMethod, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
+import { bech32ToChecksum, showWalletsPrompt } from '../../util/utils';
+import { OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import * as ZilliqaAccount from "../../account";
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
@@ -25,7 +25,7 @@ function UpdateReceiverAddress(props: any) {
 
     const updateAddress = async () => {
         if (!newAddress) {
-            Alert('error', "receiving address should be bech32 or checksum format");
+            Alert('error', "Invalid Address", "Receiving address should be bech32 or checksum format.");
             return null;
         }
 
@@ -54,16 +54,13 @@ function UpdateReceiverAddress(props: any) {
 
         setIsPending(OperationStatus.PENDING);
         
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result);
                 }
@@ -111,7 +108,7 @@ function UpdateReceiverAddress(props: any) {
                         <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="updateRecvAddrModalLabel">Update Receiving Address</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -124,7 +121,7 @@ function UpdateReceiverAddress(props: any) {
                             </div>
                             <input type="text" className="mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in bech32 format" />
                             <div className="d-flex mt-2">
-                            <button type="button" className="btn btn-user-action mx-auto" onClick={updateAddress}>Update</button>
+                            <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={updateAddress}>Update</button>
                             </div>
                         </div>
                         </>

@@ -3,8 +3,8 @@ import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import AppContext from '../../contexts/appContext';
-import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from "../../util/enum";
-import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate } from '../../util/utils';
+import { OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
+import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate, showWalletsPrompt } from '../../util/utils';
 import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
 
@@ -25,12 +25,12 @@ function UpdateCommRateModal(props: any) {
 
     const updateCommRate = async () => {
         if (!newRate || !newRate.match(/\d/)) {
-            Alert('error', "Commission rate is invalid.");
+            Alert('error', "Invalid Commission Rate", "Please enter an appropriate value, e.g. 10.5");
             return null;
         }
 
         if (newRate.length > 9) {
-            Alert('error', "Commission rate should have a maximum of 7 decimals only.");
+            Alert('error', "Invalid Commission Rate", "Commission rate should have a maximum of 7 decimals only.");
             return null;
         }
 
@@ -62,16 +62,13 @@ function UpdateCommRateModal(props: any) {
 
         setIsPending(OperationStatus.PENDING);
 
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result);
                 }
@@ -119,7 +116,7 @@ function UpdateCommRateModal(props: any) {
                         <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="updateCommRateModalLabel">Update Commission Rate</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -130,9 +127,14 @@ function UpdateCommRateModal(props: any) {
                                     <span>{currentRate ? convertToProperCommRate(currentRate).toFixed(2) : '0.00'}&#37;</span>
                                 </div>
                             </div>
-                            <input type="text" className="mb-4" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate in %" maxLength={9} />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={newRate} onChange={(e:any) => setNewRate(e.target.value)} placeholder="Enter new rate" maxLength={9} />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">%</span>
+                                </div>
+                            </div>
                             <div className="d-flex mt-2">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={updateCommRate}>Update</button>
+                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={updateCommRate}>Update</button>
                             </div>
                         </div>
                         </>

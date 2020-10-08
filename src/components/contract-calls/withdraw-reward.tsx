@@ -5,12 +5,13 @@ import { toast } from 'react-toastify';
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertQaToCommaStr } from '../../util/utils';
-import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt } from '../../util/utils';
+import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
+const BigNumber = require('bignumber.js');
 const { BN } = require('@zilliqa-js/util');
 
 
@@ -30,7 +31,7 @@ function WithdrawRewardModal(props: any) {
 
     const withdrawReward = async () => {
         if (!ssnAddress) {
-            Alert('error', "operator address should be bech32 or checksum format");
+            Alert('error', "Invalid Node", "Node address should be bech32 or checksum format");
             return null;
         }
 
@@ -59,16 +60,13 @@ function WithdrawRewardModal(props: any) {
 
         setIsPending(OperationStatus.PENDING);
         
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result)
                 }
@@ -115,7 +113,7 @@ function WithdrawRewardModal(props: any) {
                          <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="withdrawRewardModalLabel">Claim Rewards</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -127,12 +125,12 @@ function WithdrawRewardModal(props: any) {
                                 </div>
                                 <div className="col node-details-panel">
                                     <h3>Rewards</h3>
-                                    <span>{convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</span>
+                                    <span>{ new BigNumber(claimedRewardsModalData.rewards).isGreaterThanOrEqualTo(10**9) ? convertQaToCommaStr(claimedRewardsModalData.rewards) : convertQaToZilFull(claimedRewardsModalData.rewards)} ZIL</span>
                                 </div>
                             </div>
                             <p><small><em>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</em></small></p>
                             <div className="d-flex mt-4">
-                                <button type="button" className="btn btn-user-action mx-auto" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
+                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
                             </div>
 
                         </div>

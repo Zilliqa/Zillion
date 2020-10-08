@@ -5,8 +5,8 @@ import { toast } from 'react-toastify';
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr } from '../../util/utils';
-import { OperationStatus, AccessMethod, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt } from '../../util/utils';
+import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 
@@ -14,7 +14,7 @@ import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 
 
-const { BN } = require('@zilliqa-js/util');
+const { BN, units } = require('@zilliqa-js/util');
 
 
 function WithdrawStakeModal(props: any) {
@@ -25,6 +25,8 @@ function WithdrawStakeModal(props: any) {
     const impl = props.impl;
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
+    const minDelegStake = props.minDelegStake; // Qa
+    const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const { withdrawStakeModalData, updateData, updateRecentTransactions } = props;
     const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
 
@@ -49,7 +51,7 @@ function WithdrawStakeModal(props: any) {
 
         if (delegRewards !== "0") {
             console.log("you have delegated rewards: %o", delegRewards);
-            Alert('info', "You have unwithdrawn rewards in the selected node. Please withdraw the rewards before withdrawing the staked amount.");
+            Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before withdrawing the staked amount.");
             return true;
         }
 
@@ -59,7 +61,26 @@ function WithdrawStakeModal(props: any) {
                 const lastDepositCycleDeleg = parseInt(contract.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
                 const lastRewardCycle = parseInt(contract.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
-                    Alert('info', "You have buffered deposits in the selected node. Please wait for the next cycle before withdrawing the staked amount.");
+                    Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before withdrawing the staked amount.");
+                    return true;
+                }
+        }
+
+        // corner case check
+        // if user has buffered deposits
+        // happens if user first time deposit
+        // reward is zero but contract side warn has unwithdrawn rewards
+        // user cannot withdraw zero rewards from UI
+        if (contract.buff_deposit_deleg.hasOwnProperty(userBase16Address) &&
+            contract.buff_deposit_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
+                const buffDepositMap: any = contract.buff_deposit_deleg[userBase16Address][ssnChecksumAddress];
+                const lastCycleDelegNum = Object.keys(buffDepositMap).sort().pop() || '0';
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+
+                if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
+                    // deposit still in buffer 
+                    // have to wait for 2 cycles to receive rewards to clear buffer
+                    Alert('info', "Buffered Deposits Found", "Please wait for 2 more cycles for your rewards to be issued before withdrawing.");
                     return true;
                 }
         }
@@ -68,14 +89,25 @@ function WithdrawStakeModal(props: any) {
     }
 
     const withdrawStake = async () => {
+        let withdrawAmtQa;
+
         if (!ssnAddress) {
-            Alert('error', "operator address should be bech32 or checksum format");
+            Alert('error', "Invalid Node", "node address should be bech32 or checksum format.");
             return null;
         }
 
-        if (!withdrawAmt || !withdrawAmt.match(/\d/)) {
-            Alert('error', "Withdraw amount is invalid.");
+        if (!withdrawAmt) {
+            Alert('error', "Invalid Withdraw Amount", "Withdraw amount cannot be empty.");
             return null;
+        } else {
+            try {
+                withdrawAmtQa = convertZilToQa(withdrawAmt);
+            } catch (err) {
+                // user input is malformed
+                // cannot convert input zil amount to qa
+                Alert('error', "Invalid Withdraw Amount", "Please check your withdraw amount again.");
+                return null;
+            }
         }
 
         setIsPending(OperationStatus.PENDING);
@@ -92,7 +124,21 @@ function WithdrawStakeModal(props: any) {
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-        const withdrawAmtQa = convertZilToQa(withdrawAmt);
+        const delegAmtQa = withdrawStakeModalData.delegAmt;
+        const leftOverQa = new BN(delegAmtQa).sub(new BN(withdrawAmtQa));
+
+        // check if withdraw more than delegated
+        if (new BN(withdrawAmtQa).gt(new BN(delegAmtQa))) {
+            Alert('info', "Invalid Withdraw Amount", "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
+            setIsPending('');
+            return null;
+        } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
+            // check leftover amount
+            // if less than min stake amount
+            Alert('info', "Invalid Withdraw Amount", "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or withdraw ALL.");
+            setIsPending('');
+            return null;
+        }
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -116,16 +162,13 @@ function WithdrawStakeModal(props: any) {
             })
         };
         
-        if (accountType === AccessMethod.LEDGER) {
-            Alert('info', "Accessing the ledger device for keys.");
-            Alert('info', "Please follow the instructions on the device.");
-        }
+        showWalletsPrompt(accountType);
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result)
                 }
@@ -176,7 +219,7 @@ function WithdrawStakeModal(props: any) {
                         <>
                         <div className="modal-header">
                             <h5 className="modal-title" id="withdrawStakeModalLabel">Initiate Stake Withdrawal</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
@@ -191,9 +234,14 @@ function WithdrawStakeModal(props: any) {
                                     <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
                                 </div>
                             </div>
-                            <input type="text" className="mb-4" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter withdraw stake amount in ZIL" />
+                            <div className="input-group mb-4">
+                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter stake amount to withdraw" />
+                                <div className="input-group-append">
+                                    <span className="input-group-text pl-4 pr-3">ZIL</span>
+                                </div>
+                            </div>
                             <div className="d-flex">
-                                <button type="button" className="btn btn-user-action mx-auto mt-2" onClick={withdrawStake}>Initiate</button>
+                                <button type="button" className="btn btn-user-action mx-auto mt-2 shadow-none" onClick={withdrawStake}>Initiate</button>
                             </div>
                         </div>
                         </>

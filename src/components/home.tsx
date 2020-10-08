@@ -28,6 +28,7 @@ import { SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { useInterval } from '../util/use-interval';
 import useDarkMode from '../util/use-dark-mode';
+import { ToastContainer } from 'react-toastify';
 
 
 function Home(props: any) {
@@ -387,6 +388,7 @@ function Home(props: any) {
               </>
             }
           </div>
+          <ToastContainer hideProgressBar={true} />
           <Footer networkLabel={selectedNetwork} />
           <DisclaimerModal />
         </div>

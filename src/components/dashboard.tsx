@@ -133,8 +133,6 @@ function Dashboard(props: any) {
     const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
-    const [withdrawStakeOptions, setWithdrawStakeOptions] = useState([] as NodeOptions[]);
-    const [claimedRewardsOptions, setClaimedRewardsOptions] = useState([] as NodeOptions[]);
     
     // data for each contract modal
     const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
@@ -468,7 +466,7 @@ function Dashboard(props: any) {
 
                     // compute rewards
                     const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-                    console.log("test :%o", delegRewards);
+                    console.log("rewards :%o", delegRewards);
 
                     const data: DelegStakingPortfolioStats = {
                         ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
@@ -501,8 +499,6 @@ function Dashboard(props: any) {
     // for the dropdowns in the modals
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
-        let withdrawStakeOptions: NodeOptions[] = [];
-        let claimRewardsOptions: NodeOptions[] = [];
 
         ZilliqaAccount.getImplState(impl, "ssnlist")
             .then(async (contractState) => {
@@ -515,54 +511,29 @@ function Dashboard(props: any) {
                         continue;
                     }
 
-                    const operatorName = contractState.ssnlist[operatorAddr].arguments[3];
+                    const ssnArgs = contractState.ssnlist[operatorAddr].arguments;
+                    const operatorName = ssnArgs[3];
                     const operatorBech32Addr = toBech32Address(operatorAddr);
+
+                    
+                    // get number of delegators
+                    const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+                    let delegNum = '0';
+
+                    if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
+                        operatorAddr in delegNumState['ssn_deleg_amt']) {
+                        delegNum = Object.keys(delegNumState['ssn_deleg_amt'][operatorAddr]).length.toString();
+                    }
+
                     const operatorOption: NodeOptions = {
-                        label: operatorName + ": " + operatorBech32Addr,
-                        value: operatorAddr
+                        address: operatorBech32Addr,
+                        name: operatorName,
+                        stakeAmt: ssnArgs[1],
+                        delegNum: delegNum,
+                        commRate: ssnArgs[7],
                     }
                     tempNodeOptions.push(operatorOption);
                 }
-
-                // get withdraw stake options
-                const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
-
-                const depostAmtDelegState = await ZilliqaAccount.getImplState(impl, "deposit_amt_deleg");
-
-                if (depostAmtDelegState === undefined || depostAmtDelegState === 'error') {
-                    return null;
-                }
-
-                if (!depostAmtDelegState.deposit_amt_deleg.hasOwnProperty(userBase16Address)) {
-                    return null;
-                }
-
-                const depositDelegList = depostAmtDelegState.deposit_amt_deleg[userBase16Address];
-
-                for (const item of tempNodeOptions) {
-                    const ssnAddress = item.value;
-                    if (ssnAddress in depositDelegList) {
-                        // include the stake amount in the labels
-                        const delegAmt = depositDelegList[ssnAddress];
-
-                        // include the claimed rewards in the labels
-                        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-                        
-
-                        withdrawStakeOptions.push({
-                            label: item.label + " (" + convertQaToCommaStr(delegAmt) + " ZIL)",
-                            value: item.value
-                        });
-
-                        if (delegRewards && delegRewards !== '0') {
-                            claimRewardsOptions.push({
-                                label: item.label + " (" + convertQaToCommaStr(delegRewards) + " ZIL)",
-                                value: item.value
-                            });
-                        }
-                    }
-                }
-
             })
             .catch((err) => {
                 console.error(err);
@@ -576,11 +547,9 @@ function Dashboard(props: any) {
                     return null;
                 }
                 setNodeOptions([...tempNodeOptions]);
-                setWithdrawStakeOptions([...withdrawStakeOptions]);
-                setClaimedRewardsOptions([...claimRewardsOptions]);
             });
 
-    }, [impl, currWalletAddress, networkURL]);
+    }, [impl]);
 
 
     /* fetch data for operator stats panel */
@@ -849,7 +818,7 @@ function Dashboard(props: any) {
         switch (net) {
             case NetworkLabel.MAINNET:
                 // do nothing
-                Alert("info", "You are on Mainnet.");
+                Alert("info", "Info", "You are on Mainnet.");
                 networkLabel = NetworkLabel.MAINNET;
                 url = NetworkURL.MAINNET;
                 break;
@@ -858,7 +827,7 @@ function Dashboard(props: any) {
                 url = NetworkURL.TESTNET;
                 if (environment_config === Environment.PROD) {
                     // warn users not to switch to testnet on production
-                    Alert("warn", "Testnet is not supported. Please switch to Mainnet via ZilPay.");
+                    Alert("warn", "Testnet not supported", "Please switch to Mainnet via ZilPay.");
                 }
                 break;
             case NetworkLabel.ISOLATED_SERVER:
@@ -867,7 +836,7 @@ function Dashboard(props: any) {
                 url = NetworkURL.ISOLATED_SERVER;
                 if (environment_config === Environment.PROD) {
                     // warn users not to switch to testnet on production
-                    Alert("warn", "Private network is not supported. Please switch to Mainnet via ZilPay.");
+                    Alert("warn", "Private network not supported", "Please switch to Mainnet via ZilPay.");
                 }
                 break;
             default:
@@ -949,9 +918,9 @@ function Dashboard(props: any) {
             e.returnValue = 'The page auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.';
             setTimeout(() => {
                 toast.dismiss();
-            }, 5000);
+            }, 8000);
             return (
-                Alert("warn", "The app auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.")
+                Alert("warn", "Warning", "The app auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.")
             );
         }
     }, []);
@@ -1191,8 +1160,11 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                <div className="px-2">
-                                    <ToastContainer hideProgressBar={true}/>
+                                <div>
+                                    <ToastContainer 
+                                        hideProgressBar={true} 
+                                        autoClose={10000} 
+                                        pauseOnHover />
                                 </div>
 
                             </div>
@@ -1247,30 +1219,29 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                currentDelegatedOptions = {withdrawStakeOptions}
                 nodeSelectorOptions={nodeOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                transferStakeModalData={transferStakeModalData} />
+                transferStakeModalData={transferStakeModalData}
+                minDelegStake={minDelegStake} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={withdrawStakeOptions} 
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                withdrawStakeModalData={withdrawStakeModalData} />
+                withdrawStakeModalData={withdrawStakeModalData}
+                minDelegStake={minDelegStake} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={claimedRewardsOptions}
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
