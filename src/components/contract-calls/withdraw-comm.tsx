@@ -46,7 +46,7 @@ function WithdrawCommModal(props: any) {
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "Sign Transaction Error", "Please try again.");
+                    Alert('error', "Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result);
                 }
