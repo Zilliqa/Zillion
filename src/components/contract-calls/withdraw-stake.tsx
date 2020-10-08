@@ -46,25 +46,6 @@ function WithdrawStakeModal(props: any) {
             return false;
         }
 
-        // corner case check
-        // if user has buffered deposits
-        // happens if user first time deposit
-        // reward is zero but contract side warn has unwithdrawn rewards
-        // user cannot withdraw zero rewards from UI
-        if (contract.buff_deposit_deleg.hasOwnProperty(userBase16Address) &&
-            contract.buff_deposit_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
-                const buffDepositMap: any = contract.buff_deposit_deleg[userBase16Address][ssnChecksumAddress];
-                const lastCycleDelegNum = Object.keys(buffDepositMap).sort().pop() || '0';
-                const lastRewardCycle = parseInt(contract.lastrewardcycle);
-
-                if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
-                    // deposit still in buffer 
-                    // have to wait for 2 cycles to receive rewards to clear buffer
-                    Alert('info', "You have buffered deposits in the selected node. Please wait for 2 more cycles for your rewards to be issued before withdrawing.");
-                    return true;
-                }
-        }
-
         // compute rewards
         const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
 
@@ -81,6 +62,25 @@ function WithdrawStakeModal(props: any) {
                 const lastRewardCycle = parseInt(contract.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
                     Alert('info', "You have buffered deposits in the selected node. Please wait for the next cycle before withdrawing the staked amount.");
+                    return true;
+                }
+        }
+
+        // corner case check
+        // if user has buffered deposits
+        // happens if user first time deposit
+        // reward is zero but contract side warn has unwithdrawn rewards
+        // user cannot withdraw zero rewards from UI
+        if (contract.buff_deposit_deleg.hasOwnProperty(userBase16Address) &&
+            contract.buff_deposit_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
+                const buffDepositMap: any = contract.buff_deposit_deleg[userBase16Address][ssnChecksumAddress];
+                const lastCycleDelegNum = Object.keys(buffDepositMap).sort().pop() || '0';
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+
+                if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
+                    // deposit still in buffer 
+                    // have to wait for 2 cycles to receive rewards to clear buffer
+                    Alert('info', "You have buffered deposits in the selected node. Please wait for 2 more cycles for your rewards to be issued before withdrawing.");
                     return true;
                 }
         }
