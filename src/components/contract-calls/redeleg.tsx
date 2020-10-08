@@ -121,7 +121,7 @@ function ReDelegateStakeModal(props: any) {
         const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
 
         if (delegRewards !== "0") {
-            Alert('info', "Unwithdraw Rewards Found", "Please withdraw the rewards before transferring.");
+            Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before transferring.");
             return true;
         }
 
