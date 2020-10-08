@@ -31,7 +31,7 @@ function WithdrawRewardModal(props: any) {
 
     const withdrawReward = async () => {
         if (!ssnAddress) {
-            Alert('error', "operator address should be bech32 or checksum format");
+            Alert('error', "Invalid Node", "Node address should be bech32 or checksum format");
             return null;
         }
 
@@ -66,7 +66,7 @@ function WithdrawRewardModal(props: any) {
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Sign Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result)
                 }

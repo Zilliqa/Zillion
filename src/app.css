@@ -912,6 +912,22 @@ input:focus {
   text-transform: uppercase;
 }
 
+#toast-msg-container {
+  padding: 0.8em;
+}
+
+#toast-msg-container .toast-msg-header {
+  font-size: 0.75em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--primary-color);
+}
+
+#toast-msg-container .toast-msg-advice {
+  font-size: 0.9em;
+  color: var(--primary-table-font-color);
+}
+
 .wallet-access {
   margin-top: 5em;
   /* referring to animate.css */
@@ -929,10 +945,6 @@ input:focus {
 }
 
 .Toastify__toast {
-  font-size: 0.9em;
-  font-weight: 500;
-  color: var(--text-color);
-  /* border: 1px solid var(--primary-hover-color); */
   border-radius: 8px;
   background-color: var(--secondary-color);
 

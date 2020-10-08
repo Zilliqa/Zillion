@@ -7,9 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 // advice: action on what to do, e.g. please unlock your wallet
 function ToastMsg({header, advice}: any) {
     return (
-        <div>
-            <h3>{header}</h3>
-            <span>{advice}</span>
+        <div id="toast-msg-container">
+            <span className="toast-msg-header"><strong>{header}</strong></span>
+            <br/>
+            <span className="toast-msg-advice">{advice}</span>
         </div>
     );
 }

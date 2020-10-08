@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react';
-import { ToastContainer } from 'react-toastify';
 
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
@@ -139,7 +138,6 @@ function LedgerWallet(props: any) {
             
             <button type="button" className="btn btn-user-action mx-2" data-toggle="modal" data-target="#ledger-connect-modal" data-keyboard="false" data-backdrop="static" onClick={getLedgerAccounts}>Connect to Ledger Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
-            <ToastContainer hideProgressBar={true} />
         </div>
     );
 }

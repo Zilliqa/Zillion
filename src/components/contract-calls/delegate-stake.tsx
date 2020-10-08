@@ -35,14 +35,14 @@ function DelegateStakeModal(props: any) {
 
     const delegateStake = async () => {
         if (!ssnAddress) {
-            Alert('error', "Invalid Node", "Node address should be bech32 or checksum format");
+            Alert('error', "Invalid Node", "Node address should be bech32 or checksum format.");
             return null;
         }
 
         let delegAmtQa = '';
 
         if (!delegAmt) {
-            Alert('error', "Invalid Stake Amount", "Stake amount shoud not be empty");
+            Alert('error', "Invalid Stake Amount", "Stake amount shoud not be empty.");
             return null;
         } else {
             try {
@@ -51,14 +51,14 @@ function DelegateStakeModal(props: any) {
                 
 
                 if (isLessThanMinDeleg) {
-                    Alert('error', "Invalid Stake Amount", "Minimum stake amount is " + minDelegStakeDisplay + " ZIL");
+                    Alert('error', "Invalid Stake Amount", "Minimum stake amount is " + minDelegStakeDisplay + " ZIL.");
                     return null;
                 }
 
             } catch (err) {
                 // user input is malformed
                 // cannot convert input zil amount to qa
-                Alert('error', "Invalid Stake Amount", "Minimum stake amount is " + minDelegStakeDisplay + " ZIL");
+                Alert('error', "Invalid Stake Amount", "Minimum stake amount is " + minDelegStakeDisplay + " ZIL.");
                 return null;
             }
         }

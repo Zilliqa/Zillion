@@ -918,7 +918,7 @@ function Dashboard(props: any) {
             e.returnValue = 'The page auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.';
             setTimeout(() => {
                 toast.dismiss();
-            }, 5000);
+            }, 8000);
             return (
                 Alert("warn", "Warning", "The app auto retrieves data periodically. Please do not force refresh as you will lose your wallet connection.")
             );
@@ -1160,8 +1160,11 @@ function Dashboard(props: any) {
                                     </div>
                                 </div>
 
-                                <div className="px-2">
-                                    <ToastContainer hideProgressBar={true} autoClose={8000}/>
+                                <div>
+                                    <ToastContainer 
+                                        hideProgressBar={true} 
+                                        autoClose={10000} 
+                                        pauseOnHover />
                                 </div>
 
                             </div>

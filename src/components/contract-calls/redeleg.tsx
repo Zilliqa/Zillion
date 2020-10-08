@@ -177,7 +177,7 @@ function ReDelegateStakeModal(props: any) {
             } catch (err) {
                 // user input is malformed
                 // cannot convert input zil amount to qa
-                Alert('error', "Invalid Transfer Amount", "Please enter an appropriate amount e.g. '10.00'");
+                Alert('error', "Invalid Transfer Amount", "Please check your transfer amount again.");
                 return null;
             }
         }

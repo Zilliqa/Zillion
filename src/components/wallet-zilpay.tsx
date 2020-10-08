@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { ToastContainer } from 'react-toastify';
 
 import AppContext from '../contexts/appContext';
 import { AccessMethod, Environment } from '../util/enum';
@@ -27,7 +26,7 @@ function WalletZilPay(props: any) {
             return null;
 
         } else if (!zilPay.wallet.isEnable) {
-            Alert('warn', 'Locked Wallet', 'Please unlock wallet.');
+            Alert('warn', 'Locked Wallet', 'Please unlock wallet on ZilPay.');
             return null;
         }
 
@@ -63,6 +62,7 @@ function WalletZilPay(props: any) {
     }
 
     return (
+        <>
         <div className="wallet-access">
             <h2>Access wallet using ZilPay</h2>
             
@@ -73,8 +73,8 @@ function WalletZilPay(props: any) {
             
             <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
-            <ToastContainer hideProgressBar={true} />
         </div>
+        </>
     );
 }
 

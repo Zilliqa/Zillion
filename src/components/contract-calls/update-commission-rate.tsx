@@ -25,12 +25,12 @@ function UpdateCommRateModal(props: any) {
 
     const updateCommRate = async () => {
         if (!newRate || !newRate.match(/\d/)) {
-            Alert('error', "Commission rate is invalid.");
+            Alert('error', "Invalid Commission Rate", "Please enter an appropriate value, e.g. 10.5");
             return null;
         }
 
         if (newRate.length > 9) {
-            Alert('error', "Commission rate should have a maximum of 7 decimals only.");
+            Alert('error', "Invalid Commission Rate", "Commission rate should have a maximum of 7 decimals only.");
             return null;
         }
 
@@ -68,7 +68,7 @@ function UpdateCommRateModal(props: any) {
             .then((result) => {
                 console.log(result);
                 if (result === OperationStatus.ERROR) {
-                    Alert('error', "There is an error. Please try again.");
+                    Alert('error', "Sign Transaction Error", "Please try again.");
                 } else {
                     setTxnId(result);
                 }
