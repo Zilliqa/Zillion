@@ -16,10 +16,12 @@ import { computeDelegRewards } from '../../util/reward-calculator';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 
 
-const { BN } = require('@zilliqa-js/util');
+const { BN, units } = require('@zilliqa-js/util');
 
 
-function Table({ columns, data, tableId, handleNodeSelect }: any) {
+// hide the data that contains the sender address
+// no point to transfer to same person
+function Table({ columns, data, tableId, senderAddress, handleNodeSelect }: any) {
     const {
         getTableProps,
         getTableBodyProps,
@@ -59,11 +61,16 @@ function Table({ columns, data, tableId, handleNodeSelect }: any) {
                 {rows.map((row, i) => {
                     prepareRow(row)
                     return (
-                        <tr {...row.getRowProps()} onClick={() => handleNodeSelect(row.original)}>
-                            {row.cells.map(cell => {
-                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                            })}
-                        </tr>
+                        <>
+                        {
+                            (row.original as any).address !== senderAddress &&
+                            <tr {...row.getRowProps()} onClick={() => handleNodeSelect(row.original)}>
+                                {row.cells.map(cell => {
+                                    return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                                })}
+                            </tr>
+                        }
+                        </>
                     )
                 })}
             </tbody>
@@ -81,11 +88,13 @@ function ReDelegateStakeModal(props: any) {
         impl,
         ledgerIndex,
         networkURL,
+        minDelegStake,
         nodeSelectorOptions, 
         transferStakeModalData,
         updateData,
         updateRecentTransactions } = props;
 
+    const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
 
     const fromSsn = transferStakeModalData.ssnAddress; // bech32
@@ -116,6 +125,8 @@ function ReDelegateStakeModal(props: any) {
             return true;
         }
 
+        // secondary buffered deposits check
+        // different map
         // check if user has buffered deposits
         if (contract.last_buf_deposit_cycle_deleg.hasOwnProperty(userBase16Address) &&
             contract.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
@@ -123,6 +134,25 @@ function ReDelegateStakeModal(props: any) {
                 const lastRewardCycle = parseInt(contract.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
                     Alert('info', "You have buffered deposits in the selected node. Please wait for the next cycle before transferring.");
+                    return true;
+                }
+        }
+
+       // corner case check
+        // if user has buffered deposits
+        // happens if user first time deposit
+        // reward is zero but contract side warn has unwithdrawn rewards
+        // user cannot withdraw zero rewards from UI
+        if (contract.buff_deposit_deleg.hasOwnProperty(userBase16Address) &&
+            contract.buff_deposit_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
+                const buffDepositMap: any = contract.buff_deposit_deleg[userBase16Address][ssnChecksumAddress];
+                const lastCycleDelegNum = Object.keys(buffDepositMap).sort().pop() || '0';
+                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+
+                if (lastRewardCycle < parseInt(lastCycleDelegNum + 2)) {
+                    // deposit still in buffer 
+                    // have to wait for 2 cycles to receive rewards to clear buffer
+                    Alert('info', "You have buffered deposits in the selected node. Please wait for 2 more cycles for your rewards to be issued before transferring.");
                     return true;
                 }
         }
@@ -169,10 +199,17 @@ function ReDelegateStakeModal(props: any) {
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
         const currentAmtQa = transferStakeModalData.delegAmt;
+        const leftOverQa = new BN(currentAmtQa).sub(new BN(delegAmtQa));
 
-        // check if redelg more than current deleg amount
+        // check if redeleg more than current deleg amount
         if (new BN(delegAmtQa).gt(new BN(currentAmtQa))) {
             Alert('info', "You only have " + convertQaToCommaStr(currentAmtQa) + " ZIL to transfer." );
+            setIsPending('');
+            return null;
+        } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
+            // check leftover amount
+            // if less than min stake amount
+            Alert('info', "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or transfer ALL.");
             setIsPending('');
             return null;
         }
@@ -279,7 +316,7 @@ function ReDelegateStakeModal(props: any) {
                 accessor: 'delegNum',
             },
             {
-                Header: 'Stake Amount',
+                Header: 'Stake Amount (ZIL)',
                 accessor: 'stakeAmt',
                 Cell: ({ row }: any) => 
                     <>
@@ -325,7 +362,7 @@ function ReDelegateStakeModal(props: any) {
                                 !showNodeSelector &&
                                 <>
                                     {/* sender */}
-                                    <h2 className="node-details-subheading">From</h2>
+                                    <small><strong>From</strong></small>
                                     <div className="row node-details-wrapper mb-4">
                                         <div className="col node-details-panel mr-4">
                                             <h3>{transferStakeModalData.ssnName}</h3>
@@ -338,7 +375,7 @@ function ReDelegateStakeModal(props: any) {
                                     </div>
 
                                     {/* recipient*/}
-                                    <h2 className="node-details-subheading">To</h2>
+                                    <small><strong>To</strong></small>
                                     
                                     {!toSsn &&
                                         <button type="button" className="mb-4 btn btn-contract btn-block shadow-none" onClick={() => toggleNodeSelector()}>Select a node</button>
@@ -375,7 +412,7 @@ function ReDelegateStakeModal(props: any) {
                                 <>
                                     <h2 className="node-details-subheading mb-2">Select a node to transfer to</h2>
                                     <div id="transfer-stake-details">
-                                        <Table columns={columns} data={nodeSelectorOptions} handleNodeSelect={handleNodeSelect}/>
+                                        <Table columns={columns} data={nodeSelectorOptions} senderAddress={transferStakeModalData.ssnAddress} handleNodeSelect={handleNodeSelect}/>
                                     </div>
                                     <div className="d-flex">
                                         <button type="button" className="btn btn-user-action-cancel mt-4 mx-auto shadow-none" onClick={() => toggleNodeSelector()}>Back</button>

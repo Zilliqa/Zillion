@@ -1161,7 +1161,7 @@ function Dashboard(props: any) {
                                 </div>
 
                                 <div className="px-2">
-                                    <ToastContainer hideProgressBar={true}/>
+                                    <ToastContainer hideProgressBar={true} autoClose={8000}/>
                                 </div>
 
                             </div>
@@ -1220,7 +1220,8 @@ function Dashboard(props: any) {
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                transferStakeModalData={transferStakeModalData} />
+                transferStakeModalData={transferStakeModalData}
+                minDelegStake={minDelegStake} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
@@ -1230,7 +1231,8 @@ function Dashboard(props: any) {
                 userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                withdrawStakeModalData={withdrawStakeModalData} />
+                withdrawStakeModalData={withdrawStakeModalData}
+                minDelegStake={minDelegStake} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
