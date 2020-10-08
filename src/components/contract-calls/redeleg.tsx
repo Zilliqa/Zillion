@@ -16,7 +16,7 @@ import { computeDelegRewards } from '../../util/reward-calculator';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 
 
-const { BN } = require('@zilliqa-js/util');
+const { BN, units } = require('@zilliqa-js/util');
 
 
 function Table({ columns, data, tableId, handleNodeSelect }: any) {
@@ -81,11 +81,13 @@ function ReDelegateStakeModal(props: any) {
         impl,
         ledgerIndex,
         networkURL,
+        minDelegStake,
         nodeSelectorOptions, 
         transferStakeModalData,
         updateData,
         updateRecentTransactions } = props;
 
+    const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
 
     const fromSsn = transferStakeModalData.ssnAddress; // bech32
@@ -190,10 +192,17 @@ function ReDelegateStakeModal(props: any) {
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
         const currentAmtQa = transferStakeModalData.delegAmt;
+        const leftOverQa = new BN(currentAmtQa).sub(new BN(delegAmtQa));
 
-        // check if redelg more than current deleg amount
+        // check if redeleg more than current deleg amount
         if (new BN(delegAmtQa).gt(new BN(currentAmtQa))) {
             Alert('info', "You only have " + convertQaToCommaStr(currentAmtQa) + " ZIL to transfer." );
+            setIsPending('');
+            return null;
+        } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
+            // check leftover amount
+            // if less than min stake amount
+            Alert('info', "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or transfer ALL.");
             setIsPending('');
             return null;
         }
@@ -300,7 +309,7 @@ function ReDelegateStakeModal(props: any) {
                 accessor: 'delegNum',
             },
             {
-                Header: 'Stake Amount',
+                Header: 'Stake Amount (ZIL)',
                 accessor: 'stakeAmt',
                 Cell: ({ row }: any) => 
                     <>
@@ -346,7 +355,7 @@ function ReDelegateStakeModal(props: any) {
                                 !showNodeSelector &&
                                 <>
                                     {/* sender */}
-                                    <h2 className="node-details-subheading">From</h2>
+                                    <small><strong>From</strong></small>
                                     <div className="row node-details-wrapper mb-4">
                                         <div className="col node-details-panel mr-4">
                                             <h3>{transferStakeModalData.ssnName}</h3>
@@ -359,7 +368,7 @@ function ReDelegateStakeModal(props: any) {
                                     </div>
 
                                     {/* recipient*/}
-                                    <h2 className="node-details-subheading">To</h2>
+                                    <small><strong>To</strong></small>
                                     
                                     {!toSsn &&
                                         <button type="button" className="mb-4 btn btn-contract btn-block shadow-none" onClick={() => toggleNodeSelector()}>Select a node</button>
