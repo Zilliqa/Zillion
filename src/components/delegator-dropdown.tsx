@@ -63,8 +63,7 @@ function DelegatorDropdown(props: any) {
                     data-target="#withdraw-reward-modal" 
                     data-keyboard="false" 
                     data-backdrop="static"
-                    onClick={handleClaimRewards}
-                    disabled={rewards === '0' ? true : false}>
+                    onClick={handleClaimRewards}>
                         Claim Rewards
                 </button>
                 <button 
