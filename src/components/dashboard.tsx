@@ -1212,7 +1212,8 @@ function Dashboard(props: any) {
                 minDelegStake={minDelegStake}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                delegStakeModalData={delegStakeModalData} />
+                delegStakeModalData={delegStakeModalData}
+                balance={balance} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 

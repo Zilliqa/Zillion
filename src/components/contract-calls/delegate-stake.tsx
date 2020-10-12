@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr } from '../../util/utils';
 import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -23,6 +23,7 @@ function DelegateStakeModal(props: any) {
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const minDelegStake = props.minDelegStake; // Qa
+    const balance = props.balance; // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
 
     const { delegStakeModalData, updateData, updateRecentTransactions } = props;
@@ -163,12 +164,13 @@ function DelegateStakeModal(props: any) {
                                     <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
                                 </div>
                             </div>
-                            <div className="input-group mb-4">
+                            <div className="input-group mb-2">
                                 <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount" />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
                             </div>
+                            <p><small>Wallet balance: <strong>{convertQaToCommaStr(balance)}</strong> ZIL</small></p>
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
