@@ -411,7 +411,7 @@ function ReDelegateStakeModal(props: any) {
 
                                 <>
                                     <h2 className="node-details-subheading mb-2">Select a node to transfer to</h2>
-                                    <div id="transfer-stake-details">
+                                    <div id="transfer-stake-details" className="text-center">
                                         <Table columns={columns} data={nodeSelectorOptions} senderAddress={transferStakeModalData.ssnAddress} handleNodeSelect={handleNodeSelect}/>
                                     </div>
                                     <div className="d-flex">
