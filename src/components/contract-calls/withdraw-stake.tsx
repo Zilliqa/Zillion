@@ -235,7 +235,7 @@ function WithdrawStakeModal(props: any) {
                                 </div>
                             </div>
                             <div className="input-group mb-4">
-                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter stake amount to withdraw" />
+                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter stake amount to withdraw, e.g. 10, 100.5, 1000. etc" />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
