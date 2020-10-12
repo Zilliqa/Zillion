@@ -165,7 +165,7 @@ function DelegateStakeModal(props: any) {
                                 </div>
                             </div>
                             <div className="input-group mb-2">
-                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount, e.g. 10, 100.5, 1000. etc" />
+                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount" />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>

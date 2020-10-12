@@ -391,7 +391,7 @@ function ReDelegateStakeModal(props: any) {
                                         </div>
 
                                         <div className="input-group mb-4">
-                                            <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer e.g. 10, 100.5, 1000. etc" />
+                                            <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer" />
                                             <div className="input-group-append">
                                                 <span className="input-group-text pl-4 pr-3">ZIL</span>
                                             </div>
