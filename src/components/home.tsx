@@ -297,7 +297,7 @@ function Home(props: any) {
 
             <div className="heading">
               <>{toggleZillionLogo()}</>
-              <p className="tagline">Staking with Zilliqa. Simplified</p>
+              <p className="tagline">Staking with Zilliqa. Simplified!</p>
             </div>
 
             {
