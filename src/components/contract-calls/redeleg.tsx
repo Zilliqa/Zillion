@@ -61,16 +61,15 @@ function Table({ columns, data, tableId, senderAddress, handleNodeSelect }: any)
                 {rows.map((row, i) => {
                     prepareRow(row)
                     return (
-                        <>
-                        {
-                            (row.original as any).address !== senderAddress &&
-                            <tr {...row.getRowProps()} onClick={() => handleNodeSelect(row.original)}>
-                                {row.cells.map(cell => {
+                        <tr {...row.getRowProps()} onClick={() => handleNodeSelect(row.original)}>
+                            {
+                                (row.original as any).address !== senderAddress &&
+                                
+                                row.cells.map(cell => {
                                     return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                                })}
-                            </tr>
-                        }
-                        </>
+                                })
+                            }
+                        </tr>
                     )
                 })}
             </tbody>
