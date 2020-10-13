@@ -268,7 +268,11 @@ function Home(props: any) {
         <div className="row align-items-center">
           <div className="cover-content col-12 text-center">
             <div id="banner" className="mb-4 text-center">
-              <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
+              { 
+                  environment_config === Environment.PROD ? 
+                  <div className="p-3"><strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.</div> :
+                  <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
+              }
             </div>
 
             <div id="home-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
