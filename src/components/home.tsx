@@ -42,7 +42,14 @@ function Home(props: any) {
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
-  const [selectedNetwork, setSelectedNetwork] = useState(Network.TESTNET);
+  const [selectedNetwork, setSelectedNetwork] = useState(() => {
+    if (environment_config === Environment.PROD) {
+      return Network.MAINNET;
+    } else {
+      // default to testnet
+      return Network.TESTNET;
+    }
+  });
 
   // for populating ssn table
   const [totalStakeAmt, setTotalStakeAmt] = useState('0');

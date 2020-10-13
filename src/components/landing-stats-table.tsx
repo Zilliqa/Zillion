@@ -14,7 +14,7 @@ const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); //
 
 function LandingStatsTable(props: any) {
     const impl = props.impl;
-    // const networkURL = props.network;
+    const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const [showSpinner, setShowSpinner] = useState(true);
     const mountedRef = useRef(true);
@@ -38,7 +38,7 @@ function LandingStatsTable(props: any) {
         let totalDeposits = '0';
         let estAPY = new BigNumber(0);
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl)
+        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
             .then(async (contract) => {
                 
                 if (contract === undefined || contract === 'error') {
@@ -106,7 +106,7 @@ function LandingStatsTable(props: any) {
                 }
                 
             }), PromiseArea.PROMISE_LANDING_STATS);
-    }, [impl]);
+    }, [impl, networkURL]);
 
     // load inital data
     useEffect(() => {
