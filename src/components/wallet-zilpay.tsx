@@ -32,7 +32,7 @@ function WalletZilPay(props: any) {
 
         try {
             // Shell try ask user about access.
-            const connected = zilPay.wallet.connect();
+            const connected = await zilPay.wallet.connect();
 
             // Checking access.
             if (!connected) {
