@@ -974,7 +974,7 @@ function Dashboard(props: any) {
                     {/* txn notifications */}
                     <li className="nav-item">
                         <Tippy 
-                            content={<RecentTxnDropdown data={recentTransactions} network={networkURL} />} 
+                            content={<RecentTxnDropdown data={recentTransactions} networkURL={networkURL} />} 
                             animation="shift-away-subtle"
                             trigger="click"
                             arrow={false}
