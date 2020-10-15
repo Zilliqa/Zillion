@@ -56,7 +56,12 @@ export const percentToContractCommRate = (userInputRate: string) => {
 export const convertQaToCommaStr = (inputVal: string) => {
     let zil = units.fromQa(new BN(inputVal), units.Units.Zil);
     let zilProperDecimalStr = new BigNumber(zil).toFixed(3);
-    return zilProperDecimalStr.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+    const splitAmt = zilProperDecimalStr.split('.');
+    
+    // add comma separator to front part
+    let frontAmt = splitAmt[0].replace(/(.)(?=(\d{3})+$)/g,'$1,')
+    let backAmt = splitAmt[1];
+    return frontAmt + "." + backAmt;
 }
 
 // show the full zil amount
@@ -74,7 +79,12 @@ export const convertQaToZilFull = (amount: string) => {
 export const convertGzilToCommaStr = (inputVal: string) => {
     const decimalPlaces = new BigNumber(10**15);
     const gzil = new BigNumber(inputVal).dividedBy(decimalPlaces).toFixed(3);
-    return gzil.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+    const splitAmt = gzil.split('.');
+
+    // add comma separator to front part
+    let frontAmt = splitAmt[0].replace(/(.)(?=(\d{3})+$)/g,'$1,')
+    let backAmt = splitAmt[1];
+    return frontAmt + "." + backAmt;
 }
 
 export const convertNetworkUrlToLabel = (url: string) => {
