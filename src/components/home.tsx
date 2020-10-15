@@ -222,9 +222,9 @@ function Home(props: any) {
 
   const toggleZillionLogo = () => {
     if (darkMode.value === true) {
-      return <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4" />;
+      return <img src={ZillionLogo} alt="zillion" width="480px" className="mt-2 mb-4 zillion-logo" />;
     } else {
-      return <img src={ZillionLightLogo} alt="zillion" width="480px" className="mt-2 mb-4" />;
+      return <img src={ZillionLightLogo} alt="zillion" width="480px" className="mt-2 mb-4 zillion-logo" />;
     }
   }
 
