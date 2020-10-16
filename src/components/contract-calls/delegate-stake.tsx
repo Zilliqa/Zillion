@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
@@ -30,7 +30,7 @@ function DelegateStakeModal(props: any) {
 
     const ssnAddress = delegStakeModalData.ssnAddress; // bech32
 
-    const [delegAmt, setDelegAmt] = useState(''); // in ZIL
+    const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
@@ -107,6 +107,14 @@ function DelegateStakeModal(props: any) {
             }));
     }
 
+    const setDefaultStakeAmt = useCallback(() => {
+        if (minDelegStake) {
+            setDelegAmt(units.fromQa(new BN(minDelegStake), units.Units.Zil).toString());
+        } else {
+            setDelegAmt('0');
+        }
+    }, [minDelegStake]);
+
     const handleClose = () => {
         // txn success
         // invoke dashboard functions to update recent transactions and poll data
@@ -120,7 +128,7 @@ function DelegateStakeModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setDelegAmt('');
+            setDefaultStakeAmt();
             setTxnId('');
         }, 150);
     }
@@ -128,6 +136,10 @@ function DelegateStakeModal(props: any) {
     const handleDelegAmt = (e: any) => {
         setDelegAmt(e.target.value);
     }
+
+    useEffect(() => {
+        setDefaultStakeAmt();
+    }, [setDefaultStakeAmt]);
 
     return (
         <div id="delegate-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="delegateStakeModalLabel" aria-hidden="true">
@@ -164,8 +176,10 @@ function DelegateStakeModal(props: any) {
                                     <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
                                 </div>
                             </div>
+
+                            <div className="modal-label mb-2">Enter stake amount</div>
                             <div className="input-group mb-2">
-                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter stake amount" />
+                                <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>

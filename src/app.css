@@ -661,6 +661,10 @@ input:focus {
   border-color: var(--secondary-color);
 }
 
+.modal-body .modal-label {
+  font-size: 0.85em;
+}
+
 .modal-body .node-details-wrapper {
   font-size: 0.85em;
   font-weight: 500;

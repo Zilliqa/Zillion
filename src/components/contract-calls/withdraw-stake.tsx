@@ -1,11 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull } from '../../util/utils';
 import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 import { fromBech32Address } from '@zilliqa-js/crypto';
@@ -31,7 +31,7 @@ function WithdrawStakeModal(props: any) {
     const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
 
     const ssnAddress = withdrawStakeModalData.ssnAddress; // bech32
-    const [withdrawAmt, setWithdrawAmt] = useState(''); // in ZIL
+    const [withdrawAmt, setWithdrawAmt] = useState('0'); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
 
@@ -177,6 +177,16 @@ function WithdrawStakeModal(props: any) {
             }));
     }
 
+    // set default withdraw amount to current deleg amt
+    const setDefaultWithdrawAmt = useCallback(() => {
+        if (withdrawStakeModalData.delegAmt) {
+            const tempDelegAmt = convertQaToZilFull(withdrawStakeModalData.delegAmt);
+            setWithdrawAmt(tempDelegAmt);
+        } else {
+            setWithdrawAmt('0');
+        }
+    }, [withdrawStakeModalData.delegAmt]);
+
     const handleClose = () => {
         // txn success
         // invoke dashboard methods
@@ -190,7 +200,7 @@ function WithdrawStakeModal(props: any) {
         // so that the animation is smoother
         toast.dismiss();
         setTimeout(() => {
-            setWithdrawAmt('');
+            setDefaultWithdrawAmt();
             setTxnId('');
         }, 150);
     }
@@ -198,6 +208,10 @@ function WithdrawStakeModal(props: any) {
     const handleWithdrawAmt = (e: any) => {
         setWithdrawAmt(e.target.value);
     }
+
+    useEffect(() => {
+        setDefaultWithdrawAmt();
+    }, [setDefaultWithdrawAmt]);
 
     return (
         <div id="withdraw-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawStakeModalLabel" aria-hidden="true">
@@ -234,8 +248,10 @@ function WithdrawStakeModal(props: any) {
                                     <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
                                 </div>
                             </div>
+
+                            <div className="modal-label mb-2">Enter withdrawal amount</div>
                             <div className="input-group mb-4">
-                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} placeholder="Enter stake amount to withdraw" />
+                                <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
