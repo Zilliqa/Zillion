@@ -71,7 +71,7 @@ export enum Role {
 
 export enum SsnStatus {
     ACTIVE = "Active",
-    INACTIVE = "Inactive"
+    INACTIVE = "Below Min. Stake"
 }
 
 export enum ProxyCalls {

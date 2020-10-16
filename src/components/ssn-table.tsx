@@ -138,7 +138,11 @@ function SsnTable(props: any) {
                 Cell: ({ row }: any) => 
                         <>
                         <div className={ row.original.status === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive' }>
-                            {row.original.status}
+                            {
+                                row.original.status === SsnStatus.INACTIVE ?
+                                <>Below<br/>Min. Stake</> :
+                                row.original.status
+                            }
                         </div>
                         </>
             },
