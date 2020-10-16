@@ -1,4 +1,4 @@
-import React, { useState, useContext, useMemo } from 'react';
+import React, { useState, useContext, useMemo, useEffect, useCallback } from 'react';
 import { useTable, useSortBy } from 'react-table';
 import ReactTooltip from 'react-tooltip';
 import { toast } from 'react-toastify';
@@ -9,7 +9,7 @@ import AppContext from '../../contexts/appContext';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull } from '../../util/utils';
 import { ProxyCalls, OperationStatus, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -99,7 +99,7 @@ function ReDelegateStakeModal(props: any) {
     const fromSsn = transferStakeModalData.ssnAddress; // bech32
     const [toSsn, setToSsn] = useState('');
     const [toSsnName, setToSsnName] = useState('');
-    const [delegAmt, setDelegAmt] = useState(''); // in ZIL
+    const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
 
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -255,6 +255,16 @@ function ReDelegateStakeModal(props: any) {
             }));
     }
 
+    // set default transfer amt to current stake amt
+    const setDefaultDelegAmt = useCallback(() => {
+        if (transferStakeModalData.delegAmt) {
+            const tempDelegAmt = convertQaToZilFull(transferStakeModalData.delegAmt);
+            setDelegAmt(tempDelegAmt);
+        } else {
+            setDelegAmt('0');
+        }
+    }, [transferStakeModalData.delegAmt]);
+
     const handleClose = () => {
         // txn success
         // invoke dashbaord methods
@@ -271,7 +281,7 @@ function ReDelegateStakeModal(props: any) {
             setToSsn('');
             setToSsnName('');
             setTxnId('');
-            setDelegAmt('');
+            setDefaultDelegAmt();
             setShowNodeSelector(false);
         }, 150);
     }
@@ -332,6 +342,10 @@ function ReDelegateStakeModal(props: any) {
         ], []
     )
 
+    useEffect(() => {
+        setDefaultDelegAmt();
+    }, [setDefaultDelegAmt]);
+
     return (
         <div id="redeleg-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="redelegModalLabel" aria-hidden="true">
             <div className="contract-calls-modal modal-dialog modal-lg" role="document">
@@ -390,8 +404,9 @@ function ReDelegateStakeModal(props: any) {
                                             </div>
                                         </div>
 
+                                        <div className="modal-label mb-2">Enter transfer amount</div>
                                         <div className="input-group mb-4">
-                                            <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} placeholder="Enter amount to transfer" />
+                                            <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} />
                                             <div className="input-group-append">
                                                 <span className="input-group-text pl-4 pr-3">ZIL</span>
                                             </div>
