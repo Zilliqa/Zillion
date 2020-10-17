@@ -35,13 +35,9 @@ function Table({ columns, data, tableId, senderAddress, handleNodeSelect }: any)
             initialState : {
                 sortBy: [
                     {
-                        id: "delegNum",
-                        desc: true
+                        id: "name",
+                        desc: false
                     },
-                    {
-                        id: "stakeAmt",
-                        desc: true
-                    }
                 ]
             }
         }, useSortBy);

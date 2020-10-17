@@ -8,7 +8,39 @@ import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
 
 
-function Table({ columns, data, tableId, hiddenColumns }: any) {
+function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
+    // showStakeBtn is true means displaying for delegators
+    // for delegators view, don't sort by stake amount
+
+    let tempInitialState = {};
+
+    if (showStakeBtn) {
+        // deleg view
+        // don't sort by stake amount to prevent users from staking the top most everytime
+        tempInitialState = {
+            pageIndex: 0, 
+            hiddenColumns: hiddenColumns,
+            sortBy: [
+                {
+                    id: 'name',
+                    desc: false
+                }
+            ] 
+        }
+    } else {
+        // default sort by stake amt
+        tempInitialState = {
+            pageIndex: 0, 
+            hiddenColumns: hiddenColumns,
+            sortBy: [
+                {
+                    id: 'stakeAmt',
+                    desc: true
+                }
+            ] 
+        }
+    }
+
     const {
         getTableProps,
         getTableBodyProps,
@@ -19,16 +51,7 @@ function Table({ columns, data, tableId, hiddenColumns }: any) {
         {
             columns, 
             data,
-            initialState: { 
-                pageIndex: 0, 
-                hiddenColumns: hiddenColumns,
-                sortBy: [
-                    {
-                        id: 'stakeAmt',
-                        desc: true
-                    }
-                ] 
-            }
+            initialState: tempInitialState
         }, useSortBy);
     
     return (
@@ -183,7 +206,7 @@ function SsnTable(props: any) {
     return (
         <>
         <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_SSN_STATS} />
-        <Table columns={columns} data={data} className={props.tableId} hiddenColumns={getHiddenColumns()} />
+        <Table columns={columns} data={data} className={props.tableId} hiddenColumns={getHiddenColumns()} showStakeBtn={showStakeBtn} />
         </>
     );
 }
