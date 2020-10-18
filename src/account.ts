@@ -26,7 +26,7 @@ let CHAIN_ID = 1;
 let MSG_VERSION = 1;
 let GAS_PRICE = Constants.DEFAULT_GAS_PRICE; // 1000000000 Qa
 
-const GAS_LIMIT = 25000;
+const GAS_LIMIT = Constants.DEFAULT_GAS_LIMIT;
 const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
 
 Zilliqa.prototype.setProvider = function(provider: any) {
@@ -232,6 +232,35 @@ export const getImplState = async (implAddr: string, state: string) => {
 
     } catch (err) {
         console.error("error: getImplState - o%", err);
+        return "error";
+    }
+};
+
+// for explorer page use
+// get smart contract sub state with a new zilliqa object
+// sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
+// wich depends on the main zilliqa object
+export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string) => {
+    const explorerZilliqa = new Zilliqa(networkURL);
+
+    if (!implAddr) {
+        console.error("error: getImplStateExplorer - no implementation contract found");
+        return "error";
+    }
+
+    try {
+
+        // fetched implementation contract address
+        const contractState = await explorerZilliqa.blockchain.getSmartContractSubState(implAddr, state);
+        
+        if (!contractState.hasOwnProperty("result")) {
+            return "error";
+        }
+        
+        return contractState.result;
+
+    } catch (err) {
+        console.error("error: getImplStateExplorer - o%", err);
         return "error";
     }
 };

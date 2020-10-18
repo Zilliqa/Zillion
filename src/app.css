@@ -547,6 +547,10 @@ input:focus {
   color: var(--primary-dark-color);
 }
 
+.explorer .explorer-wallet {
+  color: var(--primary-color);
+}
+
 .logo {
   width: 24px;
   height: auto;
@@ -1060,6 +1064,25 @@ input:focus {
 
 #disclaimer-modal .modal-body {
   color: var(--text-color);
+}
+
+#explorer-mini-navbar {
+  position: absolute;
+  top: 20px;
+  right: 0;
+}
+
+#explorer-mini-navbar span {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.85em;
+  text-transform: capitalize;
+
+  /* theme switch */
+  -webkit-transition: color 0.5s ease;
+  -moz-transition: color 0.5s ease;
+  -o-transition: color 0.5s ease;
+  transition: color 0.5s ease;
 }
 
 #home-mini-navbar {
