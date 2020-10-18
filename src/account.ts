@@ -236,6 +236,35 @@ export const getImplState = async (implAddr: string, state: string) => {
     }
 };
 
+// for explorer page use
+// get smart contract sub state with a new zilliqa object
+// sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
+// wich depends on the main zilliqa object
+export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string) => {
+    const explorerZilliqa = new Zilliqa(networkURL);
+
+    if (!implAddr) {
+        console.error("error: getImplStateExplorer - no implementation contract found");
+        return "error";
+    }
+
+    try {
+
+        // fetched implementation contract address
+        const contractState = await explorerZilliqa.blockchain.getSmartContractSubState(implAddr, state);
+        
+        if (!contractState.hasOwnProperty("result")) {
+            return "error";
+        }
+        
+        return contractState.result;
+
+    } catch (err) {
+        console.error("error: getImplStateExplorer - o%", err);
+        return "error";
+    }
+};
+
 // numTxBlocks-1 = current block num
 export const getNumTxBlocks = async () => {
     // assume the blockchain network is already set
