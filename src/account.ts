@@ -26,7 +26,7 @@ let CHAIN_ID = 1;
 let MSG_VERSION = 1;
 let GAS_PRICE = Constants.DEFAULT_GAS_PRICE; // 1000000000 Qa
 
-const GAS_LIMIT = 25000;
+const GAS_LIMIT = Constants.DEFAULT_GAS_LIMIT;
 const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
 
 Zilliqa.prototype.setProvider = function(provider: any) {
