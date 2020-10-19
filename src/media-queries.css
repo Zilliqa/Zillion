@@ -26,6 +26,15 @@
         margin-left: -40%;
         margin-top: -18%;
     }
+
+    .explorer .explorer-wallet {
+        font-size: 0.85em;
+    }
+
+    .explorer-search .explorer-search-input {
+        font-size: 0.85em;
+        width: 350px;
+    }
   
     .zillion-logo {
       width: 100%;

@@ -566,7 +566,6 @@ input:focus {
   line-height: 40px;
   transition: width 0.4s linear;
   text-align: center;
-  text-overflow: ellipsis;
 }
 
 .explorer-search .explorer-search-input {
@@ -577,6 +576,10 @@ input:focus {
   font-weight: 500;
   color: var(--text-color);
   transition: 0.8s ease;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
 }
 
 .explorer-search .explorer-search-input:focus {
