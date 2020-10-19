@@ -551,6 +551,53 @@ input:focus {
   color: var(--primary-color);
 }
 
+.explorer-search {
+  height: 70px;
+  margin-top: 1.5em;
+  margin-bottom: -1em;
+  padding: 1em;
+}
+
+.explorer-search-input {
+  border: 0;
+  outline: 0;
+  background: none;
+  width: 0;
+  line-height: 40px;
+  transition: width 0.4s linear;
+  text-align: center;
+  text-overflow: ellipsis;
+}
+
+.explorer-search .explorer-search-input {
+  padding: 0em 1em;
+  width: 460px;
+  border-bottom: 1px solid var(--text-color);
+  font-size: 0.95em;
+  font-weight: 500;
+  color: var(--text-color);
+  transition: 0.8s ease;
+}
+
+.explorer-search .explorer-search-input:focus {
+  color: var(--primary-table-font-color);
+  border-bottom: 1px solid var(--primary-color);
+}
+
+.explorer-search .explorer-search-input:focus ~ .explorer-search-icon {
+  color: var(--primary-color);
+}
+
+.explorer-search .explorer-search-icon {
+  border: 0;
+  color: var(--text-color);
+  margin-top: -0.8em;
+  margin-left: -3em;
+  background-color: transparent;
+  background-color: var(--secondary-color);
+  transition: 0.8s ease;
+}
+
 .logo {
   width: 24px;
   height: auto;
@@ -1068,7 +1115,7 @@ input:focus {
 
 #explorer-mini-navbar {
   position: absolute;
-  top: 20px;
+  top: 40px;
   right: 0;
 }
 
