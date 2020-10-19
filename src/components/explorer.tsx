@@ -19,7 +19,9 @@ import ZillionLogo from '../static/zillion.svg';
 import ZillionLightLogo from '../static/light/zillion.svg';
 import IconSun from './icons/sun';
 import IconMoon from './icons/moon';
+import IconSearch from './icons/search';
 import ExplorerStakingPortfolio from './explorer-staking-portfolio';
+
 
 
 const BigNumber = require('bignumber.js');
@@ -36,6 +38,7 @@ const initDelegStats: DelegStats = {
 function Explorer(props: any) {
     const address = props.match.params.address; // bech32 wallet address;
     const [walletBase16Address, setWalletBase16Address] = useState('');
+    const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [stakedNodeList, setStakedNodeList] = useState([] as DelegStakingPortfolioStats[]);
 
@@ -64,7 +67,13 @@ function Explorer(props: any) {
 
         if (validation.isBech32(address)) {
             // bech32
-            wallet = fromBech32Address(address).toLowerCase();
+            try {
+                wallet = fromBech32Address(address).toLowerCase();
+            } catch (err) {
+                // input address maybe of bech32 format but cannot be decoded
+                console.error("No such address: %o", address);
+                wallet = '';
+            }
         } else if (validation.isAddress(address)) {
             // base16
             wallet = address.toLowerCase();
@@ -172,6 +181,15 @@ function Explorer(props: any) {
         }
     };
 
+    const handleExplorerSearchAddress = (e: any) => {
+        setExplorerSearchAddress(e.target.value);
+    }
+    
+    const explorerCheckRewards = () => {
+        const zillionExplorerUrl = "/address/" + explorerSearchAddress
+        props.history.push(zillionExplorerUrl);
+    };
+
 
     return (
         <div className="cover explorer">
@@ -179,7 +197,15 @@ function Explorer(props: any) {
                 <div className="row align-items-center">
                     <div className="cover-content col-12 text-center">
 
-                    <div id="explorer-mini-navbar" className="d-flex align-items-end mr-4">
+                    <div id="banner" className="mb-4 text-center">
+                        { 
+                            environment_config === Environment.PROD ? 
+                            <div className="p-3"><strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.</div> :
+                            <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
+                        }
+                    </div>
+
+                    <div id="explorer-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
 
                     <div>
                         <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>
@@ -204,8 +230,16 @@ function Explorer(props: any) {
                         </div>
 
                         <div className="wallet-access">
-                            <h2>Zillion Explorer</h2>
-                            <h6 className="explorer-wallet">{walletBase16Address && address}</h6>
+                            <h2 className="mb-0">Zillion Explorer</h2>
+                      
+                            <div className="d-flex justify-content-center h-100">
+                                <div className="explorer-search mb-4">
+                                    <input type="text" className="explorer-search-input" value={explorerSearchAddress} onChange={handleExplorerSearchAddress} placeholder="Enter wallet address to check rewards" maxLength={42}/>
+                                    <button type="button" className="btn explorer-search-icon shadow-none" onClick={() => explorerCheckRewards()}><IconSearch width="18" height="18" /></button>
+                                </div>
+                            </div>
+                           
+                            <h6 className="explorer-wallet mt-4">{walletBase16Address && address}</h6>
                         </div>
                         
                         { !walletBase16Address && <p className="mb-4">No such address.</p> }

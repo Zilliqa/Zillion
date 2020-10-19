@@ -29,6 +29,7 @@ import { toBech32Address } from '@zilliqa-js/crypto';
 import { useInterval } from '../util/use-interval';
 import useDarkMode from '../util/use-dark-mode';
 import { ToastContainer } from 'react-toastify';
+import IconSearch from './icons/search';
 
 
 function Home(props: any) {
@@ -40,6 +41,7 @@ function Home(props: any) {
 
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
+  const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState(() => {
@@ -228,6 +230,15 @@ function Home(props: any) {
     }
   }
 
+  const handleExplorerSearchAddress = (e: any) => {
+    setExplorerSearchAddress(e.target.value);
+  }
+
+  const explorerCheckRewards = () => {
+    const zillionExplorerUrl = "/address/" + explorerSearchAddress
+    props.history.push(zillionExplorerUrl);
+  };
+
   useEffect(() => {
     if (environment_config === Environment.PROD) {
       setSelectedNetwork(Network.MAINNET);
@@ -319,6 +330,13 @@ function Home(props: any) {
                 { /* sign in and seed node table */ }
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
+
+                <div className="d-flex justify-content-center h-100">
+                  <div className="explorer-search">
+                    <input type="text" className="explorer-search-input" value={explorerSearchAddress} onChange={handleExplorerSearchAddress} placeholder="Enter wallet address to check rewards" maxLength={42}/>
+                    <button type="button" className="btn explorer-search-icon shadow-none" onClick={() => explorerCheckRewards()}><IconSearch width="18" height="18" /></button>
+                  </div>
+                </div>
 
                 <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
 
