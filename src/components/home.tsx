@@ -30,6 +30,7 @@ import { useInterval } from '../util/use-interval';
 import useDarkMode from '../util/use-dark-mode';
 import { ToastContainer } from 'react-toastify';
 import IconSearch from './icons/search';
+import WarningBanner from './warning-banner';
 
 
 function Home(props: any) {
@@ -278,13 +279,8 @@ function Home(props: any) {
       <div className="container-fluid">
         <div className="row align-items-center">
           <div className="cover-content col-12 text-center">
-            <div id="banner" className="mb-4 text-center">
-              { 
-                  environment_config === Environment.PROD ? 
-                  <div className="p-3"><strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.</div> :
-                  <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
-              }
-            </div>
+            
+            <WarningBanner />
 
             <div id="home-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
 

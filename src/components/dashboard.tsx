@@ -50,6 +50,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 
 
 import BN from 'bn.js';
+import WarningBanner from './warning-banner';
 
 
 const BigNumber = require('bignumber.js');
@@ -1008,6 +1009,17 @@ function Dashboard(props: any) {
                 </ul>
             </div>
         </nav>
+
+        <div id="banner" className="mb-4 text-center">
+            { 
+                environment_config === Environment.PROD ? 
+                <>
+                <div className="p-3"><strong>Attention</strong>: Staking contract is going to be paused at 20 OCT 4:00 for upgrading. Mainnet will be unavailable at 20 OCT 5:00 for upgrading. Please refer to the announcement at <a href="https://t.me/zilliqa/493" target="_blank" rel="noopener noreferrer">https://t.me/zilliqa/493</a>.</div>
+                </> :
+                <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
+            }
+        </div>
+
         <div id="dashboard" className="container-fluid h-100">
             <div className="row h-100">
                 <div id="content" className="col pt-4">

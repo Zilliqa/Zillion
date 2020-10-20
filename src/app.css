@@ -1118,7 +1118,7 @@ input:focus {
 
 #explorer-mini-navbar {
   position: absolute;
-  top: 40px;
+  top: 80px;
   right: 0;
 }
 
@@ -1137,7 +1137,7 @@ input:focus {
 
 #home-mini-navbar {
   position: absolute;
-  top: 40px;
+  top: 80px;
   right: 0;
 }
 
@@ -1665,6 +1665,7 @@ input:focus {
   font-size: 0.78em;
   font-weight: 400;
   border: none;
+  color: var(--text-color);
   background-color: var(--secondary-color);
   background-color: transparent;
 
@@ -1674,4 +1675,8 @@ input:focus {
   -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
   -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
   box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+}
+
+#banner a {
+  color: var(--hyperlink-color);
 }
