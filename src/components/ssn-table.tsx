@@ -183,6 +183,7 @@ function SsnTable(props: any) {
                         data-backdrop="static"
                         onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}>
                             Stake
+                        disabled={true}
                     </button>
                     </>
             }
