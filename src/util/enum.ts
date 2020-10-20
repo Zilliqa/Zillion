@@ -97,3 +97,7 @@ export enum TransactionType {
     UPDATE_RECV_ADDR = 7,
     WITHDRAW_COMM = 8
 }
+
+export enum ButtonText {
+    NOT_AVAILABLE = "Not Available"
+}

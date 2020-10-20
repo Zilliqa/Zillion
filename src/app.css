@@ -305,6 +305,24 @@ input:focus {
   padding-right: 1.2em;
 }
 
+.btn-contract-small-disabled {
+  color: #ffffff;
+  background-color: #333333;
+  border: 1px solid #333333;
+  font-size: 1em;
+  font-weight: 500;
+  padding-bottom: 0.3em;
+  padding-left: 1.2em;
+  padding-right: 1.2em;
+  pointer-events: none
+}
+
+.btn-contract-small-dsiabled:hover {
+  color: #ffffff;
+  background-color: #333333;
+  border: 1px solid #333333;
+}
+
 .btn-contract-small:hover {
   color: var(--secondary-color);
   background-color: var(--primary-hover-color);
