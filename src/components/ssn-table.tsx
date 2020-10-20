@@ -195,7 +195,7 @@ function SsnTable(props: any) {
         // list the hidden column accessor names
         let hiddenColumns = [];
         if (role !== undefined && role === Role.DELEGATOR) {
-            hiddenColumns.push("commReward", "apiUrl");
+            hiddenColumns.push("commReward", "apiUrl", "stake");
         }
         if (showStakeBtn === false || role === Role.OPERATOR) {
             hiddenColumns.push("stake");
