@@ -99,8 +99,8 @@ function CompleteWithdrawalTable(props: any) {
                             <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                         </div>
                         <div className="btn-group">
-                            { data.length !== 0 && <button className="btn btn-inner-contract mr-4 shadow-none" disabled={true}>Complete Stake Withdrawals</button> }
-                            { data.length !== 0 && <button className="btn btn-inner-contract-2 mr-4 shadow-none" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdrawdetails">View Details</button> }
+                            { data.length !== 0 && <button className="btn btn-inner-contract mr-4 shadow-none" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static">Complete Stake Withdrawals</button> }
+                            { data.length !== 0 && <button className="btn btn-inner-contract-2 mr-4 shadow-none" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
                         </div>
                     </div>
 
