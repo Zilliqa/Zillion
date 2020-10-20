@@ -21,6 +21,7 @@ import IconSun from './icons/sun';
 import IconMoon from './icons/moon';
 import IconSearch from './icons/search';
 import ExplorerStakingPortfolio from './explorer-staking-portfolio';
+import WarningBanner from './warning-banner';
 
 
 
@@ -197,32 +198,26 @@ function Explorer(props: any) {
                 <div className="row align-items-center">
                     <div className="cover-content col-12 text-center">
 
-                    <div id="banner" className="mb-4 text-center">
+                        <WarningBanner />
+
+                        <div id="explorer-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
+
+                        <div>
+                            <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>
+                            { 
+                                darkMode.value === true ? 
+                                <IconSun width="20" height="20"/> : 
+                                <IconMoon width="20" height="20"/>
+                            }
+                            </button>
+                        </div>
+
                         { 
-                            environment_config === Environment.PROD ? 
-                            <div className="p-3"><strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.</div> :
-                            <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
+                            ( environment_config === Environment.STAGE || environment_config === Environment.PROD ) && 
+                            <span className="mr-2">{network}</span>
                         }
-                    </div>
 
-                    <div id="explorer-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
-
-                    <div>
-                        <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>
-                        { 
-                            darkMode.value === true ? 
-                            <IconSun width="20" height="20"/> : 
-                            <IconMoon width="20" height="20"/>
-                        }
-                        </button>
-                    </div>
-
-                    { 
-                        ( environment_config === Environment.STAGE || environment_config === Environment.PROD ) && 
-                        <span className="mr-2">{network}</span>
-                    }
-
-                    </div>
+                        </div>
 
                         <div className="heading">
                             <>{toggleZillionLogo()}</>

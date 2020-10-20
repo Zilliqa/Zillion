@@ -566,7 +566,6 @@ input:focus {
   line-height: 40px;
   transition: width 0.4s linear;
   text-align: center;
-  text-overflow: ellipsis;
 }
 
 .explorer-search .explorer-search-input {
@@ -577,6 +576,10 @@ input:focus {
   font-weight: 500;
   color: var(--text-color);
   transition: 0.8s ease;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
 }
 
 .explorer-search .explorer-search-input:focus {
@@ -1115,7 +1118,7 @@ input:focus {
 
 #explorer-mini-navbar {
   position: absolute;
-  top: 40px;
+  top: 80px;
   right: 0;
 }
 
@@ -1134,7 +1137,7 @@ input:focus {
 
 #home-mini-navbar {
   position: absolute;
-  top: 40px;
+  top: 80px;
   right: 0;
 }
 
@@ -1662,6 +1665,7 @@ input:focus {
   font-size: 0.78em;
   font-weight: 400;
   border: none;
+  color: var(--text-color);
   background-color: var(--secondary-color);
   background-color: transparent;
 
@@ -1671,4 +1675,8 @@ input:focus {
   -webkit-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
   -moz-box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
   box-shadow: 1px -1px 15px 6px var(--input-shadow-color);
+}
+
+#banner a {
+  color: var(--hyperlink-color);
 }
