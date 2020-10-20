@@ -40,7 +40,12 @@
       width: 100%;
     }
 
+    #explorer-mini-navbar {
+        top: 138px;
+    }
+
     #home-mini-navbar {
         margin-top: 2em !important;
+        top: 130px;
     }
 }
