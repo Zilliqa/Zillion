@@ -52,8 +52,7 @@ function DelegatorDropdown(props: any) {
                 id="dropdown-menu-btn" 
                 data-toggle="dropdown" 
                 aria-haspopup="true" 
-                aria-expanded="false"
-                disabled={true}>
+                aria-expanded="false">
                 Manage
             </button>
             <div className="dropdown-menu delegator-menu animate__animated animate__fadeIn" aria-labelledby="dropdown-menu-btn">
@@ -64,8 +63,7 @@ function DelegatorDropdown(props: any) {
                     data-target="#withdraw-reward-modal" 
                     data-keyboard="false" 
                     data-backdrop="static"
-                    onClick={handleClaimRewards}
-                    disabled={true}>
+                    onClick={handleClaimRewards}>
                         Claim Rewards
                 </button>
                 <button 
@@ -75,8 +73,7 @@ function DelegatorDropdown(props: any) {
                     data-target="#redeleg-stake-modal" 
                     data-keyboard="false" 
                     data-backdrop="static"
-                    onClick={handleTransferStake}
-                    disabled={true}>
+                    onClick={handleTransferStake}>
                         Transfer Stake
                 </button>
                 <button
@@ -86,8 +83,7 @@ function DelegatorDropdown(props: any) {
                     data-target="#withdraw-stake-modal" 
                     data-keyboard="false" 
                     data-backdrop="static"
-                    onClick={handleWithdrawStake}
-                    disabled={true}>
+                    onClick={handleWithdrawStake}>
                         Initiate Stake Withdrawal
                 </button>
             </div>

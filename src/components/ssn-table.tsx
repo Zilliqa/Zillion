@@ -181,8 +181,7 @@ function SsnTable(props: any) {
                         data-target="#delegate-stake-modal" 
                         data-keyboard="false" 
                         data-backdrop="static"
-                        onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}
-                        disabled={true}>
+                        onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}>
                             Stake
                     </button>
                     </>
@@ -196,7 +195,7 @@ function SsnTable(props: any) {
         // list the hidden column accessor names
         let hiddenColumns = [];
         if (role !== undefined && role === Role.DELEGATOR) {
-            hiddenColumns.push("commReward", "apiUrl", "stake");
+            hiddenColumns.push("commReward", "apiUrl");
         }
         if (showStakeBtn === false || role === Role.OPERATOR) {
             hiddenColumns.push("stake");
