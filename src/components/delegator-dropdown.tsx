@@ -1,5 +1,6 @@
 import React from 'react';
 import { TransferStakeModalData, WithdrawStakeModalData, ClaimedRewardModalData } from '../util/interface';
+import { ButtonText } from '../util/enum';
 
 
 function DelegatorDropdown(props: any) {
@@ -46,7 +47,7 @@ function DelegatorDropdown(props: any) {
     return (
         <div id="delegator-dropdown" className="dropdown dropright">
             <button 
-                className="btn btn-contract-small dropdown-toggle shadow-none" 
+                className="btn btn-contract-small-disabled dropdown-toggle shadow-none" 
                 data-display="static" 
                 type="button" 
                 id="dropdown-menu-btn" 
@@ -54,7 +55,7 @@ function DelegatorDropdown(props: any) {
                 aria-haspopup="true" 
                 aria-expanded="false"
                 disabled={true}>
-                Manage
+                {ButtonText.NOT_AVAILABLE}
             </button>
             <div className="dropdown-menu delegator-menu animate__animated animate__fadeIn" aria-labelledby="dropdown-menu-btn">
                 <button 

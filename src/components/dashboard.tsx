@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType, ButtonText } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
@@ -1058,9 +1058,9 @@ function Dashboard(props: any) {
 
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi {operatorStats.name ? operatorStats.name : 'Operator'}! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static" disabled={true}>Update Commission</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static" disabled={true}>Update Receiving Address</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static" disabled={true}>Withdraw Commission</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static" disabled={true}>{ButtonText.NOT_AVAILABLE}</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static" disabled={true}>{ButtonText.NOT_AVAILABLE}</button>
+                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static" disabled={true}>{ButtonText.NOT_AVAILABLE}</button>
                                     </div>
                                     </>
                                 }
