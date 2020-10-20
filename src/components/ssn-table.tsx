@@ -181,9 +181,9 @@ function SsnTable(props: any) {
                         data-target="#delegate-stake-modal" 
                         data-keyboard="false" 
                         data-backdrop="static"
-                        onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}>
+                        onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}
+                        disabled={true}>
                             Stake
-                        disabled={true}
                     </button>
                     </>
             }
