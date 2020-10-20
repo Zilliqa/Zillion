@@ -1665,6 +1665,7 @@ input:focus {
   font-size: 0.78em;
   font-weight: 400;
   border: none;
+  color: var(--text-color);
   background-color: var(--secondary-color);
   background-color: transparent;
 
