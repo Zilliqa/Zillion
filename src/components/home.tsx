@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { trackPromise } from 'react-promise-tracker';
 
-import { AccessMethod, Environment, Network, Role, NetworkURL, SsnStatus, PromiseArea } from '../util/enum';
+import { AccessMethod, Environment, Network, Role, NetworkURL, SsnStatus, PromiseArea, ContractState } from '../util/enum';
 import AppContext from "../contexts/appContext";
 import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
@@ -282,7 +282,12 @@ function Home(props: any) {
             
             <WarningBanner />
 
-            <div id="home-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
+            <div 
+              id="home-mini-navbar" 
+              className={
+                ContractState.IS_PAUSED.toString() === "true" ? 
+                'home-mini-navbar-disabled d-flex align-items-end mr-4' : 
+                'home-mini-navbar-enabled d-flex align-items-end mr-4'}>
 
               <div>
                 <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>

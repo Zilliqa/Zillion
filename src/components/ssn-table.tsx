@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 
-import { PromiseArea, SsnStatus, Role } from '../util/enum';
+import { PromiseArea, SsnStatus, Role, ContractState } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
 import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
@@ -182,7 +182,7 @@ function SsnTable(props: any) {
                         data-keyboard="false" 
                         data-backdrop="static"
                         onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}
-                        disabled={true}>
+                        disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
                             Stake
                     </button>
                     </>
@@ -195,9 +195,13 @@ function SsnTable(props: any) {
         // hide redudant info for certain group of users, e.g. commission reward
         // list the hidden column accessor names
         let hiddenColumns = [];
-        if (role !== undefined && role === Role.DELEGATOR) {
-            hiddenColumns.push("commReward", "apiUrl", "stake");
+        if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() !== 'true') {
+            hiddenColumns.push("commReward", "apiUrl");
+        } else if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() === 'true') {
+            // hide stake button if contract state is paused
+            hiddenColumns.push("stake");
         }
+
         if (showStakeBtn === false || role === Role.OPERATOR) {
             hiddenColumns.push("stake");
         }
