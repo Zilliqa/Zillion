@@ -1,11 +1,11 @@
 import React, {useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
-import ReactTooltip from 'react-tooltip';
 
-import IconQuestionCircle from './icons/question-circle';
 import Spinner from './spinner';
-import { PromiseArea, ButtonText, ContractState } from '../util/enum';
+import { PromiseArea } from '../util/enum';
 import { convertQaToCommaStr } from '../util/utils';
+import IconQuestionCircle from './icons/question-circle';
+import ReactTooltip from 'react-tooltip';
 
 
 function Table({ columns, data, tableId }: any) {
@@ -56,7 +56,7 @@ function Table({ columns, data, tableId }: any) {
     );
 }
 
-function CompleteWithdrawalTable(props: any) {
+function ExplorerPendingWithdrawalTable(props: any) {
     const data = props.data;
     const totalClaimableAmt = props.totalClaimableAmt;
 
@@ -80,52 +80,24 @@ function CompleteWithdrawalTable(props: any) {
     );
 
     return (
-        <>
-        { data.length !== 0 &&
-
-        <div id="delegator-complete-withdraw-details" className="col-12 mt-2 px-1 py-3">
-            <div id="complete-withdraw-accordion">
+        <div id="delegator-complete-withdraw-details" className="container px-1 py-3 mb-4">
+            <div id="complete-withdraw-explorer-accordion">
                 <div className="card text-center">
-                    <h6 className="inner-section-heading px-4 pt-4">Pending Stake Withdrawals&nbsp;
+                    <h6 className="text-left px-4 pt-4">Pending Stake Withdrawals&nbsp;
                         <span data-tip data-for="withdraw-question">
                             <IconQuestionCircle width="16" height="16" className="section-icon" />
                         </span>
                     </h6>
                     <div className="text-center">
-                        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} />
+                        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_EXPLORER_STATS} />
                     </div>
                     <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
                         <div>
-                            <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
-                        </div>
-                        <div className="btn-group">
-                            { 
-                                data.length !== 0 && 
-                                <button 
-                                    className="btn btn-inner-contract mr-4 shadow-none" 
-                                    data-toggle="modal" 
-                                    data-target="#complete-withdrawal-modal" 
-                                    data-keyboard="false" 
-                                    data-backdrop="static" 
-                                    disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
-                                        {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Complete Stake Withdrawals'}
-                                </button> 
-                            }
-                            { 
-                                data.length !== 0 && 
-                                <button 
-                                    className="btn btn-inner-contract-2 mr-4 shadow-none" 
-                                    data-toggle="collapse" 
-                                    data-target="#complete-withdraw-details" 
-                                    aria-expanded="true" 
-                                    aria-controls="complete-withdraw-details">
-                                        View Details
-                                </button> 
-                            }
+                            <span>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</span>
                         </div>
                     </div>
 
-                    <div id="complete-withdraw-details" className="collapse" aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-accordion">
+                    <div id="complete-withdraw-details" className={ data.length > 0 ? 'collapse show' : 'collapse' } aria-labelledby="complete-withdraw-accordion-header" data-parent="#complete-withdraw-explorer-accordion">
                         <div className="card-body">
                             { data.length === 0 && <em>You have no ZILs ready for withdrawal yet.</em> }
                             <Table columns={columns} data={data} />
@@ -140,11 +112,7 @@ function CompleteWithdrawalTable(props: any) {
                 <span>The amount is processed at a certain block number and only available to withdraw<br/>once the required block number is reached.</span>
             </ReactTooltip>
         </div>
-        }
-
-        </>
-    )
-
+    );
 }
 
-export default CompleteWithdrawalTable;
+export default ExplorerPendingWithdrawalTable;

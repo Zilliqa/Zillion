@@ -22,6 +22,7 @@ import IconMoon from './icons/moon';
 import IconSearch from './icons/search';
 import ExplorerStakingPortfolio from './explorer-staking-portfolio';
 import WarningBanner from './warning-banner';
+import ExplorerPendingWithdrawalTable from './explorer-pending-withdrawal-table';
 
 
 
@@ -42,6 +43,9 @@ function Explorer(props: any) {
     const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [stakedNodeList, setStakedNodeList] = useState([] as DelegStakingPortfolioStats[]);
+
+    const [pendingWithdrawalList, setPendingWithdrawlList] = useState([] as any);
+    const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
     // config.js from public folder
     const { networks_config, environment_config } = (window as { [key: string]: any })['config'];
@@ -65,6 +69,12 @@ function Explorer(props: any) {
         let totalDeposits = initDelegStats.totalDeposits;
         let wallet = '';
         let stakedNodesList: DelegStakingPortfolioStats[] = [];
+
+        // for pending withdrawal progress
+        let totalClaimableAmtBN = new BigNumber(0); // Qa
+        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
+        let progress = '0';
+
 
         if (validation.isBech32(address)) {
             // bech32
@@ -139,6 +149,58 @@ function Explorer(props: any) {
                 // converted to gzil when display
                 gzilRewards = totalZilRewardsBN;
 
+                // compute pending withdrawal progress
+                const withdrawalPendingState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending');
+
+                if (withdrawalPendingState.hasOwnProperty('withdrawal_pending')) {
+                    if (withdrawalPendingState['withdrawal_pending'].hasOwnProperty(wallet)) {
+                        const blkNumPendingWithdrawal = withdrawalPendingState['withdrawal_pending'][wallet];
+
+                        // get min bnum req
+                        const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'bnum_req');
+                        const blkNumReq = blkNumReqState['bnum_req'];
+
+                        const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocksExplorer(networkURL)).minus(1);
+
+                        // compute each of the pending withdrawal progress
+                        for (const blkNum in blkNumPendingWithdrawal) {
+                            if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                                continue;
+                            }
+
+                            // compute each pending stake withdrawal progress
+                            let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                            let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
+                            let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
+                            let completed = new BigNumber(0);
+
+                            // compute progress using blk num countdown ratio
+                            if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                                // can withdraw
+                                totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                                blkNumCountdown = new BigNumber(0);
+                                completed = new BigNumber(1);
+                            } else {
+                                // still have pending blks
+                                // 1 - (countdown/blk_req)
+                                const processed = blkNumCountdown.dividedBy(blkNumReq);
+                                completed = new BigNumber(1).minus(processed);
+                            }
+
+                            // convert progress to percentage
+                            progress = completed.times(100).toFixed(2);
+
+                            // record the stake withdrawal progress
+                            pendingStakeWithdrawalList.push({
+                                amount: pendingAmt.toString(),
+                                blkNumCountdown: blkNumCountdown.toString(),
+                                blkNumCheck: blkNumCheck.toString(),
+                                progress: progress.toString(),
+                            });
+                        }
+                    }
+                }
+
             })
             .catch((err) => {
                 console.error(err);
@@ -156,6 +218,9 @@ function Explorer(props: any) {
                     }
                     setDelegStats(data);
                     setStakedNodeList([...stakedNodesList]);
+                    setPendingWithdrawlList([...pendingStakeWithdrawalList]);
+                    setTotalClaimableAmt(totalClaimableAmtBN.toString())
+                    
                 }
             }), PromiseArea.PROMISE_GET_EXPLORER_STATS);
 
@@ -279,7 +344,8 @@ function Explorer(props: any) {
                         {
                             walletBase16Address &&
 
-                            <div id="staking-portfolio-details" className="p-4 dashboard-card container">
+                            <>
+                            <div id="staking-portfolio-details" className="p-4 dashboard-card mb-4 container">
                                 <div className="row">
                                     <div className="col">
                                         <h5 className="card-title mb-4 text-left">Nodes Staked</h5>
@@ -291,9 +357,14 @@ function Explorer(props: any) {
                                     </div>
                                 </div>
                             </div>
+
+                            <ExplorerPendingWithdrawalTable
+                                data={pendingWithdrawalList}
+                                totalClaimableAmt={totalClaimableAmt} />
+                            </>
                         }
 
-                        <button type="button" className="btn btn-user-action-cancel mx-2" onClick={redirectToMain}>Back to Main</button>
+                        <button type="button" className="btn btn-user-action-cancel mt-2 mx-2" onClick={redirectToMain}>Back to Main</button>
 
                     </div>
                     <Footer />
