@@ -588,7 +588,7 @@ input:focus {
 
 .explorer-search .explorer-search-input {
   padding: 0em 1em;
-  width: 460px;
+  width: 480px;
   border-bottom: 1px solid var(--text-color);
   font-size: 0.95em;
   font-weight: 500;
@@ -1063,6 +1063,64 @@ input:focus {
   background-color: var(--secondary-color);
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
+}
+
+#complete-withdraw-explorer-accordion {
+  border-radius: 6px;
+  background-color: var(--primary-section-bg-color);
+  border: none;
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+}
+
+#complete-withdraw-explorer-accordion .btn-group {
+  margin-top: -10px;
+}
+
+#complete-withdraw-explorer-accordion .card {
+  border: 0;
+  border-radius: 6px;
+  background-color: var(--primary-section-bg-color);
+}
+
+#complete-withdraw-explorer-accordion .card h6 {
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--primary-table-heading-color);
+  text-transform: uppercase;
+}
+
+#complete-withdraw-explorer-accordion .card-header {
+  border: 0;
+  border-radius: 6px;
+  background-color: var(--primary-section-bg-color);
+  padding-bottom: 2.5rem;
+}
+
+#complete-withdraw-explorer-accordion .card-header span {
+  font-size: 0.9em;
+  color: var(--primary-table-font-color);
+}
+
+#complete-withdraw-explorer-accordion .card-body {
+  background-color: var(--secondary-color);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+#complete-withdraw-explorer-accordion .section-icon {
+  fill: var(--primary-table-inner-heading-color)
+}
+
+#complete-withdraw-explorer-accordion .card-body > table {
+  font-size: 0.9em;
+}
+
+#complete-withdraw-explorer-accordion .card-body table tbody {
+  font-size: 0.95em; 
 }
 
 #complete-withdraw-details h3 {
