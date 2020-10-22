@@ -89,7 +89,7 @@ function ExplorerPendingWithdrawalTable(props: any) {
                         </span>
                     </h6>
                     <div className="text-center">
-                        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_EXPLORER_STATS} />
+                        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_EXPLORER_PENDING_WITHDRAWAL} />
                     </div>
                     <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
                         <div>

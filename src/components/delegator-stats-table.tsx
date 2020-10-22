@@ -7,7 +7,7 @@ import Spinner from './spinner';
 
 function DelegatorStatsTable(props: any) {
     const data = props.data;
-
+    const totalPendingWithdrawalAmt = props.totalPendingWithdrawalAmt; // Qa
 
     return (
         <>
@@ -23,7 +23,7 @@ function DelegatorStatsTable(props: any) {
             </div>
             <div className="d-block deleg-stats-card">
                 <h3>Pending Stake Withdrawal</h3>
-                <span>{convertQaToCommaStr(data.totalPendingWithdrawal)}</span>
+                <span>{convertQaToCommaStr(totalPendingWithdrawalAmt)}</span>
             </div>
 
             <div className="w-100"></div>
