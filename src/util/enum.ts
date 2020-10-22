@@ -101,3 +101,8 @@ export enum TransactionType {
 export enum ButtonText {
     NOT_AVAILABLE = "Not Available"
 }
+
+// 'true': disabled all contract call buttons, add banner to dashboard and main page
+export enum ContractState {
+    IS_PAUSED = "true"
+}

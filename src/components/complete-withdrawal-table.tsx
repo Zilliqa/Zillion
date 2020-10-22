@@ -4,7 +4,7 @@ import ReactTooltip from 'react-tooltip';
 
 import IconQuestionCircle from './icons/question-circle';
 import Spinner from './spinner';
-import { PromiseArea, ButtonText } from '../util/enum';
+import { PromiseArea, ButtonText, ContractState } from '../util/enum';
 import { convertQaToCommaStr } from '../util/utils';
 
 
@@ -99,8 +99,29 @@ function CompleteWithdrawalTable(props: any) {
                             <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
                         </div>
                         <div className="btn-group">
-                            { data.length !== 0 && <button className="btn btn-inner-contract mr-4 shadow-none" data-toggle="modal" data-target="#complete-withdrawal-modal" data-keyboard="false" data-backdrop="static" disabled={true}>{ButtonText.NOT_AVAILABLE}</button> }
-                            { data.length !== 0 && <button className="btn btn-inner-contract-2 mr-4 shadow-none" data-toggle="collapse" data-target="#complete-withdraw-details" aria-expanded="true" aria-controls="complete-withdraw-details">View Details</button> }
+                            { 
+                                data.length !== 0 && 
+                                <button 
+                                    className="btn btn-inner-contract mr-4 shadow-none" 
+                                    data-toggle="modal" 
+                                    data-target="#complete-withdrawal-modal" 
+                                    data-keyboard="false" 
+                                    data-backdrop="static" 
+                                    disabled={ContractState.IS_PAUSED === 'true' ? true : false}>
+                                        {ContractState.IS_PAUSED === 'true' ? ButtonText.NOT_AVAILABLE : 'Complete Stake Withdrawals'}
+                                </button> 
+                            }
+                            { 
+                                data.length !== 0 && 
+                                <button 
+                                    className="btn btn-inner-contract-2 mr-4 shadow-none" 
+                                    data-toggle="collapse" 
+                                    data-target="#complete-withdraw-details" 
+                                    aria-expanded="true" 
+                                    aria-controls="complete-withdraw-details">
+                                        View Details
+                                </button> 
+                            }
                         </div>
                     </div>
 
