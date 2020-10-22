@@ -62,7 +62,6 @@ const initDelegStats: DelegStats = {
     zilRewards: '0',
     gzilRewards: '0',
     gzilBalance: '0',
-    totalPendingWithdrawal: '0',
     totalDeposits: '0',
 }
 
@@ -130,6 +129,7 @@ function Dashboard(props: any) {
     const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
     const [delegPendingStakeWithdrawalStats, setDelegPendingStakeWithdrawalStats] = useState([] as any);
+    const [totalPendingWithdrawalAmt, setTotalPendingWithdrawalAmt] = useState('0');
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
     const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
@@ -272,18 +272,12 @@ function Dashboard(props: any) {
 
 
     /* fetch data for delegator stats panel */
-    /* fetch data for delegator pending stake withdrawal */
     const getDelegatorStats = useCallback(() => {
         let globalAPY = initDelegStats.globalAPY;
         let zilRewards = initDelegStats.zilRewards;
         let gzilRewards = initDelegStats.gzilRewards;
         let gzilBalance = initDelegStats.gzilBalance;
-        let totalPendingWithdrawal = initDelegStats.totalPendingWithdrawal;
         let totalDeposits = initDelegStats.totalDeposits;
-
-        let totalClaimableAmtBN = new BigNumber(0); // Qa
-        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
-        let progress = '0';
         
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
@@ -344,63 +338,6 @@ function Dashboard(props: any) {
                 }
             }
 
-            // compute total pending withdrawal
-            // compute pending withdrawal progress
-            const withdrawalPendingState = await ZilliqaAccount.getImplState(impl, 'withdrawal_pending');
-            if (withdrawalPendingState.withdrawal_pending) {
-                let totalPendingAmtBN = new BigNumber(0);
-
-                if (withdrawalPendingState.withdrawal_pending.hasOwnProperty(userBase16Address)) {
-                    const blkNumPendingWithdrawal = withdrawalPendingState.withdrawal_pending[userBase16Address];
-
-                    // get min bnum req
-                    const blkNumReqState = await ZilliqaAccount.getImplState(impl, 'bnum_req');
-                    const blkNumReq = blkNumReqState['bnum_req'];
-
-                    const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocks()).minus(1);
-                
-                    for (const blkNum in blkNumPendingWithdrawal) {
-                        if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
-                            continue;
-                        }
-
-                        // compute each pending stake withdrawal progress
-                        let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
-                        let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
-                        let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
-                        let completed = new BigNumber(0);
-
-                        // compute progress using blk num countdown ratio
-                        if (blkNumCountdown.isLessThanOrEqualTo(0)) {
-                            // can withdraw
-                            totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
-                            blkNumCountdown = new BigNumber(0);
-                            completed = new BigNumber(1);
-                        } else {
-                            // still have pending blks
-                            // 1 - (countdown/blk_req)
-                            const processed = blkNumCountdown.dividedBy(blkNumReq);
-                            completed = new BigNumber(1).minus(processed);
-                        }
-
-                        // convert progress to percentage
-                        progress = completed.times(100).toFixed(2);
-
-                        // record the stake withdrawal progress
-                        pendingStakeWithdrawalList.push({
-                            amount: pendingAmt.toString(),
-                            blkNumCountdown: blkNumCountdown.toString(),
-                            blkNumCheck: blkNumCheck.toString(),
-                            progress: progress.toString(),
-                        })
-                        
-                        totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmt);
-                    }
-                }
-
-                totalPendingWithdrawal = totalPendingAmtBN.toString();
-            }
-
         })
         .catch((err) => {
             console.error(err);
@@ -418,19 +355,94 @@ function Dashboard(props: any) {
                     zilRewards: zilRewards,
                     gzilRewards: gzilRewards,
                     gzilBalance: gzilBalance,
-                    totalPendingWithdrawal: totalPendingWithdrawal,
                     totalDeposits: totalDeposits,
                 }
 
                 setDelegStats(data);
-                setDelegPendingStakeWithdrawalStats([...pendingStakeWithdrawalList]);
-                setTotalClaimableAmt(totalClaimableAmtBN.toString());
-                
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
     }, [impl, currWalletAddress, networkURL]);
 
+
+    /* fetch data for delegator pending stake withdrawal */
+    const getDelegatorPendingWithdrawal = useCallback(() => {
+        let totalClaimableAmtBN = new BigNumber(0); // Qa
+        let totalPendingAmtBN = new BigNumber(0); // Qa, for deleg stats panel
+        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
+        let progress = '0';
+        
+        const wallet = fromBech32Address(currWalletAddress).toLowerCase();
+
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending')
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+    
+                if (!contractState['withdrawal_pending'].hasOwnProperty(wallet)) {
+                    return null;
+                }
+
+                const blkNumPendingWithdrawal = contractState['withdrawal_pending'][wallet];
+
+                // get min bnum req
+                const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'bnum_req');
+                const blkNumReq = blkNumReqState['bnum_req'];
+                const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocksExplorer(networkURL)).minus(1);
+
+                // compute each of the pending withdrawal progress
+                for (const blkNum in blkNumPendingWithdrawal) {
+                    if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+                        continue;
+                    }
+        
+                    // compute each pending stake withdrawal progress
+                    let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+                    let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
+                    let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
+                    let completed = new BigNumber(0);
+        
+                    // compute progress using blk num countdown ratio
+                    if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                        // can withdraw
+                        totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                        blkNumCountdown = new BigNumber(0);
+                        completed = new BigNumber(1);
+                    } else {
+                        // still have pending blks
+                        // 1 - (countdown/blk_req)
+                        const processed = blkNumCountdown.dividedBy(blkNumReq);
+                        completed = new BigNumber(1).minus(processed);
+                    }
+        
+                    // convert progress to percentage
+                    progress = completed.times(100).toFixed(2);
+        
+                    // record the stake withdrawal progress
+                    pendingStakeWithdrawalList.push({
+                        amount: pendingAmt.toString(),
+                        blkNumCountdown: blkNumCountdown.toString(),
+                        blkNumCheck: blkNumCheck.toString(),
+                        progress: progress.toString(),
+                    });
+
+                    // add total pending amt for deleg stats panel
+                    totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmt);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                return null;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    setDelegPendingStakeWithdrawalStats([...pendingStakeWithdrawalList]);
+                    setTotalClaimableAmt(totalClaimableAmtBN.toString());
+                    setTotalPendingWithdrawalAmt(totalPendingAmtBN.toString());
+                }
+            }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
+    }, [impl, networkURL, currWalletAddress]);
 
     /* fetch data for delegator staking portfolio panel */
     const getDelegatorStakingPortfolio = useCallback(() => {
@@ -742,6 +754,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorStakingPortfolio();
+            getDelegatorPendingWithdrawal();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
         }
@@ -757,6 +770,7 @@ function Dashboard(props: any) {
         getAccountBalance, 
         getNodeOptionsList, 
         getContractConstants, 
+        getDelegatorPendingWithdrawal,
         getDelegatorStats,
         getDelegatorStakingPortfolio,
         getOperatorStats,
@@ -772,6 +786,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorStakingPortfolio();
+            getDelegatorPendingWithdrawal();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
         }
@@ -795,6 +810,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorStakingPortfolio();
+            getDelegatorPendingWithdrawal();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
         }
@@ -1103,7 +1119,8 @@ function Dashboard(props: any) {
                                                     network={networkURL} 
                                                     refresh={refresh_rate_config} 
                                                     userAddress={currWalletAddress}
-                                                    data={delegStats} />
+                                                    data={delegStats}
+                                                    totalPendingWithdrawalAmt={totalPendingWithdrawalAmt} />
                                             </div>
                                         </div>
                                     </div>
