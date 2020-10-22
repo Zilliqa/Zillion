@@ -1011,7 +1011,7 @@ function Dashboard(props: any) {
         </nav>
 
         {
-            ContractState.IS_PAUSED === 'true' &&
+            ContractState.IS_PAUSED.toString() === 'true' &&
             <WarningDashboardBanner />
         }        
 
@@ -1060,8 +1060,8 @@ function Dashboard(props: any) {
                                             data-target="#update-comm-rate-modal" 
                                             data-keyboard="false" 
                                             data-backdrop="static" 
-                                            disabled={ContractState.IS_PAUSED === 'true' ? true : false}>
-                                                {ContractState.IS_PAUSED === 'true' ? ButtonText.NOT_AVAILABLE : 'Update Commission'}
+                                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                                                {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Update Commission'}
                                         </button>
                                         <button 
                                             type="button" 
@@ -1070,8 +1070,8 @@ function Dashboard(props: any) {
                                             data-target="#update-recv-addr-modal" 
                                             data-keyboard="false" 
                                             data-backdrop="static" 
-                                            disabled={ContractState.IS_PAUSED === 'true' ? true : false}>
-                                                {ContractState.IS_PAUSED === 'true' ? ButtonText.NOT_AVAILABLE : 'Update Receiving Address'}
+                                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                                                {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Update Receiving Address'}
                                         </button>
                                         <button 
                                             type="button" 
@@ -1080,8 +1080,8 @@ function Dashboard(props: any) {
                                             data-target="#withdraw-comm-modal" 
                                             data-keyboard="false" 
                                             data-backdrop="static" 
-                                            disabled={ContractState.IS_PAUSED === 'true' ? true : false}>
-                                                {ContractState.IS_PAUSED === 'true' ? ButtonText.NOT_AVAILABLE : 'Withdraw Commission'}
+                                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                                                {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Withdraw Commission'}
                                         </button>
                                     </div>
                                     </>

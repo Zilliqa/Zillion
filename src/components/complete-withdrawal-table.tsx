@@ -107,8 +107,8 @@ function CompleteWithdrawalTable(props: any) {
                                     data-target="#complete-withdrawal-modal" 
                                     data-keyboard="false" 
                                     data-backdrop="static" 
-                                    disabled={ContractState.IS_PAUSED === 'true' ? true : false}>
-                                        {ContractState.IS_PAUSED === 'true' ? ButtonText.NOT_AVAILABLE : 'Complete Stake Withdrawals'}
+                                    disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                                        {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Complete Stake Withdrawals'}
                                 </button> 
                             }
                             { 

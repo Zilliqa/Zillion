@@ -182,7 +182,7 @@ function SsnTable(props: any) {
                         data-keyboard="false" 
                         data-backdrop="static"
                         onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}
-                        disabled={ContractState.IS_PAUSED === 'true' ? true : false}>
+                        disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
                             Stake
                     </button>
                     </>
@@ -195,9 +195,9 @@ function SsnTable(props: any) {
         // hide redudant info for certain group of users, e.g. commission reward
         // list the hidden column accessor names
         let hiddenColumns = [];
-        if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED !== 'true') {
+        if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() !== 'true') {
             hiddenColumns.push("commReward", "apiUrl");
-        } else if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED === 'true') {
+        } else if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() === 'true') {
             // hide stake button if contract state is paused
             hiddenColumns.push("stake");
         }

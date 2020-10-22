@@ -4,7 +4,7 @@ import DisclaimerModal from './disclaimer';
 import Footer from './footer';
 
 import * as ZilliqaAccount from '../account';
-import { Environment, Network, PromiseArea } from '../util/enum';
+import { Environment, Network, PromiseArea, ContractState } from '../util/enum';
 import { DelegStats, DelegStakingPortfolioStats } from '../util/interface';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
@@ -200,7 +200,12 @@ function Explorer(props: any) {
 
                         <WarningBanner />
 
-                        <div id="explorer-mini-navbar" className="d-flex align-items-end mt-4 mr-4">
+                        <div 
+                            id="explorer-mini-navbar" 
+                            className={
+                                ContractState.IS_PAUSED.toString() === "true" ? 
+                                'explorer-mini-navbar-disabled d-flex align-items-end mr-4' : 
+                                'explorer-mini-navbar-enabled d-flex align-items-end mr-4'}>
 
                         <div>
                             <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>

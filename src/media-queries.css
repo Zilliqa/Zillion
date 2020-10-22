@@ -40,11 +40,11 @@
       width: 100%;
     }
 
-    #explorer-mini-navbar {
+    #explorer-mini-navbar .explorer-mini-navbar-disabled {
         top: 138px;
     }
 
-    #home-mini-navbar {
+    #home-mini-navbar .home-mini-navbar-disabled{
         margin-top: 2em !important;
         top: 130px;
     }
