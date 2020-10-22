@@ -1136,8 +1136,15 @@ input:focus {
 
 #explorer-mini-navbar {
   position: absolute;
-  top: 80px;
   right: 0;
+}
+
+#explorer-mini-navbar .explorer-mini-navbar-enabled {
+  top: 40px;
+}
+
+#explorer-mini-navbar .explorer-mini-navbar-disabled {
+  top: 80px;
 }
 
 #explorer-mini-navbar span {
@@ -1155,8 +1162,15 @@ input:focus {
 
 #home-mini-navbar {
   position: absolute;
-  top: 80px;
   right: 0;
+}
+
+#home-mini-navbar .home-mini-navbar-enabled {
+  top: 40px !important;
+}
+
+#home-mini-navbar .home-mini-navbar-disabled {
+  top: 80px !important;
 }
 
 #home-mini-navbar span {

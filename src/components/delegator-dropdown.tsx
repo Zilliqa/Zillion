@@ -1,6 +1,6 @@
 import React from 'react';
 import { TransferStakeModalData, WithdrawStakeModalData, ClaimedRewardModalData } from '../util/interface';
-import { ButtonText } from '../util/enum';
+import { ButtonText, ContractState } from '../util/enum';
 
 
 function DelegatorDropdown(props: any) {
@@ -47,15 +47,17 @@ function DelegatorDropdown(props: any) {
     return (
         <div id="delegator-dropdown" className="dropdown dropright">
             <button 
-                className="btn btn-contract-small-disabled dropdown-toggle shadow-none" 
+                className={ContractState.IS_PAUSED.toString() === 'true' ?
+                            'btn btn-contract-small-disabled dropdown-toggle shadow-none' :
+                            'btn btn-contract-small dropdown-toggle shadow-none'}
                 data-display="static" 
                 type="button" 
                 id="dropdown-menu-btn" 
                 data-toggle="dropdown" 
                 aria-haspopup="true" 
                 aria-expanded="false"
-                disabled={true}>
-                {ButtonText.NOT_AVAILABLE}
+                disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                    {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Manage'}
             </button>
             <div className="dropdown-menu delegator-menu animate__animated animate__fadeIn" aria-labelledby="dropdown-menu-btn">
                 <button 
@@ -66,8 +68,8 @@ function DelegatorDropdown(props: any) {
                     data-keyboard="false" 
                     data-backdrop="static"
                     onClick={handleClaimRewards}
-                    disabled={true}>
-                        Claim Rewards
+                    disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                        {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Claim Rewards'}
                 </button>
                 <button 
                     type="button" 
@@ -77,8 +79,8 @@ function DelegatorDropdown(props: any) {
                     data-keyboard="false" 
                     data-backdrop="static"
                     onClick={handleTransferStake}
-                    disabled={true}>
-                        Transfer Stake
+                    disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                        {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Transfer Stake'}
                 </button>
                 <button
                     type="button"
@@ -88,8 +90,8 @@ function DelegatorDropdown(props: any) {
                     data-keyboard="false" 
                     data-backdrop="static"
                     onClick={handleWithdrawStake}
-                    disabled={true}>
-                        Initiate Stake Withdrawal
+                    disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                        {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Initiate Stake Withdrawal'}
                 </button>
             </div>
         </div>

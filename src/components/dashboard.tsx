@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType, ButtonText } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
@@ -50,6 +50,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 
 
 import BN from 'bn.js';
+import WarningDashboardBanner from './warning-dashboard-banner';
 
 
 const BigNumber = require('bignumber.js');
@@ -1009,15 +1010,10 @@ function Dashboard(props: any) {
             </div>
         </nav>
 
-        <div id="banner" className="mb-4 text-center">
-            { 
-                environment_config === Environment.PROD ? 
-                <>
-                <div className="p-3"><strong>Attention</strong>: Staking contract is going to be paused at 20 OCT 4:00 for upgrading. Please refer to the announcement at <a href="https://t.me/zilliqa/493" target="_blank" rel="noopener noreferrer">https://t.me/zilliqa/493</a>.</div>
-                </> :
-                <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
-            }
-        </div>
+        {
+            ContractState.IS_PAUSED.toString() === 'true' &&
+            <WarningDashboardBanner />
+        }        
 
         <div id="dashboard" className="container-fluid h-100">
             <div className="row h-100">
@@ -1057,9 +1053,36 @@ function Dashboard(props: any) {
 
                                     <div className="p-4 mt-4 dashboard-card">
                                         <h5 className="card-title mb-4">Hi {operatorStats.name ? operatorStats.name : 'Operator'}! What would you like to do today?</h5>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-comm-rate-modal" data-keyboard="false" data-backdrop="static" disabled={true}>{ButtonText.NOT_AVAILABLE}</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#update-recv-addr-modal" data-keyboard="false" data-backdrop="static" disabled={true}>{ButtonText.NOT_AVAILABLE}</button>
-                                        <button type="button" className="btn btn-contract mr-4 shadow-none" data-toggle="modal" data-target="#withdraw-comm-modal" data-keyboard="false" data-backdrop="static" disabled={true}>{ButtonText.NOT_AVAILABLE}</button>
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-contract mr-4 shadow-none" 
+                                            data-toggle="modal" 
+                                            data-target="#update-comm-rate-modal" 
+                                            data-keyboard="false" 
+                                            data-backdrop="static" 
+                                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                                                {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Update Commission'}
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-contract mr-4 shadow-none" 
+                                            data-toggle="modal" 
+                                            data-target="#update-recv-addr-modal" 
+                                            data-keyboard="false" 
+                                            data-backdrop="static" 
+                                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                                                {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Update Receiving Address'}
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            className="btn btn-contract mr-4 shadow-none" 
+                                            data-toggle="modal" 
+                                            data-target="#withdraw-comm-modal" 
+                                            data-keyboard="false" 
+                                            data-backdrop="static" 
+                                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                                                {ContractState.IS_PAUSED.toString() === 'true' ? ButtonText.NOT_AVAILABLE : 'Withdraw Commission'}
+                                        </button>
                                     </div>
                                     </>
                                 }
