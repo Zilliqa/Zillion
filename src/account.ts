@@ -239,7 +239,7 @@ export const getImplState = async (implAddr: string, state: string) => {
 // for explorer page use
 // get smart contract sub state with a new zilliqa object
 // sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
-// wich depends on the main zilliqa object
+// which depends on the main zilliqa object
 export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string) => {
     const explorerZilliqa = new Zilliqa(networkURL);
 
@@ -276,6 +276,24 @@ export const getNumTxBlocks = async () => {
         return info.result.NumTxBlocks;
     } catch (err) {
         console.error("error - get latest blk number: %o", err);
+        return OperationStatus.ERROR;
+    }
+}
+
+// for explorer page use
+// get results with a new zilliqa object
+// sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
+// which depends on the main zilliqa object
+export const getNumTxBlocksExplorer = async (networkURL: string) => {
+    try {
+        const explorerZilliqa = new Zilliqa(networkURL);
+        const info = await explorerZilliqa.blockchain.getBlockChainInfo();
+        if (info === undefined && info.result === undefined) {
+            return OperationStatus.ERROR;
+        }
+        return info.result.NumTxBlocks;
+    } catch (err) {
+        console.error("error - get latest blk number explorer: %o", err);
         return OperationStatus.ERROR;
     }
 }
