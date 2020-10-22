@@ -33,7 +33,6 @@ const initDelegStats: DelegStats = {
     zilRewards: '0',
     gzilRewards: '0',
     gzilBalance: '0',
-    totalPendingWithdrawal: '0',
     totalDeposits: '0',
 }
 
@@ -87,7 +86,6 @@ function Explorer(props: any) {
         let zilRewards = initDelegStats.zilRewards;
         let gzilRewards = initDelegStats.gzilRewards;
         let gzilBalance = initDelegStats.gzilBalance;
-        let totalPendingWithdrawal = initDelegStats.totalPendingWithdrawal;
         let totalDeposits = initDelegStats.totalDeposits;
         let wallet = getWalletAddress();
         let stakedNodesList: DelegStakingPortfolioStats[] = [];
@@ -159,7 +157,6 @@ function Explorer(props: any) {
                         zilRewards: zilRewards,
                         gzilRewards: gzilRewards,
                         gzilBalance: gzilBalance, // not use
-                        totalPendingWithdrawal: totalPendingWithdrawal, // not use
                         totalDeposits: totalDeposits,
                     }
                     setDelegStats(data);

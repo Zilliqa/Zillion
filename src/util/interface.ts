@@ -15,7 +15,6 @@ interface DelegStats {
     zilRewards: string,
     gzilRewards: string,
     gzilBalance: string,
-    totalPendingWithdrawal: string,
     totalDeposits: string,
 }
 
