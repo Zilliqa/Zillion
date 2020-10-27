@@ -40,7 +40,7 @@ This enables the "Isolated Server" option in the network selection menu and disa
 
 5. On the home page, select the network. Next, select _Sign in as Delegators_ or _Sign in as Operators_
 
-6. An operator can see "Staking Performance", "Other Staked Seed Nodes" whereas delegators can only see "Other Staked Seed Nodes"
+6. An operator can see "Staking Performance", "Staked Seed Nodes" whereas delegators can only see "Staked Seed Nodes"
 
 7. Explore and execute any actions
 
@@ -56,6 +56,18 @@ This enables the "Isolated Server" option in the network selection menu and disa
 3. Assuming the hosted server is running `https`, execute `yarn start`.
 
 4. Done.
+
+
+### Enable / Disable Stake Operations
+Adjust these parameters to disable all stake operations and display a warning banner:
+
+1. At `src/util/enum.ts`, set the `enum ContractState` to **'true'** with the single quotes.
+-- This disables all the stake contract calls buttons and replaces the wordings to **"Not Available"**
+
+2. To change the banner display for the main page, edit `src/components/warning-banner.tsx`.
+
+3. To change the banner display for dashboard, edit `src/components/warning-dashboard-banner.tsx`.
+
 
 ## Caveats
 The wallet app does not store your private keys or passphrases for privacy and security concerns. The wallet session object is disconnected upon refreshing the browser. We advise you to avoid refreshing the browser; all statistics are retrieved at regular intervals as configured by `config.js`.
