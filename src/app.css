@@ -767,6 +767,12 @@ input:focus {
   background-color: var(--primary-table-striped-color);
 }
 
+.gzil-rewards {
+  font-size: 0.87em;
+  font-weight: 500;
+  margin-left: 1em;
+}
+
 .modal-body .node-details-subheading {
   font-size: 1em;
 }

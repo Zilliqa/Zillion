@@ -270,6 +270,13 @@ function Explorer(props: any) {
         props.history.push(zillionExplorerUrl);
     };
 
+    const handleKeyPress = (e: any) => {
+        if (e.keyCode === 13) {
+            // Enter key
+            // proceed to search
+            explorerCheckRewards();
+        }
+    }
 
     return (
         <div className="cover explorer">
@@ -313,7 +320,7 @@ function Explorer(props: any) {
                       
                             <div className="d-flex justify-content-center h-100">
                                 <div className="explorer-search mb-4">
-                                    <input type="text" className="explorer-search-input" value={explorerSearchAddress} onChange={handleExplorerSearchAddress} placeholder="Enter wallet address to check rewards" maxLength={42}/>
+                                    <input type="text" className="explorer-search-input" value={explorerSearchAddress} onKeyDown={handleKeyPress} onChange={handleExplorerSearchAddress} placeholder="Enter wallet address to check rewards" maxLength={42}/>
                                     <button type="button" className="btn explorer-search-icon shadow-none" onClick={() => explorerCheckRewards()}><IconSearch width="18" height="18" /></button>
                                 </div>
                             </div>

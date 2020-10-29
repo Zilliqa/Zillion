@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr } from '../../util/utils';
 import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -126,11 +126,12 @@ function WithdrawRewardModal(props: any) {
                                 <div className="col node-details-panel">
                                     <h3>Rewards</h3>
                                     <span>{ new BigNumber(claimedRewardsModalData.rewards).isGreaterThanOrEqualTo(10**9) ? convertQaToCommaStr(claimedRewardsModalData.rewards) : convertQaToZilFull(claimedRewardsModalData.rewards)} ZIL</span>
+                                    <span className="gzil-rewards">({convertGzilToCommaStr(claimedRewardsModalData.rewards)} GZIL)</span>
                                 </div>
                             </div>
                             <p><small><em>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</em></small></p>
                             <div className="d-flex mt-4">
-                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawReward}>Claim {convertQaToCommaStr(claimedRewardsModalData.rewards)} ZIL</button>
+                                <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawReward}>Claim</button>
                             </div>
 
                         </div>
