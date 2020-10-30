@@ -112,7 +112,7 @@ function SsnTable(props: any) {
                 className: 'ssn-address',
                 Cell: ({ row }: any) => 
                     <>
-                    <a data-tip={row.original.address} href={getAddressLink(row.original.address, networkURL)} target="_blank" rel="noopener noreferrer">
+                    <a data-tip={row.original.address}>
                         {getTruncatedAddress(row.original.address)}
                     </a>
                     <ReactTooltip place="bottom" type="dark" effect="float" />
@@ -194,7 +194,7 @@ function SsnTable(props: any) {
     const getHiddenColumns = () => {
         // hide redudant info for certain group of users, e.g. commission reward
         // list the hidden column accessor names
-        let hiddenColumns = [];
+        let hiddenColumns = ["address"];
         if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() !== 'true') {
             hiddenColumns.push("commReward", "apiUrl");
         } else if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() === 'true') {

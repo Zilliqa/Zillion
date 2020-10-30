@@ -33,7 +33,7 @@ function Table({ columns, data }: any) {
         }, useSortBy);
     
     return (
-        <table className="table table-responsive-lg" {...getTableProps()}>
+        <table className="table table-responsive-md" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -76,11 +76,6 @@ function StakingPortfolio(props: any) {
             {
                 Header: 'name',
                 accessor: 'ssnName',
-            },
-            {
-                Header: 'address',
-                accessor: 'ssnAddress',
-                Cell: ({ row }: any) => <a href={getAddressLink(row.original.ssnAddress, networkURL)} target="_blank" rel="noopener noreferrer">{row.original.ssnAddress}</a>
             },
             {
                 Header: 'deposit (ZIL)',
