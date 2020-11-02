@@ -129,7 +129,6 @@ function WithdrawRewardModal(props: any) {
                                     <span className="gzil-rewards">({convertGzilToCommaStr(claimedRewardsModalData.rewards)} GZIL)</span>
                                 </div>
                             </div>
-                            <p><small><em>Please confirm the <strong>address</strong> and <strong>rewards</strong> before claiming.</em></small></p>
                             <div className="d-flex mt-4">
                                 <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawReward}>Claim</button>
                             </div>

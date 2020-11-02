@@ -3,7 +3,7 @@ import { useTable, useSortBy } from 'react-table';
 import ReactTooltip from 'react-tooltip';
 
 import { PromiseArea } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, convertQaToZilFull } from '../util/utils';
+import { convertQaToCommaStr, convertQaToZilFull } from '../util/utils';
 
 import { DelegStakingPortfolioStats } from '../util/interface';
 import Spinner from './spinner';
@@ -33,7 +33,7 @@ function Table({ columns, data }: any) {
         }, useSortBy);
     
     return (
-        <table className="table table-responsive-md" {...getTableProps()}>
+        <table className="table table-responsive-sm" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -60,7 +60,7 @@ function Table({ columns, data }: any) {
 }
 
 function StakingPortfolio(props: any) {
-    const networkURL = props.network;
+    // const networkURL = props.network;
     const data: DelegStakingPortfolioStats[] = props.data;
 
     // from dashboard
@@ -106,7 +106,7 @@ function StakingPortfolio(props: any) {
                         rewards={row.original.rewards} />
                     </>
             }
-        ], [networkURL, setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
+        ], [setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
     );
 
     return (

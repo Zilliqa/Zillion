@@ -272,6 +272,7 @@ input:focus {
   width: 200px;
   border: 0;
   border-radius: 6px;
+  margin-left: -3em;
 
   background-color: var(--secondary-color);
 

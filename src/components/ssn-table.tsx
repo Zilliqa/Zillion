@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import ReactTooltip from "react-tooltip";
+// import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 
 import { PromiseArea, SsnStatus, Role, ContractState } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress } from '../util/utils';
 import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
 
@@ -82,7 +82,7 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 }
 
 function SsnTable(props: any) {
-    const networkURL = props.network;
+    // const networkURL = props.network;
     const role = props.currRole;
     
     const data: SsnStats[] = props.data;
@@ -112,10 +112,7 @@ function SsnTable(props: any) {
                 className: 'ssn-address',
                 Cell: ({ row }: any) => 
                     <>
-                    <a data-tip={row.original.address}>
-                        {getTruncatedAddress(row.original.address)}
-                    </a>
-                    <ReactTooltip place="bottom" type="dark" effect="float" />
+                    {getTruncatedAddress(row.original.address)}
                     </>
             },
             {
