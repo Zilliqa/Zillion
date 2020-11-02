@@ -21,7 +21,7 @@ const { BN, units } = require('@zilliqa-js/util');
 
 // hide the data that contains the sender address
 // no point to transfer to same person
-function Table({ columns, data, tableId, senderAddress, handleNodeSelect }: any) {
+function Table({ columns, data, tableId, senderAddress, handleNodeSelect, hiddenColumns }: any) {
     const {
         getTableProps,
         getTableBodyProps,
@@ -33,6 +33,7 @@ function Table({ columns, data, tableId, senderAddress, handleNodeSelect }: any)
             columns, 
             data,
             initialState : {
+                hiddenColumns : hiddenColumns,
                 sortBy: [
                     {
                         id: "name",
@@ -338,6 +339,11 @@ function ReDelegateStakeModal(props: any) {
         ], []
     )
 
+    const getHiddenColumns = () => {
+        let hiddenColumns = ["address"];
+        return hiddenColumns;
+    }
+
     useEffect(() => {
         setDefaultDelegAmt();
     }, [setDefaultDelegAmt]);
@@ -422,7 +428,12 @@ function ReDelegateStakeModal(props: any) {
                                 <>
                                     <h2 className="node-details-subheading mb-2">Select a node to transfer to</h2>
                                     <div id="transfer-stake-details" className="text-center">
-                                        <Table columns={columns} data={nodeSelectorOptions} senderAddress={transferStakeModalData.ssnAddress} handleNodeSelect={handleNodeSelect}/>
+                                        <Table 
+                                            columns={columns} 
+                                            data={nodeSelectorOptions} 
+                                            senderAddress={transferStakeModalData.ssnAddress} 
+                                            handleNodeSelect={handleNodeSelect}
+                                            hiddenColumns={getHiddenColumns()} />
                                     </div>
                                     <div className="d-flex">
                                         <button type="button" className="btn btn-user-action-cancel mt-4 mx-auto shadow-none" onClick={() => toggleNodeSelector()}>Back</button>

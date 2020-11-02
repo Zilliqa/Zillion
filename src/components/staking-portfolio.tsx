@@ -3,7 +3,7 @@ import { useTable, useSortBy } from 'react-table';
 import ReactTooltip from 'react-tooltip';
 
 import { PromiseArea } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, convertQaToZilFull } from '../util/utils';
+import { convertQaToCommaStr, convertQaToZilFull } from '../util/utils';
 
 import { DelegStakingPortfolioStats } from '../util/interface';
 import Spinner from './spinner';
@@ -33,7 +33,7 @@ function Table({ columns, data }: any) {
         }, useSortBy);
     
     return (
-        <table className="table table-responsive-lg" {...getTableProps()}>
+        <table className="table table-responsive-sm" {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
@@ -60,7 +60,7 @@ function Table({ columns, data }: any) {
 }
 
 function StakingPortfolio(props: any) {
-    const networkURL = props.network;
+    // const networkURL = props.network;
     const data: DelegStakingPortfolioStats[] = props.data;
 
     // from dashboard
@@ -76,11 +76,6 @@ function StakingPortfolio(props: any) {
             {
                 Header: 'name',
                 accessor: 'ssnName',
-            },
-            {
-                Header: 'address',
-                accessor: 'ssnAddress',
-                Cell: ({ row }: any) => <a href={getAddressLink(row.original.ssnAddress, networkURL)} target="_blank" rel="noopener noreferrer">{row.original.ssnAddress}</a>
             },
             {
                 Header: 'deposit (ZIL)',
@@ -111,7 +106,7 @@ function StakingPortfolio(props: any) {
                         rewards={row.original.rewards} />
                     </>
             }
-        ], [networkURL, setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
+        ], [setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
     );
 
     return (
