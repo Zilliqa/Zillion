@@ -977,6 +977,14 @@ input:focus {
   cursor: pointer;
 }
 
+.ssn-table-header-with-tip {
+  border-bottom: 1px dotted;
+}
+
+.ssn-table-header-with-tip:hover {
+  cursor: pointer;
+}
+
 .ssn-table-status-active {
   color: var(--primary-table-active-status-color);
   font-size: 0.78em;
@@ -1606,6 +1614,11 @@ input:focus {
 
 #redeleg-stake-modal .btn-change-node:hover {
   color: var(--primary-dark-color);
+}
+
+#ssn-table-header-tip {
+  font-size: 1em;
+  font-weight: 500; 
 }
 
 #toast-msg-container {
