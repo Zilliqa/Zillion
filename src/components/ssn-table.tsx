@@ -1,11 +1,12 @@
 import React, { useMemo } from 'react';
-import ReactTooltip from "react-tooltip";
+// import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 
 import { PromiseArea, SsnStatus, Role, ContractState } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getAddressLink, getTruncatedAddress } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress } from '../util/utils';
 import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
+import ReactTooltip from 'react-tooltip';
 
 
 function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
@@ -55,12 +56,21 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
         }, useSortBy);
     
     return (
+        <>
         <table id={tableId} className="table table-responsive-lg " {...getTableProps()}>
             <thead>
                 {headerGroups.map(headerGroup => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
-                        {headerGroup.headers.map(column => (
-                            <th scope="col" {...column.getHeaderProps()}>{column.render('Header')}</th>
+                        {headerGroup.headers.map((column, index) => (
+                            <th scope="col" {...column.getHeaderProps()}>
+                                {
+                                    column.render('tipText') === '' ?
+                                    column.render('Header') :
+                                    <span className="ssn-table-header-with-tip" data-for='ssn-table-header-tip' data-tip={column.render('tipText')}>
+                                        {column.render('Header')}
+                                    </span>
+                                }
+                            </th>
                         ))}
                     </tr>
                 ))}
@@ -78,11 +88,13 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
                 })}
             </tbody>
         </table>
+        <ReactTooltip id="ssn-table-header-tip" place="top" type="dark" effect="solid" />
+        </>
     );
 }
 
 function SsnTable(props: any) {
-    const networkURL = props.network;
+    // const networkURL = props.network;
     const role = props.currRole;
     
     const data: SsnStats[] = props.data;
@@ -104,7 +116,8 @@ function SsnTable(props: any) {
         () => [
             {
                 Header: 'name',
-                accessor: 'name'
+                accessor: 'name',
+                tipText: ''
             },
             {
                 Header: 'address',
@@ -112,16 +125,15 @@ function SsnTable(props: any) {
                 className: 'ssn-address',
                 Cell: ({ row }: any) => 
                     <>
-                    <a data-tip={row.original.address} href={getAddressLink(row.original.address, networkURL)} target="_blank" rel="noopener noreferrer">
-                        {getTruncatedAddress(row.original.address)}
-                    </a>
-                    <ReactTooltip place="bottom" type="dark" effect="float" />
-                    </>
+                    {getTruncatedAddress(row.original.address)}
+                    </>,
+                tipText: ''
             },
             {
                 Header: 'api endpoint',
                 accessor: 'apiUrl',
-                Cell: ({ row }: any) => <span className="ssn-table-api-url">{row.original.apiUrl}</span>
+                Cell: ({ row }: any) => <span className="ssn-table-api-url">{row.original.apiUrl}</span>,
+                tipText: 'Service API running by operator. Can be used as alternatives for Zilliqa API endpoint'
             },
             {
                 Header: 'stake amount (ZIL)',
@@ -129,7 +141,8 @@ function SsnTable(props: any) {
                 Cell: ({ row }: any) => 
                     <>
                     <span>{convertQaToCommaStr(row.original.stakeAmt)} ({computeStakeAmtPercent(row.original.stakeAmt, totalStakeAmt).toFixed(2)}&#37;)</span>
-                    </>
+                    </>,
+                tipText: 'Total amount being staked with this operator'
             },
             {
                 Header: 'buffered deposit (ZIL)',
@@ -137,23 +150,27 @@ function SsnTable(props: any) {
                 Cell: ({ row }: any) =>
                     <>
                     <span>{convertQaToCommaStr(row.original.bufferedDeposits)}</span>
-                    </>
+                    </>,
+                tipText: 'Total staked amount deposited in this cycle being considered for rewards in the next cycle'
             },
             {
                 Header: 'Comm. Rate (%)',
                 accessor: 'commRate',
                 Cell: ({ row }: any) =>
-                    <span>{convertToProperCommRate(row.original.commRate).toFixed(2)}</span>
+                    <span>{convertToProperCommRate(row.original.commRate).toFixed(2)}</span>,
+                tipText: 'Percentage of incoming rewards that the operator takes as commission'
             },
             {
                 Header: 'Comm. Reward (ZIL)',
                 accessor: 'commReward',
                 Cell: ({ row }: any) => 
-                    <span className="ssn-table-comm-reward">{convertQaToCommaStr(row.original.commReward)}</span>
+                    <span className="ssn-table-comm-reward">{convertQaToCommaStr(row.original.commReward)}</span>,
+                tipText: 'Number of ZILs earned as commission by the operator'
             },
             {
                 Header: 'Delegators',
-                accessor: 'delegNum'
+                accessor: 'delegNum',
+                tipText: 'Total number of delegators staking with this operator'
             },
             {
                 Header: 'Status',
@@ -167,7 +184,8 @@ function SsnTable(props: any) {
                                 row.original.status
                             }
                         </div>
-                        </>
+                        </>,
+                tipText: 'Determines whether the operator has met the minnimum stake amount and therefore ready to participate in staking and receive rewards'
             },
             {
                 Header: 'Stake',
@@ -185,7 +203,8 @@ function SsnTable(props: any) {
                         disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
                             Stake
                     </button>
-                    </>
+                    </>,
+                tipText: ''
             }
             // eslint-disable-next-line
         ],[totalStakeAmt, role]
@@ -194,7 +213,7 @@ function SsnTable(props: any) {
     const getHiddenColumns = () => {
         // hide redudant info for certain group of users, e.g. commission reward
         // list the hidden column accessor names
-        let hiddenColumns = [];
+        let hiddenColumns = ["address"];
         if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() !== 'true') {
             hiddenColumns.push("commReward", "apiUrl");
         } else if (role !== undefined && role === Role.DELEGATOR && ContractState.IS_PAUSED.toString() === 'true') {
@@ -211,7 +230,13 @@ function SsnTable(props: any) {
     return (
         <>
         <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_SSN_STATS} />
-        <Table columns={columns} data={data} className={props.tableId} hiddenColumns={getHiddenColumns()} showStakeBtn={showStakeBtn} />
+        <Table 
+            columns={columns} 
+            data={data} 
+            className={props.tableId} 
+            hiddenColumns={getHiddenColumns()} 
+            showStakeBtn={showStakeBtn}
+             />
         </>
     );
 }
