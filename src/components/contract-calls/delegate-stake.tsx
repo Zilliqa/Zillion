@@ -56,6 +56,20 @@ function DelegateStakeModal(props: any) {
                     return null;
                 }
 
+                const gasFeesQa = ZilliqaAccount.getGasFees();
+                const combinedFees = new BigNumber(delegAmtQa).plus(gasFeesQa);
+                const combinedFeesZil = units.fromQa(new BN(combinedFees.toString()), units.Units.Zil);
+                const remaningBalance = new BigNumber(balance).minus(delegAmtQa);
+                const isBalanceSufficient = remaningBalance.isGreaterThan(new BigNumber(gasFeesQa));
+
+                if (!isBalanceSufficient) {
+                    Alert('error', 
+                        "Insufficient Balance", 
+                        "Your wallet balance is insufficient to pay for the staked amount and gas fees combined. Total amount required is " + combinedFeesZil + " ZIL.");
+                    Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(new BN(gasFeesQa), units.Units.Zil) + " ZIL.");
+                    return null;
+                }
+
             } catch (err) {
                 // user input is malformed
                 // cannot convert input zil amount to qa

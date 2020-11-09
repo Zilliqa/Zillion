@@ -347,6 +347,14 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
 };
 
 
+// returns the combined gas price and gas limit in Qa
+// assume gas price has been retrieved correctly when dashboard is loaded
+export const getGasFees = () => {
+    // gas limit * gas price
+    const gasFees = new BN(GAS_LIMIT).mul(new BN(GAS_PRICE));
+    return gasFees;
+}
+
 export const ZilliqaAccount = () => {
     return zilliqa;
 };
