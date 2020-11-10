@@ -1434,7 +1434,8 @@ input:focus {
 }
 
 #landing-stats, 
-#operator-stats-details {
+#operator-stats-details,
+#stake-rewards-distribution {
   color: var(--text-color);
   font-size: 0.85em;
   margin-top: 4em;
@@ -1462,7 +1463,8 @@ input:focus {
 
 #landing-stats .landing-stats-card, 
 #delegator-stats-details .deleg-stats-card,
-#operator-stats-details .operator-stats-card {
+#operator-stats-details .operator-stats-card,
+#stake-rewards-distribution .stake-rewards-card {
   padding: 1em 0.5em;
   margin-left: auto;
   margin-right: auto;
@@ -1471,13 +1473,15 @@ input:focus {
 
 #landing-stats span, 
 #delegator-stats-details span,
-#operator-stats-details span {
+#operator-stats-details span,
+#stake-rewards-distribution span {
   font-size: 1.6em;
   font-weight: 600;
   color: var(--primary-table-font-color);
 }
 
-#landing-stats h2 {
+#landing-stats h2,
+#stake-rewards-distribution h2 {
   color: var(--primary-table-heading-color);
   font-size: 0.9em;
   font-weight: 500;
@@ -1487,7 +1491,8 @@ input:focus {
 
 #landing-stats h3, 
 #delegator-stats-details h3,
-#operator-stats-details h3 {
+#operator-stats-details h3,
+#stake-rewards-distribution h3 {
   color: #6C6D7A;
   font-size: 0.78em;
   font-weight: 500;
