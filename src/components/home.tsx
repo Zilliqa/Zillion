@@ -350,9 +350,8 @@ function Home(props: any) {
                   </div>
                 </div>
 
-                <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
-
                 <RewardCountdownTable network={networks_config[selectedNetwork].blockchain} />
+                <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
 
                 <div id="home-ssn-details" className="container">
                   <div className="row pl-2 pt-4">

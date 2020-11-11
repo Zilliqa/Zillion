@@ -1,7 +1,8 @@
 import { Zilliqa } from '@zilliqa-js/zilliqa';
-import React, { useState, useRef, useEffect } from 'react';
-
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import AnimatedNumber from "react-animated-numbers"
 import * as ZilliqaAccount from '../account';
+import { Constants, NetworkURL, WebSocketURL } from '../util/enum';
 const { MessageType } = require('@zilliqa-js/subscriptions');
 
 
@@ -12,11 +13,11 @@ function RewardCountdownTable(props: any) {
     // for populating rewards distribution countdown
     const [currentBlockNum, setCurrentBlockNum] = useState('0');
     const [expectedBlockNum, setExpectedBlockNum] = useState('0');
-    const [blockCountToReward, setBlockCountToReward] = useState('1800');
+    const [blockCountToReward, setBlockCountToReward] = useState('0');
 
-    const calculateBlocks = (blockNum: number) => {
-        let sampleRewardBlockNum = 858406;
-        let rewardBlockCount = 1800;
+    const calculateBlocks = useCallback((blockNum: number) => {
+        let sampleRewardBlockNum = (networkURL === NetworkURL.MAINNET) ? Constants.SAMPLE_REWARD_BLOCK_MAINNET : Constants.SAMPLE_REWARD_BLOCK_TESTNET;
+        let rewardBlockCount = Constants.REWARD_BLOCK_COUNT;
         let result = {
             expectedBlockNum : '0',
             blockCountdown : '0'
@@ -31,14 +32,13 @@ function RewardCountdownTable(props: any) {
         result.blockCountdown = blockCountdown.toString();
 
         return result
-    }
+    }, [networkURL]);
 
     useEffect(() => {
-
-
+        let webSocketURL = (networkURL === NetworkURL.MAINNET) ? WebSocketURL.MAINNET : WebSocketURL.TESTNET;
         const zilliqa = new Zilliqa(networkURL);
         const subscriber = zilliqa.subscriptionBuilder.buildNewBlockSubscriptions(
-            'wss://api-ws.zilliqa.com',
+            webSocketURL,
         );
 
         // load initial block number and countdown to quickly display on page on load
@@ -48,9 +48,9 @@ function RewardCountdownTable(props: any) {
             const result = calculateBlocks(blockNum);
     
             if (mountedRef.current) {
-            setCurrentBlockNum(blockNum.toString());
-            setBlockCountToReward(result.blockCountdown);
-            setExpectedBlockNum(result.expectedBlockNum);
+                setCurrentBlockNum(blockNum.toString());
+                setBlockCountToReward(result.blockCountdown);
+                setExpectedBlockNum(result.expectedBlockNum);
             }
         }
 
@@ -85,26 +85,41 @@ function RewardCountdownTable(props: any) {
             mountedRef.current = false;
             unsubscribeTxBlock();
           }
-    }, [networkURL]);
+    }, [networkURL, calculateBlocks]);
 
     return (
         <div id="stake-rewards-distribution" className="container">
             <div className="row p-4">
-                <h2 className="mb-4">Stake Rewards Distribution</h2>
+                <h2 className="mb-4">Rewards Distribution</h2>
 
                 <div className="col-12 align-items-center">
-                    <div className="row pb-3 mx-auto justify-content-center">
+                    <div className="row mx-auto justify-content-center">
                         <div className="d-block stake-rewards-card">
                             <h3>Current Block Num.</h3>
-                            <span>{currentBlockNum}</span>
+                            <div className="d-flex justify-content-center">
+                                <AnimatedNumber
+                                    fontStyle={{ fontFamily: "Avenir Next LT Pro", fontSize: 22, fontWeight: 600 }}
+                                    animateToNumber={currentBlockNum}
+                                    config={{ tension: 120, friction: 17 }} />
+                            </div>
                         </div>
                         <div className="d-block stake-rewards-card">
                             <h3>Blocks Until Rewards</h3>
-                            <span>{blockCountToReward}</span>
+                            <div className="test d-flex justify-content-center">
+                                <AnimatedNumber
+                                    fontStyle={{ fontFamily: "Avenir Next LT Pro", fontSize: 22, fontWeight: 600 }}
+                                    animateToNumber={blockCountToReward}
+                                    config={{ tension: 120, friction: 17 }} />
+                            </div>
                         </div>
                         <div className="d-block stake-rewards-card">
-                            <h3>Est. Reward Block Num..</h3>
-                            <span>{expectedBlockNum}</span>
+                            <h3>Est. Reward Block Num.</h3>
+                            <div className="d-flex justify-content-center">
+                                <AnimatedNumber
+                                    fontStyle={{ fontFamily: "Avenir Next LT Pro", fontSize: 22, fontWeight: 600 }}
+                                    animateToNumber={expectedBlockNum}
+                                    config={{ tension: 120, friction: 17 }} />
+                            </div>
                         </div>
                     </div>
                 </div>

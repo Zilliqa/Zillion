@@ -16,6 +16,9 @@ export enum Constants {
     DEFAULT_GAS_LIMIT = 30000,
     MAX_GZIL_SUPPLY = 682550,
     TOTAL_REWARD_SEED_NODES = 1870000,
+    REWARD_BLOCK_COUNT = 1800,
+    SAMPLE_REWARD_BLOCK_MAINNET = 858406,
+    SAMPLE_REWARD_BLOCK_TESTNET = 2040500
 }
 
 export enum Environment {
@@ -44,6 +47,11 @@ export enum NetworkURL {
     TESTNET = "https://dev-api.zilliqa.com",
     MAINNET = "https://api.zilliqa.com",
     ISOLATED_SERVER = "https://zilliqa-isolated-server.zilliqa.com"
+}
+
+export enum WebSocketURL {
+    TESTNET = "wss://dev-ws.zilliqa.com",
+    MAINNET = "wss://api-ws.zilliqa.com"
 }
 
 export enum OperationStatus {
