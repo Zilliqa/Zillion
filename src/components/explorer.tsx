@@ -23,6 +23,7 @@ import IconSearch from './icons/search';
 import ExplorerStakingPortfolio from './explorer-staking-portfolio';
 import WarningBanner from './warning-banner';
 import ExplorerPendingWithdrawalTable from './explorer-pending-withdrawal-table';
+import RewardCountdownTable from './reward-countdown-table';
 
 
 
@@ -334,6 +335,10 @@ function Explorer(props: any) {
                         {
                             walletBase16Address &&
 
+                            <>
+
+                            <RewardCountdownTable network={networkURL} />
+
                             <div id="delegator-stats-details" className="p-4 dashboard-card container">
                                 <div className="row">
                                     <div className="col text-left">
@@ -358,6 +363,8 @@ function Explorer(props: any) {
                                     </div>
                                 </div>
                             </div>
+                            
+                            </>
                         }
 
                         {/* each ssn staked */}

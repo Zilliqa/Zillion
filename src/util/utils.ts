@@ -1,5 +1,5 @@
 import { fromBech32Address } from '@zilliqa-js/crypto';
-import { Explorer, NetworkURL, Network, TransactionType, AccessMethod } from './enum';
+import { Explorer, NetworkURL, Network, TransactionType, AccessMethod, Constants } from './enum';
 import Alert from '../components/alert';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
@@ -184,4 +184,23 @@ export const showWalletsPrompt = (accountType: string) => {
         Alert('info', "Info", "Please follow the instructions on ZilPay.");
         return;
     }
+}
+
+export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkURL: string) => {
+    let sampleRewardBlockNum = 0;
+    let rewardBlockCount = 0;
+
+    if (currentNetworkURL === NetworkURL.MAINNET) {
+        sampleRewardBlockNum = Constants.SAMPLE_REWARD_BLOCK_MAINNET;
+        rewardBlockCount = Constants.REWARD_BLOCK_COUNT_MAINNET;
+    } else {
+        sampleRewardBlockNum = Constants.SAMPLE_REWARD_BLOCK_TESTNET;
+        rewardBlockCount = Constants.REWARD_BLOCK_COUNT_TESTNET;
+    }
+
+    const blockDiff = blockNum - sampleRewardBlockNum;
+    const blockTraverse = blockDiff % rewardBlockCount;
+    const blockCountdown = rewardBlockCount - blockTraverse;
+    
+    return blockCountdown;
 }

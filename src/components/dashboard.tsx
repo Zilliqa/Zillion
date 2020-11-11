@@ -4,8 +4,8 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel } from '../util/utils';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
+import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel, calculateBlockRewardCountdown } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -132,6 +132,9 @@ function Dashboard(props: any) {
     const [totalPendingWithdrawalAmt, setTotalPendingWithdrawalAmt] = useState('0');
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
     const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
+
+    // block countdown to reward distribution
+    const [blockCountToReward, setBlockCountToReward] = useState('0');
 
     const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     
@@ -506,6 +509,32 @@ function Dashboard(props: any) {
             }), PromiseArea.PROMISE_GET_STAKE_PORTFOLIO);
     }, [impl, networkURL, currWalletAddress]);
 
+    // compute number of blocks left before rewards are issued
+    const getBlockRewardCountDown = useCallback(() => {
+        let tempBlockRewardCount = '0';
+
+        trackPromise(ZilliqaAccount.getNumTxBlocksExplorer(networkURL)
+            .then((state) => {
+                if (state === undefined || state === OperationStatus.ERROR) {
+                    return null;
+                }
+                const currentBlkNum = parseInt(state) - 1;
+                const blockCountdown = calculateBlockRewardCountdown(currentBlkNum, networkURL);
+                tempBlockRewardCount = blockCountdown.toString();
+            })
+            .catch((err) => {
+                console.error(err);
+                if (mountedRef.current) {
+                    setIsError(true);
+                }
+                return null;
+            }).finally(() => {
+                console.log("updating block countdown to reward");
+                if (mountedRef.current) {
+                    setBlockCountToReward(tempBlockRewardCount);
+                }
+            }));
+    }, [networkURL]);
 
     // generate options list
     // fetch node operator names and address 
@@ -755,6 +784,7 @@ function Dashboard(props: any) {
             getDelegatorStats();
             getDelegatorStakingPortfolio();
             getDelegatorPendingWithdrawal();
+            getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
         }
@@ -768,6 +798,7 @@ function Dashboard(props: any) {
     }, [
         currRole,
         getAccountBalance, 
+        getBlockRewardCountDown,
         getNodeOptionsList, 
         getContractConstants, 
         getDelegatorPendingWithdrawal,
@@ -787,6 +818,7 @@ function Dashboard(props: any) {
             getDelegatorStats();
             getDelegatorStakingPortfolio();
             getDelegatorPendingWithdrawal();
+            getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
         }
@@ -1120,7 +1152,8 @@ function Dashboard(props: any) {
                                                     refresh={refresh_rate_config} 
                                                     userAddress={currWalletAddress}
                                                     data={delegStats}
-                                                    totalPendingWithdrawalAmt={totalPendingWithdrawalAmt} />
+                                                    totalPendingWithdrawalAmt={totalPendingWithdrawalAmt}
+                                                    blockCountToReward={blockCountToReward} />
                                             </div>
                                         </div>
                                     </div>
