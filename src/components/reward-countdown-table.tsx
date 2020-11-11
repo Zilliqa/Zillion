@@ -16,8 +16,17 @@ function RewardCountdownTable(props: any) {
     const [blockCountToReward, setBlockCountToReward] = useState('0');
 
     const calculateBlocks = useCallback((blockNum: number) => {
-        let sampleRewardBlockNum = (networkURL === NetworkURL.MAINNET) ? Constants.SAMPLE_REWARD_BLOCK_MAINNET : Constants.SAMPLE_REWARD_BLOCK_TESTNET;
-        let rewardBlockCount = Constants.REWARD_BLOCK_COUNT;
+        let sampleRewardBlockNum = 0;
+        let rewardBlockCount = 0;
+    
+        if (networkURL === NetworkURL.MAINNET) {
+            sampleRewardBlockNum = Constants.SAMPLE_REWARD_BLOCK_MAINNET;
+            rewardBlockCount = Constants.REWARD_BLOCK_COUNT_MAINNET;
+        } else {
+            sampleRewardBlockNum = Constants.SAMPLE_REWARD_BLOCK_TESTNET;
+            rewardBlockCount = Constants.REWARD_BLOCK_COUNT_TESTNET;
+        }
+
         let result = {
             expectedBlockNum : '0',
             blockCountdown : '0'
