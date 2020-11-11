@@ -32,6 +32,8 @@ import { ToastContainer } from 'react-toastify';
 import IconSearch from './icons/search';
 import WarningBanner from './warning-banner';
 
+import RewardCountdownTable from './reward-countdown-table';
+
 
 function Home(props: any) {
   const appContext = useContext(AppContext);
@@ -282,6 +284,7 @@ function Home(props: any) {
     getSsnStats();
   }, mountedRef, refresh_rate_config);
 
+
   return (
     <div className="cover">
       <div className="container-fluid">
@@ -347,6 +350,7 @@ function Home(props: any) {
                   </div>
                 </div>
 
+                <RewardCountdownTable network={networks_config[selectedNetwork].blockchain} />
                 <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
 
                 <div id="home-ssn-details" className="container">
