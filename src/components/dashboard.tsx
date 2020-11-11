@@ -1292,7 +1292,6 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions}
                 minDelegStake={minDelegStake}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}

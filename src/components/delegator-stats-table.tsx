@@ -23,7 +23,7 @@ function DelegatorStatsTable(props: any) {
                 <span>{convertQaToCommaStr(data.totalDeposits)}</span>
             </div>
             <div className="d-block deleg-stats-card">
-                <h3>Blocks Until Reward</h3>
+                <h3>Blocks Until Rewards</h3>
                 <span>{blockCountToReward}</span>
             </div>
 
