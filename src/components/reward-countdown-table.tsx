@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import AnimatedNumber from "react-animated-numbers"
 import * as ZilliqaAccount from '../account';
 import { Constants, NetworkURL, WebSocketURL } from '../util/enum';
-const { MessageType } = require('@zilliqa-js/subscriptions');
+const { MessageType, SocketConnect } = require('@zilliqa-js/subscriptions');
 
 
 function RewardCountdownTable(props: any) {
@@ -64,6 +64,13 @@ function RewardCountdownTable(props: any) {
         }
 
         async function subscribeTxBlock() {
+            subscriber.addEventListener(SocketConnect.ERROR, () => {
+                console.log("error connecting to websocket");
+                subscriber.websocket.onclose = () => null;
+                subscriber.removeEventListener(SocketConnect.ERROR);
+                subscriber.removeAllSocketListeners();
+            });
+
             subscriber.emitter.on(MessageType.NEW_BLOCK, (event: any) => {
               console.log('blocknum: ', event.value.TxBlock.header.BlockNum);
               console.log('dsblock: ', event.value.TxBlock.header.DSBlockNum);
@@ -83,16 +90,16 @@ function RewardCountdownTable(props: any) {
             await subscriber.start();
           }
       
-          async function unsubscribeTxBlock() {
-            await subscriber.stop();
-          }
-
           loadInitialData();
           subscribeTxBlock();
       
           return () => {
-            mountedRef.current = false;
+            async function unsubscribeTxBlock() {
+                await subscriber.stop();
+                subscriber.websocket.close();
+            }
             unsubscribeTxBlock();
+            mountedRef.current = false;
           }
     }, [networkURL, calculateBlocks]);
 
