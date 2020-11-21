@@ -392,7 +392,12 @@ function Dashboard(props: any) {
                 // get min bnum req
                 const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'bnum_req');
                 const blkNumReq = blkNumReqState['bnum_req'];
-                const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocksExplorer(networkURL)).minus(1);
+                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer(networkURL);
+
+                let currentBlkNum = new BigNumber(0);
+                if (txBlockNumRes !== OperationStatus.ERROR) {
+                    currentBlkNum = new BigNumber(txBlockNumRes).minus(1);
+                }
 
                 // compute each of the pending withdrawal progress
                 for (const blkNum in blkNumPendingWithdrawal) {
