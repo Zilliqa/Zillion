@@ -8,7 +8,7 @@ import Spinner from './spinner';
 function DelegatorStatsTable(props: any) {
     const data = props.data;
     // const totalPendingWithdrawalAmt = props.totalPendingWithdrawalAmt; // Qa
-    const blockCountToReward = props.blockCountToReward;
+    const blockCountToReward = props.blockCountToReward ? props.blockCountToReward : 'N/A';
 
     return (
         <>

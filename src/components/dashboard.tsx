@@ -975,6 +975,7 @@ function Dashboard(props: any) {
         }
     }, []);
 
+
     // eslint-disable-next-line
     return (
         <>
@@ -993,7 +994,6 @@ function Dashboard(props: any) {
                 <ul className="navbar-nav mr-auto">
                 </ul>
                 <ul className="navbar-nav navbar-right">
-
                     {/* wallet address */}
                     <li className="nav-item">
                         <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>
