@@ -392,7 +392,12 @@ function Dashboard(props: any) {
                 // get min bnum req
                 const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'bnum_req');
                 const blkNumReq = blkNumReqState['bnum_req'];
-                const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocksExplorer(networkURL)).minus(1);
+                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer(networkURL);
+
+                let currentBlkNum = new BigNumber(0);
+                if (txBlockNumRes !== OperationStatus.ERROR) {
+                    currentBlkNum = new BigNumber(txBlockNumRes).minus(1);
+                }
 
                 // compute each of the pending withdrawal progress
                 for (const blkNum in blkNumPendingWithdrawal) {
@@ -975,6 +980,7 @@ function Dashboard(props: any) {
         }
     }, []);
 
+
     // eslint-disable-next-line
     return (
         <>
@@ -993,7 +999,6 @@ function Dashboard(props: any) {
                 <ul className="navbar-nav mr-auto">
                 </ul>
                 <ul className="navbar-nav navbar-right">
-
                     {/* wallet address */}
                     <li className="nav-item">
                         <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>

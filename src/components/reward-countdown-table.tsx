@@ -2,7 +2,7 @@ import { Zilliqa } from '@zilliqa-js/zilliqa';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import AnimatedNumber from "react-animated-numbers"
 import * as ZilliqaAccount from '../account';
-import { Constants, NetworkURL, WebSocketURL } from '../util/enum';
+import { Constants, NetworkURL, OperationStatus, WebSocketURL } from '../util/enum';
 const { MessageType, SocketConnect } = require('@zilliqa-js/subscriptions');
 
 
@@ -53,7 +53,12 @@ function RewardCountdownTable(props: any) {
         // load initial block number and countdown to quickly display on page on load
         // because web subscriber event need time to retrieve data
         async function loadInitialData() {
-            const blockNum = parseInt(await ZilliqaAccount.getNumTxBlocksExplorer(networkURL)) - 1;
+            const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer(networkURL);
+                
+            let blockNum = 0;
+            if (txBlockNumRes !== OperationStatus.ERROR) {
+                blockNum = parseInt(txBlockNumRes) - 1;
+            }
             const result = calculateBlocks(blockNum);
     
             if (mountedRef.current) {

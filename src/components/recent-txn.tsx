@@ -17,7 +17,7 @@ function RecentTxnDropdown(props: any) {
                         <p><em>No recent transactions found.</em></p> }
 
                     { data.map((item: { type: number, txnId: string }, index: number) =>
-                        <div key={item.txnId}>
+                        <div key={item.txnId ? item.txnId : index}>
 
                             { 
                                 index === 0 &&
@@ -33,7 +33,7 @@ function RecentTxnDropdown(props: any) {
                                 <div className="notification-item">
                                     <h3 className="item-title">{getTransactionText(item.type)}</h3>
                                     <p className="item-info"><strong>Transaction ID</strong><br/>
-                                        <span className="txn-id">{item.txnId}</span>
+                                        <span className="txn-id">{item.txnId ? item.txnId : "N/A"}</span>
                                     </p>
                                 </div>
                             </a>

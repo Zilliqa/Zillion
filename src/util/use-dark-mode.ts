@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { isStorageAvailable } from './use-local-storage';
 
 
 const setTheme = (darkMode: boolean) => {
@@ -46,7 +47,10 @@ const useDarkMode = (initialValue = true) => {
     });
 
     useEffect(() => {
-        window.localStorage.setItem("dark-theme", JSON.stringify(darkMode));
+        if (isStorageAvailable('localStorage')) {
+            window.localStorage.setItem("dark-theme", JSON.stringify(darkMode));
+        }
+        
         if (darkMode) {
             document.documentElement.setAttribute('data-theme', 'dark');
         } else {

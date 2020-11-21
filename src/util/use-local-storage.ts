@@ -1,5 +1,24 @@
 import { convertNetworkUrlToLabel } from "./utils";
 
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API#Feature-detecting_localStorage
+ * checks if the browser accepts local storage
+ */
+export function isStorageAvailable(type: string) {
+    var storage;
+    try {
+        storage = (window as any)[type];
+        var x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    } catch (e) {
+        // DOM exception
+        console.error('no local storage present');
+        return false;
+    }
+}
+
 /*
  * store item in local storage
 
@@ -18,6 +37,11 @@ import { convertNetworkUrlToLabel } from "./utils";
  * 
 */
 export function storeLocalItem(wallet: string, proxy: string, network: string, key: string, value: any) {
+    
+    if (!isStorageAvailable("localStorage")) {
+        return null;
+    }
+
     network = convertNetworkUrlToLabel(network);
     const storedValue: any = window.localStorage.getItem(wallet);
     let currStorageMap: any;
@@ -68,6 +92,10 @@ export function storeLocalItem(wallet: string, proxy: string, network: string, k
  * key: storage key
 */
 export function getLocalItem(wallet: string, proxy: string, network: string, key: string, defaultValue: any) {
+    if (!isStorageAvailable("localStorage")) {
+        return defaultValue;
+    }
+
     network = convertNetworkUrlToLabel(network);
     const storedValue: any = window.localStorage.getItem(wallet);
 
