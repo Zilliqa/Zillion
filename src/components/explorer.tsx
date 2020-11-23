@@ -4,7 +4,7 @@ import DisclaimerModal from './disclaimer';
 import Footer from './footer';
 
 import * as ZilliqaAccount from '../account';
-import { Environment, Network, PromiseArea, ContractState } from '../util/enum';
+import { Environment, Network, PromiseArea, ContractState, OperationStatus } from '../util/enum';
 import { DelegStats, DelegStakingPortfolioStats } from '../util/interface';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
@@ -191,7 +191,12 @@ function Explorer(props: any) {
                 // get min bnum req
                 const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'bnum_req');
                 const blkNumReq = blkNumReqState['bnum_req'];
-                const currentBlkNum = new BigNumber(await ZilliqaAccount.getNumTxBlocksExplorer(networkURL)).minus(1);
+                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer(networkURL);
+                
+                let currentBlkNum = new BigNumber(0);
+                if (txBlockNumRes !== OperationStatus.ERROR) {
+                    currentBlkNum = new BigNumber(txBlockNumRes).minus(1);
+                }
 
                 // compute each of the pending withdrawal progress
                 for (const blkNum in blkNumPendingWithdrawal) {
