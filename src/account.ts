@@ -185,19 +185,16 @@ export const getSsnImplContract = async (proxyAddr: string, networkURL?: string)
     }
 };
 
-export const getSsnImplContractDirect = async (implAddr: string, networkURL?: string) => {
-    if (networkURL) {
-        changeNetwork(networkURL);
-    }
-
+export const getSsnImplContractDirect = async (implAddr: string, networkURL: string) => {
     try {
         if (!implAddr) {
             console.error("error: getSsnImplContractDirect - no implementation contract found");
             return "error";
         }
-        
+
+        const zilliqaObj = new Zilliqa(networkURL);
         // fetched implementation contract address
-        const implContract = await zilliqa.blockchain.getSmartContractState(implAddr);
+        const implContract = await zilliqaObj.blockchain.getSmartContractState(implAddr);
         
         if (!implContract.hasOwnProperty("result")) {
             return "error";
@@ -206,7 +203,9 @@ export const getSsnImplContractDirect = async (implAddr: string, networkURL?: st
         return implContract.result;
 
     } catch (err) {
-        console.error("error: getSsnImplContract - o%", err);
+        console.error("error: getSsnImplContractDirect - o%", err);
+        console.error("error: impl address: %o", implAddr);
+        console.error("error: network url: %o", networkURL);
         return "error"
     }
 };
