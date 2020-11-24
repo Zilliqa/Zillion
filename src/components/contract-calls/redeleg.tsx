@@ -107,7 +107,7 @@ function ReDelegateStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         
-        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl);
+        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl, networkURL);
 
         if (contract === undefined || contract === 'error') {
             return false;
