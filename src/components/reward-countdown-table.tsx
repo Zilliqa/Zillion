@@ -1,9 +1,9 @@
-import { Zilliqa } from '@zilliqa-js/zilliqa';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import AnimatedNumber from "react-animated-numbers"
+import { trackPromise } from 'react-promise-tracker';
 import * as ZilliqaAccount from '../account';
-import { Constants, NetworkURL, OperationStatus, WebSocketURL } from '../util/enum';
-const { MessageType, SocketConnect } = require('@zilliqa-js/subscriptions');
+import { OperationStatus } from '../util/enum';
+import { calculateBlockRewardCountdown } from '../util/utils';
 
 
 function RewardCountdownTable(props: any) {
@@ -15,98 +15,36 @@ function RewardCountdownTable(props: any) {
     const [expectedBlockNum, setExpectedBlockNum] = useState('0');
     const [blockCountToReward, setBlockCountToReward] = useState('0');
 
-    const calculateBlocks = useCallback((blockNum: number) => {
-        let sampleRewardBlockNum = 0;
-        let rewardBlockCount = 0;
-    
-        if (networkURL === NetworkURL.MAINNET) {
-            sampleRewardBlockNum = Constants.SAMPLE_REWARD_BLOCK_MAINNET;
-            rewardBlockCount = Constants.REWARD_BLOCK_COUNT_MAINNET;
-        } else {
-            sampleRewardBlockNum = Constants.SAMPLE_REWARD_BLOCK_TESTNET;
-            rewardBlockCount = Constants.REWARD_BLOCK_COUNT_TESTNET;
-        }
-
-        let result = {
-            expectedBlockNum : '0',
-            blockCountdown : '0'
-        }
-
-        const blockDiff = blockNum - sampleRewardBlockNum;
-        const blockTraverse = blockDiff % rewardBlockCount;
-        const blockCountdown = rewardBlockCount - blockTraverse;
-        const expectedBlockNum = blockNum + blockCountdown;
-
-        result.expectedBlockNum = expectedBlockNum.toString();
-        result.blockCountdown = blockCountdown.toString();
-
-        return result
-    }, [networkURL]);
-
     useEffect(() => {
-        let webSocketURL = (networkURL === NetworkURL.MAINNET) ? WebSocketURL.MAINNET : WebSocketURL.TESTNET;
-        const zilliqa = new Zilliqa(networkURL);
-        const subscriber = zilliqa.subscriptionBuilder.buildNewBlockSubscriptions(
-            webSocketURL,
-        );
+        let tempCurrentBlockNum = '0';
+        let tempBlockRewardCount = '0';
+        let tempExpectedBlockNum = '0';
 
-        // load initial block number and countdown to quickly display on page on load
-        // because web subscriber event need time to retrieve data
-        async function loadInitialData() {
-            const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer(networkURL);
+        trackPromise(ZilliqaAccount.getNumTxBlocksExplorer(networkURL)
+            .then((state) => {
+                if (state === undefined || state === OperationStatus.ERROR) {
+                    return null;
+                }
+                const currentBlockNum = parseInt(state) - 1;
+                const blockCountdown = calculateBlockRewardCountdown(currentBlockNum, networkURL);
+                const expectedBlockNum = currentBlockNum + blockCountdown;
                 
-            let blockNum = 0;
-            if (txBlockNumRes !== OperationStatus.ERROR) {
-                blockNum = parseInt(txBlockNumRes) - 1;
-            }
-            const result = calculateBlocks(blockNum);
-    
-            if (mountedRef.current) {
-                setCurrentBlockNum(blockNum.toString());
-                setBlockCountToReward(result.blockCountdown);
-                setExpectedBlockNum(result.expectedBlockNum);
-            }
-        }
-
-        async function subscribeTxBlock() {
-            subscriber.addEventListener(SocketConnect.ERROR, () => {
-                console.log("error connecting to websocket");
-                subscriber.websocket.onclose = () => null;
-                subscriber.removeEventListener(SocketConnect.ERROR);
-                subscriber.removeAllSocketListeners();
-            });
-
-            subscriber.emitter.on(MessageType.NEW_BLOCK, (event: any) => {
-              console.log('blocknum: ', event.value.TxBlock.header.BlockNum);
-              console.log('dsblock: ', event.value.TxBlock.header.DSBlockNum);
-              const blockNum = parseInt(event.value.TxBlock.header.BlockNum);
-              const result = calculateBlocks(blockNum);
-      
-              if (mountedRef.current) {
-                setCurrentBlockNum(blockNum.toString());
-                setBlockCountToReward(result.blockCountdown);
-                setExpectedBlockNum(result.expectedBlockNum);
-              }
-            });
-      
-            subscriber.emitter.on(MessageType.UNSUBSCRIBE, (event) => {
-              console.log('get unsubscribe event: ', event);
-            });
-            await subscriber.start();
-          }
-      
-          loadInitialData();
-          subscribeTxBlock();
-      
-          return () => {
-            async function unsubscribeTxBlock() {
-                await subscriber.stop();
-                subscriber.websocket.close();
-            }
-            unsubscribeTxBlock();
-            mountedRef.current = false;
-          }
-    }, [networkURL, calculateBlocks]);
+                tempCurrentBlockNum = currentBlockNum.toString();
+                tempBlockRewardCount = blockCountdown.toString();
+                tempExpectedBlockNum = expectedBlockNum.toString();
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+            .finally(() => {
+                console.log("updating reward countdown table");
+                if (mountedRef.current) {
+                    setCurrentBlockNum(tempCurrentBlockNum);
+                    setBlockCountToReward(tempBlockRewardCount);
+                    setExpectedBlockNum(tempExpectedBlockNum);
+                }  
+            }));
+    }, [networkURL]);
 
     return (
         <div id="stake-rewards-distribution" className="container">

@@ -52,10 +52,10 @@ export enum NetworkURL {
     ISOLATED_SERVER = "https://zilliqa-isolated-server.zilliqa.com"
 }
 
-export enum WebSocketURL {
-    TESTNET = "wss://dev-ws.zilliqa.com",
-    MAINNET = "wss://api-ws.zilliqa.com"
-}
+// export enum WebSocketURL {
+//     TESTNET = "wss://dev-ws.zilliqa.com",
+//     MAINNET = "wss://api-ws.zilliqa.com"
+// }
 
 export enum OperationStatus {
     ERROR = "ERROR",
