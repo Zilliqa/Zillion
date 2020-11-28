@@ -65,7 +65,7 @@ export const changeNetwork = function(networkURL: string) {
             break;
         }
         case NetworkURL.ISOLATED_SERVER: {
-            CHAIN_ID = 1;
+            CHAIN_ID = 222;
             break;
         }
         default: {
