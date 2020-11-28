@@ -141,6 +141,23 @@ export const getBalance = async (address: string) => {
     }
 };
 
+// identical to getBalance except it uses a random API
+export const getBalanceWithNetwork = async (address: string, networkURL: string) => {
+    try {
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
+        const balance = await zilliqaObj.blockchain.getBalance(address);
+        if (balance.result.balance === undefined) {
+            console.error("error: getBalance undefined error");
+            return "0";
+        }
+        return balance.result.balance;
+    } catch (err) {
+        console.error("error: getBalance - o%", err);
+        return "0";
+    }
+}
+
 export const getNonce = async (address: string) => {
     try {
         const balance = await zilliqa.blockchain.getBalance(address);
@@ -290,6 +307,19 @@ export const getTotalCoinSupply = async (networkURL?: string) => {
     }
 };
 
+// same as getTotalCoinSupply but with random API
+export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
+    try {
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
+        const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
+        return totalCoinSupply;
+    } catch (err) {
+        console.error("error: getTotalCoinSupply - o%", err);
+        return OperationStatus.ERROR;
+    }
+}
+
 export const getGzilContract = async (gzilAddress: string) => {
     // assume the blockchain network is already set
     try {
@@ -301,6 +331,19 @@ export const getGzilContract = async (gzilAddress: string) => {
     }
 };
 
+// same as getGzilContract but query from random API
+export const getGzilContractWithNetwork = async (gzilAddress: string, networkURL: string) => {
+    try {
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
+        const contract = await zilliqaObj.blockchain.getSmartContractState(gzilAddress);
+        return contract.result;
+    } catch (err) {
+        console.error("error - getTotalGzilSupply: %o", err);
+        return OperationStatus.ERROR;
+    }
+}
+
 // isOperator - check if address is node operator
 // @param address: base16 address
 export const isOperator = async (impl: string, address: string, networkURL: string) => {
@@ -308,7 +351,7 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
         return false;
     }
 
-    const contractState = await getImplState(impl, "ssnlist");
+    const contractState = await getImplStateExplorer(impl, networkURL, "ssnlist");
 
     if (contractState === undefined || contractState === "error") {
         return false;

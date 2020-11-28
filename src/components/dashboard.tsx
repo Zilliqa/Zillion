@@ -203,7 +203,7 @@ function Dashboard(props: any) {
     const getAccountBalance = useCallback(() => {
         let currBalance = '0';
 
-        trackPromise(ZilliqaAccount.getBalance(currWalletAddress)
+        trackPromise(ZilliqaAccount.getBalanceWithNetwork(currWalletAddress, networkURL)
             .then((balance) => {
                 currBalance = balance;
             })
@@ -221,7 +221,7 @@ function Dashboard(props: any) {
                 }
 
             }), PromiseArea.PROMISE_GET_BALANCE);
-    }, [currWalletAddress]);
+    }, [currWalletAddress, networkURL]);
 
 
     // retrieve contract constants such as min stake
@@ -230,7 +230,7 @@ function Dashboard(props: any) {
         let minDelegStake = '0';
         let totalStakeAmt = '0';
 
-        ZilliqaAccount.getImplState(impl, "mindelegstake")
+        ZilliqaAccount.getImplStateExplorer(impl, networkURL, "mindelegstake")
             .then((contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
@@ -251,7 +251,7 @@ function Dashboard(props: any) {
                 setMinDelegStake(minDelegStake);
             });
         
-        ZilliqaAccount.getImplState(impl, 'totalstakeamount')
+        ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'totalstakeamount')
             .then((contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
@@ -271,7 +271,7 @@ function Dashboard(props: any) {
                 }
             });
 
-    }, [impl]);
+    }, [impl, networkURL]);
 
 
     /* fetch data for delegator stats panel */
@@ -284,7 +284,7 @@ function Dashboard(props: any) {
         
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
-        trackPromise(ZilliqaAccount.getImplState(impl, 'deposit_amt_deleg')
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg')
         .then(async (contractState) => {
             if (contractState === undefined || contractState === 'error') {
                 return null;
@@ -295,7 +295,7 @@ function Dashboard(props: any) {
             }
 
             // compute global APY
-            const totalStakeAmtState = await ZilliqaAccount.getImplState(impl, 'totalstakeamount');
+            const totalStakeAmtState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'totalstakeamount');
             if (totalStakeAmtState['totalstakeamount']) {
                 let temp = new BigNumber(totalStakeAmtState['totalstakeamount']);
                 if (!temp.isEqualTo(0)) {
@@ -329,9 +329,9 @@ function Dashboard(props: any) {
             gzilRewards = totalZilRewardsBN;
 
             // get gzil balance
-            const gzilAddressState = await ZilliqaAccount.getImplState(impl, 'gziladdr');
+            const gzilAddressState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'gziladdr');
             if (gzilAddressState.gziladdr) {
-                const gzilContractState = await ZilliqaAccount.getGzilContract(gzilAddressState['gziladdr']);
+                const gzilContractState = await ZilliqaAccount.getGzilContractWithNetwork(gzilAddressState['gziladdr'], networkURL);
                 if (gzilContractState.balances) {
                     const gzilBalanceMap = gzilContractState.balances;
                     if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
@@ -547,7 +547,7 @@ function Dashboard(props: any) {
     const getNodeOptionsList = useCallback(() => {
         let tempNodeOptions: NodeOptions[] = [];
 
-        ZilliqaAccount.getImplState(impl, "ssnlist")
+        ZilliqaAccount.getImplStateExplorer(impl, networkURL, "ssnlist")
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
@@ -564,7 +564,7 @@ function Dashboard(props: any) {
 
                     
                     // get number of delegators
-                    const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+                    const delegNumState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssn_deleg_amt');
                     let delegNum = '0';
 
                     if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
@@ -596,7 +596,7 @@ function Dashboard(props: any) {
                 setNodeOptions([...tempNodeOptions]);
             });
 
-    }, [impl]);
+    }, [impl, networkURL]);
 
 
     /* fetch data for operator stats panel */
@@ -611,7 +611,7 @@ function Dashboard(props: any) {
 
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
-        trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssnlist')
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
@@ -624,7 +624,7 @@ function Dashboard(props: any) {
                 const ssnArgs = contractState['ssnlist'][userBase16Address]['arguments'];
 
                 // get number of delegators
-                const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+                const delegNumState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssn_deleg_amt');
 
                 if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
                     userBase16Address in delegNumState['ssn_deleg_amt']) {
@@ -662,14 +662,14 @@ function Dashboard(props: any) {
                 }
 
             }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
-    }, [impl, currWalletAddress]);
+    }, [impl, currWalletAddress, networkURL]);
 
 
     /* fetch data for ssn panel */
     const getSsnStats = useCallback(() => {
         let output: SsnStats[] = [];
 
-        trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssnlist')
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
@@ -686,7 +686,7 @@ function Dashboard(props: any) {
                     }
 
                     // get number of delegators
-                    const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+                    const delegNumState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssn_deleg_amt');
 
                     if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
                         ssnAddress in delegNumState['ssn_deleg_amt']) {
@@ -721,7 +721,7 @@ function Dashboard(props: any) {
                     setSsnStats([...output]);
                 }
             }), PromiseArea.PROMISE_GET_SSN_STATS);
-    }, [impl]);
+    }, [impl, networkURL]);
 
 
     const toggleTheme = () => {
