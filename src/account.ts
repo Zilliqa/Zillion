@@ -12,6 +12,7 @@ import { HTTPProvider } from '@zilliqa-js/core';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 import BN from 'bn.js';
+import { getRandomAPI } from './util/random-api';
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
@@ -191,8 +192,8 @@ export const getSsnImplContractDirect = async (implAddr: string, networkURL: str
             console.error("error: getSsnImplContractDirect - no implementation contract found");
             return "error";
         }
-
-        const zilliqaObj = new Zilliqa(networkURL);
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
         // fetched implementation contract address
         const implContract = await zilliqaObj.blockchain.getSmartContractState(implAddr);
         
@@ -240,7 +241,8 @@ export const getImplState = async (implAddr: string, state: string) => {
 // sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
 // which depends on the main zilliqa object
 export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string) => {
-    const explorerZilliqa = new Zilliqa(networkURL);
+    const randomAPI = getRandomAPI(networkURL);
+    const explorerZilliqa = new Zilliqa(randomAPI);
 
     if (!implAddr) {
         console.error("error: getImplStateExplorer - no implementation contract found");
@@ -285,7 +287,8 @@ export const getNumTxBlocks = async () => {
 // which depends on the main zilliqa object
 export const getNumTxBlocksExplorer = async (networkURL: string) => {
     try {
-        const explorerZilliqa = new Zilliqa(networkURL);
+        const randomAPI = getRandomAPI(networkURL);
+        const explorerZilliqa = new Zilliqa(randomAPI);
         const info = await explorerZilliqa.blockchain.getBlockChainInfo();
         if (info === undefined && info.result === undefined) {
             return OperationStatus.ERROR;
