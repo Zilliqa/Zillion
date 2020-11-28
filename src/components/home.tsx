@@ -109,8 +109,9 @@ function Home(props: any) {
   const getContractConstants = useCallback(() => {
     let totalStakeAmt = '0';
     let impl = networks_config[selectedNetwork].impl;
+    let networkURL = networks_config[selectedNetwork].blockchain;
 
-    ZilliqaAccount.getImplState(impl, 'totalstakeamount')
+    ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'totalstakeamount')
     .then((contractState) => {
         if (contractState === undefined || contractState === 'error') {
             return null;
@@ -129,8 +130,9 @@ function Home(props: any) {
   const getSsnStats = useCallback(() => {
       let output: SsnStats[] = [];
       let impl = networks_config[selectedNetwork].impl;
+      let networkURL = networks_config[selectedNetwork].blockchain;
 
-      trackPromise(ZilliqaAccount.getImplState(impl, 'ssnlist')
+      trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssnlist')
           .then(async (contractState) => {
               if (contractState === undefined || contractState === 'error') {
                   return null;
@@ -147,7 +149,7 @@ function Home(props: any) {
                   }
 
                   // get number of delegators
-                  const delegNumState = await ZilliqaAccount.getImplState(impl, 'ssn_deleg_amt');
+                  const delegNumState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssn_deleg_amt');
 
                   if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
                       ssnAddress in delegNumState['ssn_deleg_amt']) {

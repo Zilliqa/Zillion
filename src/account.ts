@@ -205,10 +205,18 @@ export const getImplState = async (implAddr: string, state: string) => {
     }
 };
 
-// for explorer page use
-// get smart contract sub state with a new zilliqa object
-// sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
-// which depends on the main zilliqa object
+/**
+ * Get smart contract sub state with a new zilliqa object
+ * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
+ * which depends on the main zilliqa object
+ * 
+ * Initially for explorer page, now extended to home page and other places that requires a random API
+ * to lessen load on Zilliqa API
+ * 
+ * @param implAddr    implementation contract in checksum format
+ * @param networkURL  blockchain api URL
+ * @param state       contract substate to query for
+ */
 export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string) => {
     const randomAPI = getRandomAPI(networkURL);
     const explorerZilliqa = new Zilliqa(randomAPI);
