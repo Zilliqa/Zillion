@@ -155,37 +155,6 @@ export const getNonce = async (address: string) => {
     }
 }
 
-// getSsnImplContract - get implementation contract state from the proxy contract
-export const getSsnImplContract = async (proxyAddr: string, networkURL?: string) => {
-    if (networkURL) {
-        changeNetwork(networkURL);
-    }
-    try {
-        if (!proxyAddr) {
-            console.error("error: getSsnImplContract - no proxy contract found");
-            return "error";
-        }
-
-        const proxyContract = await zilliqa.blockchain.getSmartContractState(proxyAddr);
-        console.log("fetched proxy contract state");
-        
-        if (proxyContract.result.hasOwnProperty('implementation')) {
-            // fetched implementation contract address
-            const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
-            console.log("fetched implementation contract state");
-            return implContract.result;
-
-        } else {
-            console.error("error: getSsnImplContract - no implementation contract found");
-            return "error"
-        }
-
-    } catch (err) {
-        console.error("error: getSsnImplContract - o%", err);
-        return "error"
-    }
-};
-
 export const getSsnImplContractDirect = async (implAddr: string, networkURL: string) => {
     try {
         if (!implAddr) {
