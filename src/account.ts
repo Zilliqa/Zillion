@@ -12,6 +12,7 @@ import { HTTPProvider } from '@zilliqa-js/core';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 import BN from 'bn.js';
+import { getRandomAPI } from './util/random-api';
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
@@ -64,7 +65,7 @@ export const changeNetwork = function(networkURL: string) {
             break;
         }
         case NetworkURL.ISOLATED_SERVER: {
-            CHAIN_ID = 1;
+            CHAIN_ID = 222;
             break;
         }
         default: {
@@ -140,6 +141,23 @@ export const getBalance = async (address: string) => {
     }
 };
 
+// identical to getBalance except it uses a random API
+export const getBalanceWithNetwork = async (address: string, networkURL: string) => {
+    try {
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
+        const balance = await zilliqaObj.blockchain.getBalance(address);
+        if (balance.result.balance === undefined) {
+            console.error("error: getBalance undefined error");
+            return "0";
+        }
+        return balance.result.balance;
+    } catch (err) {
+        console.error("error: getBalance - o%", err);
+        return "0";
+    }
+}
+
 export const getNonce = async (address: string) => {
     try {
         const balance = await zilliqa.blockchain.getBalance(address);
@@ -154,45 +172,14 @@ export const getNonce = async (address: string) => {
     }
 }
 
-// getSsnImplContract - get implementation contract state from the proxy contract
-export const getSsnImplContract = async (proxyAddr: string, networkURL?: string) => {
-    if (networkURL) {
-        changeNetwork(networkURL);
-    }
-    try {
-        if (!proxyAddr) {
-            console.error("error: getSsnImplContract - no proxy contract found");
-            return "error";
-        }
-
-        const proxyContract = await zilliqa.blockchain.getSmartContractState(proxyAddr);
-        console.log("fetched proxy contract state");
-        
-        if (proxyContract.result.hasOwnProperty('implementation')) {
-            // fetched implementation contract address
-            const implContract = await zilliqa.blockchain.getSmartContractState(proxyContract.result.implementation);
-            console.log("fetched implementation contract state");
-            return implContract.result;
-
-        } else {
-            console.error("error: getSsnImplContract - no implementation contract found");
-            return "error"
-        }
-
-    } catch (err) {
-        console.error("error: getSsnImplContract - o%", err);
-        return "error"
-    }
-};
-
 export const getSsnImplContractDirect = async (implAddr: string, networkURL: string) => {
     try {
         if (!implAddr) {
             console.error("error: getSsnImplContractDirect - no implementation contract found");
             return "error";
         }
-
-        const zilliqaObj = new Zilliqa(networkURL);
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
         // fetched implementation contract address
         const implContract = await zilliqaObj.blockchain.getSmartContractState(implAddr);
         
@@ -235,12 +222,21 @@ export const getImplState = async (implAddr: string, state: string) => {
     }
 };
 
-// for explorer page use
-// get smart contract sub state with a new zilliqa object
-// sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
-// which depends on the main zilliqa object
+/**
+ * Get smart contract sub state with a new zilliqa object
+ * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
+ * which depends on the main zilliqa object
+ * 
+ * Initially for explorer page, now extended to home page and other places that requires a random API
+ * to lessen load on Zilliqa API
+ * 
+ * @param implAddr    implementation contract in checksum format
+ * @param networkURL  blockchain api URL
+ * @param state       contract substate to query for
+ */
 export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string) => {
-    const explorerZilliqa = new Zilliqa(networkURL);
+    const randomAPI = getRandomAPI(networkURL);
+    const explorerZilliqa = new Zilliqa(randomAPI);
 
     if (!implAddr) {
         console.error("error: getImplStateExplorer - no implementation contract found");
@@ -285,7 +281,8 @@ export const getNumTxBlocks = async () => {
 // which depends on the main zilliqa object
 export const getNumTxBlocksExplorer = async (networkURL: string) => {
     try {
-        const explorerZilliqa = new Zilliqa(networkURL);
+        const randomAPI = getRandomAPI(networkURL);
+        const explorerZilliqa = new Zilliqa(randomAPI);
         const info = await explorerZilliqa.blockchain.getBlockChainInfo();
         if (info === undefined && info.result === undefined) {
             return OperationStatus.ERROR;
@@ -310,6 +307,19 @@ export const getTotalCoinSupply = async (networkURL?: string) => {
     }
 };
 
+// same as getTotalCoinSupply but with random API
+export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
+    try {
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
+        const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
+        return totalCoinSupply;
+    } catch (err) {
+        console.error("error: getTotalCoinSupply - o%", err);
+        return OperationStatus.ERROR;
+    }
+}
+
 export const getGzilContract = async (gzilAddress: string) => {
     // assume the blockchain network is already set
     try {
@@ -321,6 +331,19 @@ export const getGzilContract = async (gzilAddress: string) => {
     }
 };
 
+// same as getGzilContract but query from random API
+export const getGzilContractWithNetwork = async (gzilAddress: string, networkURL: string) => {
+    try {
+        const randomAPI = getRandomAPI(networkURL);
+        const zilliqaObj = new Zilliqa(randomAPI);
+        const contract = await zilliqaObj.blockchain.getSmartContractState(gzilAddress);
+        return contract.result;
+    } catch (err) {
+        console.error("error - getTotalGzilSupply: %o", err);
+        return OperationStatus.ERROR;
+    }
+}
+
 // isOperator - check if address is node operator
 // @param address: base16 address
 export const isOperator = async (impl: string, address: string, networkURL: string) => {
@@ -328,7 +351,7 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
         return false;
     }
 
-    const contractState = await getImplState(impl, "ssnlist");
+    const contractState = await getImplStateExplorer(impl, networkURL, "ssnlist");
 
     if (contractState === undefined || contractState === "error") {
         return false;

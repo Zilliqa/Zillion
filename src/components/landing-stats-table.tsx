@@ -50,7 +50,7 @@ function LandingStatsTable(props: any) {
                 delegNum = Object.keys(contract.deposit_amt_deleg).length.toString();
 
                 // compute circulating supply
-                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupply();
+                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetwork(networkURL);
                 const totalStakeAmount = contract.totalstakeamount;
                 totalDeposits = totalStakeAmount.toString();
 
@@ -64,7 +64,7 @@ function LandingStatsTable(props: any) {
                 }
 
                 // compute total number of gzil
-                const gzilContract = await ZilliqaAccount.getGzilContract(contract.gziladdr);
+                const gzilContract = await ZilliqaAccount.getGzilContractWithNetwork(contract.gziladdr, networkURL);
                 if (gzilContract !== undefined) {
                     // gzil is 15 decimal places
                     gzil = gzilContract.total_supply;
