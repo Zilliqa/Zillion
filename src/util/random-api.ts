@@ -11,9 +11,9 @@ const randomJS = new Random(MersenneTwister19937.autoSeed());
 
 // Testnet
 const TESTNET_API_LIST = [
-    "http://18.133.61.123:4201",
-    "https://seed-dev-api.zillet.io",
-    "http://optimus-api-elb-267956463.us-west-2.elb.amazonaws.com"
+    "https://bumblebee-api.zilliqa.network",
+    "https://ssntestnet.zillacracy.com/api",
+    "https://seed-dev-api.zillet.io"
 ];
 
 
