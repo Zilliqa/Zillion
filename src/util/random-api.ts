@@ -27,11 +27,11 @@ const MAINNET_API_LIST = [
     "https://zil-staking.ezil.me/api",
     "https://stakingseed-api.seed.zilliqa.com",
     "https://seed-zil.shardpool.io",
-    "https://zilliqa-api.staked.cloud",
 ];
 
 // https://staking-zil.kucoin.com/api", CORS error
 // https://ssn-zilliqa.moonlet.network/api , CORS error
+// https://zilliqa-api.staked.cloud, out-of-sync
 
 
 // @todo: check api aliveness?
