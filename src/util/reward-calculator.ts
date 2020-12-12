@@ -1,6 +1,6 @@
 import { getRandomAPI } from "./random-api";
 
-const { RewardCalculator } = require('./calculator')
+const { RewardCalculator } = require('./calculator');
 
 let rewardCalculator: typeof RewardCalculator;
 

@@ -38,53 +38,20 @@ function LandingStatsTable(props: any) {
         let totalDeposits = '0';
         let estAPY = new BigNumber(0);
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
-            .then(async (contract) => {
-                
-                if (contract === undefined || contract === 'error') {
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, "deposit_amt_deleg")
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
                     return null;
                 }
-
                 // compute number of nodes and delegators
-                nodesNum = Object.keys(contract.ssnlist).length.toString();
-                delegNum = Object.keys(contract.deposit_amt_deleg).length.toString();
+                let nodesMap: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "ssnlist");
 
-                // compute circulating supply
-                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetwork(networkURL);
-                const totalStakeAmount = contract.totalstakeamount;
-                totalDeposits = totalStakeAmount.toString();
-
-                if (totalCoinSupply !== OperationStatus.ERROR && totalCoinSupply.result !== undefined) {
-                    const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply.result));
-                    const totalStakeAmountBN = new BigNumber(totalStakeAmount);
-
-                    if (!totalCoinSupplyBN.isZero()) {
-                        circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
-                    }
+                if (nodesMap !== null) {
+                    nodesNum = Object.keys(nodesMap.ssnlist).length.toString();
                 }
-
-                // compute total number of gzil
-                const gzilContract = await ZilliqaAccount.getGzilContractWithNetwork(contract.gziladdr, networkURL);
-                if (gzilContract !== undefined) {
-                    // gzil is 15 decimal places
-                    gzil = gzilContract.total_supply;
-                    const decimalPlaces = new BigNumber(10**15);
-                    const maxGzilSupply = new BigNumber(MAX_GZIL_SUPPLY).times(decimalPlaces);
-                    const remainGzil = maxGzilSupply.minus(new BigNumber(gzil));
-
-                    // compute remaining gzil percentage
-                    remainingGzil = (remainGzil.dividedBy(maxGzilSupply)).times(100).toFixed(2);
-                }
-
-                // compute est. APY
-                let temp = new BigNumber(totalStakeAmount);
-
-                if (!temp.isEqualTo(0)) {
-                    estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2);
-                }
+                delegNum = Object.keys(contractState.deposit_amt_deleg).length.toString();
             })
             .finally(() => {
-
                 if(!mountedRef.current) {
                     return null;
                 }
@@ -104,8 +71,76 @@ function LandingStatsTable(props: any) {
                         estRealtimeAPY: estAPY.toString(),
                     }));
                 }
-                
             }), PromiseArea.PROMISE_LANDING_STATS);
+
+        // trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
+        //     .then(async (contract) => {
+                
+        //         if (contract === undefined || contract === 'error') {
+        //             return null;
+        //         }
+
+        //         // compute number of nodes and delegators
+        //         nodesNum = Object.keys(contract.ssnlist).length.toString();
+        //         delegNum = Object.keys(contract.deposit_amt_deleg).length.toString();
+
+        //         // compute circulating supply
+        //         const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetwork(networkURL);
+        //         const totalStakeAmount = contract.totalstakeamount;
+        //         totalDeposits = totalStakeAmount.toString();
+
+        //         if (totalCoinSupply !== OperationStatus.ERROR && totalCoinSupply.result !== undefined) {
+        //             const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply.result));
+        //             const totalStakeAmountBN = new BigNumber(totalStakeAmount);
+
+        //             if (!totalCoinSupplyBN.isZero()) {
+        //                 circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
+        //             }
+        //         }
+
+        //         // compute total number of gzil
+        //         const gzilContract = await ZilliqaAccount.getGzilContractWithNetwork(contract.gziladdr, networkURL);
+        //         if (gzilContract !== undefined) {
+        //             // gzil is 15 decimal places
+        //             gzil = gzilContract.total_supply;
+        //             const decimalPlaces = new BigNumber(10**15);
+        //             const maxGzilSupply = new BigNumber(MAX_GZIL_SUPPLY).times(decimalPlaces);
+        //             const remainGzil = maxGzilSupply.minus(new BigNumber(gzil));
+
+        //             // compute remaining gzil percentage
+        //             remainingGzil = (remainGzil.dividedBy(maxGzilSupply)).times(100).toFixed(2);
+        //         }
+
+        //         // compute est. APY
+        //         let temp = new BigNumber(totalStakeAmount);
+
+        //         if (!temp.isEqualTo(0)) {
+        //             estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2);
+        //         }
+        //     })
+        //     .finally(() => {
+
+        //         if(!mountedRef.current) {
+        //             return null;
+        //         }
+
+        //         setShowSpinner(false);
+
+        //         if (mountedRef.current) {
+        //             console.log("updating landing stats...");
+        //             setData(prevData => ({
+        //                 ...prevData,
+        //                 circulatingSupplyStake: circulatingSupplyStake.toString(),
+        //                 nodesNum: nodesNum,
+        //                 delegNum: delegNum,
+        //                 gzil: gzil,
+        //                 remainingGzil: remainingGzil.toString(),
+        //                 totalDeposits: totalDeposits,
+        //                 estRealtimeAPY: estAPY.toString(),
+        //             }));
+        //         }
+                
+        //     }), PromiseArea.PROMISE_LANDING_STATS);
     }, [impl, networkURL]);
 
     // load inital data
