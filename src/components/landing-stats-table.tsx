@@ -50,6 +50,54 @@ function LandingStatsTable(props: any) {
                     nodesNum = Object.keys(nodesMap.ssnlist).length.toString();
                 }
                 delegNum = Object.keys(contractState.deposit_amt_deleg).length.toString();
+
+                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetwork(networkURL);
+
+                // get total stake amount
+                let totalStakeAmount = 0;
+                let totalStakeAmountJson: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "totalstakeamount");
+                if (totalStakeAmount !== null) {
+                    totalStakeAmount = totalStakeAmountJson.totalstakeamount;
+                }
+                totalDeposits = totalStakeAmount.toString();
+
+                if (totalCoinSupply !== OperationStatus.ERROR && totalCoinSupply.result !== undefined) {
+                    const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply.result));
+                    const totalStakeAmountBN = new BigNumber(totalStakeAmount);
+
+                    if (!totalCoinSupplyBN.isZero()) {
+                        circulatingSupplyStake = (totalStakeAmountBN.dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
+                    }
+                }
+
+                // fetch gzil address
+                let gzilAddr = "";
+                let gzilAddrJson: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "gziladdr");
+
+                if (gzilAddrJson !== null) {
+                    gzilAddr = gzilAddrJson.gziladdr;
+                }
+
+                // compute total number of gzil
+                const gzilContract = await ZilliqaAccount.getImplStateExplorer(gzilAddr, networkURL, "total_supply");
+                if (gzilContract !== null) {
+                    // gzil is 15 decimal places
+                    gzil = gzilContract.total_supply;
+                    const decimalPlaces = new BigNumber(10**15);
+                    const maxGzilSupply = new BigNumber(MAX_GZIL_SUPPLY).times(decimalPlaces);
+                    const remainGzil = maxGzilSupply.minus(new BigNumber(gzil));
+
+                    // compute remaining gzil percentage
+                    remainingGzil = (remainGzil.dividedBy(maxGzilSupply)).times(100).toFixed(2);
+                }
+
+                // compute est. APY
+                let temp = new BigNumber(totalStakeAmount);
+
+                if (!temp.isEqualTo(0)) {
+                    estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2);
+                }
+
             })
             .finally(() => {
                 if(!mountedRef.current) {
