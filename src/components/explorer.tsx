@@ -95,13 +95,9 @@ function Explorer(props: any) {
             setWalletBase16Address(wallet);
         }
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg')
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg', [wallet])
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
-                    return null;
-                }
-    
-                if (!contractState['deposit_amt_deleg'].hasOwnProperty(wallet)) {
                     return null;
                 }
 
@@ -109,14 +105,9 @@ function Explorer(props: any) {
                 let totalZilRewardsBN = new BigNumber(0);
                 const depositDelegList = contractState['deposit_amt_deleg'][wallet];
 
-                // fetch ssnlist for the names
-                // for computing list of staked nodes
+                // fetch the ssn information for each deposit
                 const ssnContractState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssnlist');
 
-                if (!ssnContractState['ssnlist']) {
-                    return null;
-                }
-                
                 for (const ssnAddress in depositDelegList) {
                     if (!depositDelegList.hasOwnProperty(ssnAddress)) {
                         continue;
@@ -132,7 +123,7 @@ function Explorer(props: any) {
 
                     // append data to list of staked nodes
                     const data: DelegStakingPortfolioStats = {
-                        ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
+                        ssnName: ssnContractState["ssnlist"][ssnAddress]["arguments"][3],
                         ssnAddress: toBech32Address(ssnAddress),
                         delegAmt: delegAmtQaBN.toString(),
                         rewards: delegRewards.toString()
