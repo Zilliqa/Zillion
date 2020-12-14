@@ -107,9 +107,14 @@ function ReDelegateStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         
-        const contract = await ZilliqaAccount.getSsnImplContractDirect(impl, networkURL);
+        const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "lastrewardcycle");
+        const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
-        if (contract === undefined || contract === 'error') {
+        if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error') {
+            return false;
+        }
+
+        if (last_buf_deposit_cycle_deleg_json === undefined || last_buf_deposit_cycle_deleg_json === 'error') {
             return false;
         }
 
@@ -124,10 +129,9 @@ function ReDelegateStakeModal(props: any) {
         // secondary buffered deposits check
         // different map
         // check if user has buffered deposits
-        if (contract.last_buf_deposit_cycle_deleg.hasOwnProperty(userBase16Address) &&
-            contract.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
-                const lastDepositCycleDeleg = parseInt(contract.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
-                const lastRewardCycle = parseInt(contract.lastrewardcycle);
+        if (last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
+                const lastDepositCycleDeleg = parseInt(last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
+                const lastRewardCycle = parseInt(last_reward_cycle_json.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
                     Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before transferring.");
                     return true;

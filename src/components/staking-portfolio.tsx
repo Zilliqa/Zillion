@@ -111,7 +111,7 @@ function StakingPortfolio(props: any) {
 
     return (
         <>
-        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_STAKE_PORTFOLIO} />
+        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} />
         { data.length === 0 && <div className="d-block px-4 pb-3 text-left"><em>You have not deposited in any nodes yet.</em></div> }
         { data.length > 0 && <Table columns={columns} data={data} /> }
         </>

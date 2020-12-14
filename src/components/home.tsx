@@ -138,6 +138,9 @@ function Home(props: any) {
                   return null;
               }
 
+              // get number of delegators for all ssn
+              const delegNumState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssn_deleg_amt');
+
               for (const ssnAddress in contractState['ssnlist']) {
                   const ssnArgs = contractState['ssnlist'][ssnAddress]['arguments'];
                   let delegNum = '0';
@@ -148,9 +151,7 @@ function Home(props: any) {
                       status = SsnStatus.ACTIVE;
                   }
 
-                  // get number of delegators
-                  const delegNumState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssn_deleg_amt');
-
+                  // get the actual number of delegators from the map
                   if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
                       ssnAddress in delegNumState['ssn_deleg_amt']) {
                       delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
