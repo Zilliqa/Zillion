@@ -79,24 +79,24 @@ export class RewardCalculator {
     async combine_buff_direct(ssnaddr: string, delegator: string, reward_list: number[]) {
         const result_map = new Map <number, BN>();
 
-        const direct_deposit_json = await this.contract.getSubState(KEY_DIRECT_DEPOSIT_DELEG, [delegator.toLowerCase()]);
-        const buffer_deposit_json = await this.contract.getSubState(KEY_BUFF_DEPOSIT_DELEG, [delegator.toLowerCase()]);
-        const deleg_stake_per_cycle_json = await this.contract.getSubState(KEY_DELEG_PER_CYCLE, [delegator.toLowerCase()]);
+        const direct_deposit_json = await this.contract.getSubState(KEY_DIRECT_DEPOSIT_DELEG, [delegator.toLowerCase(), ssnaddr]);
+        const buffer_deposit_json = await this.contract.getSubState(KEY_BUFF_DEPOSIT_DELEG, [delegator.toLowerCase(), ssnaddr]);
+        const deleg_stake_per_cycle_json = await this.contract.getSubState(KEY_DELEG_PER_CYCLE, [delegator.toLowerCase(), ssnaddr]);
 
         let direct_deposit_map: any = null;
         let buffer_deposit_map: any = null;
         let deleg_stake_per_cycle_map: any = null;
 
         if (direct_deposit_json !== null) {
-            direct_deposit_map = direct_deposit_json[KEY_DIRECT_DEPOSIT_DELEG][delegator.toLowerCase()];
+            direct_deposit_map = direct_deposit_json[KEY_DIRECT_DEPOSIT_DELEG][delegator.toLowerCase()][ssnaddr];
         }
 
         if (buffer_deposit_json !== null) {
-            buffer_deposit_map = buffer_deposit_json[KEY_BUFF_DEPOSIT_DELEG][delegator.toLowerCase()];
+            buffer_deposit_map = buffer_deposit_json[KEY_BUFF_DEPOSIT_DELEG][delegator.toLowerCase()][ssnaddr];
         }
 
         if (deleg_stake_per_cycle_json !== null) {
-            deleg_stake_per_cycle_map = deleg_stake_per_cycle_json[KEY_DELEG_PER_CYCLE][delegator.toLowerCase()];
+            deleg_stake_per_cycle_map = deleg_stake_per_cycle_json[KEY_DELEG_PER_CYCLE][delegator.toLowerCase()][ssnaddr];
         }
         
         // remove this
@@ -113,23 +113,20 @@ export class RewardCalculator {
             const c2 = cycle - 2;
             let hist_amt = new BN(0);
             if (deleg_stake_per_cycle_map !== null 
-                && deleg_stake_per_cycle_map[ssnaddr] !== undefined 
-                && deleg_stake_per_cycle_map[ssnaddr][c1.toString()] !== undefined) {
-                    hist_amt = new BN(deleg_stake_per_cycle_map[ssnaddr][c1.toString()]);
+                && deleg_stake_per_cycle_map[c1.toString()] !== undefined) {
+                    hist_amt = new BN(deleg_stake_per_cycle_map[c1.toString()]);
             }
 
             let dir_amt = new BN(0);
             if (direct_deposit_map !== null 
-                && direct_deposit_map[ssnaddr] !== undefined
-                && direct_deposit_map[ssnaddr][c1.toString()] !== undefined) {
-                dir_amt = new BN(direct_deposit_map[ssnaddr][c1.toString()]);
+                && direct_deposit_map[c1.toString()] !== undefined) {
+                dir_amt = new BN(direct_deposit_map[c1.toString()]);
             }
 
             let buf_amt = new BN(0);
             if (buffer_deposit_map !== null 
-                && buffer_deposit_map[ssnaddr] !== undefined
-                && buffer_deposit_map[ssnaddr][c2.toString()] !== undefined) {
-                    buf_amt = new BN(buffer_deposit_map[ssnaddr][c2.toString()]);
+                && buffer_deposit_map[c2.toString()] !== undefined) {
+                    buf_amt = new BN(buffer_deposit_map[c2.toString()]);
             }
 
             let total_amt_tmp = dir_amt.add(buf_amt);
