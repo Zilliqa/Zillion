@@ -38,20 +38,29 @@ function LandingStatsTable(props: any) {
         let totalDeposits = '0';
         let estAPY = new BigNumber(0);
 
-        trackPromise(ZilliqaAccount.getSsnImplContractDirect(impl, networkURL)
-            .then(async (contract) => {
-                
-                if (contract === undefined || contract === 'error') {
+        // use last_withdraw_cycle_deleg instead of deposit_amt_deleg to compute total number of unique delegators
+        // because the map size is smaller
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, "last_withdraw_cycle_deleg")
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
                     return null;
                 }
-
                 // compute number of nodes and delegators
-                nodesNum = Object.keys(contract.ssnlist).length.toString();
-                delegNum = Object.keys(contract.deposit_amt_deleg).length.toString();
+                let nodesMap: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "comm_for_ssn");
 
-                // compute circulating supply
+                if (nodesMap !== undefined && nodesMap !== 'error') {
+                    nodesNum = Object.keys(nodesMap.comm_for_ssn).length.toString();
+                }
+                delegNum = Object.keys(contractState.last_withdraw_cycle_deleg).length.toString();
+
                 const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetwork(networkURL);
-                const totalStakeAmount = contract.totalstakeamount;
+
+                // get total stake amount
+                let totalStakeAmount = 0;
+                let totalStakeAmountJson: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "totalstakeamount");
+                if (totalStakeAmountJson !== undefined && totalStakeAmountJson !== 'error') {
+                    totalStakeAmount = totalStakeAmountJson.totalstakeamount;
+                }
                 totalDeposits = totalStakeAmount.toString();
 
                 if (totalCoinSupply !== OperationStatus.ERROR && totalCoinSupply.result !== undefined) {
@@ -63,11 +72,19 @@ function LandingStatsTable(props: any) {
                     }
                 }
 
+                // fetch gzil address
+                let gzilAddr = "";
+                let gzilAddrJson: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "gziladdr");
+
+                if (gzilAddrJson !== undefined && gzilAddrJson !== 'error') {
+                    gzilAddr = gzilAddrJson.gziladdr;
+                }
+
                 // compute total number of gzil
-                const gzilContract = await ZilliqaAccount.getGzilContractWithNetwork(contract.gziladdr, networkURL);
-                if (gzilContract !== undefined) {
+                const gzilTotalSupplyJson = await ZilliqaAccount.getImplStateExplorer(gzilAddr, networkURL, "total_supply");
+                if (gzilTotalSupplyJson !== undefined && gzilTotalSupplyJson !== 'error') {
                     // gzil is 15 decimal places
-                    gzil = gzilContract.total_supply;
+                    gzil = gzilTotalSupplyJson.total_supply;
                     const decimalPlaces = new BigNumber(10**15);
                     const maxGzilSupply = new BigNumber(MAX_GZIL_SUPPLY).times(decimalPlaces);
                     const remainGzil = maxGzilSupply.minus(new BigNumber(gzil));
@@ -82,9 +99,9 @@ function LandingStatsTable(props: any) {
                 if (!temp.isEqualTo(0)) {
                     estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2);
                 }
+
             })
             .finally(() => {
-
                 if(!mountedRef.current) {
                     return null;
                 }
@@ -104,8 +121,8 @@ function LandingStatsTable(props: any) {
                         estRealtimeAPY: estAPY.toString(),
                     }));
                 }
-                
             }), PromiseArea.PROMISE_LANDING_STATS);
+            
     }, [impl, networkURL]);
 
     // load inital data

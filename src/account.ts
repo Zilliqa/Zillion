@@ -232,9 +232,10 @@ export const getImplState = async (implAddr: string, state: string) => {
  * 
  * @param implAddr    implementation contract in checksum format
  * @param networkURL  blockchain api URL
- * @param state       contract substate to query for
+ * @param state       the name of the variable in the contract
+ * @param indices     JSON array to specify the indices if the variable is a map type
  */
-export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string) => {
+export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
     const randomAPI = getRandomAPI(networkURL);
     const explorerZilliqa = new Zilliqa(randomAPI);
 
@@ -245,8 +246,13 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
 
     try {
 
-        // fetched implementation contract address
-        const contractState = await explorerZilliqa.blockchain.getSmartContractSubState(implAddr, state);
+        let contractState: any = null;
+        if (indices !== null) {
+            // fetched implementation contract address
+            contractState = await explorerZilliqa.blockchain.getSmartContractSubState(implAddr, state, indices);
+        } else {
+            contractState = await explorerZilliqa.blockchain.getSmartContractSubState(implAddr, state);
+        }
         
         if (!contractState.hasOwnProperty("result")) {
             return "error";
