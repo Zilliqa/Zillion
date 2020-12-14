@@ -167,16 +167,12 @@ function Explorer(props: any) {
         let progress = '0';
 
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending')
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending', [wallet])
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
                 }
     
-                if (!contractState['withdrawal_pending'].hasOwnProperty(wallet)) {
-                    return null;
-                }
-
                 const blkNumPendingWithdrawal = contractState['withdrawal_pending'][wallet];
 
                 // get min bnum req
