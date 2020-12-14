@@ -46,7 +46,7 @@ function LandingStatsTable(props: any) {
                 // compute number of nodes and delegators
                 let nodesMap: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "comm_for_ssn");
 
-                if (nodesMap !== undefined || nodesMap !== 'error') {
+                if (nodesMap !== undefined && nodesMap !== 'error') {
                     nodesNum = Object.keys(nodesMap.comm_for_ssn).length.toString();
                 }
                 delegNum = Object.keys(contractState.deposit_amt_deleg).length.toString();
@@ -56,7 +56,7 @@ function LandingStatsTable(props: any) {
                 // get total stake amount
                 let totalStakeAmount = 0;
                 let totalStakeAmountJson: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "totalstakeamount");
-                if (totalStakeAmount !== undefined || totalStakeAmount !== 'error') {
+                if (totalStakeAmountJson !== undefined && totalStakeAmountJson !== 'error') {
                     totalStakeAmount = totalStakeAmountJson.totalstakeamount;
                 }
                 totalDeposits = totalStakeAmount.toString();
@@ -74,13 +74,13 @@ function LandingStatsTable(props: any) {
                 let gzilAddr = "";
                 let gzilAddrJson: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "gziladdr");
 
-                if (gzilAddrJson !== undefined || gzilAddrJson !== 'error') {
+                if (gzilAddrJson !== undefined && gzilAddrJson !== 'error') {
                     gzilAddr = gzilAddrJson.gziladdr;
                 }
 
                 // compute total number of gzil
                 const gzilTotalSupplyJson = await ZilliqaAccount.getImplStateExplorer(gzilAddr, networkURL, "total_supply");
-                if (gzilTotalSupplyJson !== undefined || gzilTotalSupplyJson !== 'error') {
+                if (gzilTotalSupplyJson !== undefined && gzilTotalSupplyJson !== 'error') {
                     // gzil is 15 decimal places
                     gzil = gzilTotalSupplyJson.total_supply;
                     const decimalPlaces = new BigNumber(10**15);
