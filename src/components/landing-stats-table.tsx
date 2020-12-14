@@ -38,7 +38,9 @@ function LandingStatsTable(props: any) {
         let totalDeposits = '0';
         let estAPY = new BigNumber(0);
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, "deposit_amt_deleg")
+        // use last_withdraw_cycle_deleg instead of deposit_amt_deleg to compute total number of unique delegators
+        // because the map size is smaller
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, "last_withdraw_cycle_deleg")
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
                     return null;
@@ -49,7 +51,7 @@ function LandingStatsTable(props: any) {
                 if (nodesMap !== undefined && nodesMap !== 'error') {
                     nodesNum = Object.keys(nodesMap.comm_for_ssn).length.toString();
                 }
-                delegNum = Object.keys(contractState.deposit_amt_deleg).length.toString();
+                delegNum = Object.keys(contractState.last_withdraw_cycle_deleg).length.toString();
 
                 const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetwork(networkURL);
 
