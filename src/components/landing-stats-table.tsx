@@ -44,10 +44,10 @@ function LandingStatsTable(props: any) {
                     return null;
                 }
                 // compute number of nodes and delegators
-                let nodesMap: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "ssnlist");
+                let nodesMap: any = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "comm_for_ssn");
 
                 if (nodesMap !== undefined || nodesMap !== 'error') {
-                    nodesNum = Object.keys(nodesMap.ssnlist).length.toString();
+                    nodesNum = Object.keys(nodesMap.comm_for_ssn).length.toString();
                 }
                 delegNum = Object.keys(contractState.deposit_amt_deleg).length.toString();
 
