@@ -12,20 +12,24 @@ const KEY_DELEG_PER_CYCLE = 'deleg_stake_per_cycle'
 export class RewardCalculator {
     zilliqa: any;
     contract: any;
+    last_withdraw_cycle_map: any;
+    last_reward_cycle_json: any;
 
     constructor(url: String, ssnlist: String) {
          this.zilliqa = new Zilliqa(url);
          this.contract = this.zilliqa.contracts.at(ssnlist);
     }
 
+    // store the required maps first
+    async compute_maps(delegator: string) {
+        this.last_withdraw_cycle_map = await this.contract.getSubState(KEY_LAST_WITHDRAW_CYCLE, [delegator.toLowerCase()]);
+        this.last_reward_cycle_json = await this.contract.getSubState(KEY_LAST_REWARD_CYCLE);
+    }
+
     async get_rewards(ssnaddr: string, delegator: string) {
-
-        const last_withdraw_cycle_map = await this.contract.getSubState(KEY_LAST_WITHDRAW_CYCLE, [delegator.toLowerCase()]);
-        const last_reward_cycle_json = await this.contract.getSubState(KEY_LAST_REWARD_CYCLE);
-
-        const reward_list = await this.get_reward_cycle_list(last_withdraw_cycle_map, last_reward_cycle_json, ssnaddr, delegator);
+        const reward_list = await this.get_reward_cycle_list(this.last_withdraw_cycle_map, this.last_reward_cycle_json, ssnaddr, delegator);
         const delegate_per_cycle = await this.combine_buff_direct(ssnaddr,delegator,reward_list);
-        const need_list = await this.get_reward_need_cycle_list(last_withdraw_cycle_map, last_reward_cycle_json, ssnaddr, delegator);
+        const need_list = await this.get_reward_need_cycle_list(this.last_withdraw_cycle_map, this.last_reward_cycle_json, ssnaddr, delegator);
         const rewards = await this.calculate_rewards(ssnaddr,delegate_per_cycle,need_list);
         return rewards;
     }
