@@ -284,16 +284,12 @@ function Dashboard(props: any) {
         
         const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg')
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg', [userBase16Address])
         .then(async (contractState) => {
             if (contractState === undefined || contractState === 'error') {
                 return null;
             }
-
-            if (!contractState['deposit_amt_deleg'].hasOwnProperty(userBase16Address)) {
-                return null;
-            }
-
+            
             // compute global APY
             const totalStakeAmtState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'totalstakeamount');
             if (totalStakeAmtState['totalstakeamount']) {
