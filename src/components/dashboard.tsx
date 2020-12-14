@@ -274,8 +274,12 @@ function Dashboard(props: any) {
     }, [impl, networkURL]);
 
 
-    /* fetch data for delegator stats panel */
+    /* 
+    * fetch data for delegator stats panel
+    * fetch data for delegator staking portfolio
+    */
     const getDelegatorStats = useCallback(() => {
+        let output: DelegStakingPortfolioStats[] = [];
         let globalAPY = initDelegStats.globalAPY;
         let zilRewards = initDelegStats.zilRewards;
         let gzilRewards = initDelegStats.gzilRewards;
@@ -303,6 +307,9 @@ function Dashboard(props: any) {
             let totalZilRewardsBN = new BigNumber(0);
             const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
 
+            // fetch ssnlist for the names
+            const ssnContractState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssnlist');
+
             for (const ssnAddress in depositDelegList) {
                 if (!depositDelegList.hasOwnProperty(ssnAddress)) {
                     continue;
@@ -315,6 +322,15 @@ function Dashboard(props: any) {
                 // compute zil rewards
                 const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
                 totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
+
+                // for staking portfolio section
+                const data: DelegStakingPortfolioStats = {
+                    ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
+                    ssnAddress: toBech32Address(ssnAddress),
+                    delegAmt: delegAmtQaBN.toString(),
+                    rewards: delegRewards.toString(),
+                }
+                output.push(data);
             }
 
             totalDeposits = totalDepositsBN.toString();
@@ -327,13 +343,9 @@ function Dashboard(props: any) {
             // get gzil balance
             const gzilAddressState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'gziladdr');
             if (gzilAddressState.gziladdr) {
-                const gzilContractState = await ZilliqaAccount.getGzilContractWithNetwork(gzilAddressState['gziladdr'], networkURL);
-                if (gzilContractState.balances) {
-                    const gzilBalanceMap = gzilContractState.balances;
-                    if (gzilBalanceMap.hasOwnProperty(userBase16Address)) {
-                        // compute user gzil balance
-                        gzilBalance = gzilBalanceMap[userBase16Address];
-                    }
+                const gzilContractState = await ZilliqaAccount.getImplStateExplorer(gzilAddressState['gziladdr'], networkURL, "balances", [userBase16Address]);
+                if (gzilContractState !== null) {
+                    gzilBalance = gzilContractState["balances"][userBase16Address];
                 }
             }
 
@@ -348,7 +360,6 @@ function Dashboard(props: any) {
         .finally(() => {
             if (mountedRef.current) {
                 console.log("updating delegator stats...");
-
                 const data: DelegStats = {
                     globalAPY: globalAPY,
                     zilRewards: zilRewards,
@@ -356,8 +367,10 @@ function Dashboard(props: any) {
                     gzilBalance: gzilBalance,
                     totalDeposits: totalDeposits,
                 }
-
                 setDelegStats(data);
+
+                console.log("updating delegator staking portfolio...");
+                setDelegStakingStats([...output]);
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
@@ -444,59 +457,6 @@ function Dashboard(props: any) {
             }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
     }, [impl, networkURL, currWalletAddress]);
 
-    /* fetch data for delegator staking portfolio panel */
-    const getDelegatorStakingPortfolio = useCallback(() => {
-        let output: DelegStakingPortfolioStats[] = [];
-
-        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
-
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg', [userBase16Address])
-            .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
-                    return null;
-                }
-
-                // fetch ssnlist for the names
-                const ssnContractState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssnlist');
-
-                const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
-                
-                for (const ssnAddress in depositDelegList) {
-                    if (!depositDelegList.hasOwnProperty(ssnAddress)) {
-                        continue;
-                    }
-                    
-                    // compute stake amount
-                    const delegAmt = new BN(depositDelegList[ssnAddress]);
-
-                    // compute rewards
-                    const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, userBase16Address)).toString();
-                    console.log("rewards :%o", delegRewards);
-
-                    const data: DelegStakingPortfolioStats = {
-                        ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
-                        ssnAddress: toBech32Address(ssnAddress),
-                        delegAmt: delegAmt.toString(),
-                        rewards: delegRewards.toString(),
-                    }
-                    output.push(data);
-                }
-
-            })
-            .catch((err) => {
-                console.error(err);
-                if (mountedRef.current) {
-                    setIsError(true);
-                }
-                return null;
-            })
-            .finally(() => {
-                if (mountedRef.current) {
-                    console.log("updating delegator staking portfolio...");
-                    setDelegStakingStats([...output]);
-                }
-            }), PromiseArea.PROMISE_GET_STAKE_PORTFOLIO);
-    }, [impl, networkURL, currWalletAddress]);
 
     // compute number of blocks left before rewards are issued
     const getBlockRewardCountDown = useCallback(() => {
@@ -725,7 +685,6 @@ function Dashboard(props: any) {
 
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
-            getDelegatorStakingPortfolio();
             getDelegatorPendingWithdrawal();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
@@ -745,7 +704,6 @@ function Dashboard(props: any) {
         getContractConstants, 
         getDelegatorPendingWithdrawal,
         getDelegatorStats,
-        getDelegatorStakingPortfolio,
         getOperatorStats,
         getSsnStats
     ]);
@@ -757,7 +715,7 @@ function Dashboard(props: any) {
 
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
-            getDelegatorStakingPortfolio();
+            // getDelegatorStakingPortfolio();
             getDelegatorPendingWithdrawal();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
@@ -781,7 +739,6 @@ function Dashboard(props: any) {
 
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
-            getDelegatorStakingPortfolio();
             getDelegatorPendingWithdrawal();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
