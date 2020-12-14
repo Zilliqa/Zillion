@@ -377,13 +377,9 @@ function Dashboard(props: any) {
         
         const wallet = fromBech32Address(currWalletAddress).toLowerCase();
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending')
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending', [wallet])
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === 'error') {
-                    return null;
-                }
-    
-                if (!contractState['withdrawal_pending'].hasOwnProperty(wallet)) {
                     return null;
                 }
 
