@@ -254,7 +254,7 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
             contractState = await explorerZilliqa.blockchain.getSmartContractSubState(implAddr, state);
         }
         
-        if (!contractState.hasOwnProperty("result")) {
+        if (!contractState.hasOwnProperty("result") || contractState.result === null || contractState.result === undefined) {
             return "error";
         }
         
@@ -357,7 +357,7 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
         return false;
     }
 
-    const contractState = await getImplStateExplorer(impl, networkURL, "ssnlist");
+    const contractState = await getImplStateExplorer(impl, networkURL, "ssnlist", [address]);
 
     if (contractState === undefined || contractState === "error") {
         return false;
@@ -366,12 +366,7 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
     console.log("account.ts check is operator: %o", address);
     console.log("account.ts check is impl: %o", impl);
     console.log("account.ts check is networkURL: %o", networkURL);
-    if (address in contractState.ssnlist) {
-        console.log("operator %o exist", address);
-        return true;
-    } else {
-        return false;
-    }
+    return true;
 };
 
 
