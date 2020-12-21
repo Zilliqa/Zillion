@@ -19,14 +19,8 @@ const TESTNET_API_LIST = [
 
 // Mainnet
 const MAINNET_API_LIST = [
-    "https://ssn.zillacracy.com/api",
-    "https://zilliqa.atomicwallet.io/api",
-    "https://ssn-api-mainnet.viewblock.io",
-    "https://ssn-zilliqa.cex.io/api",
-    "https://ssn.zillet.io",
-    "https://zil-staking.ezil.me/api",
     "https://stakingseed-api.seed.zilliqa.com",
-    "https://seed-zil.shardpool.io",
+    "https://api.zilliqa.com",
 ];
 
 // https://staking-zil.kucoin.com/api", CORS error
