@@ -20,7 +20,6 @@ const TESTNET_API_LIST = [
 // Mainnet
 const MAINNET_API_LIST = [
     "https://ssn.zillacracy.com/api",
-    "https://ssn-zilliqa.moonlet.network/api",
     "https://ssn-api-mainnet.viewblock.io",	
     "https://ssn-zilliqa.cex.io/api",
     "https://ssn.zillet.io",
