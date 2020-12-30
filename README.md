@@ -7,6 +7,7 @@
 ### Development
 1. `yarn`
 
+
 2. Tweak the settings in `public/config.js`
 ```
     networks_config: {
