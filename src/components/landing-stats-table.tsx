@@ -152,7 +152,7 @@ function LandingStatsTable(props: any) {
                 <>
                 <div className="row pb-3 mx-auto justify-content-center">
                     <div className="d-block landing-stats-card">
-                        <h3>EST. Realtime APY</h3>
+                        <h3>EST. Realtime APR</h3>
                         <span>{data.estRealtimeAPY}%</span>
                     </div>
                     <div className="d-block landing-stats-card">

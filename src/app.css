@@ -88,7 +88,6 @@ body {
 
 
   --background-circle-url: url('./static/bg_circle.svg');
-  --background-stakezil-url: url('./static/bg_stake_zil.svg');
 }
 
 [data-theme="light"] {
@@ -125,7 +124,6 @@ body {
 
 
   --background-circle-url: url('./static/light/bg_circle.svg');
-  --background-stakezil-url: url('./static/light/bg_stake_zil.svg');
 }
 
 /* transition for theme switch */
@@ -445,13 +443,12 @@ input:focus {
 .cover {
   background-color: var(--secondary-color);
 
-  background-image: var(--background-circle-url), var(--background-stakezil-url);
+  background-image: var(--background-circle-url);
 
-  background-size: 1000px, 600px;
+  background-size: 1000px;
 
   background-position:
-    top 0px left -200px,
-    bottom 20% right 10%;
+    top 0px left -200px;
   
   background-repeat: no-repeat;
 }
