@@ -19,12 +19,6 @@ const TESTNET_API_LIST = [
 
 // Mainnet
 const MAINNET_API_LIST = [
-    "https://ssn.zillacracy.com/api",
-    "https://ssn-zilliqa.cex.io/api",
-    "https://ssn.zillet.io",
-    "https://zil-staking.ezil.me/api",
-    "https://staking-zil.kucoin.com/api",
-    "https://stakingseed-api.seed.zilliqa.com",
     "https://api.zilliqa.com",
 ];
 
@@ -32,6 +26,12 @@ const MAINNET_API_LIST = [
 // https://zilliqa-api.staked.cloud, out-of-sync
 // "https://ssn-api-mainnet.viewblock.io", rate limit
 
+// "https://ssn.zillacracy.com/api",
+// "https://ssn-zilliqa.cex.io/api",
+// "https://ssn.zillet.io",
+// "https://zil-staking.ezil.me/api",
+// "https://staking-zil.kucoin.com/api",
+// "https://stakingseed-api.seed.zilliqa.com",
 
 // @todo: check api aliveness?
 export const getRandomAPI = (networkURL: string) => {
