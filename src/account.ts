@@ -298,21 +298,6 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
     }
 };
 
-// numTxBlocks-1 = current block num
-export const getNumTxBlocks = async () => {
-    // assume the blockchain network is already set
-    try {
-        const info = await zilliqa.blockchain.getBlockChainInfo();
-        if (info === undefined && info.result === undefined) {
-            return OperationStatus.ERROR;
-        }
-        return info.result.NumTxBlocks;
-    } catch (err) {
-        console.error("error - get latest blk number: %o", err);
-        return OperationStatus.ERROR;
-    }
-}
-
 // for explorer page use
 // get results with a new zilliqa object
 // sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
