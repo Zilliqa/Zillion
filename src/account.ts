@@ -317,19 +317,6 @@ export const getNumTxBlocksExplorer = async (networkURL: string) => {
     }
 }
 
-export const getTotalCoinSupply = async (networkURL?: string) => {
-    if (networkURL) {
-        changeNetwork(networkURL);
-    }
-    try {
-        const totalCoinSupply = await zilliqa.blockchain.getTotalCoinSupply();
-        return totalCoinSupply;
-    } catch (err) {
-        console.error("error: getTotalCoinSupply - o%", err);
-        return OperationStatus.ERROR;
-    }
-};
-
 // same as getTotalCoinSupply but with random API
 export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
     try {
