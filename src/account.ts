@@ -254,6 +254,19 @@ export const getNumTxBlocksExplorerRetriable = async (networkURL: string) => {
     return result;
 };
 
+export const getTotalCoinSupplyWithNetworkRetriable = async (networkURL:string) => {
+    let result;
+    for (let attempt = 0; attempt < 10; attempt++) {
+        result = await getTotalCoinSupplyWithNetwork(networkURL);
+        if (result !== OperationStatus.ERROR) {
+            break;
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+    return result;
+};
+
 /**
  * Get smart contract sub state with a new zilliqa object
  * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
@@ -361,7 +374,7 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
         return false;
     }
 
-    const contractState = await getImplStateExplorer(impl, networkURL, "ssnlist", [address]);
+    const contractState = await getImplStateExplorerRetriable(impl, networkURL, "ssnlist", [address]);
 
     if (contractState === undefined || contractState === "error") {
         return false;

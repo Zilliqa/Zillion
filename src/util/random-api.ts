@@ -13,7 +13,8 @@ const randomJS = new Random(MersenneTwister19937.autoSeed());
 const TESTNET_API_LIST = [
     "https://bumblebee-api.zilliqa.network",
     "https://ssntestnet.zillacracy.com/api",
-    "https://seed-dev-api.zillet.io"
+    "https://seed-dev-api.zillet.io",
+    "https://dev-api.zilliqa.com"
 ];
 
 

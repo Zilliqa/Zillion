@@ -53,7 +53,7 @@ function LandingStatsTable(props: any) {
                 }
                 delegNum = Object.keys(contractState.last_withdraw_cycle_deleg).length.toString();
 
-                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetwork(networkURL);
+                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetworkRetriable(networkURL);
 
                 // get total stake amount
                 let totalStakeAmount = 0;
