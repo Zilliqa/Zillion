@@ -222,6 +222,38 @@ export const getImplState = async (implAddr: string, state: string) => {
     }
 };
 
+// -------------------------------
+//           RETRIABLE
+// -------------------------------
+
+export const getImplStateExplorerRetriable = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
+    let result;
+
+    for (let attempt = 0; attempt < 10; attempt++) {
+        result = await getImplStateExplorer(implAddr, networkURL, state, indices);
+        if (result !== "error") {
+            break;
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+    return result;
+};
+
+export const getNumTxBlocksExplorerRetriable = async (networkURL: string) => {
+    let result;
+
+    for (let attempt = 0; attempt < 10; attempt++) {
+        result = await getNumTxBlocksExplorer(networkURL);
+        if (result !== OperationStatus.ERROR) {
+            break;
+        } else {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+    return result;
+};
+
 /**
  * Get smart contract sub state with a new zilliqa object
  * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
@@ -236,13 +268,13 @@ export const getImplState = async (implAddr: string, state: string) => {
  * @param indices     JSON array to specify the indices if the variable is a map type
  */
 export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
-    const randomAPI = getRandomAPI(networkURL);
-    const explorerZilliqa = new Zilliqa(randomAPI);
-
     if (!implAddr) {
         console.error("error: getImplStateExplorer - no implementation contract found");
         return "error";
     }
+
+    const randomAPI = getRandomAPI(networkURL);
+    const explorerZilliqa = new Zilliqa(randomAPI);
 
     try {
 
