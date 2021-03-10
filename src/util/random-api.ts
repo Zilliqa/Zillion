@@ -47,6 +47,6 @@ export const getRandomAPI = (networkURL: string) => {
         const index = randomJS.integer(0, (TESTNET_API_LIST.length-1));
         api = TESTNET_API_LIST[index];
     }
-    console.log("utilizing random api: %o", api);
+    // console.log("utilizing random api: %o", api);
     return api;
 };

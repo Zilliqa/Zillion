@@ -30,6 +30,13 @@ let GAS_PRICE = Constants.DEFAULT_GAS_PRICE; // 1000000000 Qa
 const GAS_LIMIT = Constants.DEFAULT_GAS_LIMIT;
 const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
 
+ // config.js from public folder
+ // max retry attempt: 10 tries
+ // retry delay interval: 100ms
+ let { api_max_retry_attempt, api_retry_delay } = (window as { [key: string]: any })['config'];
+ api_max_retry_attempt = api_max_retry_attempt ? api_max_retry_attempt : 10;
+ api_retry_delay = api_retry_delay ? api_retry_delay : 100;
+
 Zilliqa.prototype.setProvider = function(provider: any) {
     this.blockchain.provider = provider;
     this.wallet.provider = this.blockchain.provider;
@@ -181,12 +188,12 @@ export const getNonce = async (address: string) => {
 export const getImplStateExplorerRetriable = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
     let result;
 
-    for (let attempt = 0; attempt < 10; attempt++) {
+    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
         result = await getImplStateExplorer(implAddr, networkURL, state, indices);
         if (result !== "error") {
             break;
         } else {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
         }
     }
     return result;
@@ -195,12 +202,12 @@ export const getImplStateExplorerRetriable = async (implAddr: string, networkURL
 export const getNumTxBlocksExplorerRetriable = async (networkURL: string) => {
     let result;
 
-    for (let attempt = 0; attempt < 10; attempt++) {
+    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
         result = await getNumTxBlocksExplorer(networkURL);
         if (result !== OperationStatus.ERROR) {
             break;
         } else {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
         }
     }
     return result;
@@ -208,12 +215,12 @@ export const getNumTxBlocksExplorerRetriable = async (networkURL: string) => {
 
 export const getTotalCoinSupplyWithNetworkRetriable = async (networkURL:string) => {
     let result;
-    for (let attempt = 0; attempt < 10; attempt++) {
+    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
         result = await getTotalCoinSupplyWithNetwork(networkURL);
         if (result !== OperationStatus.ERROR) {
             break;
         } else {
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
         }
     }
     return result;
