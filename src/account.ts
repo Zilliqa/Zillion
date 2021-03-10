@@ -343,30 +343,6 @@ export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
     }
 }
 
-export const getGzilContract = async (gzilAddress: string) => {
-    // assume the blockchain network is already set
-    try {
-        const contract = await zilliqa.blockchain.getSmartContractState(gzilAddress);
-        return contract.result;
-    } catch (err) {
-        console.error("error - getTotalGzilSupply: %o", err);
-        return OperationStatus.ERROR;
-    }
-};
-
-// same as getGzilContract but query from random API
-export const getGzilContractWithNetwork = async (gzilAddress: string, networkURL: string) => {
-    try {
-        const randomAPI = getRandomAPI(networkURL);
-        const zilliqaObj = new Zilliqa(randomAPI);
-        const contract = await zilliqaObj.blockchain.getSmartContractState(gzilAddress);
-        return contract.result;
-    } catch (err) {
-        console.error("error - getTotalGzilSupply: %o", err);
-        return OperationStatus.ERROR;
-    }
-}
-
 // isOperator - check if address is node operator
 // @param address: base16 address
 export const isOperator = async (impl: string, address: string, networkURL: string) => {
