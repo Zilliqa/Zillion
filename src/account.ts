@@ -127,6 +127,7 @@ export const addWalletByPrivatekey = async (privatekey: string) => {
     }
 };
 
+// used by wallet ledger
 export const getBalance = async (address: string) => {
     try {
         const balance = await zilliqa.blockchain.getBalance(address);
@@ -153,7 +154,7 @@ export const getBalanceWithNetwork = async (address: string, networkURL: string)
         }
         return balance.result.balance;
     } catch (err) {
-        console.error("error: getBalance - o%", err);
+        // console.error("error: getBalance - o%", err);
         return "0";
     }
 }
@@ -172,55 +173,6 @@ export const getNonce = async (address: string) => {
     }
 }
 
-export const getSsnImplContractDirect = async (implAddr: string, networkURL: string) => {
-    try {
-        if (!implAddr) {
-            console.error("error: getSsnImplContractDirect - no implementation contract found");
-            return "error";
-        }
-        const randomAPI = getRandomAPI(networkURL);
-        const zilliqaObj = new Zilliqa(randomAPI);
-        // fetched implementation contract address
-        const implContract = await zilliqaObj.blockchain.getSmartContractState(implAddr);
-        
-        if (!implContract.hasOwnProperty("result")) {
-            return "error";
-        }
-        
-        return implContract.result;
-
-    } catch (err) {
-        console.error("error: getSsnImplContractDirect - o%", err);
-        console.error("error: impl address: %o", implAddr);
-        console.error("error: network url: %o", networkURL);
-        return "error"
-    }
-};
-
-// uses get smart contract sub state
-export const getImplState = async (implAddr: string, state: string) => {
-
-    if (!implAddr) {
-        console.error("error: getImplState - no implementation contract found");
-        return "error";
-    }
-
-    try {
-
-        // fetched implementation contract address
-        const contractState = await zilliqa.blockchain.getSmartContractSubState(implAddr, state);
-        
-        if (!contractState.hasOwnProperty("result")) {
-            return "error";
-        }
-        
-        return contractState.result;
-
-    } catch (err) {
-        console.error("error: getImplState - o%", err);
-        return "error";
-    }
-};
 
 // -------------------------------
 //           RETRIABLE
@@ -268,6 +220,8 @@ export const getTotalCoinSupplyWithNetworkRetriable = async (networkURL:string) 
 };
 
 /**
+ * getImplStateExplorer
+ * 
  * Get smart contract sub state with a new zilliqa object
  * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
  * which depends on the main zilliqa object
@@ -286,10 +240,9 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
         return "error";
     }
 
-    const randomAPI = getRandomAPI(networkURL);
-    const explorerZilliqa = new Zilliqa(randomAPI);
-
     try {
+        const randomAPI = getRandomAPI(networkURL);
+        const explorerZilliqa = new Zilliqa(randomAPI);
 
         let contractState: any = null;
         if (indices !== null) {
@@ -302,19 +255,25 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
         if (!contractState.hasOwnProperty("result") || contractState.result === null || contractState.result === undefined) {
             return "error";
         }
-        
+
         return contractState.result;
 
     } catch (err) {
-        console.error("error: getImplStateExplorer - o%", err);
+        // console.error("error: getImplStateExplorer - o%", err);
         return "error";
     }
 };
 
-// for explorer page use
-// get results with a new zilliqa object
-// sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
-// which depends on the main zilliqa object
+
+/**
+ * getNumTxBlocksExplorer
+ * 
+ * Retrieves the latest block number with a new zilliqa object
+ * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
+ * which depends on the main zilliqa object
+ * @param networkURL 
+ * @returns 
+ */
 export const getNumTxBlocksExplorer = async (networkURL: string) => {
     try {
         const randomAPI = getRandomAPI(networkURL);
@@ -325,12 +284,18 @@ export const getNumTxBlocksExplorer = async (networkURL: string) => {
         }
         return info.result.NumTxBlocks;
     } catch (err) {
-        console.error("error - get latest blk number explorer: %o", err);
+        // console.error("error - get latest blk number explorer: %o", err);
         return OperationStatus.ERROR;
     }
 }
 
-// same as getTotalCoinSupply but with random API
+/**
+ * getTotalCoinSupplyWithNetwork
+ * 
+ * Retrieves the latest total $ZIL supply
+ * @param networkURL 
+ * @returns 
+ */
 export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
     try {
         const randomAPI = getRandomAPI(networkURL);
@@ -338,13 +303,22 @@ export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
         const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
         return totalCoinSupply;
     } catch (err) {
-        console.error("error: getTotalCoinSupply - o%", err);
+        // console.error("error: getTotalCoinSupply - o%", err);
         return OperationStatus.ERROR;
     }
 }
 
-// isOperator - check if address is node operator
-// @param address: base16 address
+
+/**
+ * isOperator
+ * 
+ * Checks if the logged-in user is a legit node operator
+ * 
+ * @param impl implementation contract address
+ * @param address base16 address
+ * @param networkURL 
+ * @returns 
+ */
 export const isOperator = async (impl: string, address: string, networkURL: string) => {
     if (!impl || !networkURL) {
         return false;
@@ -363,8 +337,13 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
 };
 
 
-// returns the combined gas price and gas limit in Qa
-// assume gas price has been retrieved correctly when dashboard is loaded
+/**
+ * getGasFees
+ * 
+ * Returns the combined gas price and gas limit in Qa
+ * assume gas price has been retrieved correctly when dashboard is loaded
+ * @returns
+ */
 export const getGasFees = () => {
     // gas limit * gas price
     const gasFees = new BN(GAS_LIMIT).mul(new BN(GAS_PRICE));
@@ -375,7 +354,7 @@ export const ZilliqaAccount = () => {
     return zilliqa;
 };
 
-// refactor
+// sign wrapper to determine which signer to use
 export const handleSign = async (accessMethod: string, networkURL: string, txParams: any, ledgerIndex: number) => {
     changeNetwork(networkURL);
     let result = "";
