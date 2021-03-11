@@ -20,7 +20,7 @@ function RewardCountdownTable(props: any) {
         let tempBlockRewardCount = '0';
         let tempExpectedBlockNum = '0';
 
-        trackPromise(ZilliqaAccount.getNumTxBlocksExplorer(networkURL)
+        trackPromise(ZilliqaAccount.getNumTxBlocksExplorerRetriable(networkURL)
             .then((state) => {
                 if (state === undefined || state === OperationStatus.ERROR) {
                     return null;
