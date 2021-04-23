@@ -19,7 +19,7 @@ function WarningBanner(props: any) {
                 </> :
                 <>
                 <div className="p-3"><strong>Warning</strong>: Zillion is still in testnet. You are using this dApp at your own risk. Zilliqa cannot assume any responsibility for any loss of funds.</div>
-                <div className="px-3 pb-3"><strong>Attention</strong>: Testnet staking contract is going to be paused for updates.</div>
+                <div className="px-3 pb-3"><strong>Attention</strong>: Testnet staking contract is paused currently. Please check back again later.</div>
                 </>
             }
         </div>

@@ -17,7 +17,7 @@ function WarningDashboardBanner(props: any) {
                 }
                 </> :
                 <>
-                <div className="px-3 pt-3 pb-3"><strong>Attention</strong>: Testnet staking contract is going to be paused for updates.</div>
+                <div className="px-3 pt-3 pb-3"><strong>Attention</strong>: Testnet staking contract is paused currently. Please check back again later.</div>
                 </>
             }
         </div>
