@@ -12,10 +12,11 @@ const randomJS = new Random(MersenneTwister19937.autoSeed());
 // Testnet
 const TESTNET_API_LIST = [
     "https://bumblebee-api.zilliqa.network",
-    "https://ssntestnet.zillacracy.com/api",
-    "https://seed-dev-api.zillet.io",
     "https://dev-api.zilliqa.com"
 ];
+
+// https://seed-dev-api.zillet.io           CORS error
+// https://ssntestnet.zillacracy.com/api    CORS error
 
 
 // Mainnet
