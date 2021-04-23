@@ -32,7 +32,9 @@
     },
     blockchain_explorer_config: "viewblock",
     refresh_rate_config: 3000,
-    environment_config: "dev",
+    api_max_retry_attempt: 10,
+    api_retry_delay: 100,
+    environment_config: "dev"
 ``` 
 
 3. (Optional) If you are interested in using the isolated server, set `environment_config` to `dev` otherwise, set to `stage` for testnet and `prod` for mainnet respectively.

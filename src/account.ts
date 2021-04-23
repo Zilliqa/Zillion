@@ -30,6 +30,13 @@ let GAS_PRICE = Constants.DEFAULT_GAS_PRICE; // 1000000000 Qa
 const GAS_LIMIT = Constants.DEFAULT_GAS_LIMIT;
 const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
 
+ // config.js from public folder
+ // max retry attempt: 10 tries
+ // retry delay interval: 100ms
+ let { api_max_retry_attempt, api_retry_delay } = (window as { [key: string]: any })['config'];
+ api_max_retry_attempt = api_max_retry_attempt ? api_max_retry_attempt : 10;
+ api_retry_delay = api_retry_delay ? api_retry_delay : 100;
+
 Zilliqa.prototype.setProvider = function(provider: any) {
     this.blockchain.provider = provider;
     this.wallet.provider = this.blockchain.provider;
@@ -127,6 +134,7 @@ export const addWalletByPrivatekey = async (privatekey: string) => {
     }
 };
 
+// used by wallet ledger
 export const getBalance = async (address: string) => {
     try {
         const balance = await zilliqa.blockchain.getBalance(address);
@@ -153,7 +161,7 @@ export const getBalanceWithNetwork = async (address: string, networkURL: string)
         }
         return balance.result.balance;
     } catch (err) {
-        console.error("error: getBalance - o%", err);
+        // console.error("error: getBalance - o%", err);
         return "0";
     }
 }
@@ -172,57 +180,55 @@ export const getNonce = async (address: string) => {
     }
 }
 
-export const getSsnImplContractDirect = async (implAddr: string, networkURL: string) => {
-    try {
-        if (!implAddr) {
-            console.error("error: getSsnImplContractDirect - no implementation contract found");
-            return "error";
-        }
-        const randomAPI = getRandomAPI(networkURL);
-        const zilliqaObj = new Zilliqa(randomAPI);
-        // fetched implementation contract address
-        const implContract = await zilliqaObj.blockchain.getSmartContractState(implAddr);
-        
-        if (!implContract.hasOwnProperty("result")) {
-            return "error";
-        }
-        
-        return implContract.result;
 
-    } catch (err) {
-        console.error("error: getSsnImplContractDirect - o%", err);
-        console.error("error: impl address: %o", implAddr);
-        console.error("error: network url: %o", networkURL);
-        return "error"
+// -------------------------------
+//           RETRIABLE
+// -------------------------------
+
+export const getImplStateExplorerRetriable = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
+    let result;
+
+    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
+        result = await getImplStateExplorer(implAddr, networkURL, state, indices);
+        if (result !== "error") {
+            break;
+        } else {
+            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
+        }
     }
+    return result;
 };
 
-// uses get smart contract sub state
-export const getImplState = async (implAddr: string, state: string) => {
+export const getNumTxBlocksExplorerRetriable = async (networkURL: string) => {
+    let result;
 
-    if (!implAddr) {
-        console.error("error: getImplState - no implementation contract found");
-        return "error";
-    }
-
-    try {
-
-        // fetched implementation contract address
-        const contractState = await zilliqa.blockchain.getSmartContractSubState(implAddr, state);
-        
-        if (!contractState.hasOwnProperty("result")) {
-            return "error";
+    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
+        result = await getNumTxBlocksExplorer(networkURL);
+        if (result !== OperationStatus.ERROR) {
+            break;
+        } else {
+            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
         }
-        
-        return contractState.result;
-
-    } catch (err) {
-        console.error("error: getImplState - o%", err);
-        return "error";
     }
+    return result;
+};
+
+export const getTotalCoinSupplyWithNetworkRetriable = async (networkURL:string) => {
+    let result;
+    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
+        result = await getTotalCoinSupplyWithNetwork(networkURL);
+        if (result !== OperationStatus.ERROR) {
+            break;
+        } else {
+            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
+        }
+    }
+    return result;
 };
 
 /**
+ * getImplStateExplorer
+ * 
  * Get smart contract sub state with a new zilliqa object
  * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
  * which depends on the main zilliqa object
@@ -236,15 +242,14 @@ export const getImplState = async (implAddr: string, state: string) => {
  * @param indices     JSON array to specify the indices if the variable is a map type
  */
 export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
-    const randomAPI = getRandomAPI(networkURL);
-    const explorerZilliqa = new Zilliqa(randomAPI);
-
     if (!implAddr) {
         console.error("error: getImplStateExplorer - no implementation contract found");
         return "error";
     }
 
     try {
+        const randomAPI = getRandomAPI(networkURL);
+        const explorerZilliqa = new Zilliqa(randomAPI);
 
         let contractState: any = null;
         if (indices !== null) {
@@ -257,34 +262,25 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
         if (!contractState.hasOwnProperty("result") || contractState.result === null || contractState.result === undefined) {
             return "error";
         }
-        
+
         return contractState.result;
 
     } catch (err) {
-        console.error("error: getImplStateExplorer - o%", err);
+        // console.error("error: getImplStateExplorer - o%", err);
         return "error";
     }
 };
 
-// numTxBlocks-1 = current block num
-export const getNumTxBlocks = async () => {
-    // assume the blockchain network is already set
-    try {
-        const info = await zilliqa.blockchain.getBlockChainInfo();
-        if (info === undefined && info.result === undefined) {
-            return OperationStatus.ERROR;
-        }
-        return info.result.NumTxBlocks;
-    } catch (err) {
-        console.error("error - get latest blk number: %o", err);
-        return OperationStatus.ERROR;
-    }
-}
 
-// for explorer page use
-// get results with a new zilliqa object
-// sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
-// which depends on the main zilliqa object
+/**
+ * getNumTxBlocksExplorer
+ * 
+ * Retrieves the latest block number with a new zilliqa object
+ * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
+ * which depends on the main zilliqa object
+ * @param networkURL 
+ * @returns 
+ */
 export const getNumTxBlocksExplorer = async (networkURL: string) => {
     try {
         const randomAPI = getRandomAPI(networkURL);
@@ -295,25 +291,18 @@ export const getNumTxBlocksExplorer = async (networkURL: string) => {
         }
         return info.result.NumTxBlocks;
     } catch (err) {
-        console.error("error - get latest blk number explorer: %o", err);
+        // console.error("error - get latest blk number explorer: %o", err);
         return OperationStatus.ERROR;
     }
 }
 
-export const getTotalCoinSupply = async (networkURL?: string) => {
-    if (networkURL) {
-        changeNetwork(networkURL);
-    }
-    try {
-        const totalCoinSupply = await zilliqa.blockchain.getTotalCoinSupply();
-        return totalCoinSupply;
-    } catch (err) {
-        console.error("error: getTotalCoinSupply - o%", err);
-        return OperationStatus.ERROR;
-    }
-};
-
-// same as getTotalCoinSupply but with random API
+/**
+ * getTotalCoinSupplyWithNetwork
+ * 
+ * Retrieves the latest total $ZIL supply
+ * @param networkURL 
+ * @returns 
+ */
 export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
     try {
         const randomAPI = getRandomAPI(networkURL);
@@ -321,43 +310,28 @@ export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
         const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
         return totalCoinSupply;
     } catch (err) {
-        console.error("error: getTotalCoinSupply - o%", err);
+        // console.error("error: getTotalCoinSupply - o%", err);
         return OperationStatus.ERROR;
     }
 }
 
-export const getGzilContract = async (gzilAddress: string) => {
-    // assume the blockchain network is already set
-    try {
-        const contract = await zilliqa.blockchain.getSmartContractState(gzilAddress);
-        return contract.result;
-    } catch (err) {
-        console.error("error - getTotalGzilSupply: %o", err);
-        return OperationStatus.ERROR;
-    }
-};
 
-// same as getGzilContract but query from random API
-export const getGzilContractWithNetwork = async (gzilAddress: string, networkURL: string) => {
-    try {
-        const randomAPI = getRandomAPI(networkURL);
-        const zilliqaObj = new Zilliqa(randomAPI);
-        const contract = await zilliqaObj.blockchain.getSmartContractState(gzilAddress);
-        return contract.result;
-    } catch (err) {
-        console.error("error - getTotalGzilSupply: %o", err);
-        return OperationStatus.ERROR;
-    }
-}
-
-// isOperator - check if address is node operator
-// @param address: base16 address
+/**
+ * isOperator
+ * 
+ * Checks if the logged-in user is a legit node operator
+ * 
+ * @param impl implementation contract address
+ * @param address base16 address
+ * @param networkURL 
+ * @returns 
+ */
 export const isOperator = async (impl: string, address: string, networkURL: string) => {
     if (!impl || !networkURL) {
         return false;
     }
 
-    const contractState = await getImplStateExplorer(impl, networkURL, "ssnlist", [address]);
+    const contractState = await getImplStateExplorerRetriable(impl, networkURL, "ssnlist", [address]);
 
     if (contractState === undefined || contractState === "error") {
         return false;
@@ -370,8 +344,13 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
 };
 
 
-// returns the combined gas price and gas limit in Qa
-// assume gas price has been retrieved correctly when dashboard is loaded
+/**
+ * getGasFees
+ * 
+ * Returns the combined gas price and gas limit in Qa
+ * assume gas price has been retrieved correctly when dashboard is loaded
+ * @returns
+ */
 export const getGasFees = () => {
     // gas limit * gas price
     const gasFees = new BN(GAS_LIMIT).mul(new BN(GAS_PRICE));
@@ -382,7 +361,7 @@ export const ZilliqaAccount = () => {
     return zilliqa;
 };
 
-// refactor
+// sign wrapper to determine which signer to use
 export const handleSign = async (accessMethod: string, networkURL: string, txParams: any, ledgerIndex: number) => {
     changeNetwork(networkURL);
     let result = "";

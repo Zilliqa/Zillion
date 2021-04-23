@@ -17,6 +17,11 @@
  * 
  *  - when set to prod, blockchain is set to mainnet
  * 
+ * api_max_retry_attempt
+ * - maximum attempt to retry fetching contract data before giving up
+ * 
+ * api_retry_delay: [time in milliseconds]
+ * - interval to wait before retrying to fetch the contract data
 */
 
 window['config'] = {
@@ -42,5 +47,7 @@ window['config'] = {
     },
     blockchain_explorer_config: "viewblock",
     refresh_rate_config: 300000,
+    api_max_retry_attempt: 10,
+    api_retry_delay: 100,
     environment_config: "stage"
 }

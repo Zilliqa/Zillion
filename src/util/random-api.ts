@@ -12,9 +12,11 @@ const randomJS = new Random(MersenneTwister19937.autoSeed());
 // Testnet
 const TESTNET_API_LIST = [
     "https://bumblebee-api.zilliqa.network",
-    "https://ssntestnet.zillacracy.com/api",
-    "https://seed-dev-api.zillet.io"
+    "https://dev-api.zilliqa.com"
 ];
+
+// https://seed-dev-api.zillet.io           CORS error
+// https://ssntestnet.zillacracy.com/api    CORS error
 
 
 // Mainnet
@@ -46,6 +48,6 @@ export const getRandomAPI = (networkURL: string) => {
         const index = randomJS.integer(0, (TESTNET_API_LIST.length-1));
         api = TESTNET_API_LIST[index];
     }
-    console.log("utilizing random api: %o", api);
+    // console.log("utilizing random api: %o", api);
     return api;
 };
