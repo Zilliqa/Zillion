@@ -956,10 +956,7 @@ function Dashboard(props: any) {
             </div>
         </nav>
 
-        {
-            ContractState.IS_PAUSED.toString() === 'true' &&
-            <WarningDashboardBanner />
-        }     
+        <WarningDashboardBanner />
 
         <div id="dashboard" className="container-fluid h-100">
             <div className="row h-100">
