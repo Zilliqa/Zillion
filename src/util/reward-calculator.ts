@@ -32,14 +32,12 @@ export const computeDelegRewardsRetriable = async (impl: string, networkURL: str
     for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
         try {
             const randomAPI = apiRandomizer.getRandomApi(networkURL);
-            console.log(randomAPI);
             result = await computeDelegRewards(impl, randomAPI, ssn, delegator);
-            console.log(result.toString());
             break;
         } catch (err) {
             // error with querying api
             // retry
-            console.log("error detected compute rewards");
+            // console.log("error detected compute rewards");
             continue;
         }
     }
