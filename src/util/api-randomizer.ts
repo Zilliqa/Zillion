@@ -3,30 +3,17 @@ import { NetworkURL } from "./enum";
 const { Random, MersenneTwister19937 } = require("random-js");
 const randomJS = new Random(MersenneTwister19937.autoSeed());
 
+// read from public/config.js
+let { networks_config } = (window as { [key: string]: any })['config'];
+
 // Testnet
-const TESTNET_API_LIST = [
-    "https://bumblebee-api.zilliqa.network",
-    "https://dev-api.zilliqa.com",
-];
-
-// https://seed-dev-api.zillet.io           CORS error
-// https://ssntestnet.zillacracy.com/api    CORS error
-
+// defaults to dev-api,zilliqa if config.js not found
+const TESTNET_API_LIST = networks_config["testnet"]["api_list"] || ["https://dev-api.zilliqa.com"];
 
 // Mainnet
-const MAINNET_API_LIST = [
-    "https://ssn.zillacracy.com/api",
-    "https://ssn-zilliqa.cex.io/api",
-    "https://ssn.zillet.io",
-    "https://zil-staking.ezil.me/api",
-    "https://staking-zil.kucoin.com/api",
-    "https://stakingseed-api.seed.zilliqa.com",
-    "https://api.zilliqa.com",
-];
+// defaults to api.zilliqa if config.js not found
+const MAINNET_API_LIST = networks_config["mainnet"]["api_list"] || ["https://api.zilliqa.com"];
 
-// https://ssn-zilliqa.moonlet.network/api , CORS error
-// https://zilliqa-api.staked.cloud, out-of-sync
-// "https://ssn-api-mainnet.viewblock.io", rate limit
 
 /**
  * Randomize the API

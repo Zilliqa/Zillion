@@ -5,8 +5,8 @@ const { RewardCalculator } = require('./calculator');
 
 // config.js from public folder
  // max retry attempt: 10 tries
- let { api_max_retry_attempt } = (window as { [key: string]: any })['config'];
- api_max_retry_attempt = api_max_retry_attempt ? api_max_retry_attempt : 10;
+let { api_max_retry_attempt } = (window as { [key: string]: any })['config'];
+api_max_retry_attempt = api_max_retry_attempt ? api_max_retry_attempt : 10;
 
 let rewardCalculator: typeof RewardCalculator;
 

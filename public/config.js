@@ -6,6 +6,16 @@
  * node_status
  *  - link to staking viewer
  * 
+ * api_list
+ *   - seed node url
+ *   - Testnet excluded network due to cors:
+ *     - https://seed-dev-api.zillet.io 
+ *     - https://ssntestnet.zillacracy.com/api
+ *    - Mainnet excluded
+ *     - https://ssn-zilliqa.moonlet.network/api
+ *     - https://zilliqa-api.staked.cloud
+ *     - https://ssn-api-mainnet.viewblock.io
+ * 
  * refresh_rate_config: [time in milliseconds]
  * - interval at which contract data and wallet's info are updated
  * 
@@ -31,12 +41,25 @@ window['config'] = {
             impl: "0x05C2DdeC2E4449160436130CB4F9b84dE9f7eE5b",
             blockchain: "https://dev-api.zilliqa.com",
             node_status: "https://testnet-viewer.zilliqa.com",
+            api_list: [
+                "https://bumblebee-api.zilliqa.network",
+                "https://dev-api.zilliqa.com",
+            ]
         },
         mainnet: {
             proxy: "",
             impl: "",
             blockchain: "https://api.zilliqa.com",
             node_status: "https://staking-viewer.zilliqa.com",
+            api_list : [
+                "https://ssn.zillacracy.com/api",
+                "https://ssn-zilliqa.cex.io/api",
+                "https://ssn.zillet.io",
+                "https://zil-staking.ezil.me/api",
+                "https://staking-zil.kucoin.com/api",
+                "https://stakingseed-api.seed.zilliqa.com",
+                "https://api.zilliqa.com",
+            ]
         },
         isolated_server: {
             proxy: "0x0578B8e9D9c2493D4a2E98f364c7ed311F7a0d71",
