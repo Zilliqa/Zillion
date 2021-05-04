@@ -716,7 +716,6 @@ function Dashboard(props: any) {
 
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
-            // getDelegatorStakingPortfolio();
             getDelegatorPendingWithdrawal();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
