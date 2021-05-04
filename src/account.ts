@@ -12,7 +12,7 @@ import { HTTPProvider } from '@zilliqa-js/core';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 import BN from 'bn.js';
-import { getRandomAPI } from './util/random-api';
+import { ApiRandomizer } from './util/api-randomizer';
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
@@ -29,13 +29,12 @@ let GAS_PRICE = Constants.DEFAULT_GAS_PRICE; // 1000000000 Qa
 
 const GAS_LIMIT = Constants.DEFAULT_GAS_LIMIT;
 const zilliqa = new Zilliqa('https://dev-api.zilliqa.com');
+const apiRandomizer = ApiRandomizer.getInstance();
 
  // config.js from public folder
  // max retry attempt: 10 tries
- // retry delay interval: 100ms
- let { api_max_retry_attempt, api_retry_delay } = (window as { [key: string]: any })['config'];
+ let { api_max_retry_attempt } = (window as { [key: string]: any })['config'];
  api_max_retry_attempt = api_max_retry_attempt ? api_max_retry_attempt : 10;
- api_retry_delay = api_retry_delay ? api_retry_delay : 100;
 
 Zilliqa.prototype.setProvider = function(provider: any) {
     this.blockchain.provider = provider;
@@ -152,17 +151,16 @@ export const getBalance = async (address: string) => {
 // identical to getBalance except it uses a random API
 export const getBalanceWithNetwork = async (address: string, networkURL: string) => {
     try {
-        const randomAPI = getRandomAPI(networkURL);
+        const randomAPI = apiRandomizer.getRandomApi(networkURL);
         const zilliqaObj = new Zilliqa(randomAPI);
         const balance = await zilliqaObj.blockchain.getBalance(address);
         if (balance.result.balance === undefined) {
-            console.error("error: getBalance undefined error");
             return "0";
         }
         return balance.result.balance;
     } catch (err) {
         // console.error("error: getBalance - o%", err);
-        return "0";
+        return OperationStatus.ERROR;
     }
 }
 
@@ -185,6 +183,18 @@ export const getNonce = async (address: string) => {
 //           RETRIABLE
 // -------------------------------
 
+export const getBalanceRetriable = async (address: string, networkURL: string) => {
+    let result;
+
+    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
+        result = await getBalanceWithNetwork(address, networkURL);
+        if (result !== OperationStatus.ERROR) {
+            break;
+        }
+    }
+    return result;
+};
+
 export const getImplStateExplorerRetriable = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
     let result;
 
@@ -192,8 +202,6 @@ export const getImplStateExplorerRetriable = async (implAddr: string, networkURL
         result = await getImplStateExplorer(implAddr, networkURL, state, indices);
         if (result !== "error") {
             break;
-        } else {
-            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
         }
     }
     return result;
@@ -206,8 +214,6 @@ export const getNumTxBlocksExplorerRetriable = async (networkURL: string) => {
         result = await getNumTxBlocksExplorer(networkURL);
         if (result !== OperationStatus.ERROR) {
             break;
-        } else {
-            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
         }
     }
     return result;
@@ -219,8 +225,6 @@ export const getTotalCoinSupplyWithNetworkRetriable = async (networkURL:string) 
         result = await getTotalCoinSupplyWithNetwork(networkURL);
         if (result !== OperationStatus.ERROR) {
             break;
-        } else {
-            await new Promise(resolve => setTimeout(resolve, api_retry_delay));
         }
     }
     return result;
@@ -248,7 +252,7 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
     }
 
     try {
-        const randomAPI = getRandomAPI(networkURL);
+        const randomAPI = apiRandomizer.getRandomApi(networkURL);
         const explorerZilliqa = new Zilliqa(randomAPI);
 
         let contractState: any = null;
@@ -283,7 +287,7 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
  */
 export const getNumTxBlocksExplorer = async (networkURL: string) => {
     try {
-        const randomAPI = getRandomAPI(networkURL);
+        const randomAPI = apiRandomizer.getRandomApi(networkURL);
         const explorerZilliqa = new Zilliqa(randomAPI);
         const info = await explorerZilliqa.blockchain.getBlockChainInfo();
         if (info === undefined && info.result === undefined) {
@@ -305,7 +309,7 @@ export const getNumTxBlocksExplorer = async (networkURL: string) => {
  */
 export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
     try {
-        const randomAPI = getRandomAPI(networkURL);
+        const randomAPI = apiRandomizer.getRandomApi(networkURL);
         const zilliqaObj = new Zilliqa(randomAPI);
         const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
         return totalCoinSupply;
