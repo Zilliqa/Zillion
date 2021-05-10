@@ -11,7 +11,7 @@ function WarningBanner(props: any) {
             { 
                 environment_config === Environment.PROD ? 
                 <>
-                <div className="px-3 py-3"><strong>Warning</strong>: Zilliqa Staking phase 1 will undergo migration to phase 1.1 start from May 11 2020, 04:45 UTC. During the migration, staking contracts will be paused. For more information, please check out <a href="https://blog.zilliqa.com/upcoming-staking-contract-upgrades-to-enhance-user-experience-with-new-functionalities-c7548aab4823">this blog post</a>>. </div>
+                <div className="px-3 py-3"><strong>Warning</strong>: Zilliqa Staking Phase 1 will undergo migration to Phase 1.1 starting from May 11 2020, 04:45 UTC. During the migration, staking contracts will be paused. For more information, please check out <a href="https://blog.zilliqa.com/upcoming-staking-contract-upgrades-to-enhance-user-experience-with-new-functionalities-c7548aab4823">this blog post</a>. </div>
                 <div className="px-3 py-3"><strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.</div>
                 {
                     ContractState.IS_PAUSED.toString() === 'true' && 
