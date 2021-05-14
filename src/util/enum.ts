@@ -16,8 +16,8 @@ export enum Constants {
     DEFAULT_GAS_LIMIT = 30000,
     MAX_GZIL_SUPPLY = 682550,
     TOTAL_REWARD_SEED_NODES = 1870000,
-    REWARD_BLOCK_COUNT_MAINNET = 1800,
-    REWARD_DS_BLOCK_COUNT_MAINNET = 18,
+    REWARD_BLOCK_COUNT_MAINNET = 2200,
+    REWARD_DS_BLOCK_COUNT_MAINNET = 22,
     REWARD_BLOCK_COUNT_TESTNET = 200,
     REWARD_DS_BLOCK_COUNT_TESTNET = 2,
     SAMPLE_REWARD_BLOCK_MAINNET = 874600,
@@ -116,5 +116,5 @@ export enum ButtonText {
 
 // 'true': disabled all contract call buttons, add banner to dashboard and main page
 export enum ContractState {
-    IS_PAUSED = "true"
+    IS_PAUSED = "false"
 }
