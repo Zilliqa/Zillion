@@ -12,12 +12,12 @@ export enum AccessMethod {
 export enum Constants {
     MANUAL_REFRESH_DELAY=5000,
     REFRESH_RATE = 30000,
-    DEFAULT_GAS_PRICE = 1000000000,
+    DEFAULT_GAS_PRICE = 2000000000,
     DEFAULT_GAS_LIMIT = 30000,
     MAX_GZIL_SUPPLY = 682550,
-    TOTAL_REWARD_SEED_NODES = 1870000,
-    REWARD_BLOCK_COUNT_MAINNET = 1800,
-    REWARD_DS_BLOCK_COUNT_MAINNET = 18,
+    TOTAL_REWARD_SEED_NODES = 1548800,
+    REWARD_BLOCK_COUNT_MAINNET = 2200,
+    REWARD_DS_BLOCK_COUNT_MAINNET = 22,
     REWARD_BLOCK_COUNT_TESTNET = 200,
     REWARD_DS_BLOCK_COUNT_TESTNET = 2,
     SAMPLE_REWARD_BLOCK_MAINNET = 874600,
@@ -51,11 +51,6 @@ export enum NetworkURL {
     MAINNET = "https://api.zilliqa.com",
     ISOLATED_SERVER = "https://zilliqa-isolated-server.zilliqa.com"
 }
-
-// export enum WebSocketURL {
-//     TESTNET = "wss://dev-ws.zilliqa.com",
-//     MAINNET = "wss://api-ws.zilliqa.com"
-// }
 
 export enum OperationStatus {
     ERROR = "ERROR",
@@ -116,5 +111,5 @@ export enum ButtonText {
 
 // 'true': disabled all contract call buttons, add banner to dashboard and main page
 export enum ContractState {
-    IS_PAUSED = "true"
+    IS_PAUSED = "false"
 }
