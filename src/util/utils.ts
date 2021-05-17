@@ -1,4 +1,4 @@
-import { fromBech32Address } from '@zilliqa-js/crypto';
+import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Explorer, NetworkURL, Network, TransactionType, AccessMethod, Constants } from './enum';
 import Alert from '../components/alert';
 const { BN, validation, units } = require('@zilliqa-js/util');
@@ -8,6 +8,11 @@ const BigNumber = require('bignumber.js');
 const { blockchain_explorer_config } = (window as { [key: string]: any })['config'];
 
 export const bech32ToChecksum = (address: string) => {
+    if (validation.isAddress(address)) {
+        // convert to checksum format
+        return fromBech32Address(toBech32Address(address))
+    }
+
     if (validation.isBech32(address)) {
         return fromBech32Address(address);
     }
