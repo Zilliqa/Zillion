@@ -22,6 +22,7 @@ import ReDelegateStakeModal from './contract-calls/redeleg';
 import WithdrawStakeModal from './contract-calls/withdraw-stake';
 import WithdrawRewardModal from './contract-calls/withdraw-reward';
 import CompleteWithdrawModal from './contract-calls/complete-withdraw';
+import SwapDelegModal from './contract-calls/swap-deleg';
 
 import logo from "../static/logo.png";
 import DisclaimerModal from './disclaimer';
@@ -803,7 +804,7 @@ function Dashboard(props: any) {
     useEffect(() => {
         if (accountType === AccessMethod.ZILPAY) {
             const zilPay = (window as any).zilPay;
-
+            
             if (zilPay) {
                 console.log("zil pay method ...");
                 // switch to the zilpay network on load
@@ -906,6 +907,18 @@ function Dashboard(props: any) {
                         { networkURL === NetworkURL.TESTNET && <p className="px-1">Testnet</p> }
                         { networkURL === NetworkURL.MAINNET && <p className="px-1">Mainnet</p> }
                         { networkURL === NetworkURL.ISOLATED_SERVER && <p className="px-1">Isolated Server</p> }
+                    </li>
+
+                    <li className="nav-item">
+                        <button 
+                            type="button" 
+                            className="btn btn-theme mx-2"  
+                            data-toggle="modal" 
+                            data-target="#swap-deleg-modal" 
+                            data-keyboard="false" 
+                            data-backdrop="static">
+                                Swap
+                        </button>
                     </li>
 
                     <li className="nav-item">
@@ -1233,6 +1246,11 @@ function Dashboard(props: any) {
                 ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
+            
+            <SwapDelegModal 
+                proxy={proxy}
+                networkURL={networkURL}
+                ledgerIndex={ledgerIndex}/>
                 
         </div>
         </>
