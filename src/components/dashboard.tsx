@@ -40,7 +40,7 @@ import IconMoon from './icons/moon';
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewardsRetriable } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData, SwapDelegModalData } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import Footer from './footer';
@@ -100,7 +100,10 @@ const initWithdrawStakeModalData: WithdrawStakeModalData = {
     delegAmt: '0'
 }
 
-
+const initSwapDelegModalData: SwapDelegModalData = {
+    swapRecipientAddress: '',
+    requestorList: []
+}
 
 function Dashboard(props: any) {
 
@@ -144,6 +147,7 @@ function Dashboard(props: any) {
     const [delegStakeModalData, setDelegStakeModalData] = useState<DelegateStakeModalData>(initDelegStakeModalData);
     const [transferStakeModalData, setTransferStakeModalData] = useState<TransferStakeModalData>(initTransferStakeModalData);
     const [withdrawStakeModalData, setWithdrawStakeModalData] = useState<WithdrawStakeModalData>(initWithdrawStakeModalData);
+    const [swapDelegModalData, setSwapDelegModalData] = useState<SwapDelegModalData>(initSwapDelegModalData);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -459,6 +463,56 @@ function Dashboard(props: any) {
             }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
     }, [impl, networkURL, currWalletAddress]);
 
+    // get swap requests
+    const getDelegatorSwapRequests = useCallback(() => {
+        let swapRecipientAddress = '';
+        let requestorList: any = [];
+
+        trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deleg_swap_request")
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+
+                const wallet = fromBech32Address(currWalletAddress).toLowerCase();
+
+                console.log(contractState['deleg_swap_request']);
+                if (wallet in contractState['deleg_swap_request']) {
+                    swapRecipientAddress = contractState['deleg_swap_request'][wallet];
+                    console.log(swapRecipientAddress);
+                }
+
+                // get the list of requestors that is pending for this wallet to accept
+                // reverse the mapping
+                let reverseMap = Object.keys(contractState['deleg_swap_request']).reduce((newMap: any, k) => {
+                    let receipientAddr = contractState['deleg_swap_request'][k];
+                    newMap[receipientAddr] = newMap[receipientAddr] || [];
+                    newMap[receipientAddr].push(k)
+                    return newMap;
+                }, {});
+
+                if (wallet in reverseMap) {
+                    requestorList = reverseMap[wallet];
+                }
+
+            })
+            .catch((err) => {
+                console.error(err);
+                return null;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    console.log("updating delegator swap requests...");
+                    const data: SwapDelegModalData = {
+                        swapRecipientAddress: swapRecipientAddress,
+                        requestorList: requestorList,
+                    }
+                    console.log(data);
+                    setSwapDelegModalData(data);
+                }
+            }), PromiseArea.PROMISE_GET_DELEG_SWAP_REQUESTS);
+    }, [impl, networkURL, currWalletAddress]);
+
 
     // compute number of blocks left before rewards are issued
     const getBlockRewardCountDown = useCallback(() => {
@@ -688,6 +742,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
+            getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
@@ -706,6 +761,7 @@ function Dashboard(props: any) {
         getContractConstants, 
         getDelegatorPendingWithdrawal,
         getDelegatorStats,
+        getDelegatorSwapRequests,
         getOperatorStats,
         getSsnStats
     ]);
@@ -718,6 +774,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
+            getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
@@ -741,6 +798,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
+            getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
@@ -804,7 +862,7 @@ function Dashboard(props: any) {
     useEffect(() => {
         if (accountType === AccessMethod.ZILPAY) {
             const zilPay = (window as any).zilPay;
-            
+
             if (zilPay) {
                 console.log("zil pay method ...");
                 // switch to the zilpay network on load
@@ -1250,7 +1308,8 @@ function Dashboard(props: any) {
             <SwapDelegModal 
                 proxy={proxy}
                 networkURL={networkURL}
-                ledgerIndex={ledgerIndex}/>
+                ledgerIndex={ledgerIndex}
+                swapDelegModalData={swapDelegModalData} />
                 
         </div>
         </>

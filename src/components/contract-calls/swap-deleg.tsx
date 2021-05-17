@@ -16,6 +16,7 @@ function SwapDelegModal(props: any) {
     const proxy = props.proxy;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
+    const {swapDelegModalData} = props;
 
     // transfer all stakes to this new deleg
     const [newDelegAddr, setNewDelegAddr] = useState('');
@@ -43,7 +44,7 @@ function SwapDelegModal(props: any) {
             code: "",
             data: JSON.stringify({
                 _tag: ProxyCalls.REQUEST_DELEG_SWAP,
-                paramas: [
+                params: [
                     {
                         vname: 'new_deleg_addr',
                         type: 'ByStr20',
@@ -57,7 +58,6 @@ function SwapDelegModal(props: any) {
 
         trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
         .then((result) => {
-            console.log(result);
             if (result === OperationStatus.ERROR) {
                 Alert('error', "Transaction Error", "Please try again.");
             } else {
@@ -85,6 +85,12 @@ function SwapDelegModal(props: any) {
                         <div className="input-group mb-2">
                             <input type="text" className="form-control shadow-none" value={newDelegAddr} onChange={handleNewDelegAddr} />
                         </div>
+
+                        <h2 className="node-details-subheading mb-2">My Request</h2>
+                        <p>{swapDelegModalData.swapRecipientAddress}</p>
+
+                        <h2 className="node-details-subheading mb-2">Transfer In Requests</h2>
+                        <p>{swapDelegModalData.requestorList}</p>
 
                         <div className="d-flex">
                             <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={requestDelegSwap}>Send Request</button>
