@@ -8,7 +8,7 @@ import Alert from '../alert';
 import AppContext from '../../contexts/appContext';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 
-const { BN, units } = require('@zilliqa-js/util');
+const { BN } = require('@zilliqa-js/util');
 
 function SwapDelegModal(props: any) {
     const appContext = useContext(AppContext);
@@ -24,6 +24,61 @@ function SwapDelegModal(props: any) {
     const handleNewDelegAddr = (e : any) => {
         // TODO: validate addr
         setNewDelegAddr(e.target.value);
+    }
+
+    const sendTxn = (txParams: any) => {
+        setIsPending(OperationStatus.PENDING);
+
+        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        .then((result) => {
+            if (result === OperationStatus.ERROR) {
+                Alert('error', "Transaction Error", "Please try again.");
+            } else {
+                console.log(result);
+            }
+        }).finally(() => {
+            setIsPending('');
+        }));
+    }
+
+    const confirmDelegSwap = async (requestorAddr: string) => {
+        let txParams = {
+            toAddr: proxyChecksum,
+            amount: new BN(0),
+            code: "",
+            data: JSON.stringify({
+                _tag: ProxyCalls.CONFIRM_DELEG_SWAP,
+                params: [
+                    {
+                        vname: 'requestor',
+                        type: 'ByStr20',
+                        value: `${requestorAddr}`,
+                    }
+                ]
+            })
+        };
+
+        sendTxn(txParams);
+    }
+
+    const rejectDelegSwap = async (requestorAddr: string) => {
+        let txParams = {
+            toAddr: proxyChecksum,
+            amount: new BN(0),
+            code: "",
+            data: JSON.stringify({
+                _tag: ProxyCalls.REJECT_DELEG_SWAP,
+                params: [
+                    {
+                        vname: 'requestor',
+                        type: 'ByStr20',
+                        value: `${requestorAddr}`,
+                    }
+                ]
+            })
+        };
+
+        sendTxn(txParams);
     }
 
     const requestDelegSwap = async () => {
@@ -51,18 +106,7 @@ function SwapDelegModal(props: any) {
             })
         };
 
-        setIsPending(OperationStatus.PENDING);
-
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
-        .then((result) => {
-            if (result === OperationStatus.ERROR) {
-                Alert('error', "Transaction Error", "Please try again.");
-            } else {
-                console.log(result);
-            }
-        }).finally(() => {
-            setIsPending('');
-        }));
+        sendTxn(txParams);
     }
 
     const revokeDelegSwap = async () => {
@@ -77,18 +121,7 @@ function SwapDelegModal(props: any) {
             })
         };
 
-        setIsPending(OperationStatus.PENDING);
-
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
-        .then((result) => {
-            if (result === OperationStatus.ERROR) {
-                Alert('error', "Transaction Error", "Please try again.");
-            } else {
-                console.log(result);
-            }
-        }).finally(() => {
-            setIsPending('');
-        }));
+        sendTxn(txParams);
     }
 
     return (
@@ -122,7 +155,10 @@ function SwapDelegModal(props: any) {
                         <ul>
                             {
                                 swapDelegModalData.requestorList.map((requestorAddr: string, index: number) => (
-                                    <li key={index}>{convertBase16ToBech32(requestorAddr)}</li>
+                                    <li key={index}>{convertBase16ToBech32(requestorAddr)}
+                                        <button type="button" className="btn btn-contract-small shadow-none" onClick={() => confirmDelegSwap(requestorAddr)}>Accept</button>
+                                        <button type="button" className="btn shadow-none" onClick={() => rejectDelegSwap(requestorAddr)}>Reject</button>
+                                    </li>
                                 ))
                             }
                         </ul>
