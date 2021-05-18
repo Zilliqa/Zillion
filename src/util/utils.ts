@@ -19,6 +19,13 @@ export const bech32ToChecksum = (address: string) => {
     return address;
 };
 
+export const convertBase16ToBech32 = (address: string) => {
+    if (validation.isAddress(address)) {
+        return toBech32Address(address);
+    }
+    return address;
+}
+
 export const convertZilToQa = (amount: string) => {
     return units.toQa(amount, units.Units.Zil);
 };

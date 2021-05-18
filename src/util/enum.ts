@@ -89,6 +89,7 @@ export enum ProxyCalls {
     DELEGATE_STAKE = "DelegateStake",
     REDELEGATE_STAKE = "ReDelegateStake",
     REQUEST_DELEG_SWAP = "RequestDelegatorSwap",
+    REVOKE_DELEG_SWAP = "RevokeDelegatorSwap",
     UPDATE_COMM = "UpdateComm",
     UPDATE_RECV_ADDR = "UpdateReceivingAddr",
     WITHDRAW_COMM = "WithdrawComm",
