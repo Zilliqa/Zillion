@@ -30,6 +30,7 @@ import DelegatorStatsTable from './delegator-stats-table';
 import OperatorStatsTable from './operator-stats-table';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
 
+import IconArrowUpDown from './icons/arrow-up-down';
 import IconQuestionCircle from './icons/question-circle';
 import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
@@ -970,12 +971,12 @@ function Dashboard(props: any) {
                     <li className="nav-item">
                         <button 
                             type="button" 
-                            className="btn btn-theme mx-2"  
+                            className="btn btn-notify-dropdown btn-theme shadow-none mx-2"  
                             data-toggle="modal" 
                             data-target="#swap-deleg-modal" 
                             data-keyboard="false" 
                             data-backdrop="static">
-                                Swap
+                                <IconArrowUpDown width="16" height="16"/>
                         </button>
                     </li>
 
@@ -1309,7 +1310,8 @@ function Dashboard(props: any) {
                 proxy={proxy}
                 networkURL={networkURL}
                 ledgerIndex={ledgerIndex}
-                swapDelegModalData={swapDelegModalData} />
+                swapDelegModalData={swapDelegModalData}
+                userAddress={currWalletAddress} />
                 
         </div>
         </>

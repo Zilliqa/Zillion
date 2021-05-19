@@ -974,6 +974,10 @@ input:focus {
   cursor: pointer;
 }
 
+.swap-icon {
+  fill: var(--primary-table-inner-heading-color);
+}
+
 .ssn-table-header-with-tip {
   border-bottom: 1px dotted;
 }
@@ -1626,14 +1630,14 @@ input:focus {
   background-color: var(--primary-table-striped-color);
 }
 
-#redeleg-stake-modal .btn-change-node {
+#swap-deleg-modal .btn-change-node, #redeleg-stake-modal .btn-change-node {
   font-size: 1em;
   padding: 0;
   margin-left: 1.5em;
   color: var(--primary-color);
 }
 
-#redeleg-stake-modal .btn-change-node:hover {
+#swap-deleg-modal .btn-change-node, #redeleg-stake-modal .btn-change-node:hover {
   color: var(--primary-dark-color);
 }
 
