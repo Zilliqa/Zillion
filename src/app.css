@@ -964,6 +964,72 @@ input:focus {
   color: var(--primary-color);
 }
 
+.react-tabs {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.react-tabs__tab-list {
+  color: var(--placeholder-text-color);
+  border-bottom: none;
+  margin: 0 0 10px;
+  padding: 0;
+}
+
+.react-tabs__tab {
+  display: inline-block;
+  border: none;
+  bottom: -1px;
+  position: relative;
+  list-style: none;
+  padding: 12px 12px;
+  cursor: pointer;
+  width: 50%; /* percent = 100 / number of tabs */
+  text-align: center;
+  font-size: 1.1em;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.react-tabs__tab--selected {
+  background: var(--secondary-color);
+  border-bottom: 2px solid var(--primary-dark-color);
+  color: var(--primary-color);
+  border-radius: 0;
+}
+
+.react-tabs__tab--disabled {
+  color: var(--primary-dark-color);
+  cursor: default;
+}
+
+.react-tabs__tab:focus {
+  box-shadow: 0 0 5px hsl(208, 99%, 50%);
+  border-color: hsl(208, 99%, 50%);
+  outline: none;
+}
+
+.react-tabs__tab:focus:after {
+  content: "";
+  position: absolute;
+  height: 5px;
+  left: -4px;
+  right: -4px;
+  bottom: -5px;
+  background: var(--primary-section-bg-color);
+  transition: all 0.5s;
+}
+
+.react-tabs__tab-panel {
+  display: none;
+}
+
+.react-tabs__tab-panel--selected {
+  display: block;
+  /* referring to animate.css */
+  animation: fadeIn;
+  animation-duration: 0.5s;
+}
+
 .section-icon {
   fill: #f0f0f0;
   margin-top: -7px;
@@ -972,6 +1038,60 @@ input:focus {
 
 .section-icon:hover {
   cursor: pointer;
+}
+
+.swap-deleg-requestor-list {
+  color: var(--text-color);
+}
+
+.swap-deleg-requestor-list > li > div {
+  background: var(--primary-table-striped-color);
+  padding: 20px;
+}
+
+.swap-deleg-requestor-list > li > div > span {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.swap-deleg-requestor-list > li > div > .btn-contract-group {
+  margin-top: -4px;
+}
+
+.swap-deleg-requestor-list > li > div > .btn-contract-group > .btn-contract-small {
+  color: var(--secondary-color);
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  font-size: 0.9em;
+  font-weight: 500;
+  padding-bottom: 0.3em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.swap-deleg-requestor-list > li > div > .btn-contract-group >.btn-contract-small:hover {
+  color: var(--secondary-color);
+  background-color: var(--primary-hover-color);
+  border: 1px solid var(--primary-hover-color);
+}
+
+.swap-deleg-requestor-list > li > div > .btn-contract-group > .btn-contract-small-cancel {
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  font-size: 0.9em;
+  font-weight: 500;
+  padding-bottom: 0.3em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.swap-deleg-requestor-list > li > div > .btn-contract-group > .btn-contract-small-cancel:hover {
+  border: 1px solid var(--primary-hover-color);
+}
+
+.swap-deleg-requestor-list .zillion-explorer-link {
+  margin-left: 10px;
+  margin-top: -6px;
 }
 
 .swap-icon {
@@ -1024,6 +1144,10 @@ input:focus {
 
 .wallet-connect-text {
   margin: 4.4em 0em;
+}
+
+.zillion-explorer-link {
+  fill: var(--primary-color);
 }
 
 .Toastify__toast {
@@ -1815,3 +1939,4 @@ input:focus {
 #banner a {
   color: var(--hyperlink-color);
 }
+

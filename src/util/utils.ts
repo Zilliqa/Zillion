@@ -149,6 +149,11 @@ export const getAddressLink = (address: string, networkURL: string) => {
     return link;
 }
 
+export const getZillionExplorerLink = (address: string) => {
+    let domain = window.location.origin;
+    return domain + "/address/" + address;
+}
+
 // returns the zil address with '...'
 export const getTruncatedAddress = (address: string) => {
     if (!address) {
@@ -178,6 +183,14 @@ export const getTransactionText = (txnType: TransactionType) => {
             return "Update Receiving Address";
         case TransactionType.WITHDRAW_COMM:
             return "Withdraw Commission";
+        case TransactionType.REQUEST_DELEG_SWAP:
+            return "Request Delegator Swap";
+        case TransactionType.REVOKE_DELEG_SWAP:
+            return "Revoke Delegator Swap";
+        case TransactionType.CONFIRM_DELEG_SWAP:
+            return "Accept Swap Request";
+        case TransactionType.REJECT_DELEG_SWAP:
+            return "Reject Swap Request";
         default:
             return "Error";
     }

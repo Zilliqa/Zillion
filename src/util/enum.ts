@@ -107,7 +107,11 @@ export enum TransactionType {
     TRANSFER_STAKE = 5,
     UPDATE_COMM_RATE = 6,
     UPDATE_RECV_ADDR = 7,
-    WITHDRAW_COMM = 8
+    WITHDRAW_COMM = 8,
+    REQUEST_DELEG_SWAP = 9,
+    REVOKE_DELEG_SWAP = 10,
+    CONFIRM_DELEG_SWAP = 11,
+    REJECT_DELEG_SWAP = 12,
 }
 
 export enum ButtonText {
