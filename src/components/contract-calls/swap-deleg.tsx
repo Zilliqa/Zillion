@@ -48,7 +48,22 @@ function SwapDelegModal(props: any) {
         // txn success
         // invoke dashboard methods
         if (txnId) {
-            updateRecentTransactions(txnType as unknown as TransactionType, txnId);
+            let convertedTxnType;
+            switch (txnType) {
+                case TransactionType.REQUEST_DELEG_SWAP.toString():
+                    convertedTxnType = TransactionType.REQUEST_DELEG_SWAP;
+                    break;
+                case TransactionType.REVOKE_DELEG_SWAP.toString():
+                    convertedTxnType = TransactionType.REVOKE_DELEG_SWAP;
+                    break;
+                case TransactionType.CONFIRM_DELEG_SWAP.toString():
+                    convertedTxnType = TransactionType.CONFIRM_DELEG_SWAP;
+                    break;
+                case TransactionType.REJECT_DELEG_SWAP.toString():
+                    convertedTxnType = TransactionType.REJECT_DELEG_SWAP;
+                    break;
+            }
+            updateRecentTransactions(convertedTxnType, txnId);
             updateData();
         }
         
