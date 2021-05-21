@@ -177,10 +177,12 @@ function SwapDelegModal(props: any) {
     const hasBufferedOrRewards = async (address: string) => {
         console.log("has buffer or rewards: %o", address);
         let wallet = fromBech32Address(address).toLowerCase();
+        let displayAddr = getTruncatedAddress(address);
 
         const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "lastrewardcycle");
         const lbdc = await  ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "last_buf_deposit_cycle_deleg", [wallet]);
         const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
+        const buff_deposit_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "buff_deposit_deleg", [wallet]);
         
         if (lrc === undefined || lrc === "error") {
             return false;
@@ -194,12 +196,16 @@ function SwapDelegModal(props: any) {
             return false;
         }
 
+        if (buff_deposit_deleg_map === undefined || buff_deposit_deleg_map === "error") {
+            return false;
+        }
+
         let ssnlist = deposit_amt_deleg_map["deposit_amt_deleg"][wallet];
         for (let ssnAddress in ssnlist) {
             // check rewards
             const rewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, wallet));
             if (rewards !== "0") {
-                let msg = `${address} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
+                let msg = `${displayAddr} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
                 Alert('info', "Unwithdrawn Rewards Found", msg);
                 return true;
             }
@@ -209,23 +215,27 @@ function SwapDelegModal(props: any) {
                 const ldcd = parseInt(lbdc["last_buf_deposit_cycle_deleg"][wallet][ssnAddress]);
                 const lrc_o = parseInt(lrc["lastrewardcycle"]);
                 if (lrc_o <= ldcd) {
-                    let msg = `${address} has buffered deposits. Please wait for the next cycle before continuing.`
+                    let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
                     Alert('info', "Buffered Deposits Found", msg);
                     return true;
                 }
             }
 
             // check buffered deposits (lrc-1)
+            const lrc_o = parseInt(lrc["lastrewardcycle"]) - 1;
+            if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
+                if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet][ssnAddress].hasOwnProperty(lrc_o)) {
+                    let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
+                    Alert('info', "Buffered Deposits Found", msg);
+                    return true;
+                }
+            }
 
         }
         return false;
     }
 
     const requestDelegSwap = async () => {
-        if (hasBufferedOrRewards(userAddress)) {
-            Alert('info', "Unwithdrawn Found", "loremipsum");
-            return null;
-        }
 
         if (!validateAddress(newDelegAddr)) {
             Alert('error', "Invalid Address", "Wallet address should be bech32 or checksum format.");
@@ -233,6 +243,20 @@ function SwapDelegModal(props: any) {
         }
 
         if (!isValidSwap(newDelegAddr)) {
+            return null;
+        }
+
+        setIsPending(OperationStatus.PENDING);
+
+        const check1 = await hasBufferedOrRewards(userAddress);
+        if (check1) {
+            setIsPending('');
+            return null;
+        }
+
+        const check2 = await hasBufferedOrRewards(newDelegAddr);
+        if (check2) {
+            setIsPending('');
             return null;
         }
 
