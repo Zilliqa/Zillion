@@ -3,7 +3,7 @@ import * as ZilliqaAccount from '../../account';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
-import { bech32ToChecksum, convertBase16ToBech32, getZillionExplorerLink, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, showWalletsPrompt } from '../../util/utils';
 import Alert from '../alert';
 import AppContext from '../../contexts/appContext';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
@@ -14,34 +14,47 @@ import IconEditBox from '../icons/edit-box-line';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import ReactTooltip from 'react-tooltip';
+import { computeDelegRewardsRetriable } from '../../util/reward-calculator';
 
-const { BN } = require('@zilliqa-js/util');
+const { BN, validation } = require('@zilliqa-js/util');
 
 function SwapDelegModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
     
-    const {proxy, ledgerIndex, networkURL, swapDelegModalData, userAddress, updateData, updateRecentTransactions} = props;
+    const {proxy, impl, ledgerIndex, networkURL, swapDelegModalData, userAddress, updateData, updateRecentTransactions} = props;
     const proxyChecksum = bech32ToChecksum(proxy);
 
     // transfer all stakes to this new deleg
-    const [newDelegAddr, setNewDelegAddr] = useState('');
+    const [newDelegAddr, setNewDelegAddr] = useState(''); // bech32
     const [txnId, setTxnId] = useState('');
     const [txnType, setTxnType] = useState('');
+    const [tabIndex, setTabIndex] = useState(0);
     const [isPending, setIsPending] = useState('');
     const [isEdit, setIsEdit] = useState(false);
 
     const cleanUp = () => {
         setNewDelegAddr('');
+        setTabIndex(0);
         setIsPending('');
         setIsEdit(false);
         setTxnId('');
         setTxnType('');
     }
 
+    const validateAddress = (address: string) => {
+        if (!address || address === "" || (!validation.isAddress(address) && !validation.isBech32(address)) ) {
+            return false;
+        }
+        return true;
+    }
+
     const handleNewDelegAddr = (e : any) => {
-        // TODO: validate addr
-        setNewDelegAddr(e.target.value);
+        let address = e.target.value;
+        if (address && (validation.isAddress(address) || validation.isBech32(address)) ) {
+            address = toBech32Address(bech32ToChecksum(address))
+        }
+        setNewDelegAddr(address);
     }
 
     const handleClose = () => {
@@ -135,9 +148,91 @@ function SwapDelegModal(props: any) {
         sendTxn(TransactionType.REJECT_DELEG_SWAP, txParams);
     }
 
+    // returns true if address is ok
+    // otherwise returns false
+    // @param swapAddr: bech32 format
+    const isValidSwap = (swapAddr: string) => {
+        // check if it is self swap
+        if (userAddress === swapAddr) {
+            Alert('error', "Invalid New Owner", "Please enter another wallet address other than the connected wallet.");
+            return false;
+        }
+
+        // check if it is cyclic, i.e. if B -> X, where X == A exists
+        let byStr20SwapAddr = fromBech32Address(swapAddr).toLowerCase();
+        console.log("bystr20: %o\n", byStr20SwapAddr);
+        console.log(swapDelegModalData.requestorList);
+        if (swapDelegModalData.requestorList.includes(byStr20SwapAddr)) {
+            let msg = `There is an existing request from ${getTruncatedAddress(swapAddr)}. Please accept or reject the incoming request first.`;
+            Alert('error', "Invalid New Owner", msg);
+            return false;
+        }
+
+        return true;
+    }
+
+    // check if address has buffered deposits or unwithdrawn rewards
+    // returns true if the address has buffered deposits or rewards, otherwise returns false
+    // @param address: bech32 format
+    const hasBufferedOrRewards = async (address: string) => {
+        console.log("has buffer or rewards: %o", address);
+        let wallet = fromBech32Address(address).toLowerCase();
+
+        const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "lastrewardcycle");
+        const lbdc = await  ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "last_buf_deposit_cycle_deleg", [wallet]);
+        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
+        
+        if (lrc === undefined || lrc === "error") {
+            return false;
+        }
+
+        if (lbdc === undefined || lbdc === "error") {
+            return false;
+        }
+
+        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error") {
+            return false;
+        }
+
+        let ssnlist = deposit_amt_deleg_map["deposit_amt_deleg"][wallet];
+        for (let ssnAddress in ssnlist) {
+            // check rewards
+            const rewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, wallet));
+            if (rewards !== "0") {
+                let msg = `${address} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
+                Alert('info', "Unwithdrawn Rewards Found", msg);
+                return true;
+            }
+
+            // check buffered deposits
+            if (lbdc["last_buf_deposit_cycle_deleg"][wallet].hasOwnProperty(ssnAddress)) {
+                const ldcd = parseInt(lbdc["last_buf_deposit_cycle_deleg"][wallet][ssnAddress]);
+                const lrc_o = parseInt(lrc["lastrewardcycle"]);
+                if (lrc_o <= ldcd) {
+                    let msg = `${address} has buffered deposits. Please wait for the next cycle before continuing.`
+                    Alert('info', "Buffered Deposits Found", msg);
+                    return true;
+                }
+            }
+
+            // check buffered deposits (lrc-1)
+
+        }
+        return false;
+    }
+
     const requestDelegSwap = async () => {
-        if (!newDelegAddr) {
+        if (hasBufferedOrRewards(userAddress)) {
+            Alert('info', "Unwithdrawn Found", "loremipsum");
+            return null;
+        }
+
+        if (!validateAddress(newDelegAddr)) {
             Alert('error', "Invalid Address", "Wallet address should be bech32 or checksum format.");
+            return null;
+        }
+
+        if (!isValidSwap(newDelegAddr)) {
             return null;
         }
 
@@ -199,7 +294,7 @@ function SwapDelegModal(props: any) {
                         <button type="button" className="close btn shadow-none ml-auto mr-3 mt-2" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <Tabs defaultIndex={0}>
+                        <Tabs selectedIndex={tabIndex} onSelect={index => setTabIndex(index)}>
                             <TabList>
                                 <Tab>Change Stake Ownership</Tab>
                                 <Tab>Incoming Requests</Tab>
@@ -230,7 +325,7 @@ function SwapDelegModal(props: any) {
                                         (isEdit || !swapDelegModalData.swapRecipientAddress)
                                         ?
                                         <>
-                                        <div className="modal-label mb-2">Enter new owner address</div>
+                                        <div className="modal-label mb-2">Enter new owner address<br/>(in bech32 format e.g. zil1xxxxxxxxxxxxx)</div>
                                         <div className="input-group mb-2">
                                             <input type="text" className="form-control shadow-none" value={newDelegAddr} onChange={handleNewDelegAddr} />
                                         </div> 
@@ -239,7 +334,7 @@ function SwapDelegModal(props: any) {
                                         null
                                     }
 
-                                    <div className="d-flex mt-3">
+                                    <div className="d-flex mt-4">
                                         {
                                             swapDelegModalData.swapRecipientAddress
                                             ?

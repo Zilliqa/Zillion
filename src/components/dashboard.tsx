@@ -1308,6 +1308,7 @@ function Dashboard(props: any) {
             
             <SwapDelegModal 
                 proxy={proxy}
+                impl={impl}  
                 networkURL={networkURL}
                 ledgerIndex={ledgerIndex}
                 swapDelegModalData={swapDelegModalData}
