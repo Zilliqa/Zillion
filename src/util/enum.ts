@@ -111,5 +111,5 @@ export enum ButtonText {
 
 // 'true': disabled all contract call buttons, add banner to dashboard and main page
 export enum ContractState {
-    IS_PAUSED = "true"
+    IS_PAUSED = "false"
 }
