@@ -32,6 +32,8 @@ function SwapDelegModal(props: any) {
     const [tabIndex, setTabIndex] = useState(0);
     const [isPending, setIsPending] = useState('');
     const [isEdit, setIsEdit] = useState(false);
+    
+    const [showConfirmRevokeBox, setShowConfirmRevokeBox] = useState(false);
 
     const cleanUp = () => {
         setNewDelegAddr('');
@@ -40,6 +42,7 @@ function SwapDelegModal(props: any) {
         setIsEdit(false);
         setTxnId('');
         setTxnType('');
+        setShowConfirmRevokeBox(false);
     }
 
     const validateAddress = (address: string) => {
@@ -357,6 +360,31 @@ function SwapDelegModal(props: any) {
 
                         :
 
+                        showConfirmRevokeBox ?
+
+                        <div className="modal-body">
+                            <h5 className="modal-title mb-4">Revoke Request</h5>
+                            <p>Are you sure you want to revoke the existing transfer ownership request?</p>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel">
+                                    <h3>Pending New Owner To Accept</h3>
+                                    <span>{convertBase16ToBech32(swapDelegModalData.swapRecipientAddress)}</span>
+                                </div>
+                            </div>
+                            <div className="d-flex mt-4">
+                                <div className="mx-auto">
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={revokeDelegSwap}>
+                                        Yes
+                                    </button>
+                                    <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRevokeBox(false)}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        :
+
                         <>
                         <button type="button" className="close btn shadow-none ml-auto mr-3 mt-2" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                             <span aria-hidden="true">&times;</span>
@@ -414,7 +442,7 @@ function SwapDelegModal(props: any) {
                                                     :
                                                     <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => setIsEdit(true)}>Edit Request</button>
                                                 }
-                                                <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={revokeDelegSwap}>Revoke Request</button>
+                                                <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRevokeBox(true)}>Revoke Request</button>
                                             </div>
                                             :
                                             // show new owner form
