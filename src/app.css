@@ -43,6 +43,27 @@
   font-display: swap;
 }
 
+[badge]:after {
+  border-radius: 50%;
+  color: var(--notification-icon-color);
+  content: attr(badge);
+  font-size: 9px;
+  margin-top: 1em;
+  margin-left: -0.7em;
+  min-width: 20px;
+  padding-top: 3px;
+  padding-bottom: 2.5px;
+  padding-left: 2px;
+  padding-right: 2px;
+  font-weight: 600;
+  position: absolute;
+  text-align: center;
+}
+
+[badge^="-"]:after, [badge="0"]:after, [badge=""]:after {
+  display: none;
+}
+
 body {
   margin: 0;
   font-family: 'Avenir Next LT Pro', 'Helvetica Neue', sans-serif;

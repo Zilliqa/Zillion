@@ -308,11 +308,11 @@ function SwapDelegModal(props: any) {
         setIsPending(OperationStatus.PENDING);
 
         const userHasStaked = await hasStaked(userAddress);
-        if (!userHasStaked) {
-            setIsPending('');
-            Alert('info', "User Has No Stake", `You have not stake with any operators.`);
-            return null;
-        }
+        // if (!userHasStaked) {
+        //     setIsPending('');
+        //     Alert('info', "User Has No Stake", `You have not stake with any operators.`);
+        //     return null;
+        // }
 
         const userHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
         if (userHasBuffOrRewards) {
@@ -490,7 +490,13 @@ function SwapDelegModal(props: any) {
                         <Tabs selectedIndex={tabIndex} onSelect={index => setTabIndex(index)}>
                             <TabList>
                                 <Tab>Change Stake Ownership</Tab>
-                                <Tab>Incoming Requests</Tab>
+                                <Tab>
+                                    Incoming Requests 
+                                    { 
+                                        //@ts-ignore
+                                        <span badge="1"></span>
+                                    }
+                                </Tab>
                             </TabList>
 
                             <TabPanel>

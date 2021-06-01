@@ -30,7 +30,7 @@ import DelegatorStatsTable from './delegator-stats-table';
 import OperatorStatsTable from './operator-stats-table';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
 
-import IconArrowUpDown from './icons/arrow-up-down';
+import IconShuffle from './icons/shuffle';
 import IconQuestionCircle from './icons/question-circle';
 import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
@@ -978,23 +978,15 @@ function Dashboard(props: any) {
                             data-backdrop="static"
                             data-tip
                             data-for="swap-tip">
-                                <IconArrowUpDown width="16" height="16"/>
+                                <IconShuffle width="16" height="16"/>
+                                {
+                                    //@ts-ignore
+                                    <span badge={swapDelegModalData.swapRecipientAddress ? (swapDelegModalData.requestorList.length+1) : swapDelegModalData.requestorList.length}></span>
+                                }
                         </button>
+
                         <ReactTooltip id="swap-tip" place="bottom" type="dark" effect="solid">
                             <span>Change Stake Ownership</span>
-                        </ReactTooltip>
-                    </li>
-
-                    <li className="nav-item">
-                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme} data-tip data-for="theme-toggle-tip">
-                        { 
-                            darkMode.value === true ? 
-                            <IconSun width="16" height="16"/> : 
-                            <IconMoon width="16" height="16"/>
-                        }
-                        </button>
-                        <ReactTooltip id="theme-toggle-tip" place="bottom" type="dark" effect="solid">
-                            <span>Appearance</span>
                         </ReactTooltip>
                     </li>
 
@@ -1026,6 +1018,19 @@ function Dashboard(props: any) {
                         </Tippy>
                         <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
                             <span>Recent Transactions</span>
+                        </ReactTooltip>
+                    </li>
+
+                    <li className="nav-item">
+                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme} data-tip data-for="theme-toggle-tip">
+                        { 
+                            darkMode.value === true ? 
+                            <IconSun width="16" height="16"/> : 
+                            <IconMoon width="16" height="16"/>
+                        }
+                        </button>
+                        <ReactTooltip id="theme-toggle-tip" place="bottom" type="dark" effect="solid">
+                            <span>Appearance</span>
                         </ReactTooltip>
                     </li>
 
