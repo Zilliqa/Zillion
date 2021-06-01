@@ -975,19 +975,27 @@ function Dashboard(props: any) {
                             data-toggle="modal" 
                             data-target="#swap-deleg-modal" 
                             data-keyboard="false" 
-                            data-backdrop="static">
+                            data-backdrop="static"
+                            data-tip
+                            data-for="swap-tip">
                                 <IconArrowUpDown width="16" height="16"/>
                         </button>
+                        <ReactTooltip id="swap-tip" place="bottom" type="dark" effect="solid">
+                            <span>Change Stake Ownership</span>
+                        </ReactTooltip>
                     </li>
 
                     <li className="nav-item">
-                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme}>
+                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme} data-tip data-for="theme-toggle-tip">
                         { 
                             darkMode.value === true ? 
                             <IconSun width="16" height="16"/> : 
                             <IconMoon width="16" height="16"/>
                         }
                         </button>
+                        <ReactTooltip id="theme-toggle-tip" place="bottom" type="dark" effect="solid">
+                            <span>Appearance</span>
+                        </ReactTooltip>
                     </li>
 
                     {/* txn notifications */}

@@ -175,7 +175,6 @@ function SwapDelegModal(props: any) {
     // returns true if the address has buffered deposits or rewards, otherwise returns false
     // @param address: bech32 format
     const hasBufferedOrRewards = async (address: string) => {
-        console.log("has buffer or rewards: %o", address);
         let wallet = fromBech32Address(address).toLowerCase();
         let displayAddr = getTruncatedAddress(address);
 
@@ -210,10 +209,11 @@ function SwapDelegModal(props: any) {
                 return true;
             }
 
+            const lrc_o = parseInt(lrc["lastrewardcycle"]);
+
             // check buffered deposits
             if (lbdc["last_buf_deposit_cycle_deleg"][wallet].hasOwnProperty(ssnAddress)) {
                 const ldcd = parseInt(lbdc["last_buf_deposit_cycle_deleg"][wallet][ssnAddress]);
-                const lrc_o = parseInt(lrc["lastrewardcycle"]);
                 if (lrc_o <= ldcd) {
                     let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
                     Alert('info', "Buffered Deposits Found", msg);
@@ -222,17 +222,37 @@ function SwapDelegModal(props: any) {
             }
 
             // check buffered deposits (lrc-1)
-            const lrc_o = parseInt(lrc["lastrewardcycle"]) - 1;
-            if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
-                if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet][ssnAddress].hasOwnProperty(lrc_o)) {
-                    let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
-                    Alert('info', "Buffered Deposits Found", msg);
-                    return true;
+            let lrc_o_minus = lrc_o - 1
+            if (lrc_o_minus >= 0) {
+                if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
+                    if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet][ssnAddress].hasOwnProperty(lrc_o_minus)) {
+                        let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
+                        Alert('info', "Buffered Deposits Found", msg);
+                        return true;
+                    }
                 }
             }
 
         }
         return false;
+    }
+
+    // check if address has staked with some ssn
+    // returns false if address has not stake; otherwise returns true
+    const hasStaked = async (address: string) => {
+        console.log("has staked")
+        let wallet = fromBech32Address(address).toLowerCase();
+
+        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
+
+        console.log("deposit amt deleg: %o\n", deposit_amt_deleg_map);
+
+        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map.length === 0) {
+            console.log("has staked return false");
+            return false;
+        }
+
+        return true;
     }
 
     const requestDelegSwap = async () => {
@@ -246,16 +266,23 @@ function SwapDelegModal(props: any) {
             return null;
         }
 
+        const userHasStaked = await hasStaked(userAddress);
+        if (!userHasStaked) {
+            Alert('info', "User Has No Stake", `You have not stake with any operators.`);
+            return null;
+        }
+
         setIsPending(OperationStatus.PENDING);
 
-        const check1 = await hasBufferedOrRewards(userAddress);
-        if (check1) {
+        const userHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
+        if (userHasBuffOrRewards) {
+            // user has buffered deposits or rewards
             setIsPending('');
             return null;
         }
 
-        const check2 = await hasBufferedOrRewards(newDelegAddr);
-        if (check2) {
+        const newDelegHasBuffOrRewards = await hasBufferedOrRewards(newDelegAddr);
+        if (newDelegHasBuffOrRewards) {
             setIsPending('');
             return null;
         }
