@@ -1089,7 +1089,7 @@ input:focus {
   border: 1px solid var(--primary-hover-color);
 }
 
-.swap-deleg-requestor-list .zillion-explorer-link {
+.swap-deleg-requestor-list .zillion-explorer-link, .zillion-explorer-link {
   margin-left: 10px;
   margin-top: -6px;
 }

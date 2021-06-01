@@ -27,6 +27,7 @@ function SwapDelegModal(props: any) {
 
     // transfer all stakes to this new deleg
     const [newDelegAddr, setNewDelegAddr] = useState(''); // bech32
+    const [selectedDelegAddr, setSelectedDelegAddr] = useState(''); // base16; used in incoming requests tab to track the address being accepted or rejected
     const [txnId, setTxnId] = useState('');
     const [txnType, setTxnType] = useState('');
     const [tabIndex, setTabIndex] = useState(0);
@@ -34,15 +35,20 @@ function SwapDelegModal(props: any) {
     const [isEdit, setIsEdit] = useState(false);
     
     const [showConfirmRevokeBox, setShowConfirmRevokeBox] = useState(false);
+    const [showConfirmSwapBox, setShowConfirmSwapBox] = useState(false);
+    const [showConfirmRejectBox, setShowConfirmRejectBox] = useState(false);
 
     const cleanUp = () => {
         setNewDelegAddr('');
+        setSelectedDelegAddr('');
         setTabIndex(0);
         setIsPending('');
         setIsEdit(false);
         setTxnId('');
         setTxnType('');
         setShowConfirmRevokeBox(false);
+        setShowConfirmSwapBox(false);
+        setShowConfirmRejectBox(false);
     }
 
     const validateAddress = (address: string) => {
@@ -58,6 +64,16 @@ function SwapDelegModal(props: any) {
             address = toBech32Address(bech32ToChecksum(address))
         }
         setNewDelegAddr(address);
+    }
+
+    const toggleConfirmSwapBox = (address : string) => {
+        setSelectedDelegAddr(address);
+        setShowConfirmSwapBox(true);
+    }
+
+    const toggleRejectSwapBox = (address : string) => {
+        setSelectedDelegAddr(address);
+        setShowConfirmRejectBox(true);
     }
 
     const handleClose = () => {
@@ -112,6 +128,8 @@ function SwapDelegModal(props: any) {
     }
 
     const confirmDelegSwap = async (requestorAddr: string) => {
+        console.log("CONFIRM SWAP: %o\n", requestorAddr);
+
         setIsPending(OperationStatus.PENDING);
 
         const requestorHasBuffOrRewards = await hasBufferedOrRewards(requestorAddr);
@@ -148,6 +166,8 @@ function SwapDelegModal(props: any) {
     }
 
     const rejectDelegSwap = async (requestorAddr: string) => {
+        console.log("REJECT DELEG: %o\n", requestorAddr);
+        
         let txParams = {
             toAddr: proxyChecksum,
             amount: new BN(0),
@@ -363,7 +383,7 @@ function SwapDelegModal(props: any) {
                         showConfirmRevokeBox ?
 
                         <div className="modal-body">
-                            <h5 className="modal-title mb-4">Revoke Request</h5>
+                            <h5 className="modal-title mb-4">Revoke Confirmation</h5>
                             <p>Are you sure you want to revoke the existing transfer ownership request?</p>
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
@@ -377,6 +397,83 @@ function SwapDelegModal(props: any) {
                                         Yes
                                     </button>
                                     <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRevokeBox(false)}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        :
+
+                        showConfirmRejectBox ?
+
+                        <div className="modal-body">
+                            <h5 className="modal-title mb-4">Reject Confirmation</h5>
+                            <p>Are you sure you wish to <em>reject</em> the transfer request?</p>
+
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel">
+                                    <h3>Requestor's Wallet</h3>
+                                    <span>{convertBase16ToBech32(selectedDelegAddr)}</span>
+                                    <a href={getZillionExplorerLink(convertBase16ToBech32(selectedDelegAddr))} target="_blank" rel="noopener noreferrer" data-tip data-for="explorer-tip"><IconEditBox width="16" height="16" className="zillion-explorer-link"/></a>
+                                    <ReactTooltip id="explorer-tip" place="bottom" type="dark" effect="solid">
+                                        <span>View Wallet on Zillion Explorer</span>
+                                    </ReactTooltip>
+                                </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <small><strong>Notes</strong></small>
+                                <ul>
+                                    <li><small>By clicking on <em>'Yes'</em>, you are rejecting the transfer request and would not receive the stakes and rewards from the requestor's wallet.</small></li>
+                                </ul>
+                            </div>
+
+                            <div className="d-flex mt-4">
+                                <div className="mx-auto">
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => rejectDelegSwap(selectedDelegAddr)}>
+                                        Yes
+                                    </button>
+                                    <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRejectBox(false)}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        :
+
+                        showConfirmSwapBox ?
+
+                        <div className="modal-body">
+                            <h5 className="modal-title mb-4">Accept Confirmation</h5>
+                            <p>Are you sure you wish to <em>accept</em> all the stakes and rewards from this wallet?</p>
+
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel">
+                                    <h3>Requestor's Wallet</h3>
+                                    <span>{convertBase16ToBech32(selectedDelegAddr)}</span>
+                                    <a href={getZillionExplorerLink(convertBase16ToBech32(selectedDelegAddr))} target="_blank" rel="noopener noreferrer" data-tip data-for="explorer-tip"><IconEditBox width="16" height="16" className="zillion-explorer-link"/></a>
+                                    <ReactTooltip id="explorer-tip" place="bottom" type="dark" effect="solid">
+                                        <span>View Wallet on Zillion Explorer</span>
+                                    </ReactTooltip>
+                                </div>
+                            </div>
+
+                            <div className="mb-4">
+                                <small><strong>Notes</strong></small>
+                                <ul>
+                                    <li><small>By clicking on <em>'Yes'</em>, all the stakes and rewards are transferred from the requestor's wallet to your wallet.</small></li>
+                                    <li><small>This transfer process is <strong>non-reversible.</strong></small></li>
+                                </ul>
+                            </div>
+
+                            <div className="d-flex mt-4">
+                                <div className="mx-auto">
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => confirmDelegSwap(selectedDelegAddr)}>
+                                        Yes
+                                    </button>
+                                    <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmSwapBox(false)}>
                                         Cancel
                                     </button>
                                 </div>
@@ -467,17 +564,17 @@ function SwapDelegModal(props: any) {
                                                 <li key={index}>
                                                     <div className="flex mb-2">
                                                         <span>{convertBase16ToBech32(requestorAddr)}</span>
-                                                        <a href={getZillionExplorerLink(convertBase16ToBech32(requestorAddr))} target="_blank" rel="noopener noreferrer" data-tip data-for="explorer-tip"><IconEditBox width="16" height="16" className="zillion-explorer-link"/></a>
+                                                        <a href={getZillionExplorerLink(convertBase16ToBech32(requestorAddr))} target="_blank" rel="noopener noreferrer" data-tip data-for="explorer-tip2"><IconEditBox width="16" height="16" className="zillion-explorer-link"/></a>
                                                         <div className="float-right btn-contract-group">
-                                                            <button type="button" className="btn btn-contract-small shadow-none mx-2" onClick={() => confirmDelegSwap(requestorAddr)}>Accept</button>
-                                                            <button type="button" className="btn btn-contract-small-cancel shadow-none mx-2" onClick={() => rejectDelegSwap(requestorAddr)}>Reject</button>
+                                                            <button type="button" className="btn btn-contract-small shadow-none mx-2" onClick={() => toggleConfirmSwapBox(requestorAddr)}>Accept</button>
+                                                            <button type="button" className="btn btn-contract-small-cancel shadow-none mx-2" onClick={() => toggleRejectSwapBox(requestorAddr)}>Reject</button>
                                                         </div>
                                                     </div>
                                                 </li>
                                             ))
                                         }
                                     </ul>
-                                    <ReactTooltip id="explorer-tip" place="bottom" type="dark" effect="solid">
+                                    <ReactTooltip id="explorer-tip2" place="bottom" type="dark" effect="solid">
                                         <span>View Wallet on Zillion Explorer</span>
                                     </ReactTooltip>
                                     </>
