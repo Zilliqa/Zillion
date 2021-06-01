@@ -167,7 +167,7 @@ function SwapDelegModal(props: any) {
 
     const rejectDelegSwap = async (requestorAddr: string) => {
         console.log("REJECT DELEG: %o\n", requestorAddr);
-        
+
         let txParams = {
             toAddr: proxyChecksum,
             amount: new BN(0),
@@ -214,7 +214,7 @@ function SwapDelegModal(props: any) {
     // returns true if the address has buffered deposits or rewards, otherwise returns false
     // @param address: bech32 format
     const hasBufferedOrRewards = async (address: string) => {
-        let wallet = fromBech32Address(address).toLowerCase();
+        let wallet = bech32ToChecksum(address).toLowerCase();
         let displayAddr = getTruncatedAddress(address);
 
         const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "lastrewardcycle");
@@ -305,13 +305,14 @@ function SwapDelegModal(props: any) {
             return null;
         }
 
+        setIsPending(OperationStatus.PENDING);
+
         const userHasStaked = await hasStaked(userAddress);
         if (!userHasStaked) {
+            setIsPending('');
             Alert('info', "User Has No Stake", `You have not stake with any operators.`);
             return null;
         }
-
-        setIsPending(OperationStatus.PENDING);
 
         const userHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
         if (userHasBuffOrRewards) {
@@ -382,7 +383,7 @@ function SwapDelegModal(props: any) {
 
                         showConfirmRevokeBox ?
 
-                        <div className="modal-body">
+                        <div className="modal-body animate__animated animate__fadeIn">
                             <h5 className="modal-title mb-4">Revoke Confirmation</h5>
                             <p>Are you sure you want to revoke the existing transfer ownership request?</p>
                             <div className="row node-details-wrapper mb-4">
@@ -407,9 +408,9 @@ function SwapDelegModal(props: any) {
 
                         showConfirmRejectBox ?
 
-                        <div className="modal-body">
+                        <div className="modal-body animate__animated animate__fadeIn">
                             <h5 className="modal-title mb-4">Reject Confirmation</h5>
-                            <p>Are you sure you wish to <em>reject</em> the transfer request?</p>
+                            <p>Are you sure you wish to <u><em>reject</em></u> the transfer request?</p>
 
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
@@ -445,9 +446,9 @@ function SwapDelegModal(props: any) {
 
                         showConfirmSwapBox ?
 
-                        <div className="modal-body">
+                        <div className="modal-body animate__animated animate__fadeIn">
                             <h5 className="modal-title mb-4">Accept Confirmation</h5>
-                            <p>Are you sure you wish to <em>accept</em> all the stakes and rewards from this wallet?</p>
+                            <p>Are you sure you wish to <u><em>accept</em></u> all the stakes and rewards from this wallet?</p>
 
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
