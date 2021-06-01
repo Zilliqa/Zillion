@@ -109,6 +109,22 @@ function SwapDelegModal(props: any) {
     }
 
     const confirmDelegSwap = async (requestorAddr: string) => {
+        setIsPending(OperationStatus.PENDING);
+
+        const requestorHasBuffOrRewards = await hasBufferedOrRewards(requestorAddr);
+        if (requestorHasBuffOrRewards) {
+            // requestor has buffered deposits or rewards
+            setIsPending('');
+            return null;
+        }
+
+        // userAddress here is the new delegator waiting to receive
+        const newDelegHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
+        if (newDelegHasBuffOrRewards) {
+            setIsPending('');
+            return null;
+        }
+
         let txParams = {
             toAddr: proxyChecksum,
             amount: new BN(0),
