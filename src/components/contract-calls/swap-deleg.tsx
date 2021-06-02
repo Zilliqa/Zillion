@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useContext } from 'react';
 import * as ZilliqaAccount from '../../account';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
@@ -128,7 +128,6 @@ function SwapDelegModal(props: any) {
     }
 
     const confirmDelegSwap = async (requestorAddr: string) => {
-        console.log("CONFIRM SWAP: %o\n", requestorAddr);
 
         setIsPending(OperationStatus.PENDING);
 
@@ -166,7 +165,6 @@ function SwapDelegModal(props: any) {
     }
 
     const rejectDelegSwap = async (requestorAddr: string) => {
-        console.log("REJECT DELEG: %o\n", requestorAddr);
 
         let txParams = {
             toAddr: proxyChecksum,
@@ -199,8 +197,7 @@ function SwapDelegModal(props: any) {
 
         // check if it is cyclic, i.e. if B -> X, where X == A exists
         let byStr20SwapAddr = fromBech32Address(swapAddr).toLowerCase();
-        console.log("bystr20: %o\n", byStr20SwapAddr);
-        console.log(swapDelegModalData.requestorList);
+
         if (swapDelegModalData.requestorList.includes(byStr20SwapAddr)) {
             let msg = `There is an existing request from ${getTruncatedAddress(swapAddr)}. Please accept or reject the incoming request first.`;
             Alert('error', "Invalid New Owner", msg);
@@ -279,15 +276,11 @@ function SwapDelegModal(props: any) {
     // check if address has staked with some ssn
     // returns false if address has not stake; otherwise returns true
     const hasStaked = async (address: string) => {
-        console.log("has staked")
         let wallet = fromBech32Address(address).toLowerCase();
 
         const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
 
-        console.log("deposit amt deleg: %o\n", deposit_amt_deleg_map);
-
         if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map.length === 0) {
-            console.log("has staked return false");
             return false;
         }
 
@@ -308,11 +301,11 @@ function SwapDelegModal(props: any) {
         setIsPending(OperationStatus.PENDING);
 
         const userHasStaked = await hasStaked(userAddress);
-        // if (!userHasStaked) {
-        //     setIsPending('');
-        //     Alert('info', "User Has No Stake", `You have not stake with any operators.`);
-        //     return null;
-        // }
+        if (!userHasStaked) {
+            setIsPending('');
+            Alert('info', "User Has No Stake", `You have not stake with any operators.`);
+            return null;
+        }
 
         const userHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
         if (userHasBuffOrRewards) {
@@ -326,8 +319,6 @@ function SwapDelegModal(props: any) {
             setIsPending('');
             return null;
         }
-
-        console.log("new deleg addr: %o", newDelegAddr)
 
         // gas price, gas limit declared in account.ts
         let txParams = {
