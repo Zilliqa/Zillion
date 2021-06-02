@@ -489,13 +489,9 @@ function SwapDelegModal(props: any) {
                         </button>
                         <Tabs selectedIndex={tabIndex} onSelect={index => setTabIndex(index)}>
                             <TabList>
-                                <Tab>Change Stake Ownership</Tab>
+                                <Tab>Change Stake Ownership { swapDelegModalData.swapRecipientAddress ? <span>(1)</span> : null }</Tab>
                                 <Tab>
-                                    Incoming Requests 
-                                    { 
-                                        //@ts-ignore
-                                        <span badge="1"></span>
-                                    }
+                                    Incoming Requests { swapDelegModalData.requestorList.length > 0 ? <span>({swapDelegModalData.requestorList.length})</span> : null}
                                 </Tab>
                             </TabList>
 
