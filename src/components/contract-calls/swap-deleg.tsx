@@ -9,12 +9,22 @@ import AppContext from '../../contexts/appContext';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
+import IconWalletTransferLong from '../icons/wallet-transfer-long';
+import IconQuestionCircle from '../icons/question-circle';
 import IconArrowDown from '../icons/arrow-down';
 import IconEditBox from '../icons/edit-box-line';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import ReactTooltip from 'react-tooltip';
 import { computeDelegRewardsRetriable } from '../../util/reward-calculator';
+
+import SwapImg from "../../static/swap_img0.png";
+import SwapImg1 from "../../static/swap_img1.png";
+import SwapImg2 from "../../static/swap_img2.png";
+import SwapImg3 from "../../static/swap_img3.png";
+import SwapImg4 from "../../static/swap_img4.png";
+import SwapImg5 from "../../static/swap_img5.png";
+
 
 const { BN, validation } = require('@zilliqa-js/util');
 
@@ -34,9 +44,12 @@ function SwapDelegModal(props: any) {
     const [isPending, setIsPending] = useState('');
     const [isEdit, setIsEdit] = useState(false);
     
+    const [showHelpBox, setShowHelpBox] = useState(false);
     const [showConfirmRevokeBox, setShowConfirmRevokeBox] = useState(false);
     const [showConfirmSwapBox, setShowConfirmSwapBox] = useState(false);
     const [showConfirmRejectBox, setShowConfirmRejectBox] = useState(false);
+
+    const [tutorialStep, setTutorialStep] = useState(0); // for the help guide
 
     const cleanUp = () => {
         setNewDelegAddr('');
@@ -46,9 +59,11 @@ function SwapDelegModal(props: any) {
         setIsEdit(false);
         setTxnId('');
         setTxnType('');
+        setShowHelpBox(false);
         setShowConfirmRevokeBox(false);
         setShowConfirmSwapBox(false);
         setShowConfirmRejectBox(false);
+        setTutorialStep(0);
     }
 
     const validateAddress = (address: string) => {
@@ -64,6 +79,16 @@ function SwapDelegModal(props: any) {
             address = toBech32Address(bech32ToChecksum(address))
         }
         setNewDelegAddr(address);
+    }
+
+    const decreaseTutorialStep = () => {
+        let newTutorialStep = tutorialStep - 1;
+        setTutorialStep(newTutorialStep);
+    }
+
+    const incrementTutorialStep = () => {
+        let newTutorialStep = tutorialStep + 1;
+        setTutorialStep(newTutorialStep);
     }
 
     const toggleConfirmSwapBox = (address : string) => {
@@ -106,6 +131,12 @@ function SwapDelegModal(props: any) {
         setTimeout(() => {
             cleanUp();
         }, 150);
+    }
+
+    // reset the tutorial
+    const handleCloseTutorial = () => {
+        setShowHelpBox(false);
+        setTutorialStep(0);
     }
 
     const sendTxn = (txnType: TransactionType, txParams: any) => {
@@ -372,6 +403,141 @@ function SwapDelegModal(props: any) {
 
                         :
 
+                        showHelpBox ?
+
+                        <>
+                        <div className="modal-header">
+                            {
+                                tutorialStep === 0 ?
+                                <h5 className="modal-title" id="swap-deleg-modal">What is this?</h5>
+                                :
+                                tutorialStep === 1 ?
+                                <h5 className="modal-title" id="swap-deleg-modal">How do I transfer my stakes to another wallet?</h5>
+                                :
+                                tutorialStep === 2 ?
+                                <h5 className="modal-title" id="swap-deleg-modal">How do I modify the recipient or revoke the request?</h5>
+                                :
+                                tutorialStep === 3 ?
+                                <h5 className="modal-title" id="swap-deleg-modal">I received an incoming transfer request. What should I do with it?</h5>
+                                :
+                                tutorialStep === 4 ?
+                                <h5 className="modal-title" id="swap-deleg-modal">I accepted a request. How do I know if it is successful?</h5>
+                                :
+                                tutorialStep === 5 ?
+                                <h5 className="modal-title" id="swap-deleg-modal">Final Notes</h5>
+                                :
+                                null
+                            }
+                            
+                            <button type="button" className="close btn shadow-none" aria-label="CloseTutorial" onClick={handleCloseTutorial}>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            {
+                                tutorialStep === 0 ?
+                                <div className="div-fade text-center">
+                                    <IconWalletTransferLong width="400" className="mb-4"/>
+                                    <p>You can now transfer your stakes from one wallet to another!</p>
+                                    <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={() => incrementTutorialStep()}>Continue</button>
+                                </div>
+
+                                :
+                                
+                                tutorialStep === 1 ?
+                                <div>
+                                    <p>At the "Change Stake Ownership", enter the recipient wallet address.</p>
+                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg} alt="change_ownership" /></div>
+                                    <p>Wait for the transaction to process on the blockchain.</p>
+                                    <div className="d-flex mt-4">
+                                        <div className="mx-auto">
+                                            <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => decreaseTutorialStep()}>Prev</button>
+                                            <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => incrementTutorialStep()}>Next</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                :
+
+                                tutorialStep === 2 ?
+                                <div>
+                                    <p>After setting a recipient, should you change your mind, you may edit the recipient to another address or revoke the request entirely.</p>
+                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg1} alt="edit_revoke_request" /></div>
+                                    <p>This can only be done if the recipient has not accepted your request.</p>
+                                    <div className="d-flex mt-4">
+                                        <div className="mx-auto">
+                                            <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => decreaseTutorialStep()}>Prev</button>
+                                            <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => incrementTutorialStep()}>Next</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                :
+
+                                tutorialStep === 3 ?
+                                <div>
+                                    <p>At the "Incoming Requests", if you are the <strong>recipient</strong>, you will see the list of wallet addresses / users who have intention to transfer their stakes to you.</p>
+                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg2} alt="incoming_requests" /></div>
+                                    <p>If you <strong>accept</strong> the requests, all the stakes would be transferred from the requestors' wallet to you.</p>
+                                    <p>If you <strong>reject</strong> the requests, nothing would happen and the requestor has to send a new request if he or she wishes to transfer the stakes to you.</p>
+                                    <p>Please wait for the transaction to be processed completely on the blockchain before accepting or rejecting another request.</p>
+                                    <div className="d-flex mt-4">
+                                        <div className="mx-auto">
+                                            <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => decreaseTutorialStep()}>Prev</button>
+                                            <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => incrementTutorialStep()}>Next</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                :
+
+                                tutorialStep === 4 ?
+                                <div>
+                                    <p>If you are the <strong>recipient</strong>, you should see a transaction ID after accepting the request as shown below.</p>
+                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg3} alt="txn_id" /></div>
+                                    <p>Click on transaction ID and it would bring you to ViewBlock.</p>
+                                    <p>Refresh the ViewBlock page once every few minutes; the transaction should be successful in less than 10 minutes.</p>
+                                    <p>Head back to <strong>Zillion Dashboard</strong> and hit the manual refresh button.</p>
+                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg4} alt="manual_refresh" /></div>
+                                    <p>You should observe the new amounts under <strong>My Staking Portfolio</strong>.</p>
+                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg5} alt="dashboard_staking_portfolio" /></div>
+                                    <div className="d-flex mt-4">
+                                        <div className="mx-auto">
+                                            <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => decreaseTutorialStep()}>Prev</button>
+                                            <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => incrementTutorialStep()}>Next</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                :
+
+                                tutorialStep === 5 ?
+                                <div>
+                                    <ul>
+                                        <li className="mb-3"><strong>Once the recipient has accepted a request, Zilliqa is not able to reverse the transfer process.</strong></li>
+                                        <li className="mb-3">Beware of scams! Do not send a transfer request if you are unsure of who the recipient is!</li>
+                                        <li className="mb-3">If you are a recipient, once you accept the transfer request, all the stakes would be transferred to your wallet. If the requestor has staked on the same node operator as you, the amount would be tabulated together.</li>
+                                        <li className="mb-3">If you are a requestor, please check the recipient address carefully before sending the request. The transfer request is <strong>not reverrsible</strong> once the recipient has accepted.</li>
+                                        <li>Ensure you have no buffered deposits or unwithdrawn rewards before sending a transfer request or accepting a transfer. This is to facilitate the stakes tabulation when the recipient chooses to accept the request.</li>
+                                    </ul>
+                                    <div className="d-flex mt-4">
+                                        <div className="mx-auto">
+                                            <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => decreaseTutorialStep()}>Prev</button>
+                                            <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => handleCloseTutorial()}>Got It!</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                :
+
+                                null
+
+                            }
+                        </div>
+                        </>
+
+                        :
+
                         showConfirmRevokeBox ?
 
                         <div className="modal-body animate__animated animate__fadeIn">
@@ -417,7 +583,7 @@ function SwapDelegModal(props: any) {
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
-                                    <li><small>By clicking on <em>'Yes'</em>, you are rejecting the transfer request and would not receive the stakes and rewards from the requestor's wallet.</small></li>
+                                    <li><small>By clicking on <em>'Yes'</em>, you are rejecting the transfer request and would not receive the stakes from the requestor's wallet.</small></li>
                                 </ul>
                             </div>
 
@@ -439,7 +605,7 @@ function SwapDelegModal(props: any) {
 
                         <div className="modal-body animate__animated animate__fadeIn">
                             <h5 className="modal-title mb-4">Accept Confirmation</h5>
-                            <p>Are you sure you wish to <u><em>accept</em></u> all the stakes and rewards from this wallet?</p>
+                            <p>Are you sure you wish to <u><em>accept</em></u> all the stakes from this wallet?</p>
 
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
@@ -455,7 +621,7 @@ function SwapDelegModal(props: any) {
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
-                                    <li><small>By clicking on <em>'Yes'</em>, all the stakes and rewards are transferred from the requestor's wallet to your wallet.</small></li>
+                                    <li><small>By clicking on <em>'Yes'</em>, all the stakes are transferred from the requestor's wallet to your wallet.</small></li>
                                     <li><small>This transfer process is <strong>non-reversible.</strong></small></li>
                                 </ul>
                             </div>
@@ -475,9 +641,17 @@ function SwapDelegModal(props: any) {
                         :
 
                         <>
-                        <button type="button" className="close btn shadow-none ml-auto mr-3 mt-2" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <div className="d-flex">
+                            <button type="button" className="btn btn-notify-dropdown btn-theme ml-auto mt-1 mr-2" aria-label="Help" data-tip data-for="tutorial-tip" onClick={() => setShowHelpBox(true)}>
+                                <IconQuestionCircle width="22" height="22"/>
+                            </button>
+                            <button type="button" className="close btn shadow-none mx-2 mt-2" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <ReactTooltip id="tutorial-tip" place="bottom" type="dark" effect="solid">
+                                <strong>Help</strong>
+                            </ReactTooltip>
+                        </div>
                         <Tabs selectedIndex={tabIndex} onSelect={index => setTabIndex(index)}>
                             <TabList>
                                 <Tab>Change Stake Ownership { swapDelegModalData.swapRecipientAddress ? <span>(1)</span> : null }</Tab>
