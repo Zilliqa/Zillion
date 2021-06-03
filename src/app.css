@@ -647,6 +647,10 @@ input:focus {
   height: auto;
 }
 
+.icon-fill {
+  fill: var(--primary-color);
+}
+
 .icon-ledger-line .cls-1, .icon-zilpay-line .cls-1 {
   fill: none;
   stroke: var(--primary-color);

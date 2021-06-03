@@ -101,6 +101,12 @@ function SwapDelegModal(props: any) {
         setShowConfirmRejectBox(true);
     }
 
+    const toggleRevokeSwapBox = () => {
+        // hide the new owner address form when clicked on revoke
+        setIsEdit(false);
+        setShowConfirmRevokeBox(true);
+    }
+
     const handleClose = () => {
         // txn success
         // invoke dashboard methods
@@ -437,7 +443,7 @@ function SwapDelegModal(props: any) {
                             {
                                 tutorialStep === 0 ?
                                 <div className="div-fade text-center">
-                                    <IconWalletTransferLong width="400" className="mb-4"/>
+                                    <IconWalletTransferLong width="400" className="mb-4 icon-fill"/>
                                     <p>You can now transfer your stakes from one wallet to another!</p>
                                     <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={() => incrementTutorialStep()}>Continue</button>
                                 </div>
@@ -707,7 +713,7 @@ function SwapDelegModal(props: any) {
                                                     :
                                                     <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => setIsEdit(true)}>Edit Request</button>
                                                 }
-                                                <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRevokeBox(true)}>Revoke Request</button>
+                                                <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => toggleRevokeSwapBox()}>Revoke Request</button>
                                             </div>
                                             :
                                             // show new owner form
