@@ -1794,6 +1794,16 @@ input:focus {
   color: var(--primary-dark-color);
 }
 
+#swap-deleg-modal .edit-swap-addr {
+  margin-top: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+#swap-deleg-modal .edit-swap-notes {
+  margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
 #ssn-table-header-tip {
   font-size: 1em;
   font-weight: 500; 

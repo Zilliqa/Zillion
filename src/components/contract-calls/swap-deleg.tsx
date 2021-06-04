@@ -352,24 +352,24 @@ function SwapDelegModal(props: any) {
         setIsPending(OperationStatus.PENDING);
 
         const userHasStaked = await hasStaked(userAddress);
-        if (!userHasStaked) {
-            setIsPending('');
-            Alert('info', "User Has No Stake", `You have not stake with any operators.`);
-            return null;
-        }
+        // if (!userHasStaked) {
+        //     setIsPending('');
+        //     Alert('info', "User Has No Stake", `You have not stake with any operators.`);
+        //     return null;
+        // }
 
         const userHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
-        if (userHasBuffOrRewards) {
-            // user has buffered deposits or rewards
-            setIsPending('');
-            return null;
-        }
+        // if (userHasBuffOrRewards) {
+        //     // user has buffered deposits or rewards
+        //     setIsPending('');
+        //     return null;
+        // }
 
         const newDelegHasBuffOrRewards = await hasBufferedOrRewards(newDelegAddr);
-        if (newDelegHasBuffOrRewards) {
-            setIsPending('');
-            return null;
-        }
+        // if (newDelegHasBuffOrRewards) {
+        //     setIsPending('');
+        //     return null;
+        // }
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -534,7 +534,7 @@ function SwapDelegModal(props: any) {
                                 tutorialStep === 5 ?
                                 <div>
                                     <ul>
-                                        <li className="mb-3"><strong>Once the recipient has accepted a request, Zilliqa is not able to reverse the transfer process.</strong></li>
+                                        <li className="mb-3"><strong>Once the recipient has accepted a request, Zilliqa is not able to undo the transfer process.</strong></li>
                                         <li className="mb-3">Beware of scams! Do not send a transfer request if you are unsure of who the recipient is!</li>
                                         <li className="mb-3">If you are a recipient, once you accept the transfer request, all the stakes would be transferred to your wallet. If the requestor has staked on the same node operator as you, the amount would be tabulated together.</li>
                                         <li className="mb-3">If you are a requestor, please check the recipient address carefully before sending the request. The transfer request is <strong>not reverrsible</strong> once the recipient has accepted.</li>
@@ -562,7 +562,7 @@ function SwapDelegModal(props: any) {
 
                         <div className="modal-body animate__animated animate__fadeIn">
                             <h5 className="modal-title mb-4">Send Request Confirmation</h5>
-                            <p>Are you sure you want to transfer <strong>ALL</strong> your stakes to this address?</p>
+                            <p>Are you sure you want to transfer <strong><u>ALL</u></strong> your stakes to this address?</p>
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
                                     <h3>Target Recipient</h3>
@@ -574,7 +574,7 @@ function SwapDelegModal(props: any) {
                                 <ul>
                                     <li><small>By clicking on <em>'Yes'</em>, you are sending a request to transfer all your existing stakes to this address.</small></li>
                                     <li><small>Beware of scams! Ensure you know who the recipient is before sending the request.</small></li>
-                                    <li><small>Once the recipient side has accepted your request, all your stakes would be transferred to the recipient wallet; this process is <strong>non-reverisble</strong>.</small></li>
+                                    <li><small>Process is <strong>irreverisble</strong> once the recipient side has accepted your request.</small></li>
                                 </ul>
                             </div>
                             <div className="d-flex mt-4">
@@ -676,7 +676,7 @@ function SwapDelegModal(props: any) {
                                 <small><strong>Notes</strong></small>
                                 <ul>
                                     <li><small>By clicking on <em>'Yes'</em>, all the stakes are transferred from the requestor's wallet to your wallet.</small></li>
-                                    <li><small>This transfer process is <strong>non-reversible.</strong></small></li>
+                                    <li><small>This transfer process is <strong>irreversible.</strong></small></li>
                                 </ul>
                             </div>
 
@@ -716,6 +716,7 @@ function SwapDelegModal(props: any) {
 
                             <TabPanel>
                                 <div className="modal-body">
+                                    <p className="mb-4">Transfer <strong>ALL</strong> your existing stakes from one wallet to another wallet by entering a new owner address.</p>
                                     {
                                         swapDelegModalData.swapRecipientAddress 
                                         ?
@@ -738,15 +739,24 @@ function SwapDelegModal(props: any) {
                                         // show new address form if editing or no swap recipient
                                         (isEdit || !swapDelegModalData.swapRecipientAddress)
                                         ?
-                                        <>
-                                        <div className="modal-label mb-2">Enter new owner address<br/>(in bech32 format e.g. zil1xxxxxxxxxxxxx)</div>
-                                        <div className="input-group mb-2">
-                                            <input type="text" className="form-control shadow-none" value={newDelegAddr} onChange={handleNewDelegAddr} />
-                                        </div> 
-                                        </>
+                                        <div className="edit-swap-addr">
+                                            <div className="modal-label mb-2"><strong>Enter new owner address</strong><br/>(in bech32 format e.g. zil1xxxxxxxxxxxxx)</div>
+                                            <div className="input-group mb-2">
+                                                <input type="text" className="form-control shadow-none" value={newDelegAddr} onChange={handleNewDelegAddr} />
+                                            </div> 
+                                        </div>
                                         :
                                         null
                                     }
+
+                                    <div className="edit-swap-notes">
+                                        <small><strong>Notes</strong></small>
+                                        <ul>
+                                            <li><small>Beware of scams! Ensure you know who the recipient is before sending the request.</small></li>
+                                            <li><small>Process is <strong>irreversible</strong> once the recipient side has accepted your request.</small></li>
+                                        </ul>
+                                        <p></p>
+                                    </div>
 
                                     <div className="d-flex mt-4">
                                         {
