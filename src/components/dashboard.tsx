@@ -1322,6 +1322,7 @@ function Dashboard(props: any) {
                 impl={impl}  
                 networkURL={networkURL}
                 ledgerIndex={ledgerIndex}
+                ssnstatsList={ssnStats}
                 swapDelegModalData={swapDelegModalData}
                 userAddress={currWalletAddress}
                 updateData={updateData}

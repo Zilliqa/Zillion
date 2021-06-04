@@ -32,7 +32,7 @@ function SwapDelegModal(props: any) {
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
     
-    const {proxy, impl, ledgerIndex, networkURL, swapDelegModalData, userAddress, updateData, updateRecentTransactions} = props;
+    const {proxy, impl, ledgerIndex, networkURL, ssnstatsList, swapDelegModalData, userAddress, updateData, updateRecentTransactions} = props;
     const proxyChecksum = bech32ToChecksum(proxy);
 
     // transfer all stakes to this new deleg
@@ -75,12 +75,27 @@ function SwapDelegModal(props: any) {
         return true;
     }
 
+    // checks if user entered ssn address
+    // address zil format
+    const isSsnAddress = (address: string) => {
+        for (let ssn of ssnstatsList) {
+            if (address === ssn.address) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     const handleNewDelegAddr = (e : any) => {
         let address = e.target.value;
         if (!address || address === null) {
             address = '';
         } else if (address && (validation.isAddress(address) || validation.isBech32(address)) ) {
-            address = toBech32Address(bech32ToChecksum(address))
+            address = toBech32Address(bech32ToChecksum(address));
+            if (isSsnAddress(address)) {
+                Alert('error', "Invalid Address", `Do not enter a node address. If you want to transfer your stake to another node, go to "Staking Portfolio" > "Manage" > "Transfer Stake" `);
+                address = '';
+            } 
         }
         setNewDelegAddr(address);
     }
