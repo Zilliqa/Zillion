@@ -1804,6 +1804,14 @@ input:focus {
   margin-bottom: 2.5rem;
 }
 
+#swap-deleg-modal .modal-content {
+  max-height: calc(100vh - 10rem);
+}
+
+#swap-deleg-modal .contract-calls-modal {
+  padding-top: 4%;
+}
+
 #ssn-table-header-tip {
   font-size: 1em;
   font-weight: 500; 

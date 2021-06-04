@@ -93,7 +93,7 @@ function SwapDelegModal(props: any) {
         } else if (address && (validation.isAddress(address) || validation.isBech32(address)) ) {
             address = toBech32Address(bech32ToChecksum(address));
             if (isSsnAddress(address)) {
-                Alert('error', "Invalid Address", `Do not enter a node address. If you want to transfer your stake to another node, go to "Staking Portfolio" > "Manage" > "Transfer Stake" `);
+                Alert('error', "Invalid Address", `Do not enter a node address. If you want to transfer your stake from one node to another node, go to "Staking Portfolio" > "Manage" > "Transfer Stake" `);
                 address = '';
             } 
         }
@@ -423,7 +423,7 @@ function SwapDelegModal(props: any) {
 
     return (
         <div id="swap-deleg-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="swapDelegModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-scrollable modal-lg" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -551,6 +551,7 @@ function SwapDelegModal(props: any) {
                                     <ul>
                                         <li className="mb-3"><strong>Once the recipient has accepted a request, Zilliqa is not able to undo the transfer process.</strong></li>
                                         <li className="mb-3">Beware of scams! Do not send a transfer request if you are unsure of who the recipient is!</li>
+                                        <li className="mb-3">Do not enter any node operator's address.</li>
                                         <li className="mb-3">If you are a recipient, once you accept the transfer request, all the stakes would be transferred to your wallet. If the requestor has staked on the same node operator as you, the amount would be tabulated together.</li>
                                         <li className="mb-3">If you are a requestor, please check the recipient address carefully before sending the request. The transfer request is <strong>not reverrsible</strong> once the recipient has accepted.</li>
                                         <li>Ensure you have no buffered deposits or unwithdrawn rewards before sending a transfer request or accepting a transfer. This is to facilitate the stakes tabulation when the recipient chooses to accept the request.</li>
