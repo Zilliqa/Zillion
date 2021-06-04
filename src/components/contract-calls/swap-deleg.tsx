@@ -482,7 +482,7 @@ function SwapDelegModal(props: any) {
                                 tutorialStep === 1 ?
                                 <div>
                                     <p>At the "Change Stake Ownership", enter the recipient wallet address.</p>
-                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg} alt="change_ownership" /></div>
+                                    <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg} alt="change_ownership" /></div>
                                     <p>Wait for the transaction to process on the blockchain.</p>
                                     <div className="d-flex mt-4">
                                         <div className="mx-auto">
@@ -497,7 +497,7 @@ function SwapDelegModal(props: any) {
                                 tutorialStep === 2 ?
                                 <div>
                                     <p>After setting a recipient, should you change your mind, you may edit the recipient to another address or revoke the request entirely.</p>
-                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg1} alt="edit_revoke_request" /></div>
+                                    <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg1} alt="edit_revoke_request" /></div>
                                     <p>This can only be done if the recipient has not accepted your request.</p>
                                     <div className="d-flex mt-4">
                                         <div className="mx-auto">
@@ -512,7 +512,7 @@ function SwapDelegModal(props: any) {
                                 tutorialStep === 3 ?
                                 <div>
                                     <p>At the "Incoming Requests", if you are the <strong>recipient</strong>, you will see the list of wallet addresses / users who have intention to transfer their stakes to you.</p>
-                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg2} alt="incoming_requests" /></div>
+                                    <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg2} alt="incoming_requests" /></div>
                                     <p>If you <strong>accept</strong> the requests, all the stakes would be transferred from the requestors' wallet to you.</p>
                                     <p>If you <strong>reject</strong> the requests, nothing would happen and the requestor has to send a new request if he or she wishes to transfer the stakes to you.</p>
                                     <p>Please wait for the transaction to be processed completely on the blockchain before accepting or rejecting another request.</p>
@@ -529,13 +529,13 @@ function SwapDelegModal(props: any) {
                                 tutorialStep === 4 ?
                                 <div>
                                     <p>If you are the <strong>recipient</strong>, you should see a transaction ID after accepting the request as shown below.</p>
-                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg3} alt="txn_id" /></div>
+                                    <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg3} alt="txn_id" /></div>
                                     <p>Click on transaction ID and it would bring you to ViewBlock.</p>
                                     <p>Refresh the ViewBlock page once every few minutes; the transaction should be successful in less than 10 minutes.</p>
                                     <p>Head back to <strong>Zillion Dashboard</strong> and hit the manual refresh button.</p>
-                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg4} alt="manual_refresh" /></div>
+                                    <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg4} alt="manual_refresh" /></div>
                                     <p>You should observe the new amounts under <strong>My Staking Portfolio</strong>.</p>
-                                    <div className="d-flex mb-4"><img className="mx-auto" src={SwapImg5} alt="dashboard_staking_portfolio" /></div>
+                                    <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg5} alt="dashboard_staking_portfolio" /></div>
                                     <div className="d-flex mt-4">
                                         <div className="mx-auto">
                                             <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => decreaseTutorialStep()}>Prev</button>
