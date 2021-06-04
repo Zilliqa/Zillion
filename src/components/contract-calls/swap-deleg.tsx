@@ -367,24 +367,24 @@ function SwapDelegModal(props: any) {
         setIsPending(OperationStatus.PENDING);
 
         const userHasStaked = await hasStaked(userAddress);
-        // if (!userHasStaked) {
-        //     setIsPending('');
-        //     Alert('info', "User Has No Stake", `You have not stake with any operators.`);
-        //     return null;
-        // }
+        if (!userHasStaked) {
+            setIsPending('');
+            Alert('info', "User Has No Stake", `You have not stake with any operators.`);
+            return null;
+        }
 
         const userHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
-        // if (userHasBuffOrRewards) {
-        //     // user has buffered deposits or rewards
-        //     setIsPending('');
-        //     return null;
-        // }
+        if (userHasBuffOrRewards) {
+            // user has buffered deposits or rewards
+            setIsPending('');
+            return null;
+        }
 
         const newDelegHasBuffOrRewards = await hasBufferedOrRewards(newDelegAddr);
-        // if (newDelegHasBuffOrRewards) {
-        //     setIsPending('');
-        //     return null;
-        // }
+        if (newDelegHasBuffOrRewards) {
+            setIsPending('');
+            return null;
+        }
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -438,7 +438,7 @@ function SwapDelegModal(props: any) {
 
                         :
 
-                        showHelpBox ?
+                        document.referrer.indexOf(window.location.hostname) === -1 || showHelpBox ?
 
                         <>
                         <div className="modal-header">
