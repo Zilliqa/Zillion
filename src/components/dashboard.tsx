@@ -477,10 +477,8 @@ function Dashboard(props: any) {
 
                 const wallet = fromBech32Address(currWalletAddress).toLowerCase();
 
-                console.log(contractState['deleg_swap_request']);
                 if (wallet in contractState['deleg_swap_request']) {
                     swapRecipientAddress = contractState['deleg_swap_request'][wallet];
-                    console.log(swapRecipientAddress);
                 }
 
                 // get the list of requestors that is pending for this wallet to accept
