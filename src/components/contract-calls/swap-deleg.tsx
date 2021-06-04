@@ -579,11 +579,11 @@ function SwapDelegModal(props: any) {
                             </div>
                             <div className="d-flex mt-4">
                                 <div className="mx-auto">
-                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={requestDelegSwap}>
-                                        Yes
-                                    </button>
                                     <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmSendRequestBox(false)}>
                                         Cancel
+                                    </button>
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={requestDelegSwap}>
+                                        Yes
                                     </button>
                                 </div>
                             </div>
@@ -605,11 +605,11 @@ function SwapDelegModal(props: any) {
                             </div>
                             <div className="d-flex mt-4">
                                 <div className="mx-auto">
-                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={revokeDelegSwap}>
-                                        Yes
-                                    </button>
                                     <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRevokeBox(false)}>
                                         Cancel
+                                    </button>
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={revokeDelegSwap}>
+                                        Yes
                                     </button>
                                 </div>
                             </div>
@@ -643,11 +643,11 @@ function SwapDelegModal(props: any) {
 
                             <div className="d-flex mt-4">
                                 <div className="mx-auto">
-                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => rejectDelegSwap(selectedDelegAddr)}>
-                                        Yes
-                                    </button>
                                     <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRejectBox(false)}>
                                         Cancel
+                                    </button>
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => rejectDelegSwap(selectedDelegAddr)}>
+                                        Yes
                                     </button>
                                 </div>
                             </div>
@@ -682,11 +682,11 @@ function SwapDelegModal(props: any) {
 
                             <div className="d-flex mt-4">
                                 <div className="mx-auto">
-                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => confirmDelegSwap(selectedDelegAddr)}>
-                                        Yes
-                                    </button>
                                     <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmSwapBox(false)}>
                                         Cancel
+                                    </button>
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => confirmDelegSwap(selectedDelegAddr)}>
+                                        Yes
                                     </button>
                                 </div>
                             </div>
