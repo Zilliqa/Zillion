@@ -45,6 +45,7 @@ function SwapDelegModal(props: any) {
     const [isEdit, setIsEdit] = useState(false);
     
     const [showHelpBox, setShowHelpBox] = useState(false);
+    const [showConfirmSendRequestBox, setShowConfirmSendRequestBox] = useState(false);
     const [showConfirmRevokeBox, setShowConfirmRevokeBox] = useState(false);
     const [showConfirmSwapBox, setShowConfirmSwapBox] = useState(false);
     const [showConfirmRejectBox, setShowConfirmRejectBox] = useState(false);
@@ -60,6 +61,7 @@ function SwapDelegModal(props: any) {
         setTxnId('');
         setTxnType('');
         setShowHelpBox(false);
+        setShowConfirmSendRequestBox(false);
         setShowConfirmRevokeBox(false);
         setShowConfirmSwapBox(false);
         setShowConfirmRejectBox(false);
@@ -75,7 +77,9 @@ function SwapDelegModal(props: any) {
 
     const handleNewDelegAddr = (e : any) => {
         let address = e.target.value;
-        if (address && (validation.isAddress(address) || validation.isBech32(address)) ) {
+        if (!address || address === null) {
+            address = '';
+        } else if (address && (validation.isAddress(address) || validation.isBech32(address)) ) {
             address = toBech32Address(bech32ToChecksum(address))
         }
         setNewDelegAddr(address);
@@ -89,6 +93,16 @@ function SwapDelegModal(props: any) {
     const incrementTutorialStep = () => {
         let newTutorialStep = tutorialStep + 1;
         setTutorialStep(newTutorialStep);
+    }
+
+    // validate the input target recipient before showing the confirm send box
+    const toggleConfirmSendRequestBox = () => {
+        let targetRecipientAddr = newDelegAddr;
+        if (!validateAddress(targetRecipientAddr)) {
+            Alert('error', "Invalid Address", "Wallet address should be bech32 or checksum format.");
+            return null;
+        }
+        setShowConfirmSendRequestBox(true);
     }
 
     const toggleConfirmSwapBox = (address : string) => {
@@ -544,6 +558,40 @@ function SwapDelegModal(props: any) {
 
                         :
 
+                        showConfirmSendRequestBox ?
+
+                        <div className="modal-body animate__animated animate__fadeIn">
+                            <h5 className="modal-title mb-4">Send Request Confirmation</h5>
+                            <p>Are you sure you want to transfer <strong>ALL</strong> your stakes to this address?</p>
+                            <div className="row node-details-wrapper mb-4">
+                                <div className="col node-details-panel">
+                                    <h3>Target Recipient</h3>
+                                    <span>{newDelegAddr}</span>
+                                </div>
+                            </div>
+                            <div className="mb-4">
+                                <small><strong>Notes</strong></small>
+                                <ul>
+                                    <li><small>By clicking on <em>'Yes'</em>, you are sending a request to transfer all your existing stakes to this address.</small></li>
+                                    <li><small>Beware of scams! Ensure you know who the recipient is before sending the request.</small></li>
+                                    <li><small>Once the recipient side has accepted your request, all your stakes would be transferred to the recipient wallet; this process is <strong>non-reverisble</strong>.</small></li>
+                                </ul>
+                            </div>
+                            <div className="d-flex mt-4">
+                                <div className="mx-auto">
+                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={requestDelegSwap}>
+                                        Yes
+                                    </button>
+                                    <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmSendRequestBox(false)}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        :
+
                         showConfirmRevokeBox ?
 
                         <div className="modal-body animate__animated animate__fadeIn">
@@ -709,7 +757,7 @@ function SwapDelegModal(props: any) {
                                                     isEdit
                                                     ?
                                                     // allow users to send the modified address
-                                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={requestDelegSwap}>Send Request</button>
+                                                    <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => toggleConfirmSendRequestBox()}>Send Request</button>
                                                     :
                                                     <button type="button" className="btn btn-user-action mx-2 shadow-none" onClick={() => setIsEdit(true)}>Edit Request</button>
                                                 }
@@ -717,7 +765,7 @@ function SwapDelegModal(props: any) {
                                             </div>
                                             :
                                             // show new owner form
-                                            <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={requestDelegSwap}>Send Request</button>
+                                            <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={() => toggleConfirmSendRequestBox()}>Send Request</button>
                                         }
                                     </div>
                                 </div>
