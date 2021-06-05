@@ -353,6 +353,20 @@ function SwapDelegModal(props: any) {
         return true;
     }
 
+    // check if address has pending withdrawal
+    // returns false if address has no pending withdrawal
+    const hasPendingWithdrawal = async (address: string) => {
+        let wallet = fromBech32Address(address).toLowerCase();
+
+        const pending_withdrawal_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "withdrawal_pending", [wallet]);
+
+        if (pending_withdrawal_map === undefined || pending_withdrawal_map === "error" || pending_withdrawal_map.length === 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     const requestDelegSwap = async () => {
 
         if (!validateAddress(newDelegAddr)) {
@@ -367,9 +381,10 @@ function SwapDelegModal(props: any) {
         setIsPending(OperationStatus.PENDING);
 
         const userHasStaked = await hasStaked(userAddress);
-        if (!userHasStaked) {
+        const userHasPendingWithdrawal = await hasPendingWithdrawal(userAddress);
+        if (!userHasStaked && !userHasPendingWithdrawal) {
             setIsPending('');
-            Alert('info', "User Has No Stake", `You have not stake with any operators.`);
+            Alert('info', "User Has No Stake", `You have not staked with any operators.`);
             return null;
         }
 
