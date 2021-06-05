@@ -1,4 +1,4 @@
-import { fromBech32Address } from '@zilliqa-js/crypto';
+import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Explorer, NetworkURL, Network, TransactionType, AccessMethod, Constants } from './enum';
 import Alert from '../components/alert';
 const { BN, validation, units } = require('@zilliqa-js/util');
@@ -8,11 +8,23 @@ const BigNumber = require('bignumber.js');
 const { blockchain_explorer_config } = (window as { [key: string]: any })['config'];
 
 export const bech32ToChecksum = (address: string) => {
+    if (validation.isAddress(address)) {
+        // convert to checksum format
+        return fromBech32Address(toBech32Address(address))
+    }
+
     if (validation.isBech32(address)) {
         return fromBech32Address(address);
     }
     return address;
 };
+
+export const convertBase16ToBech32 = (address: string) => {
+    if (validation.isAddress(address)) {
+        return toBech32Address(address);
+    }
+    return address;
+}
 
 export const convertZilToQa = (amount: string) => {
     return units.toQa(amount, units.Units.Zil);
@@ -137,6 +149,11 @@ export const getAddressLink = (address: string, networkURL: string) => {
     return link;
 }
 
+export const getZillionExplorerLink = (address: string) => {
+    let domain = window.location.origin;
+    return domain + "/address/" + address;
+}
+
 // returns the zil address with '...'
 export const getTruncatedAddress = (address: string) => {
     if (!address) {
@@ -166,6 +183,14 @@ export const getTransactionText = (txnType: TransactionType) => {
             return "Update Receiving Address";
         case TransactionType.WITHDRAW_COMM:
             return "Withdraw Commission";
+        case TransactionType.REQUEST_DELEG_SWAP:
+            return "Request Delegator Swap";
+        case TransactionType.REVOKE_DELEG_SWAP:
+            return "Revoke Delegator Swap";
+        case TransactionType.CONFIRM_DELEG_SWAP:
+            return "Accept Swap Request";
+        case TransactionType.REJECT_DELEG_SWAP:
+            return "Reject Swap Request";
         default:
             return "Error";
     }

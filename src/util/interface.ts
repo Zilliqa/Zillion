@@ -67,6 +67,11 @@ interface WithdrawStakeModalData {
     delegAmt: string,
 }
 
+interface SwapDelegModalData {
+    swapRecipientAddress: string,
+    requestorList: string[],
+}
+
 export type {
     ClaimedRewardModalData,
     DelegateStakeModalData,
@@ -75,6 +80,7 @@ export type {
     NodeOptions,
     OperatorStats,
     SsnStats,
+    SwapDelegModalData,
     TransferStakeModalData,
     WithdrawStakeModalData
 }

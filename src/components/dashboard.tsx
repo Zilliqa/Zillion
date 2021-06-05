@@ -22,6 +22,7 @@ import ReDelegateStakeModal from './contract-calls/redeleg';
 import WithdrawStakeModal from './contract-calls/withdraw-stake';
 import WithdrawRewardModal from './contract-calls/withdraw-reward';
 import CompleteWithdrawModal from './contract-calls/complete-withdraw';
+import SwapDelegModal from './contract-calls/swap-deleg';
 
 import logo from "../static/logo.png";
 import DisclaimerModal from './disclaimer';
@@ -29,6 +30,7 @@ import DelegatorStatsTable from './delegator-stats-table';
 import OperatorStatsTable from './operator-stats-table';
 import CompleteWithdrawalTable from './complete-withdrawal-table';
 
+import IconShuffle from './icons/shuffle';
 import IconQuestionCircle from './icons/question-circle';
 import IconRefresh from './icons/refresh';
 import IconBell from './icons/bell';
@@ -39,7 +41,7 @@ import IconMoon from './icons/moon';
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewardsRetriable } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData, SwapDelegModalData } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import Footer from './footer';
@@ -99,7 +101,10 @@ const initWithdrawStakeModalData: WithdrawStakeModalData = {
     delegAmt: '0'
 }
 
-
+const initSwapDelegModalData: SwapDelegModalData = {
+    swapRecipientAddress: '',
+    requestorList: []
+}
 
 function Dashboard(props: any) {
 
@@ -143,6 +148,7 @@ function Dashboard(props: any) {
     const [delegStakeModalData, setDelegStakeModalData] = useState<DelegateStakeModalData>(initDelegStakeModalData);
     const [transferStakeModalData, setTransferStakeModalData] = useState<TransferStakeModalData>(initTransferStakeModalData);
     const [withdrawStakeModalData, setWithdrawStakeModalData] = useState<WithdrawStakeModalData>(initWithdrawStakeModalData);
+    const [swapDelegModalData, setSwapDelegModalData] = useState<SwapDelegModalData>(initSwapDelegModalData);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -458,6 +464,54 @@ function Dashboard(props: any) {
             }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
     }, [impl, networkURL, currWalletAddress]);
 
+    // get swap requests
+    const getDelegatorSwapRequests = useCallback(() => {
+        let swapRecipientAddress = '';
+        let requestorList: any = [];
+
+        trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deleg_swap_request")
+            .then(async (contractState) => {
+                if (contractState === undefined || contractState === 'error') {
+                    return null;
+                }
+
+                const wallet = fromBech32Address(currWalletAddress).toLowerCase();
+
+                if (wallet in contractState['deleg_swap_request']) {
+                    swapRecipientAddress = contractState['deleg_swap_request'][wallet];
+                }
+
+                // get the list of requestors that is pending for this wallet to accept
+                // reverse the mapping
+                let reverseMap = Object.keys(contractState['deleg_swap_request']).reduce((newMap: any, k) => {
+                    let receipientAddr = contractState['deleg_swap_request'][k];
+                    newMap[receipientAddr] = newMap[receipientAddr] || [];
+                    newMap[receipientAddr].push(k)
+                    return newMap;
+                }, {});
+
+                if (wallet in reverseMap) {
+                    requestorList = reverseMap[wallet];
+                }
+
+            })
+            .catch((err) => {
+                console.error(err);
+                return null;
+            })
+            .finally(() => {
+                if (mountedRef.current) {
+                    console.log("updating delegator swap requests...");
+                    const data: SwapDelegModalData = {
+                        swapRecipientAddress: swapRecipientAddress,
+                        requestorList: requestorList,
+                    }
+                    console.log(data);
+                    setSwapDelegModalData(data);
+                }
+            }), PromiseArea.PROMISE_GET_DELEG_SWAP_REQUESTS);
+    }, [impl, networkURL, currWalletAddress]);
+
 
     // compute number of blocks left before rewards are issued
     const getBlockRewardCountDown = useCallback(() => {
@@ -687,6 +741,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
+            getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
@@ -705,6 +760,7 @@ function Dashboard(props: any) {
         getContractConstants, 
         getDelegatorPendingWithdrawal,
         getDelegatorStats,
+        getDelegatorSwapRequests,
         getOperatorStats,
         getSsnStats
     ]);
@@ -717,6 +773,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
+            getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
@@ -740,6 +797,7 @@ function Dashboard(props: any) {
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
+            getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (currRole === Role.OPERATOR.toString()) {
             getOperatorStats();
@@ -909,13 +967,25 @@ function Dashboard(props: any) {
                     </li>
 
                     <li className="nav-item">
-                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme}>
-                        { 
-                            darkMode.value === true ? 
-                            <IconSun width="16" height="16"/> : 
-                            <IconMoon width="16" height="16"/>
-                        }
+                        <button 
+                            type="button" 
+                            className="btn btn-notify-dropdown btn-theme shadow-none mx-2"  
+                            data-toggle="modal" 
+                            data-target="#swap-deleg-modal" 
+                            data-keyboard="false" 
+                            data-backdrop="static"
+                            data-tip
+                            data-for="swap-tip">
+                                <IconShuffle width="16" height="16"/>
+                                {
+                                    //@ts-ignore
+                                    <span badge={swapDelegModalData.swapRecipientAddress ? (swapDelegModalData.requestorList.length+1) : swapDelegModalData.requestorList.length}></span>
+                                }
                         </button>
+
+                        <ReactTooltip id="swap-tip" place="bottom" type="dark" effect="solid">
+                            <span>Change Stake Ownership</span>
+                        </ReactTooltip>
                     </li>
 
                     {/* txn notifications */}
@@ -946,6 +1016,19 @@ function Dashboard(props: any) {
                         </Tippy>
                         <ReactTooltip id="notification-tip" place="bottom" type="dark" effect="solid">
                             <span>Recent Transactions</span>
+                        </ReactTooltip>
+                    </li>
+
+                    <li className="nav-item">
+                        <button type="button" className="btn btn-notify-dropdown btn-theme shadow-none mx-2" onClick={toggleTheme} data-tip data-for="theme-toggle-tip">
+                        { 
+                            darkMode.value === true ? 
+                            <IconSun width="16" height="16"/> : 
+                            <IconMoon width="16" height="16"/>
+                        }
+                        </button>
+                        <ReactTooltip id="theme-toggle-tip" place="bottom" type="dark" effect="solid">
+                            <span>Appearance</span>
                         </ReactTooltip>
                     </li>
 
@@ -1231,6 +1314,17 @@ function Dashboard(props: any) {
                 impl={impl}  
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex}
+                updateData={updateData}
+                updateRecentTransactions={updateRecentTransactions} />
+            
+            <SwapDelegModal 
+                proxy={proxy}
+                impl={impl}  
+                networkURL={networkURL}
+                ledgerIndex={ledgerIndex}
+                ssnstatsList={ssnStats}
+                swapDelegModalData={swapDelegModalData}
+                userAddress={currWalletAddress}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
                 
