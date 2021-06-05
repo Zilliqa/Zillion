@@ -438,7 +438,7 @@ function SwapDelegModal(props: any) {
 
                         :
 
-                        document.referrer.indexOf(window.location.hostname) === -1 || showHelpBox ?
+                        showHelpBox ?
 
                         <>
                         <div className="modal-header">
