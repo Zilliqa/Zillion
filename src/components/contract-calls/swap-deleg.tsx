@@ -447,7 +447,6 @@ function SwapDelegModal(props: any) {
                 window.localStorage.setItem("show-swap-help", JSON.stringify(false));
             }
         }
-        console.log("swapp....");
     }, [])
 
     return (
