@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import * as ZilliqaAccount from '../../account';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
@@ -24,6 +24,7 @@ import SwapImg2 from "../../static/swap_img2.png";
 import SwapImg3 from "../../static/swap_img3.png";
 import SwapImg4 from "../../static/swap_img4.png";
 import SwapImg5 from "../../static/swap_img5.png";
+import { isStorageAvailable } from '../../util/use-local-storage';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
@@ -435,6 +436,19 @@ function SwapDelegModal(props: any) {
 
         sendTxn(TransactionType.REVOKE_DELEG_SWAP, txParams);
     }
+
+    useEffect(() => {
+        // show the tutorial if this is the first time
+        // user clicks on the change stake ownership button
+        if (isStorageAvailable('localStorage')) {
+            const storedValue: any = window.localStorage.getItem("show-swap-help");
+            if (storedValue === null) {
+                setShowHelpBox(true);
+                window.localStorage.setItem("show-swap-help", JSON.stringify(false));
+            }
+        }
+        console.log("swapp....");
+    }, [])
 
     return (
         <div id="swap-deleg-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="swapDelegModalLabel" aria-hidden="true">
