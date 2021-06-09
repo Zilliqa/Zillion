@@ -1,7 +1,10 @@
 import type Transport from "@ledgerhq/hw-transport";
+import TransportU2F from "@ledgerhq/hw-transport-u2f";
+import TransportWebHID from '@ledgerhq/hw-transport-webhid';
+import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 
 const { BN, Long } = require('@zilliqa-js/util');
-const txnEncoder = require('@zilliqa-js/account/dist/util').encodeTransactionProto;
+const { encodeTransactionProto } = require('@zilliqa-js/account/dist/util');
 
 const CLA = 0xe0;
 const INS = {
@@ -16,7 +19,7 @@ const SigByteLen = 64;
 const Bech32AddrLen = 'zil'.length + 1 + 32 + 6;
 
 
-export default class Ledger {
+export class LedgerZilliqa {
     transport: Transport<any>;
 
     constructor(transport: Transport<any>, scrambleKey: string = "w0w") {
@@ -97,7 +100,7 @@ export default class Ledger {
             txnParams.gasLimit = Long.fromNumber(txnParams.gasLimit);
         }
 
-        var txnBytes = txnEncoder(txnParams);
+        var txnBytes = encodeTransactionProto(txnParams);
 
         const STREAM_LEN = 128; // Stream in batches of STREAM_LEN bytes each.
         var txn1Bytes;
@@ -161,3 +164,32 @@ export default class Ledger {
                 });
     }
 }
+
+// helper to create the correct transport object based on the browser support after Chrome 91 deprecates Transport U2F
+// call getTransport follow by new LedgerZilliqa object
+export const getTransport = async (): Promise<Transport<any>> => {
+    const isWebHIDSupported = await TransportWebHID.isSupported().catch(() => false);
+    const isWebUSBSupported = await TransportWebUSB.isSupported().catch(() => false);
+
+    if (isWebHIDSupported) {
+        console.log("ledger webhid supported");
+        const list = await TransportWebHID.list();
+        if (list.length > 0 && list[0].append) {
+            console.log("ledger webhid new list: %o\n", list);
+            return new TransportWebHID(list[0]);
+        }
+
+        console.log("ledger webhid later");
+        const existing = await TransportWebHID.openConnected().catch(() => null);
+        return existing ?? (await TransportWebHID.request());
+
+    } else if (isWebUSBSupported) {
+        console.log("ledger webusb supported");
+        const existing = await TransportWebUSB.openConnected();
+        return existing ?? (await TransportWebUSB.request());
+    }
+
+    console.log("ledger u2f fallback");
+    return TransportU2F.create();
+}
+

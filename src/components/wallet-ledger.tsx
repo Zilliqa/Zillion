@@ -6,9 +6,7 @@ import { AccessMethod } from '../util/enum';
 import { convertQaToCommaStr } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 
-import TransportU2F from "@ledgerhq/hw-transport-u2f";
-import TransportWebAuthn from "@ledgerhq/hw-transport-webauthn";
-import ZilliqaLedger from '../ledger';
+import { LedgerZilliqa, getTransport } from '../ledger-zilliqa';
 
 import $ from "jquery";
 
@@ -30,19 +28,14 @@ function LedgerWallet(props: any) {
 
     const role = props.role;
 
-    let transport: import("@ledgerhq/hw-transport").default<string> = null as any;
-    let ledger: ZilliqaLedger | null = null;
+
+    let ledger: LedgerZilliqa | null = null;
 
     const getLedgerAccounts = async () => {
         try {
-            const isWebAuthn = await TransportWebAuthn.isSupported();
-            if (isWebAuthn) {
-                transport = await TransportWebAuthn.create();
-            } else {
-                transport = await TransportU2F.create();
-            }
 
-            ledger = new ZilliqaLedger(transport);
+            const transport = await getTransport();
+            ledger = new LedgerZilliqa(transport);
 
             const result = await ledger!.getPublicAddress(ledgerIndex);
             const currAddress = result.pubAddr;

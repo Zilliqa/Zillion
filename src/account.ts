@@ -3,10 +3,7 @@
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
 import { NetworkURL, OperationStatus, AccessMethod, Constants } from './util/enum';
-import ZilliqaLedger from './ledger';
-
-import TransportU2F from "@ledgerhq/hw-transport-u2f";
-import TransportWebAuthn from "@ledgerhq/hw-transport-webauthn";
+import { getTransport, LedgerZilliqa } from './ledger-zilliqa';
 
 import { HTTPProvider } from '@zilliqa-js/core';
 import { fromBech32Address } from '@zilliqa-js/crypto';
@@ -394,16 +391,8 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
 };
 
 const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: number) => {
-    let transport = null;
-    const isWebAuthn = await TransportWebAuthn.isSupported();
-    if (isWebAuthn) {
-        console.log("webauthn is supported");
-        transport = await TransportWebAuthn.create();
-    } else {
-        transport = await TransportU2F.create();
-    }
-    
-    const ledger = new ZilliqaLedger(transport);
+    const transport = await getTransport();
+    const ledger = new LedgerZilliqa(transport);
     const result = await ledger.getPublicAddress(ledgerIndex);
 
     // get public key
