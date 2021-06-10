@@ -392,8 +392,6 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
 };
 
 const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: number) => {
-    console.log("ledger sign");
-    
     const transport = await LedgerZilliqa.getTransport();
     const ledger = new LedgerZilliqa(transport);
     const result = await ledger.getPublicAddress(ledgerIndex);
@@ -488,7 +486,7 @@ const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: 
                 return OperationStatus.ERROR;
             }
 
-            // transport.close();
+            transport.close();
 
         } catch (err) {
             console.log("something is wrong with broadcasting the transaction :%o", JSON.stringify(err));

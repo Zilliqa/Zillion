@@ -2,6 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+import { Constants } from "./util/enum";
 
 const { BN, Long } = require('@zilliqa-js/util');
 const { encodeTransactionProto } = require('@zilliqa-js/account/dist/util');
@@ -31,8 +32,8 @@ export class LedgerZilliqa {
         if (isWebHIDSupported) {
             console.log("ledger webhid supported");
             const list = await TransportWebHID.list();
-            if (list.length > 0 && list[0].opened) {
-              return new TransportWebHID(list[0]);
+            if (list.length > 0 && list[0].opened && list[0].vendorId === Constants.LEDGER_VENDOR_ID) {
+                return new TransportWebHID(list[0]);
             }
             const existing = await TransportWebHID.openConnected().catch(() => null);
             return existing ?? TransportWebHID.request();
