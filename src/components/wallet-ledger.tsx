@@ -1,12 +1,11 @@
 import React, { useContext, useState } from 'react';
-
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import { AccessMethod } from '../util/enum';
 import { convertQaToCommaStr } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 
-import { LedgerZilliqa, getTransport } from '../ledger-zilliqa';
+import { LedgerZilliqa } from '../ledger-zilliqa';
 
 import $ from "jquery";
 
@@ -28,22 +27,24 @@ function LedgerWallet(props: any) {
 
     const role = props.role;
 
+    const handleClose = () => {
+        setLedgerIndex(defaultLedgerIndex);
+        setLedgerAccounts([] as LedgerAccount[]);
+    }
 
-    let ledger: LedgerZilliqa | null = null;
-
-    const getLedgerAccounts = async () => {
+    const getLedgerAccounts = async (currentLedgerIndex: number) => {
         try {
+            Alert('info', "Info", "Please follow the instructions on the device.");
+            
+            const transport = await LedgerZilliqa.getTransport();
+            const ledger = new LedgerZilliqa(transport);
 
-            const transport = await getTransport();
-            console.log(transport);
-            ledger = new LedgerZilliqa(transport);
-
-            const result = await ledger!.getPublicAddress(ledgerIndex);
+            const result = await ledger!.getPublicAddress(currentLedgerIndex);
             const currAddress = result.pubAddr;
             const balance = await ZilliqaAccount.getBalance(currAddress);
 
             const currLedgerAccount: LedgerAccount = {
-                hwIndex: ledgerIndex,
+                hwIndex: currentLedgerIndex,
                 bech32Address: currAddress,
                 balance: balance
             }
@@ -52,13 +53,15 @@ function LedgerWallet(props: any) {
             tempLedgerAccounts.push(currLedgerAccount);
             setLedgerAccounts([...tempLedgerAccounts]);
             
-            // prepare next ledger index
-            const nextLedgerIndex = ledgerIndex + 1;
-            setLedgerIndex(nextLedgerIndex);
+            setLedgerIndex(currentLedgerIndex);
 
         } catch (err) {
             console.error("error getting ledger index: %o", ledgerIndex);
             Alert('error', 'Unable to access ledger', 'Have you unlock the PIN code?');
+
+            // clear modal state
+            $("#ledger-connect-modal").modal("hide");
+            handleClose();
         }
     }
 
@@ -94,6 +97,10 @@ function LedgerWallet(props: any) {
         } catch (err) {
             console.error("error unlocking ledger...:%o", err);
             Alert('error', 'Unable to access ledger', 'Have you unlock the PIN code?');
+
+            // clear modal state
+            $("#ledger-connect-modal").modal("hide");
+            handleClose();
         }
     }
 
@@ -104,8 +111,13 @@ function LedgerWallet(props: any) {
             <div id="ledger-connect-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="ledgerConnectModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                     <div className="modal-content">
+                        <div className="modal-header">
+                            <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
                         <div className="modal-body">
-                            <table className="table p-4 my-4">
+                            <table className="table p-4 mt-2 mb-4">
                                 <thead>
                                     <tr>
                                         <th>Index</th>
@@ -123,14 +135,14 @@ function LedgerWallet(props: any) {
                                     )}
                                 </tbody>
                             </table>
-                            <button type="button" className="btn btn-user-action-cancel mx-2" onClick={getLedgerAccounts}>Next Account</button>
+                            <button type="button" className="btn btn-user-action-cancel mx-2" onClick={() => getLedgerAccounts(ledgerIndex+1)}>Next Account</button>
                             <button type="button" className="btn btn-user-action mx-2" onClick={() => unlockWallet(defaultLedgerIndex)}>Use Default Index #{defaultLedgerIndex}</button>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <button type="button" className="btn btn-user-action mx-2" data-toggle="modal" data-target="#ledger-connect-modal" data-keyboard="false" data-backdrop="static" onClick={getLedgerAccounts}>Connect to Ledger Wallet</button>
+            <button type="button" className="btn btn-user-action mx-2" data-toggle="modal" data-target="#ledger-connect-modal" data-keyboard="false" data-backdrop="static" onClick={() => getLedgerAccounts(ledgerIndex)}>Connect to Ledger Wallet</button>
             <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
         </div>
     );

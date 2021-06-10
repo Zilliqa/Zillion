@@ -3,13 +3,14 @@
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
 import { NetworkURL, OperationStatus, AccessMethod, Constants } from './util/enum';
-import { getTransport, LedgerZilliqa } from './ledger-zilliqa';
+import { LedgerZilliqa } from './ledger-zilliqa';
 
 import { HTTPProvider } from '@zilliqa-js/core';
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 import BN from 'bn.js';
 import { ApiRandomizer } from './util/api-randomizer';
+
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
 const { TransactionFactory } = require('@zilliqa-js/account');
@@ -392,8 +393,8 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
 
 const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: number) => {
     console.log("ledger sign");
-    let transport = await getTransport();
-    console.log(transport);
+    
+    const transport = await LedgerZilliqa.getTransport();
     const ledger = new LedgerZilliqa(transport);
     const result = await ledger.getPublicAddress(ledgerIndex);
 
@@ -487,7 +488,7 @@ const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: 
                 return OperationStatus.ERROR;
             }
 
-            transport.close();
+            // transport.close();
 
         } catch (err) {
             console.log("something is wrong with broadcasting the transaction :%o", JSON.stringify(err));
