@@ -391,7 +391,9 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
 };
 
 const handleLedgerSign = async (networkURL: string, txParams: any, ledgerIndex: number) => {
-    const transport = await getTransport();
+    console.log("ledger sign");
+    let transport = await getTransport();
+    console.log(transport);
     const ledger = new LedgerZilliqa(transport);
     const result = await ledger.getPublicAddress(ledgerIndex);
 

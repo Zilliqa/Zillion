@@ -35,6 +35,7 @@ function LedgerWallet(props: any) {
         try {
 
             const transport = await getTransport();
+            console.log(transport);
             ledger = new LedgerZilliqa(transport);
 
             const result = await ledger!.getPublicAddress(ledgerIndex);

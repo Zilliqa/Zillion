@@ -171,22 +171,39 @@ export const getTransport = async (): Promise<Transport<any>> => {
     const isWebHIDSupported = await TransportWebHID.isSupported().catch(() => false);
     const isWebUSBSupported = await TransportWebUSB.isSupported().catch(() => false);
 
-    if (isWebHIDSupported) {
-        console.log("ledger webhid supported");
-        const list = await TransportWebHID.list();
-        if (list.length > 0 && list[0].append) {
-            console.log("ledger webhid new list: %o\n", list);
-            return new TransportWebHID(list[0]);
+    // if (isWebHIDSupported) {
+    //     console.log("ledger webhid supported");
+    //     const list = await TransportWebHID.list();
+    //     if (list.length > 0 && list[0].append) {
+    //         console.log("ledger webhid new list: %o\n", list);
+    //         return new TransportWebHID(list[0]);
+    //     }
+
+    //     console.log("ledger webhid later");
+    //     const existing = await TransportWebHID.openConnected().catch(() => null);
+    //     return existing ?? (await TransportWebHID.request());
+
+    // } else if (isWebUSBSupported) {
+    //     console.log("ledger webusb supported");
+    //     const existing = await TransportWebUSB.openConnected();
+    //     return existing ?? (await TransportWebUSB.request());
+    // }
+
+    // if (isWebHIDSupported) {
+    //     const existing = await TransportWebHID.openConnected().catch(() => null);
+    //     if (existing === null) {
+    //         return TransportWebHID.create();
+    //     }
+    //     return existing;
+    // }
+
+    if (isWebUSBSupported) {
+        const existing = await TransportWebUSB.openConnected().catch(() => null);
+        if (existing === null) {
+            console.log("webusb create new transport");
+            return TransportWebUSB.create();
         }
-
-        console.log("ledger webhid later");
-        const existing = await TransportWebHID.openConnected().catch(() => null);
-        return existing ?? (await TransportWebHID.request());
-
-    } else if (isWebUSBSupported) {
-        console.log("ledger webusb supported");
-        const existing = await TransportWebUSB.openConnected();
-        return existing ?? (await TransportWebUSB.request());
+        return existing;
     }
 
     console.log("ledger u2f fallback");
