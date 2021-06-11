@@ -56,12 +56,8 @@ function LedgerWallet(props: any) {
             setLedgerIndex(currentLedgerIndex);
 
         } catch (err) {
-            console.error("error getting ledger index: %o", ledgerIndex);
+            console.error("error getting ledger index: %o", err);
             Alert('error', 'Unable to access ledger', 'Have you unlock the PIN code?');
-
-            // clear modal state
-            $("#ledger-connect-modal").modal("hide");
-            handleClose();
         }
     }
 
