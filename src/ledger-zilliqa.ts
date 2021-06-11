@@ -1,7 +1,11 @@
 import type Transport from "@ledgerhq/hw-transport";
+import TransportU2F from "@ledgerhq/hw-transport-u2f";
+import TransportWebHID from '@ledgerhq/hw-transport-webhid';
+import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+import { Constants } from "./util/enum";
 
 const { BN, Long } = require('@zilliqa-js/util');
-const txnEncoder = require('@zilliqa-js/account/dist/util').encodeTransactionProto;
+const { encodeTransactionProto } = require('@zilliqa-js/account/dist/util');
 
 const CLA = 0xe0;
 const INS = {
@@ -16,12 +20,40 @@ const SigByteLen = 64;
 const Bech32AddrLen = 'zil'.length + 1 + 32 + 6;
 
 
-export default class Ledger {
+export class LedgerZilliqa {
     transport: Transport<any>;
 
+    // helper to create the transport object
+    // which is later used to init the constructor
+    static async getTransport() {
+        const isWebHIDSupported = await TransportWebHID.isSupported().catch(() => false);
+        const isWebUSBSupported = await TransportWebUSB.isSupported().catch(() => false);
+    
+        if (isWebHIDSupported) {
+            console.log("ledger webhid supported");
+            const list = await TransportWebHID.list();
+            if (list.length > 0 && list[0].opened && list[0].vendorId === Constants.LEDGER_VENDOR_ID) {
+                return new TransportWebHID(list[0]);
+            }
+            const existing = await TransportWebHID.openConnected().catch(() => null);
+            return existing ?? TransportWebHID.request();
+        }
+    
+        if (isWebUSBSupported) {
+            console.log("ledger webusb supported")
+            const existing = await TransportWebUSB.openConnected().catch(() => null);
+            if (existing === null) {
+                return TransportWebUSB.create();
+            }
+            return existing;
+        }
+    
+        console.log("ledger u2f fallback");
+        return TransportU2F.create();
+    }
+    
     constructor(transport: Transport<any>, scrambleKey: string = "w0w") {
         this.transport = transport;
-        transport.setExchangeTimeout(180000);
         transport.decorateAppAPIMethods(
             this,
             ["getVersion", "getPublicKey", "getPublicAddress", "signTxn"],
@@ -97,7 +129,7 @@ export default class Ledger {
             txnParams.gasLimit = Long.fromNumber(txnParams.gasLimit);
         }
 
-        var txnBytes = txnEncoder(txnParams);
+        var txnBytes = encodeTransactionProto(txnParams);
 
         const STREAM_LEN = 128; // Stream in batches of STREAM_LEN bytes each.
         var txn1Bytes;

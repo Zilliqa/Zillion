@@ -1269,7 +1269,7 @@ function Dashboard(props: any) {
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                ledgerIndex={ledgerIndex} 
+                ledgerIndex={ledgerIndex}
                 minDelegStake={minDelegStake}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
