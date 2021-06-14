@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import * as ZilliqaAccount from '../../account';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
@@ -24,6 +24,7 @@ import SwapImg2 from "../../static/swap_img2.png";
 import SwapImg3 from "../../static/swap_img3.png";
 import SwapImg4 from "../../static/swap_img4.png";
 import SwapImg5 from "../../static/swap_img5.png";
+import { isStorageAvailable } from '../../util/use-local-storage';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
@@ -436,6 +437,18 @@ function SwapDelegModal(props: any) {
         sendTxn(TransactionType.REVOKE_DELEG_SWAP, txParams);
     }
 
+    useEffect(() => {
+        // show the tutorial if this is the first time
+        // user clicks on the change stake ownership button
+        if (isStorageAvailable('localStorage')) {
+            const storedValue: any = window.localStorage.getItem("show-swap-help");
+            if (storedValue === null) {
+                setShowHelpBox(true);
+                window.localStorage.setItem("show-swap-help", JSON.stringify(false));
+            }
+        }
+    }, [])
+
     return (
         <div id="swap-deleg-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="swapDelegModalLabel" aria-hidden="true">
             <div className="contract-calls-modal modal-dialog modal-dialog-scrollable modal-lg" role="document">
@@ -496,9 +509,9 @@ function SwapDelegModal(props: any) {
                                 
                                 tutorialStep === 1 ?
                                 <div>
-                                    <p>At the "Change Stake Ownership", enter the recipient wallet address.</p>
+                                    <p>Under the "Change Stake Ownership" tab, enter the recipient wallet address.</p>
                                     <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg} alt="change_ownership" /></div>
-                                    <p>Wait for the transaction to process on the blockchain.</p>
+                                    <p>Wait for the transaction to be processed on the blockchain.</p>
                                     <div className="d-flex mt-4">
                                         <div className="mx-auto">
                                             <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => decreaseTutorialStep()}>Prev</button>
@@ -526,7 +539,7 @@ function SwapDelegModal(props: any) {
 
                                 tutorialStep === 3 ?
                                 <div>
-                                    <p>At the "Incoming Requests", if you are the <strong>recipient</strong>, you will see the list of wallet addresses / users who have intention to transfer their stakes to you.</p>
+                                    <p>Under the "Incoming Requests", if you are the <strong>recipient</strong>, you will see the list of wallet addresses / users who wish to transfer their stakes to you.</p>
                                     <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg2} alt="incoming_requests" /></div>
                                     <p>If you <strong>accept</strong> the requests, all the stakes would be transferred from the requestors' wallet to you.</p>
                                     <p>If you <strong>reject</strong> the requests, nothing would happen and the requestor has to send a new request if he or she wishes to transfer the stakes to you.</p>
@@ -545,7 +558,7 @@ function SwapDelegModal(props: any) {
                                 <div>
                                     <p>If you are the <strong>recipient</strong>, you should see a transaction ID after accepting the request as shown below.</p>
                                     <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg3} alt="txn_id" /></div>
-                                    <p>Click on transaction ID and it would bring you to ViewBlock.</p>
+                                    <p>Click on the transaction ID and it would bring you to ViewBlock.</p>
                                     <p>Refresh the ViewBlock page once every few minutes; the transaction should be successful in less than 10 minutes.</p>
                                     <p>Head back to <strong>Zillion Dashboard</strong> and hit the manual refresh button.</p>
                                     <div className="d-flex mb-4"><img className="mx-auto img-fluid" src={SwapImg4} alt="manual_refresh" /></div>
@@ -568,8 +581,8 @@ function SwapDelegModal(props: any) {
                                         <li className="mb-3">Beware of scams! Do not send a transfer request if you are unsure of who the recipient is!</li>
                                         <li className="mb-3">Do not enter any node operator's address.</li>
                                         <li className="mb-3">If you are a recipient, once you accept the transfer request, all the stakes would be transferred to your wallet. If the requestor has staked on the same node operator as you, the amount would be tabulated together.</li>
-                                        <li className="mb-3">If you are a requestor, please check the recipient address carefully before sending the request. The transfer request is <strong>not reverrsible</strong> once the recipient has accepted.</li>
-                                        <li>Ensure you have no buffered deposits or unwithdrawn rewards before sending a transfer request or accepting a transfer. This is to facilitate the stakes tabulation when the recipient chooses to accept the request.</li>
+                                        <li className="mb-3">If you are a requestor, please check the recipient address carefully before sending the request. The transfer request is <strong>irreversible</strong> once the recipient has accepted.</li>
+                                        <li>Ensure that you have no buffered deposits or unwithdrawn rewards before sending a transfer request or accepting a transfer. This is to facilitate the stakes tabulation when the recipient chooses to accept the request.</li>
                                     </ul>
                                     <div className="d-flex mt-4">
                                         <div className="mx-auto">
@@ -604,8 +617,8 @@ function SwapDelegModal(props: any) {
                                 <small><strong>Notes</strong></small>
                                 <ul>
                                     <li><small>By clicking on <em>'Yes'</em>, you are sending a request to transfer all your existing stakes to this address.</small></li>
-                                    <li><small>Beware of scams! Ensure you know who the recipient is before sending the request.</small></li>
-                                    <li><small>Process is <strong>irreverisble</strong> once the recipient side has accepted your request.</small></li>
+                                    <li><small>Beware of scams! Ensure that you know who the recipient is before sending the request.</small></li>
+                                    <li><small>Process is <strong>irreverisble</strong> once the recipient has accepted your request.</small></li>
                                 </ul>
                             </div>
                             <div className="d-flex mt-4">
@@ -747,7 +760,7 @@ function SwapDelegModal(props: any) {
 
                             <TabPanel>
                                 <div className="modal-body">
-                                    <p className="mb-4">Transfer <strong>ALL</strong> your existing stakes from one wallet to another wallet by entering a new owner address.</p>
+                                    <p className="mb-4">Transfer <strong>ALL</strong> your existing stakes from one wallet to another by entering a new owner address.</p>
                                     {
                                         swapDelegModalData.swapRecipientAddress 
                                         ?
@@ -783,8 +796,8 @@ function SwapDelegModal(props: any) {
                                     <div className="edit-swap-notes">
                                         <small><strong>Notes</strong></small>
                                         <ul>
-                                            <li><small>Beware of scams! Ensure you know who the recipient is before sending the request.</small></li>
-                                            <li><small>Process is <strong>irreversible</strong> once the recipient side has accepted your request.</small></li>
+                                            <li><small>Beware of scams! Ensure that you know who the recipient is before sending the request.</small></li>
+                                            <li><small>Process is <strong>irreversible</strong> once the recipient has accepted your request.</small></li>
                                         </ul>
                                         <p></p>
                                     </div>
