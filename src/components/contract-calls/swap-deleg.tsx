@@ -305,7 +305,7 @@ function SwapDelegModal(props: any) {
         for (let ssnAddress in ssnlist) {
             // check rewards
             const rewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, wallet));
-            console.log("rewards....:%o\n", rewards);
+            
             if (rewards !== "0") {
                 let msg = `${displayAddr} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
                 Alert('info', "Unwithdrawn Rewards Found", msg);
