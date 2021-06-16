@@ -113,7 +113,7 @@ function Home(props: any) {
 
     ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'totalstakeamount')
     .then((contractState) => {
-        if (contractState === undefined || contractState === 'error') {
+        if (contractState === undefined || contractState === null || contractState === 'error') {
             return null;
         }
         totalStakeAmt = contractState.totalstakeamount;
@@ -134,7 +134,7 @@ function Home(props: any) {
 
       trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'ssnlist')
           .then(async (contractState) => {
-              if (contractState === undefined || contractState === 'error') {
+              if (contractState === undefined || contractState === null || contractState === 'error') {
                   return null;
               }
 

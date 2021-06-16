@@ -294,18 +294,18 @@ function SwapDelegModal(props: any) {
             return false;
         }
 
-        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error") {
-            return false;
-        }
-
-        if (buff_deposit_deleg_map === undefined || buff_deposit_deleg_map === "error") {
+        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null) {
+            // delegator has not delegate with any ssn
+            // no need to perform further checks
             return false;
         }
 
         let ssnlist = deposit_amt_deleg_map["deposit_amt_deleg"][wallet];
+
         for (let ssnAddress in ssnlist) {
             // check rewards
             const rewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, wallet));
+            console.log("rewards....:%o\n", rewards);
             if (rewards !== "0") {
                 let msg = `${displayAddr} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
                 Alert('info', "Unwithdrawn Rewards Found", msg);
@@ -327,7 +327,10 @@ function SwapDelegModal(props: any) {
             // check buffered deposits (lrc-1)
             let lrc_o_minus = lrc_o - 1
             if (lrc_o_minus >= 0) {
-                if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
+                if (buff_deposit_deleg_map !== undefined && 
+                    buff_deposit_deleg_map !== 'error' && 
+                    buff_deposit_deleg_map !== null &&  
+                    buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
                     if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet][ssnAddress].hasOwnProperty(lrc_o_minus)) {
                         let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
                         Alert('info', "Buffered Deposits Found", msg);
@@ -347,7 +350,7 @@ function SwapDelegModal(props: any) {
 
         const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
 
-        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map.length === 0) {
+        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null || deposit_amt_deleg_map.length === 0) {
             return false;
         }
 
@@ -361,7 +364,7 @@ function SwapDelegModal(props: any) {
 
         const pending_withdrawal_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "withdrawal_pending", [wallet]);
 
-        if (pending_withdrawal_map === undefined || pending_withdrawal_map === "error" || pending_withdrawal_map.length === 0) {
+        if (pending_withdrawal_map === undefined || pending_withdrawal_map === "error" || pending_withdrawal_map === null || pending_withdrawal_map.length === 0) {
             return false;
         }
 
