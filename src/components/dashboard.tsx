@@ -351,7 +351,7 @@ function Dashboard(props: any) {
             const gzilAddressState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'gziladdr');
             if (gzilAddressState.gziladdr) {
                 const gzilContractState = await ZilliqaAccount.getImplStateExplorerRetriable(gzilAddressState['gziladdr'], networkURL, "balances", [userBase16Address]);
-                if (gzilContractState !== 'error') {
+                if (gzilContractState && gzilContractState !== 'error') {
                     gzilBalance = gzilContractState["balances"][userBase16Address];
                 }
             }

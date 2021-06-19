@@ -198,7 +198,7 @@ function SwapDelegModal(props: any) {
 
         setIsPending(OperationStatus.PENDING);
 
-        const requestorHasBuffOrRewards = await hasBufferedOrRewards(requestorAddr);
+        const requestorHasBuffOrRewards = await hasBufferedOrRewards("ConfirmSwap", requestorAddr);
         if (requestorHasBuffOrRewards) {
             // requestor has buffered deposits or rewards
             setIsPending('');
@@ -206,7 +206,7 @@ function SwapDelegModal(props: any) {
         }
 
         // userAddress here is the new delegator waiting to receive
-        const newDelegHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
+        const newDelegHasBuffOrRewards = await hasBufferedOrRewards("ConfirmSwap", userAddress);
         if (newDelegHasBuffOrRewards) {
             setIsPending('');
             return null;
@@ -276,10 +276,12 @@ function SwapDelegModal(props: any) {
 
     // check if address has buffered deposits or unwithdrawn rewards
     // returns true if the address has buffered deposits or rewards, otherwise returns false
+    // @param invokerMethod: a string to determine if it is coming from RequestSwap or ConfirmSwap to change the message display
     // @param address: bech32 format
-    const hasBufferedOrRewards = async (address: string) => {
+    const hasBufferedOrRewards = async (invokerMethod: string = "", address: string) => {
         let wallet = bech32ToChecksum(address).toLowerCase();
         let displayAddr = getTruncatedAddress(address);
+        let targetName = address === userAddress ? "Your wallet" : invokerMethod === "RequestSwap" ? "The recipient" : "The requestor"
 
         const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "lastrewardcycle");
         const lbdc = await  ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "last_buf_deposit_cycle_deleg", [wallet]);
@@ -305,9 +307,9 @@ function SwapDelegModal(props: any) {
         for (let ssnAddress in ssnlist) {
             // check rewards
             const rewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, wallet));
-            
-            if (rewards !== "0") {
-                let msg = `${displayAddr} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
+
+            if (rewards.gt(new BN(0))) {
+                let msg = `${targetName} ${displayAddr} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
                 Alert('info', "Unwithdrawn Rewards Found", msg);
                 return true;
             }
@@ -318,7 +320,7 @@ function SwapDelegModal(props: any) {
             if (lbdc["last_buf_deposit_cycle_deleg"][wallet].hasOwnProperty(ssnAddress)) {
                 const ldcd = parseInt(lbdc["last_buf_deposit_cycle_deleg"][wallet][ssnAddress]);
                 if (lrc_o <= ldcd) {
-                    let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
+                    let msg = `${targetName} ${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
                     Alert('info', "Buffered Deposits Found", msg);
                     return true;
                 }
@@ -332,7 +334,7 @@ function SwapDelegModal(props: any) {
                     buff_deposit_deleg_map !== null &&  
                     buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
                     if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet][ssnAddress].hasOwnProperty(lrc_o_minus)) {
-                        let msg = `${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
+                        let msg = `${targetName} ${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
                         Alert('info', "Buffered Deposits Found", msg);
                         return true;
                     }
@@ -392,14 +394,14 @@ function SwapDelegModal(props: any) {
             return null;
         }
 
-        const userHasBuffOrRewards = await hasBufferedOrRewards(userAddress);
+        const userHasBuffOrRewards = await hasBufferedOrRewards("RequestSwap", userAddress);
         if (userHasBuffOrRewards) {
             // user has buffered deposits or rewards
             setIsPending('');
             return null;
         }
 
-        const newDelegHasBuffOrRewards = await hasBufferedOrRewards(newDelegAddr);
+        const newDelegHasBuffOrRewards = await hasBufferedOrRewards("RequestSwap", newDelegAddr);
         if (newDelegHasBuffOrRewards) {
             setIsPending('');
             return null;
