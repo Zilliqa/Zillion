@@ -110,11 +110,11 @@ function ReDelegateStakeModal(props: any) {
         const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "lastrewardcycle");
         const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
-        if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error') {
+        if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
             return false;
         }
 
-        if (last_buf_deposit_cycle_deleg_json === undefined || last_buf_deposit_cycle_deleg_json === 'error') {
+        if (last_buf_deposit_cycle_deleg_json === undefined || last_buf_deposit_cycle_deleg_json === 'error' || last_buf_deposit_cycle_deleg_json === null) {
             return false;
         }
 
