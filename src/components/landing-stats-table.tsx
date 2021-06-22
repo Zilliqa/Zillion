@@ -42,13 +42,13 @@ function LandingStatsTable(props: any) {
         // because the map size is smaller
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "last_withdraw_cycle_deleg")
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
                 // compute number of nodes and delegators
                 let nodesMap: any = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "comm_for_ssn");
 
-                if (nodesMap !== undefined && nodesMap !== 'error') {
+                if (nodesMap !== undefined && nodesMap !== 'error' && nodesMap !== null) {
                     nodesNum = Object.keys(nodesMap.comm_for_ssn).length.toString();
                 }
                 delegNum = Object.keys(contractState.last_withdraw_cycle_deleg).length.toString();
@@ -58,7 +58,7 @@ function LandingStatsTable(props: any) {
                 // get total stake amount
                 let totalStakeAmount = 0;
                 let totalStakeAmountJson: any = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "totalstakeamount");
-                if (totalStakeAmountJson !== undefined && totalStakeAmountJson !== 'error') {
+                if (totalStakeAmountJson !== undefined && totalStakeAmountJson !== 'error' && totalStakeAmountJson !== null) {
                     totalStakeAmount = totalStakeAmountJson.totalstakeamount;
                 }
                 totalDeposits = totalStakeAmount.toString();
@@ -76,13 +76,13 @@ function LandingStatsTable(props: any) {
                 let gzilAddr = "";
                 let gzilAddrJson: any = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "gziladdr");
 
-                if (gzilAddrJson !== undefined && gzilAddrJson !== 'error') {
+                if (gzilAddrJson !== undefined && gzilAddrJson !== 'error' && gzilAddrJson !== null) {
                     gzilAddr = gzilAddrJson.gziladdr;
                 }
 
                 // compute total number of gzil
                 const gzilTotalSupplyJson = await ZilliqaAccount.getImplStateExplorerRetriable(gzilAddr, networkURL, "total_supply");
-                if (gzilTotalSupplyJson !== undefined && gzilTotalSupplyJson !== 'error') {
+                if (gzilTotalSupplyJson !== undefined && gzilTotalSupplyJson !== 'error' && gzilTotalSupplyJson !== null) {
                     // gzil is 15 decimal places
                     gzil = gzilTotalSupplyJson.total_supply;
                     const decimalPlaces = new BigNumber(10**15);

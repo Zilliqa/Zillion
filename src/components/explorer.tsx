@@ -97,7 +97,7 @@ function Explorer(props: any) {
 
         trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg', [wallet])
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
 
@@ -169,7 +169,7 @@ function Explorer(props: any) {
 
         trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending', [wallet])
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
     

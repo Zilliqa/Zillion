@@ -238,7 +238,7 @@ function Dashboard(props: any) {
 
         ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "mindelegstake")
             .then((contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
                 minDelegStake = contractState.mindelegstake;
@@ -259,7 +259,7 @@ function Dashboard(props: any) {
         
         ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'totalstakeamount')
             .then((contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
                 totalStakeAmt = contractState.totalstakeamount;
@@ -296,7 +296,7 @@ function Dashboard(props: any) {
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'deposit_amt_deleg', [userBase16Address])
         .then(async (contractState) => {
-            if (contractState === undefined || contractState === 'error') {
+            if (contractState === undefined || contractState === null || contractState === 'error') {
                 return null;
             }
 
@@ -351,7 +351,7 @@ function Dashboard(props: any) {
             const gzilAddressState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'gziladdr');
             if (gzilAddressState.gziladdr) {
                 const gzilContractState = await ZilliqaAccount.getImplStateExplorerRetriable(gzilAddressState['gziladdr'], networkURL, "balances", [userBase16Address]);
-                if (gzilContractState !== 'error') {
+                if (gzilContractState && gzilContractState !== 'error') {
                     gzilBalance = gzilContractState["balances"][userBase16Address];
                 }
             }
@@ -395,7 +395,7 @@ function Dashboard(props: any) {
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'withdrawal_pending', [wallet])
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
 
@@ -471,7 +471,7 @@ function Dashboard(props: any) {
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deleg_swap_request")
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
 
@@ -555,7 +555,7 @@ function Dashboard(props: any) {
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'ssnlist', [userBase16Address])
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
 
@@ -564,7 +564,7 @@ function Dashboard(props: any) {
                 // get number of delegators
                 const delegNumState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'ssn_deleg_amt', [userBase16Address]);
 
-                if (delegNumState !== undefined && delegNumState !== 'error') {
+                if (delegNumState !== undefined && delegNumState !== 'error' && delegNumState !== null) {
                     delegNum = Object.keys(delegNumState['ssn_deleg_amt'][userBase16Address]).length.toString();
                 }
 
@@ -612,7 +612,7 @@ function Dashboard(props: any) {
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'ssnlist')
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
                 }
 
