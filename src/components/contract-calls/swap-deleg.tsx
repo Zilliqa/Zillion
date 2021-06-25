@@ -623,7 +623,7 @@ function SwapDelegModal(props: any) {
                                 <ul>
                                     <li><small>By clicking on <em>'Yes'</em>, you are sending a request to transfer all your existing stakes to this address.</small></li>
                                     <li><small>Beware of scams! Ensure that you know who the recipient is before sending the request.</small></li>
-                                    <li><small>Process is <strong>irreverisble</strong> once the recipient has accepted your request.</small></li>
+                                    <li><small>Process is <strong>irreversible</strong> once the recipient has accepted your request.</small></li>
                                 </ul>
                             </div>
                             <div className="d-flex mt-4">
