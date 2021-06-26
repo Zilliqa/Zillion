@@ -681,16 +681,15 @@ function Dashboard(props: any) {
     // update current role is used for ZilPay
     // due to account switch on the fly
     // role is always compared against the selected role at home page
-    const updateCurrentRole = useCallback(async (userBase16Address: string, currImpl?: string, currNetworkURL?: string) => {
+    const updateCurrentRole = useCallback(async (userBase16Address: string, currImpl?: string) => {
         // setState is async
         // use input params to get latest impl and network
         let newRole = "";
         let implAddress = currImpl ? currImpl : impl;
-        let networkAddress = currNetworkURL ? currNetworkURL : networkURL;
 
         console.log("updating current role...%o", userBase16Address);
 
-        const isOperator = await ZilliqaAccount.isOperator(implAddress, userBase16Address, networkAddress);
+        const isOperator = await ZilliqaAccount.isOperator(implAddress, userBase16Address);
 
         // login role is set by context during wallet access
         if (loginRole === Role.OPERATOR.toString() && isOperator) {
@@ -699,7 +698,7 @@ function Dashboard(props: any) {
             newRole = Role.DELEGATOR.toString();
         }
         setCurrRole(newRole);
-    }, [impl, networkURL, loginRole]);
+    }, [impl, loginRole]);
 
 
     // load initial data

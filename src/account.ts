@@ -218,10 +218,10 @@ export const getNumTxBlocksExplorerRetriable = async () => {
     return result;
 };
 
-export const getTotalCoinSupplyWithNetworkRetriable = async (networkURL:string) => {
+export const getTotalCoinSupplyWithNetworkRetriable = async () => {
     let result;
     for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
-        result = await getTotalCoinSupplyWithNetwork(networkURL);
+        result = await getTotalCoinSupplyWithNetwork();
         if (result !== OperationStatus.ERROR) {
             break;
         }
@@ -300,10 +300,8 @@ export const getNumTxBlocksExplorer = async () => {
  * getTotalCoinSupplyWithNetwork
  * 
  * Retrieves the latest total $ZIL supply
- * @param networkURL 
- * @returns 
  */
-export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
+export const getTotalCoinSupplyWithNetwork = async () => {
     try {
         apiRandomizer.fetchSsnApi();
         const randomAPI = apiRandomizer.getRandomApi();
@@ -324,11 +322,10 @@ export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
  * 
  * @param impl implementation contract address
  * @param address base16 address
- * @param networkURL 
  * @returns 
  */
-export const isOperator = async (impl: string, address: string, networkURL: string) => {
-    if (!impl || !networkURL) {
+export const isOperator = async (impl: string, address: string) => {
+    if (!impl) {
         return false;
     }
 
@@ -340,7 +337,6 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
 
     console.log("account.ts check is operator: %o", address);
     console.log("account.ts check is impl: %o", impl);
-    console.log("account.ts check is networkURL: %o", networkURL);
     return true;
 };
 

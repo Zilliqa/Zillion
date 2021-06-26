@@ -14,7 +14,6 @@ const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); //
 
 function LandingStatsTable(props: any) {
     const impl = props.impl;
-    const networkURL = props.network;
     const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
     const [showSpinner, setShowSpinner] = useState(true);
     const mountedRef = useRef(true);
@@ -53,7 +52,7 @@ function LandingStatsTable(props: any) {
                 }
                 delegNum = Object.keys(contractState.last_withdraw_cycle_deleg).length.toString();
 
-                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetworkRetriable(networkURL);
+                const totalCoinSupply = await ZilliqaAccount.getTotalCoinSupplyWithNetworkRetriable();
 
                 // get total stake amount
                 let totalStakeAmount = 0;
@@ -123,7 +122,7 @@ function LandingStatsTable(props: any) {
                 }
             }), PromiseArea.PROMISE_LANDING_STATS);
             
-    }, [impl, networkURL]);
+    }, [impl]);
 
     // load inital data
     useEffect(() => {
