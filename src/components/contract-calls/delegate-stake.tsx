@@ -60,7 +60,7 @@ function DelegateStakeModal(props: any) {
                 const gasFeesQa = ZilliqaAccount.getGasFees();
                 const combinedFees = new BigNumber(delegAmtQa).plus(gasFeesQa);
                 const combinedFeesZil = units.fromQa(new BN(combinedFees.toString()), units.Units.Zil);
-                const remaningBalance = balance.minus(delegAmtQa);
+                const remaningBalance = new BigNumber(balance).minus(delegAmtQa);
                 const isBalanceSufficient = remaningBalance.isGreaterThan(new BigNumber(gasFeesQa));
 
                 if (!isBalanceSufficient) {

@@ -33,14 +33,18 @@ import IconSearch from './icons/search';
 import WarningBanner from './warning-banner';
 
 import RewardCountdownTable from './reward-countdown-table';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { updateApiMaxAttempt, updateBlockchainExplorer, updateChainInfo, updateRefreshRate } from '../store/blockchainSlice';
 
 
 function Home(props: any) {
+  const dispatch = useAppDispatch();
   const appContext = useContext(AppContext);
+  const chainInfo = useAppSelector(state => state.blockchain);
   const { updateNetwork } = appContext;
 
   // config.js from public folder
-  const { networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
+  const { networks_config, blockchain_explorer_config, refresh_rate_config, api_max_retry_attempt, environment_config } = (window as { [key: string]: any })['config'];
 
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
@@ -49,9 +53,23 @@ function Home(props: any) {
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState(() => {
     if (environment_config === Environment.PROD) {
+      dispatch(updateChainInfo({
+        proxy: networks_config[Network.MAINNET].proxy,
+        impl: networks_config[Network.MAINNET].impl,
+        blockchain: networks_config[Network.MAINNET].blockchain,
+        staking_viewer: networks_config[Network.MAINNET].node_status,
+        api_list: networks_config[Network.MAINNET].api_list,
+      }));
       return Network.MAINNET;
     } else {
       // default to testnet
+      dispatch(updateChainInfo({
+        proxy: networks_config[Network.TESTNET].proxy,
+        impl: networks_config[Network.TESTNET].impl,
+        blockchain: networks_config[Network.TESTNET].blockchain,
+        staking_viewer: networks_config[Network.TESTNET].node_status,
+        api_list: networks_config[Network.TESTNET].api_list,
+      }));
       return Network.TESTNET;
     }
   });
@@ -108,8 +126,8 @@ function Home(props: any) {
   /* fetch data for contract constants */
   const getContractConstants = useCallback(() => {
     let totalStakeAmt = '0';
-    let impl = networks_config[selectedNetwork].impl;
-    let networkURL = networks_config[selectedNetwork].blockchain;
+    let impl = chainInfo.impl;
+    let networkURL = chainInfo.blockchain;
 
     ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'totalstakeamount')
     .then((contractState) => {
@@ -123,14 +141,14 @@ function Home(props: any) {
             setTotalStakeAmt(totalStakeAmt);
         }
     });
-  }, [networks_config, selectedNetwork]);
+  }, [chainInfo.impl, chainInfo.blockchain]);
 
   
   /* fetch data for ssn panel */
   const getSsnStats = useCallback(() => {
       let output: SsnStats[] = [];
-      let impl = networks_config[selectedNetwork].impl;
-      let networkURL = networks_config[selectedNetwork].blockchain;
+      let impl = chainInfo.impl;
+      let networkURL = chainInfo.blockchain;
 
       trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'ssnlist')
           .then(async (contractState) => {
@@ -180,7 +198,7 @@ function Home(props: any) {
               }
           }), PromiseArea.PROMISE_GET_SSN_STATS);
 
-  }, [networks_config, selectedNetwork]);
+  }, [chainInfo.impl, chainInfo.blockchain]);
 
     
   const DisplayAccessMethod = () => {
@@ -264,8 +282,16 @@ function Home(props: any) {
       updateNetwork(Network.TESTNET);
       ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
+
     // eslint-disable-next-line
   }, [selectedNetwork]);
+
+  useEffect(() => {
+    // set the refresh rate and api attempt
+    dispatch(updateRefreshRate({ refresh_rate: refresh_rate_config }));
+    dispatch(updateApiMaxAttempt({ api_max_attempt: api_max_retry_attempt }));
+    dispatch(updateBlockchainExplorer({ blockchain_explorer: blockchain_explorer_config }));
+  }, [dispatch, refresh_rate_config, api_max_retry_attempt, blockchain_explorer_config ]);
 
   useEffect(() => {
     window.onbeforeunload = null;
@@ -353,16 +379,19 @@ function Home(props: any) {
                   </div>
                 </div>
 
-                <RewardCountdownTable network={networks_config[selectedNetwork].blockchain} />
-                <LandingStatsTable impl={networks_config[selectedNetwork].impl} network={networks_config[selectedNetwork].blockchain} refresh={refresh_rate_config} />
+                <RewardCountdownTable network={chainInfo.blockchain} />
+                <LandingStatsTable 
+                  impl={chainInfo.impl} 
+                  network={chainInfo.blockchain} 
+                  refresh={chainInfo.refresh_rate} />
 
                 <div id="home-ssn-details" className="container">
                   <div className="row pl-2 pt-4">
                     <div className="col text-left">
                       <h2>Staked Seed Nodes</h2>
                       <p className="info mt-4 mb-0">Please refer to our&nbsp; 
-                          <a className="info-link" href={networks_config[selectedNetwork].node_status ? 
-                              networks_config[selectedNetwork].node_status : 
+                          <a className="info-link" href={chainInfo.staking_viewer ? 
+                              chainInfo.staking_viewer : 
                               "https://zilliqa.com/"} 
                                 target="_blank" 
                                 rel="noopener noreferrer">
@@ -375,9 +404,9 @@ function Home(props: any) {
                   <div className="row">
                     <div className="col-12 content">
                         <SsnTable 
-                          impl={networks_config[selectedNetwork].impl} 
-                          network={networks_config[selectedNetwork].blockchain} 
-                          refresh={refresh_rate_config}
+                          impl={chainInfo.impl}
+                          network={chainInfo.blockchain} 
+                          refresh={chainInfo.refresh_rate}
                           data={ssnStats}
                           totalStakeAmt={totalStakeAmt} />
                     </div>

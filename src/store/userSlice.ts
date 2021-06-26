@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import BigNumber from 'bignumber.js'
 import { Role } from '../util/enum'
 
 interface UserState {
     address_bech32: string,
     address_base16: string,
     authenticated: boolean,
-    balance: BigNumber, // zils in Qa
+    balance: string, // zils in Qa
     role: Role,
 }
 
@@ -14,7 +13,7 @@ const initialState: UserState = {
     address_bech32: '',
     address_base16: '',
     authenticated: false,
-    balance: new BigNumber(0),
+    balance: '0',
     role: Role.NONE,
 }
 

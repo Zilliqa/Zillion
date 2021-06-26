@@ -224,7 +224,7 @@ function Dashboard(props: any) {
             .finally(() => {
                 if (mountedRef.current) {
                     console.log("updating wallet balance...");
-                    dispatch(updateBalance({ balance: new BigNumber(currBalance) }));
+                    dispatch(updateBalance({ balance: currBalance }));
                 }
 
             }), PromiseArea.PROMISE_GET_BALANCE);
