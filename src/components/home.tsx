@@ -34,7 +34,7 @@ import WarningBanner from './warning-banner';
 
 import RewardCountdownTable from './reward-countdown-table';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { updateApiMaxAttempt, updateBlockchainExplorer, updateChainInfo, updateRefreshRate } from '../store/blockchainSlice';
+import { updateChainInfo } from '../store/blockchainSlice';
 
 
 function Home(props: any) {
@@ -44,7 +44,7 @@ function Home(props: any) {
   const { updateNetwork } = appContext;
 
   // config.js from public folder
-  const { networks_config, blockchain_explorer_config, refresh_rate_config, api_max_retry_attempt, environment_config } = (window as { [key: string]: any })['config'];
+  const { environment_config } = (window as { [key: string]: any })['config'];
 
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
   const [isShowAccessMethod, setShowAccessMethod] = useState(false);
@@ -53,23 +53,9 @@ function Home(props: any) {
   const [accessMethod, setAccessMethod] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState(() => {
     if (environment_config === Environment.PROD) {
-      dispatch(updateChainInfo({
-        proxy: networks_config[Network.MAINNET].proxy,
-        impl: networks_config[Network.MAINNET].impl,
-        blockchain: networks_config[Network.MAINNET].blockchain,
-        staking_viewer: networks_config[Network.MAINNET].node_status,
-        api_list: networks_config[Network.MAINNET].api_list,
-      }));
       return Network.MAINNET;
     } else {
       // default to testnet
-      dispatch(updateChainInfo({
-        proxy: networks_config[Network.TESTNET].proxy,
-        impl: networks_config[Network.TESTNET].impl,
-        blockchain: networks_config[Network.TESTNET].blockchain,
-        staking_viewer: networks_config[Network.TESTNET].node_status,
-        api_list: networks_config[Network.TESTNET].api_list,
-      }));
       return Network.TESTNET;
     }
   });
@@ -287,16 +273,8 @@ function Home(props: any) {
   }, [selectedNetwork]);
 
   useEffect(() => {
-    // set the refresh rate and api attempt
-    dispatch(updateRefreshRate({ refresh_rate: refresh_rate_config }));
-    dispatch(updateApiMaxAttempt({ api_max_attempt: api_max_retry_attempt }));
-    dispatch(updateBlockchainExplorer({ blockchain_explorer: blockchain_explorer_config }));
-  }, [dispatch, refresh_rate_config, api_max_retry_attempt, blockchain_explorer_config ]);
-
-  useEffect(() => {
     window.onbeforeunload = null;
   }, []);
-
 
   // load initial data
   useEffect(() => {
@@ -311,7 +289,7 @@ function Home(props: any) {
   useInterval(() => {
     getContractConstants();
     getSsnStats();
-  }, mountedRef, refresh_rate_config);
+  }, mountedRef, chainInfo.refresh_rate);
 
 
   return (
