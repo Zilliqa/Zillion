@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
-import { AccessMethod } from '../util/enum';
+import { AccountType } from '../util/enum';
 import { convertQaToCommaStr } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 
@@ -82,7 +82,7 @@ function LedgerWallet(props: any) {
             console.log("ledger wallet index: %o", hwIndex);
 
             // update context
-            initParams(selectedLedgerAddress, AccessMethod.LEDGER);
+            initParams(selectedLedgerAddress, AccountType.LEDGER);
             await updateRole(selectedLedgerAddress, role);
             updateLedgerIndex(hwIndex);
             updateAuth()

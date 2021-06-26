@@ -4,7 +4,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
 import AppContext from "../contexts/appContext";
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccessMethod, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
+import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel, calculateBlockRewardCountdown } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
@@ -860,7 +860,7 @@ function Dashboard(props: any) {
      * When document has loaded, it start to observable network form zilpay.
      */
     useEffect(() => {
-        if (accountType === AccessMethod.ZILPAY) {
+        if (accountType === AccountType.ZILPAY) {
             const zilPay = (window as any).zilPay;
 
             if (zilPay) {
@@ -875,7 +875,7 @@ function Dashboard(props: any) {
                 
                 accountStreamChanged.subscribe((account: any) => {
                     console.log("zil pay account changing...");
-                    initParams(account.base16, AccessMethod.ZILPAY);
+                    initParams(account.base16, AccountType.ZILPAY);
                     const bech32 = toBech32Address(account.base16);
                     dispatch(updateAddress({ address_base16: account.base16, address_bech32: bech32 }));
                 });

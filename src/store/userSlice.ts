@@ -1,19 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { Role } from '../util/enum'
+import { AccountType, LedgerIndex, Role } from '../util/enum'
 
 interface UserState {
     address_bech32: string,
     address_base16: string,
+    account_type: AccountType,
     authenticated: boolean,
     balance: string, // zils in Qa
+    ledger_index: number,
     role: Role,
 }
 
 const initialState: UserState = {
     address_bech32: '',
     address_base16: '',
+    account_type: AccountType.NONE,
     authenticated: false,
     balance: '0',
+    ledger_index: LedgerIndex.DEFAULT,
     role: Role.NONE,
 }
 

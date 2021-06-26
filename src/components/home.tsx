@@ -3,7 +3,7 @@ import { withRouter } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { trackPromise } from 'react-promise-tracker';
 
-import { AccessMethod, Environment, Network, Role, NetworkURL, SsnStatus, PromiseArea, ContractState } from '../util/enum';
+import { AccountType, Environment, Network, Role, NetworkURL, SsnStatus, PromiseArea, ContractState } from '../util/enum';
 import AppContext from "../contexts/appContext";
 import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
@@ -189,19 +189,19 @@ function Home(props: any) {
     
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
-      case AccessMethod.KEYSTORE: 
+      case AccountType.KEYSTORE: 
         return <WalletKeystore 
                   onReturnCallback={resetWalletsClicked} 
                   onWalletLoadingCallback={toggleDirectToDashboard} 
                   onSuccessCallback={redirectToDashboard} 
                   role={role} />;
-      case AccessMethod.ZILPAY:
+      case AccountType.ZILPAY:
         return <WalletZilPay 
                   onReturnCallback={resetWalletsClicked} 
                   onWalletLoadingCallback={toggleDirectToDashboard}
                   onSuccessCallback={redirectToDashboard}
                   role={role} />;
-      case AccessMethod.LEDGER:
+      case AccountType.LEDGER:
         return <WalletLedger 
                   onReturnCallback={resetWalletsClicked}
                   onWalletLoadingCallback={toggleDirectToDashboard} 
@@ -403,19 +403,19 @@ function Home(props: any) {
 
                   <div 
                     className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccessMethod.KEYSTORE)}>
+                    onClick={() => handleAccessMethod(AccountType.KEYSTORE)}>
                       <IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span>
                   </div>
 
                   <div 
                     className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccessMethod.LEDGER)}>
+                    onClick={() => handleAccessMethod(AccountType.LEDGER)}>
                       <IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span>
                   </div>
 
                   <div 
                     className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccessMethod.ZILPAY)} 
+                    onClick={() => handleAccessMethod(AccountType.ZILPAY)} 
                     data-tip={ environment_config === Environment.PROD ? "Ensure your ZilPay is on Mainnet network" : "Ensure your ZilPay is on Testnet network" }>
                       <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
                   </div>

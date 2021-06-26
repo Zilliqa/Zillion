@@ -2,7 +2,7 @@
  * Modified for Zilliqa
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
-import { NetworkURL, OperationStatus, AccessMethod, Constants } from './util/enum';
+import { NetworkURL, OperationStatus, AccountType, Constants } from './util/enum';
 import { LedgerZilliqa } from './ledger-zilliqa';
 
 import { HTTPProvider } from '@zilliqa-js/core';
@@ -368,19 +368,19 @@ export const handleSign = async (accessMethod: string, networkURL: string, txPar
     changeNetwork(networkURL);
     let result = "";
     switch (accessMethod) {
-        case AccessMethod.LEDGER:
+        case AccountType.LEDGER:
             result = await handleLedgerSign(networkURL, txParams, ledgerIndex);
             break;
-        case AccessMethod.PRIVATEKEY:
+        case AccountType.PRIVATEKEY:
             result = await handleNormalSign(txParams);
             break;
-        case AccessMethod.MNEMONIC:
+        case AccountType.MNEMONIC:
             result = await handleNormalSign(txParams);
             break;
-        case AccessMethod.KEYSTORE:
+        case AccountType.KEYSTORE:
             result = await handleNormalSign(txParams);
             break;
-        case AccessMethod.ZILPAY:
+        case AccountType.ZILPAY:
             result = await handleZilPaySign(txParams);
             break;
         default:

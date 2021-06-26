@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import * as Account from '../account';
-import { AccessMethod } from '../util/enum';
+import { AccountType } from '../util/enum';
 
 
 function MnemonicWallet(props: any) {
@@ -43,7 +43,7 @@ function MnemonicWallet(props: any) {
             props.onWalletLoadingCallback();
 
             // update context
-            initParams(address, AccessMethod.MNEMONIC);
+            initParams(address, AccountType.MNEMONIC);
             await updateRole(address, role);
             updateAuth();
 

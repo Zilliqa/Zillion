@@ -2,7 +2,7 @@ import React, { useState, useContext} from 'react';
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import * as Account from '../account';
-import { AccessMethod } from '../util/enum';
+import { AccountType } from '../util/enum';
 
 
 function WalletPrivatekey(props: any) {
@@ -32,7 +32,7 @@ function WalletPrivatekey(props: any) {
                 props.onWalletLoadingCallback();
 
                 // update context
-                initParams(walletAddress, AccessMethod.PRIVATEKEY);
+                initParams(walletAddress, AccountType.PRIVATEKEY);
                 await updateRole(walletAddress, role);
                 updateAuth();
 

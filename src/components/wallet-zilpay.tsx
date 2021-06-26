@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import AppContext from '../contexts/appContext';
-import { AccessMethod, Environment } from '../util/enum';
+import { AccountType, Environment } from '../util/enum';
 import Alert from './alert';
 
 import { initUser } from '../store/userSlice'
@@ -52,7 +52,7 @@ function WalletZilPay(props: any) {
             // update context
             // need await for update role for it to complete, otherwise context is empty
             // update with zilpay selected network
-            initParams(base16, AccessMethod.ZILPAY);
+            initParams(base16, AccountType.ZILPAY);
             updateNetwork(zilPay.wallet.net);
             await updateRole(base16, role);
             updateAuth();

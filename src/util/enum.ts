@@ -1,10 +1,11 @@
-export enum AccessMethod {
+export enum AccountType {
     PRIVATEKEY = "PRIVATEKEY",
     KEYSTORE = "KEYSTORE",
     MNEMONIC = "MNEMONIC",
     ZILPAY = "ZILPAY",
     MOONLET = "MOONLET",
-    LEDGER = "LEDGER"
+    LEDGER = "LEDGER",
+    NONE = ""
 }
 
 

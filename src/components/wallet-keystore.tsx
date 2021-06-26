@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import * as Account from '../account';
-import { AccessMethod } from '../util/enum';
+import { AccountType } from '../util/enum';
 
 
 class WalletKeystore extends Component<any, any> {
@@ -53,7 +53,7 @@ class WalletKeystore extends Component<any, any> {
                     this.props.onWalletLoadingCallback();
 
                     // update context
-                    this.context.initParams(address, AccessMethod.KEYSTORE);
+                    this.context.initParams(address, AccountType.KEYSTORE);
                     await this.context.updateRole(address, this.props.role);
                     this.context.updateAuth();
 
