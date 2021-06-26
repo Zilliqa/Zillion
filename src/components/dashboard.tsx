@@ -54,6 +54,9 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
+
 
 const BigNumber = require('bignumber.js');
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString();
@@ -111,11 +114,12 @@ function Dashboard(props: any) {
     const appContext = useContext(AppContext);
     const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
 
-
     const [currWalletAddress, setCurrWalletAddress] = useState(address ? address : ''); // keep track of current wallet as zilpay have multiple wallets
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
+
+    const reduxUserState = useSelector((state: RootState) => state.user)
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];

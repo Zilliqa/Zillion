@@ -1,12 +1,15 @@
 import React, { useContext } from 'react';
-
 import AppContext from '../contexts/appContext';
 import { AccessMethod, Environment } from '../util/enum';
 import Alert from './alert';
 
+import { useDispatch } from 'react-redux'
+import { initUser } from '../store/userSlice'
+import { toBech32Address } from '@zilliqa-js/crypto';
+
 
 function WalletZilPay(props: any) {
-
+    const dispatch = useDispatch()
     const appContext = useContext(AppContext);
     const { initParams, updateAuth, updateNetwork, updateRole } = appContext;
 
@@ -41,6 +44,7 @@ function WalletZilPay(props: any) {
             }
 
             const { base16 } = zilPay.wallet.defaultAccount;
+            const bech32Address = toBech32Address(base16);
 
             // request parent to show spinner while updating context
             props.onWalletLoadingCallback();
@@ -52,6 +56,8 @@ function WalletZilPay(props: any) {
             updateNetwork(zilPay.wallet.net);
             await updateRole(base16, role);
             updateAuth();
+
+            dispatch(initUser({ address_base16: base16, address_bech32: bech32Address, authenticated: true }));
 
             // request parent to redirect to dashboard
             props.onSuccessCallback();
