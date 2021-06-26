@@ -373,7 +373,7 @@ function Dashboard(props: any) {
                 // get min bnum req
                 const blkNumReqState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'bnum_req');
                 const blkNumReq = blkNumReqState['bnum_req'];
-                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorerRetriable(networkURL);
+                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorerRetriable();
 
                 let currentBlkNum = new BigNumber(0);
                 if (txBlockNumRes !== OperationStatus.ERROR) {
@@ -431,7 +431,7 @@ function Dashboard(props: any) {
                     setTotalPendingWithdrawalAmt(totalPendingAmtBN.toString());
                 }
             }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
-    }, [impl, networkURL, userState.address_base16]);
+    }, [impl, userState.address_base16]);
 
     // get swap requests
     const getDelegatorSwapRequests = useCallback(() => {
@@ -486,7 +486,7 @@ function Dashboard(props: any) {
     const getBlockRewardCountDown = useCallback(() => {
         let tempBlockRewardCount = '0';
 
-        trackPromise(ZilliqaAccount.getNumTxBlocksExplorerRetriable(networkURL)
+        trackPromise(ZilliqaAccount.getNumTxBlocksExplorerRetriable()
             .then((state) => {
                 if (state === undefined || state === OperationStatus.ERROR) {
                     return null;

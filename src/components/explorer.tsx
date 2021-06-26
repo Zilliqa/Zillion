@@ -178,7 +178,7 @@ function Explorer(props: any) {
                 // get min bnum req
                 const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, 'bnum_req');
                 const blkNumReq = blkNumReqState['bnum_req'];
-                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer(networkURL);
+                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer();
                 
                 let currentBlkNum = new BigNumber(0);
                 if (txBlockNumRes !== OperationStatus.ERROR) {

@@ -206,11 +206,11 @@ export const getImplStateExplorerRetriable = async (implAddr: string, state: str
     return result;
 };
 
-export const getNumTxBlocksExplorerRetriable = async (networkURL: string) => {
+export const getNumTxBlocksExplorerRetriable = async () => {
     let result;
 
     for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
-        result = await getNumTxBlocksExplorer(networkURL);
+        result = await getNumTxBlocksExplorer();
         if (result !== OperationStatus.ERROR) {
             break;
         }
@@ -279,12 +279,8 @@ export const getImplStateExplorer = async (implAddr: string, state: string, indi
  * getNumTxBlocksExplorer
  * 
  * Retrieves the latest block number with a new zilliqa object
- * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
- * which depends on the main zilliqa object
- * @param networkURL 
- * @returns 
  */
-export const getNumTxBlocksExplorer = async (networkURL: string) => {
+export const getNumTxBlocksExplorer = async () => {
     try {
         apiRandomizer.fetchSsnApi();
         const randomAPI = apiRandomizer.getRandomApi();
