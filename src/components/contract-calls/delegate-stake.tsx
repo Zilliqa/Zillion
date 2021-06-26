@@ -10,6 +10,7 @@ import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
 
 const BigNumber = require('bignumber.js');
 const { BN, units } = require('@zilliqa-js/util');
@@ -23,7 +24,7 @@ function DelegateStakeModal(props: any) {
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
     const minDelegStake = props.minDelegStake; // Qa
-    const balance = props.balance; // Qa
+    const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
 
     const { delegStakeModalData, updateData, updateRecentTransactions } = props;
@@ -59,7 +60,7 @@ function DelegateStakeModal(props: any) {
                 const gasFeesQa = ZilliqaAccount.getGasFees();
                 const combinedFees = new BigNumber(delegAmtQa).plus(gasFeesQa);
                 const combinedFeesZil = units.fromQa(new BN(combinedFees.toString()), units.Units.Zil);
-                const remaningBalance = new BigNumber(balance).minus(delegAmtQa);
+                const remaningBalance = balance.minus(delegAmtQa);
                 const isBalanceSufficient = remaningBalance.isGreaterThan(new BigNumber(gasFeesQa));
 
                 if (!isBalanceSufficient) {
@@ -198,7 +199,7 @@ function DelegateStakeModal(props: any) {
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
                             </div>
-                            <p><small>Wallet balance: <strong>{convertQaToCommaStr(balance)}</strong> ZIL</small></p>
+                            <p><small>Wallet balance: <strong>{convertQaToCommaStr(balance.toString())}</strong> ZIL</small></p>
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>

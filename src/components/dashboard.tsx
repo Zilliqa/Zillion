@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { updateAddress } from '../store/userSlice';
+import { updateAddress, updateBalance } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
@@ -115,8 +115,6 @@ function Dashboard(props: any) {
     const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
 
     const [currRole, setCurrRole] = useState(loginRole);
-
-    const [balance, setBalance] = useState("");
 
     const userState = useAppSelector(state => state.user);
 
@@ -226,11 +224,11 @@ function Dashboard(props: any) {
             .finally(() => {
                 if (mountedRef.current) {
                     console.log("updating wallet balance...");
-                    setBalance(currBalance);
+                    dispatch(updateBalance({ balance: new BigNumber(currBalance) }));
                 }
 
             }), PromiseArea.PROMISE_GET_BALANCE);
-    }, [userState.address_bech32, networkURL]);
+    }, [userState.address_bech32, networkURL, dispatch]);
 
 
     // retrieve contract constants such as min stake
@@ -960,7 +958,7 @@ function Dashboard(props: any) {
                     
                     {/* balance */}
                     <li className="nav-item">
-                        <p className="px-1">{balance ? convertQaToCommaStr(balance) : '0.000'} ZIL</p>
+                        <p className="px-1">{userState.balance ? convertQaToCommaStr(`${userState.balance}`) : '0.000'} ZIL</p>
                     </li>
 
                     {/* network */}
@@ -1277,8 +1275,7 @@ function Dashboard(props: any) {
                 minDelegStake={minDelegStake}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                delegStakeModalData={delegStakeModalData}
-                balance={balance} />
+                delegStakeModalData={delegStakeModalData} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 

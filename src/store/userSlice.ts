@@ -1,11 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import BigNumber from 'bignumber.js'
 import { Role } from '../util/enum'
 
 interface UserState {
     address_bech32: string,
     address_base16: string,
     authenticated: boolean,
-    balance: string, // zils in Qa
+    balance: BigNumber, // zils in Qa
     role: Role,
 }
 
@@ -13,9 +14,13 @@ const initialState: UserState = {
     address_bech32: '',
     address_base16: '',
     authenticated: false,
-    balance: '',
+    balance: new BigNumber(0),
     role: Role.NONE,
 }
+
+export const fetchBalance = createAsyncThunk('user/fetchBalance', async () => {
+    // fetch from zil account?
+})
 
 /**
  * stores user's wallet information
@@ -42,6 +47,11 @@ const userSlice = createSlice({
         reset(state) {
             state = initialState
         },
+    },
+    extraReducers: (builder) => {
+        // builder.addCase(fetchBalance.fulfilled, (state, { payload }) => {
+        //     state.balance = payload
+        // })
     },
 })
 
