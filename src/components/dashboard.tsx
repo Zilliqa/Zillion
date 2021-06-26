@@ -11,7 +11,7 @@ import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
 
-import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
+import { toBech32Address } from '@zilliqa-js/crypto';
 
 import WithdrawCommModal from './contract-calls/withdraw-comm';
 import UpdateReceiverAddress from './contract-calls/update-receiver-address';
@@ -54,8 +54,8 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
+import { updateAddress } from '../store/userSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
 const BigNumber = require('bignumber.js');
@@ -110,16 +110,15 @@ const initSwapDelegModalData: SwapDelegModalData = {
 }
 
 function Dashboard(props: any) {
-
+    const dispatch = useAppDispatch();
     const appContext = useContext(AppContext);
     const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
 
-    const [currWalletAddress, setCurrWalletAddress] = useState(address ? address : ''); // keep track of current wallet as zilpay have multiple wallets
     const [currRole, setCurrRole] = useState(loginRole);
 
     const [balance, setBalance] = useState("");
 
-    const reduxUserState = useSelector((state: RootState) => state.user)
+    const userState = useAppSelector(state => state.user);
 
     // config.js from public folder
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
@@ -213,7 +212,7 @@ function Dashboard(props: any) {
     const getAccountBalance = useCallback(() => {
         let currBalance = '0';
 
-        trackPromise(ZilliqaAccount.getBalanceRetriable(currWalletAddress, networkURL)
+        trackPromise(ZilliqaAccount.getBalanceRetriable(userState.address_bech32, networkURL)
             .then((balance) => {
                 currBalance = balance;
             })
@@ -231,7 +230,7 @@ function Dashboard(props: any) {
                 }
 
             }), PromiseArea.PROMISE_GET_BALANCE);
-    }, [currWalletAddress, networkURL]);
+    }, [userState.address_bech32, networkURL]);
 
 
     // retrieve contract constants such as min stake
@@ -296,7 +295,7 @@ function Dashboard(props: any) {
         let gzilBalance = initDelegStats.gzilBalance;
         let totalDeposits = initDelegStats.totalDeposits;
         
-        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+        const userBase16Address = userState.address_base16;
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'deposit_amt_deleg', [userBase16Address])
         .then(async (contractState) => {
@@ -385,7 +384,7 @@ function Dashboard(props: any) {
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
-    }, [impl, currWalletAddress, networkURL]);
+    }, [impl, userState.address_base16, networkURL]);
 
 
     /* fetch data for delegator pending stake withdrawal */
@@ -395,7 +394,7 @@ function Dashboard(props: any) {
         let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
         let progress = '0';
         
-        const wallet = fromBech32Address(currWalletAddress).toLowerCase();
+        const wallet = userState.address_base16;
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'withdrawal_pending', [wallet])
             .then(async (contractState) => {
@@ -466,7 +465,7 @@ function Dashboard(props: any) {
                     setTotalPendingWithdrawalAmt(totalPendingAmtBN.toString());
                 }
             }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
-    }, [impl, networkURL, currWalletAddress]);
+    }, [impl, networkURL, userState.address_base16]);
 
     // get swap requests
     const getDelegatorSwapRequests = useCallback(() => {
@@ -479,7 +478,7 @@ function Dashboard(props: any) {
                     return null;
                 }
 
-                const wallet = fromBech32Address(currWalletAddress).toLowerCase();
+                const wallet = userState.address_base16;
 
                 if (wallet in contractState['deleg_swap_request']) {
                     swapRecipientAddress = contractState['deleg_swap_request'][wallet];
@@ -514,7 +513,7 @@ function Dashboard(props: any) {
                     setSwapDelegModalData(data);
                 }
             }), PromiseArea.PROMISE_GET_DELEG_SWAP_REQUESTS);
-    }, [impl, networkURL, currWalletAddress]);
+    }, [impl, networkURL, userState.address_base16]);
 
 
     // compute number of blocks left before rewards are issued
@@ -555,7 +554,7 @@ function Dashboard(props: any) {
         let commReward = initOperatorStats.commReward;
         let receiver = initOperatorStats.receiver;
 
-        const userBase16Address = fromBech32Address(currWalletAddress).toLowerCase();
+        const userBase16Address = userState.address_base16;
 
         trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, 'ssnlist', [userBase16Address])
             .then(async (contractState) => {
@@ -603,7 +602,7 @@ function Dashboard(props: any) {
                 }
 
             }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
-    }, [impl, currWalletAddress, networkURL]);
+    }, [impl, userState.address_base16, networkURL]);
 
 
     /* 
@@ -707,7 +706,7 @@ function Dashboard(props: any) {
 
         // restore order back
         setRecentTransactions([...temp].reverse());
-        storeLocalItem(currWalletAddress, proxy, networkURL, 'recent-txn', temp.reverse());
+        storeLocalItem(userState.address_bech32, proxy, networkURL, 'recent-txn', temp.reverse());
 
         // set recent txn indicator icon
         setIsTxnNotify(true);
@@ -816,9 +815,9 @@ function Dashboard(props: any) {
 
     // re-hydrate data from localstorage
     useEffect(() => {
-        let txns = getLocalItem(currWalletAddress, proxy, networkURL, 'recent-txn', [] as any); 
+        let txns = getLocalItem(userState.address_bech32, proxy, networkURL, 'recent-txn', [] as any); 
         setRecentTransactions(txns);
-    }, [currWalletAddress, proxy, networkURL]);
+    }, [userState.address_bech32, proxy, networkURL]);
 
     const networkChanger = (net: string) => {
         let networkLabel = "";
@@ -879,7 +878,8 @@ function Dashboard(props: any) {
                 accountStreamChanged.subscribe((account: any) => {
                     console.log("zil pay account changing...");
                     initParams(account.base16, AccessMethod.ZILPAY);
-                    setCurrWalletAddress(toBech32Address(account.base16));
+                    const bech32 = toBech32Address(account.base16);
+                    dispatch(updateAddress({ address_base16: account.base16, address_bech32: bech32 }));
                 });
 
                 return () => {
@@ -898,13 +898,13 @@ function Dashboard(props: any) {
             return;
         }
 
-        if (!isAuth || isError) {
+        if (!userState.authenticated || isError) {
             // redirect to login request
             props.history.push("/oops");
         }
 
         // eslint-disable-next-line
-    }, [isError, isAuth, props.history]);
+    }, [isError, userState.authenticated, props.history]);
 
     // change to correct role for zilpay switch
     // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
@@ -913,11 +913,11 @@ function Dashboard(props: any) {
     // when network change (zilpay switch network)
     useEffect(() => {
         console.log("unified change network");
-        if (!currWalletAddress) {
+        if (!userState.address_base16) {
             return;
         }
-        updateCurrentRole(fromBech32Address(currWalletAddress).toLowerCase());
-    }, [currWalletAddress, updateCurrentRole]);
+        updateCurrentRole(userState.address_base16);
+    }, [userState.address_base16, updateCurrentRole]);
 
     
     // prevent user from refreshing
@@ -955,7 +955,7 @@ function Dashboard(props: any) {
                 <ul className="navbar-nav navbar-right">
                     {/* wallet address */}
                     <li className="nav-item">
-                        <p className="px-1">{currWalletAddress ? <a href={getAddressLink(currWalletAddress, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{currWalletAddress}</a> : 'No wallet detected'}</p>
+                        <p className="px-1">{userState.address_bech32 ? <a href={getAddressLink(userState.address_bech32, networkURL)} className="wallet-link" target="_blank" rel="noopener noreferrer">{userState.address_bech32}</a> : 'No wallet detected'}</p>
                     </li>
                     
                     {/* balance */}
@@ -1070,7 +1070,7 @@ function Dashboard(props: any) {
                                         impl={impl} 
                                         network={networkURL} 
                                         refresh={refresh_rate_config} 
-                                        userAddress={currWalletAddress}
+                                        userAddress={userState.address_bech32}
                                         data={delegPendingStakeWithdrawalStats}
                                         totalClaimableAmt={totalClaimableAmt} />
                                 }
@@ -1132,7 +1132,7 @@ function Dashboard(props: any) {
                                                     impl={impl} 
                                                     network={networkURL} 
                                                     refresh={refresh_rate_config} 
-                                                    userAddress={currWalletAddress}
+                                                    userAddress={userState.address_bech32}
                                                     data={delegStats}
                                                     totalPendingWithdrawalAmt={totalPendingWithdrawalAmt}
                                                     blockCountToReward={blockCountToReward} />
@@ -1159,7 +1159,7 @@ function Dashboard(props: any) {
                                                         impl={impl} 
                                                         network={networkURL} 
                                                         refresh={refresh_rate_config} 
-                                                        userAddress={currWalletAddress}
+                                                        userAddress={userState.address_bech32}
                                                         data={delegStakingStats}
                                                         setClaimedRewardModalData={setClaimedRewardModalData}
                                                         setTransferStakeModalData={setTransferStakeModalData}
@@ -1188,7 +1188,7 @@ function Dashboard(props: any) {
                                                     impl={impl} 
                                                     network={networkURL} 
                                                     refresh={refresh_rate_config} 
-                                                    userAddress={currWalletAddress}
+                                                    userAddress={userState.address_bech32}
                                                     data={operatorStats} />
                                             </div>
                                         </div>
@@ -1286,7 +1286,7 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
                 nodeSelectorOptions={nodeOptions}
-                userAddress={currWalletAddress}
+                userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
                 transferStakeModalData={transferStakeModalData}
@@ -1297,7 +1297,7 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                userAddress={currWalletAddress}
+                userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
                 withdrawStakeModalData={withdrawStakeModalData}
@@ -1308,7 +1308,7 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                userAddress={currWalletAddress}
+                userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
                 claimedRewardsModalData={claimedRewardsModalData} />
@@ -1328,7 +1328,7 @@ function Dashboard(props: any) {
                 ledgerIndex={ledgerIndex}
                 ssnstatsList={ssnStats}
                 swapDelegModalData={swapDelegModalData}
-                userAddress={currWalletAddress}
+                userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
                 

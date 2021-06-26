@@ -3,13 +3,13 @@ import AppContext from '../contexts/appContext';
 import { AccessMethod, Environment } from '../util/enum';
 import Alert from './alert';
 
-import { useDispatch } from 'react-redux'
 import { initUser } from '../store/userSlice'
 import { toBech32Address } from '@zilliqa-js/crypto';
+import { useAppDispatch } from '../store/hooks';
 
 
 function WalletZilPay(props: any) {
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
     const appContext = useContext(AppContext);
     const { initParams, updateAuth, updateNetwork, updateRole } = appContext;
 
