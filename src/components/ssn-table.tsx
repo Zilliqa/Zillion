@@ -94,7 +94,6 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 }
 
 function SsnTable(props: any) {
-    // const networkURL = props.network;
     const role = props.currRole;
     
     const data: SsnStats[] = props.data;

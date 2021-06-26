@@ -55,9 +55,8 @@ function WalletZilPay(props: any) {
             initParams(base16, AccountType.ZILPAY);
             updateNetwork(zilPay.wallet.net);
             await updateRole(base16, role);
-            updateAuth();
 
-            dispatch(initUser({ address_base16: base16, address_bech32: bech32Address, authenticated: true }));
+            dispatch(initUser({ address_base16: base16, address_bech32: bech32Address, account_type: AccountType.ZILPAY, authenticated: true }));
 
             // request parent to redirect to dashboard
             props.onSuccessCallback();

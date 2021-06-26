@@ -33,9 +33,10 @@ const userSlice = createSlice({
     initialState: initialState,
     reducers: {
         initUser(state, action) {
-            const { address_base16, address_bech32, authenticated } = action.payload
+            const { address_base16, address_bech32, account_type, authenticated } = action.payload
             state.address_base16 = address_base16.toLowerCase()
             state.address_bech32 = address_bech32.toLowerCase()
+            state.account_type = account_type
             state.authenticated = authenticated
         },
         updateAddress(state, action) {
@@ -46,6 +47,10 @@ const userSlice = createSlice({
         updateBalance(state, action) {
             const { balance } = action.payload
             state.balance = balance
+        },
+        updateLedgerIndex(state, action) {
+            const { ledger_index } = action.payload
+            state.ledger_index = ledger_index
         },
         reset(state) {
             state = initialState
@@ -62,6 +67,7 @@ export const {
     initUser,
     updateAddress,
     updateBalance,
+    updateLedgerIndex,
     reset,
 } = userSlice.actions
 

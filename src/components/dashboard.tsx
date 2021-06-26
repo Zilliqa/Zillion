@@ -167,38 +167,6 @@ function Dashboard(props: any) {
         props.history.push("/");
     }
 
-    // eslint-disable-next-line
-    const handleChangeNetwork = React.useCallback((value: string) => {
-        // e.target.value is network URL
-        setNetworkURL(value);
-        ZilliqaAccount.changeNetwork(value);
-
-        // update the context to be safe
-        // context reads the network label not url
-        // probably no need to update 
-        // as networkURL is passed down from here onwards
-        let networkLabel = "";
-        switch (value) {
-            case NetworkURL.TESTNET:
-                networkLabel = NetworkLabel.TESTNET;
-                break;
-            case NetworkURL.MAINNET:
-                networkLabel = NetworkLabel.MAINNET;
-                break;
-            case NetworkURL.ISOLATED_SERVER:
-                networkLabel = NetworkLabel.ISOLATED_SERVER;
-                break;
-            default:
-                networkLabel = NetworkLabel.TESTNET
-                break;
-        }
-        updateNetwork(networkLabel);
-
-        // update the proxy contract state
-        setProxy(networks_config[networkLabel].proxy);
-        setImpl(networks_config[networkLabel].impl);
-    }, [updateNetwork, networks_config]);
-
     // set recent txn indicator icon
     const handleTxnNotify = () => {
         if (!isTxnNotify) {
@@ -1210,10 +1178,6 @@ function Dashboard(props: any) {
                                         </div>
                                         <div className="col-12 text-center">
                                             <SsnTable 
-                                                impl={impl} 
-                                                network={networkURL} 
-                                                blockchainExplorer={blockchain_explorer_config} 
-                                                refresh={refresh_rate_config} 
                                                 currRole={currRole} 
                                                 data={ssnStats}
                                                 totalStakeAmt={totalStakeAmt}

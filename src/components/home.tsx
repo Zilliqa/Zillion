@@ -33,12 +33,10 @@ import IconSearch from './icons/search';
 import WarningBanner from './warning-banner';
 
 import RewardCountdownTable from './reward-countdown-table';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { updateChainInfo } from '../store/blockchainSlice';
+import { useAppSelector } from '../store/hooks';
 
 
 function Home(props: any) {
-  const dispatch = useAppDispatch();
   const appContext = useContext(AppContext);
   const chainInfo = useAppSelector(state => state.blockchain);
   const { updateNetwork } = appContext;
@@ -382,9 +380,6 @@ function Home(props: any) {
                   <div className="row">
                     <div className="col-12 content">
                         <SsnTable 
-                          impl={chainInfo.impl}
-                          network={chainInfo.blockchain} 
-                          refresh={chainInfo.refresh_rate}
                           data={ssnStats}
                           totalStakeAmt={totalStakeAmt} />
                     </div>
