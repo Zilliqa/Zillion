@@ -283,10 +283,10 @@ function SwapDelegModal(props: any) {
         let displayAddr = getTruncatedAddress(address);
         let targetName = address === userAddress ? "Your wallet" : invokerMethod === "RequestSwap" ? "The recipient" : "The requestor"
 
-        const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "lastrewardcycle");
-        const lbdc = await  ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "last_buf_deposit_cycle_deleg", [wallet]);
-        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
-        const buff_deposit_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "buff_deposit_deleg", [wallet]);
+        const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "lastrewardcycle");
+        const lbdc = await  ZilliqaAccount.getImplStateExplorerRetriable(impl, "last_buf_deposit_cycle_deleg", [wallet]);
+        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "deposit_amt_deleg", [wallet]);
+        const buff_deposit_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "buff_deposit_deleg", [wallet]);
         
         if (lrc === undefined || lrc === "error") {
             return false;
@@ -350,7 +350,7 @@ function SwapDelegModal(props: any) {
     const hasStaked = async (address: string) => {
         let wallet = fromBech32Address(address).toLowerCase();
 
-        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
+        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "deposit_amt_deleg", [wallet]);
 
         if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null || deposit_amt_deleg_map.length === 0) {
             return false;
@@ -364,7 +364,7 @@ function SwapDelegModal(props: any) {
     const hasPendingWithdrawal = async (address: string) => {
         let wallet = fromBech32Address(address).toLowerCase();
 
-        const pending_withdrawal_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "withdrawal_pending", [wallet]);
+        const pending_withdrawal_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "withdrawal_pending", [wallet]);
 
         if (pending_withdrawal_map === undefined || pending_withdrawal_map === "error" || pending_withdrawal_map === null || pending_withdrawal_map.length === 0) {
             return false;

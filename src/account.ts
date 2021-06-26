@@ -147,9 +147,10 @@ export const getBalance = async (address: string) => {
 };
 
 // identical to getBalance except it uses a random API
-export const getBalanceWithNetwork = async (address: string, networkURL: string) => {
+export const getBalanceWithNetwork = async (address: string) => {
     try {
-        const randomAPI = apiRandomizer.getRandomApi(networkURL);
+        apiRandomizer.fetchSsnApi();
+        const randomAPI = apiRandomizer.getRandomApi();
         const zilliqaObj = new Zilliqa(randomAPI);
         const balance = await zilliqaObj.blockchain.getBalance(address);
         if (balance.result.balance === undefined) {
@@ -181,11 +182,11 @@ export const getNonce = async (address: string) => {
 //           RETRIABLE
 // -------------------------------
 
-export const getBalanceRetriable = async (address: string, networkURL: string) => {
+export const getBalanceRetriable = async (address: string) => {
     let result;
 
     for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
-        result = await getBalanceWithNetwork(address, networkURL);
+        result = await getBalanceWithNetwork(address);
         if (result !== OperationStatus.ERROR) {
             break;
         }
@@ -193,11 +194,11 @@ export const getBalanceRetriable = async (address: string, networkURL: string) =
     return result;
 };
 
-export const getImplStateExplorerRetriable = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
+export const getImplStateExplorerRetriable = async (implAddr: string, state: string, indices?: any) => {
     let result;
 
     for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
-        result = await getImplStateExplorer(implAddr, networkURL, state, indices);
+        result = await getImplStateExplorer(implAddr, state, indices);
         if (result !== "error") {
             break;
         }
@@ -239,18 +240,18 @@ export const getTotalCoinSupplyWithNetworkRetriable = async (networkURL:string) 
  * to lessen load on Zilliqa API
  * 
  * @param implAddr    implementation contract in checksum format
- * @param networkURL  blockchain api URL
  * @param state       the name of the variable in the contract
  * @param indices     JSON array to specify the indices if the variable is a map type
  */
-export const getImplStateExplorer = async (implAddr: string, networkURL: string, state: string, indices?: any) => {
+export const getImplStateExplorer = async (implAddr: string, state: string, indices?: any) => {
     if (!implAddr) {
         console.error("error: getImplStateExplorer - no implementation contract found");
         return "error";
     }
 
     try {
-        const randomAPI = apiRandomizer.getRandomApi(networkURL);
+        apiRandomizer.fetchSsnApi();
+        const randomAPI = apiRandomizer.getRandomApi();
         const explorerZilliqa = new Zilliqa(randomAPI);
 
         let contractState: any = null;
@@ -285,7 +286,8 @@ export const getImplStateExplorer = async (implAddr: string, networkURL: string,
  */
 export const getNumTxBlocksExplorer = async (networkURL: string) => {
     try {
-        const randomAPI = apiRandomizer.getRandomApi(networkURL);
+        apiRandomizer.fetchSsnApi();
+        const randomAPI = apiRandomizer.getRandomApi();
         const explorerZilliqa = new Zilliqa(randomAPI);
         const info = await explorerZilliqa.blockchain.getBlockChainInfo();
         if (info === undefined && info.result === undefined) {
@@ -307,7 +309,8 @@ export const getNumTxBlocksExplorer = async (networkURL: string) => {
  */
 export const getTotalCoinSupplyWithNetwork = async (networkURL: string) => {
     try {
-        const randomAPI = apiRandomizer.getRandomApi(networkURL);
+        apiRandomizer.fetchSsnApi();
+        const randomAPI = apiRandomizer.getRandomApi();
         const zilliqaObj = new Zilliqa(randomAPI);
         const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
         return totalCoinSupply;
@@ -333,7 +336,7 @@ export const isOperator = async (impl: string, address: string, networkURL: stri
         return false;
     }
 
-    const contractState = await getImplStateExplorerRetriable(impl, networkURL, "ssnlist", [address]);
+    const contractState = await getImplStateExplorerRetriable(impl, "ssnlist", [address]);
 
     if (contractState === undefined || contractState === null || contractState === "error") {
         return false;

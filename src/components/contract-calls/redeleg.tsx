@@ -107,8 +107,8 @@ function ReDelegateStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         
-        const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "lastrewardcycle");
-        const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "last_buf_deposit_cycle_deleg", [userBase16Address]);
+        const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, "lastrewardcycle");
+        const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
         if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
             return false;

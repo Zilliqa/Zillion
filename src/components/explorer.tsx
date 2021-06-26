@@ -95,7 +95,7 @@ function Explorer(props: any) {
             setWalletBase16Address(wallet);
         }
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'deposit_amt_deleg', [wallet])
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, 'deposit_amt_deleg', [wallet])
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
@@ -106,7 +106,7 @@ function Explorer(props: any) {
                 const depositDelegList = contractState['deposit_amt_deleg'][wallet];
 
                 // fetch the ssn information for each deposit
-                const ssnContractState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'ssnlist');
+                const ssnContractState = await ZilliqaAccount.getImplStateExplorer(impl, 'ssnlist');
 
                 for (const ssnAddress in depositDelegList) {
                     if (!depositDelegList.hasOwnProperty(ssnAddress)) {
@@ -167,7 +167,7 @@ function Explorer(props: any) {
         let progress = '0';
 
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'withdrawal_pending', [wallet])
+        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, 'withdrawal_pending', [wallet])
             .then(async (contractState) => {
                 if (contractState === undefined || contractState === null || contractState === 'error') {
                     return null;
@@ -176,7 +176,7 @@ function Explorer(props: any) {
                 const blkNumPendingWithdrawal = contractState['withdrawal_pending'][wallet];
 
                 // get min bnum req
-                const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, 'bnum_req');
+                const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, 'bnum_req');
                 const blkNumReq = blkNumReqState['bnum_req'];
                 const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer(networkURL);
                 
