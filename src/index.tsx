@@ -11,7 +11,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import store from './store/store'
 import { Environment, Network } from './util/enum';
-import { updateApiMaxAttempt, updateBlockchainExplorer, updateChainInfo, updateRefreshRate } from './store/blockchainSlice';
+import { CONFIG_LOADED, UPDATE_API_MAX_ATTEMPT, UPDATE_BLOCKCHAIN_EXPLORER, UPDATE_CHAIN_INFO, UPDATE_REFRESH_RATE } from './store/blockchainSlice';
 
 // config.js from public folder
 const { environment_config, networks_config, blockchain_explorer_config, refresh_rate_config, api_max_retry_attempt } = (window as { [key: string]: any })['config'];
@@ -19,7 +19,7 @@ const { environment_config, networks_config, blockchain_explorer_config, refresh
 // store the config file info to redux
 // to allow other components to read the contract
 if (environment_config === Environment.PROD) {
-  store.dispatch(updateChainInfo({
+  store.dispatch(UPDATE_CHAIN_INFO({
     proxy: networks_config[Network.MAINNET].proxy,
     impl: networks_config[Network.MAINNET].impl,
     blockchain: networks_config[Network.MAINNET].blockchain,
@@ -28,7 +28,7 @@ if (environment_config === Environment.PROD) {
   }));
 } else {
   // defaults to testnet
-  store.dispatch(updateChainInfo({
+  store.dispatch(UPDATE_CHAIN_INFO({
     proxy: networks_config[Network.TESTNET].proxy,
     impl: networks_config[Network.TESTNET].impl,
     blockchain: networks_config[Network.TESTNET].blockchain,
@@ -37,9 +37,10 @@ if (environment_config === Environment.PROD) {
   }));
 }
 
-store.dispatch(updateRefreshRate({ refresh_rate: refresh_rate_config }));
-store.dispatch(updateApiMaxAttempt({ api_max_attempt: api_max_retry_attempt }));
-store.dispatch(updateBlockchainExplorer({ blockchain_explorer: blockchain_explorer_config }));
+store.dispatch(UPDATE_REFRESH_RATE({ refresh_rate: refresh_rate_config }));
+store.dispatch(UPDATE_API_MAX_ATTEMPT({ api_max_attempt: api_max_retry_attempt }));
+store.dispatch(UPDATE_BLOCKCHAIN_EXPLORER({ blockchain_explorer: blockchain_explorer_config }));
+store.dispatch(CONFIG_LOADED()); // informs saga to start polling data
 
 ReactDOM.render(
   <React.StrictMode>

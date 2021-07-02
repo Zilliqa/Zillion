@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-interface BlockchainState {
+export interface BlockchainState {
     proxy: string,
     impl: string,
     blockchain: string,
@@ -26,7 +26,7 @@ const blockchainSlice = createSlice({
     name: 'blockchain',
     initialState: initialState,
     reducers: {
-        updateChainInfo(state, action) {
+        UPDATE_CHAIN_INFO(state, action) {
             const { proxy, impl, blockchain, staking_viewer, api_list } = action.payload
             state.proxy = proxy
             state.impl = impl
@@ -34,26 +34,28 @@ const blockchainSlice = createSlice({
             state.staking_viewer = staking_viewer
             state.api_list = api_list
         },
-        updateBlockchainExplorer(state, action) {
+        UPDATE_BLOCKCHAIN_EXPLORER(state, action) {
             const { blockchain_explorer } = action.payload
             state.blockchain_explorer = blockchain_explorer
         },
-        updateRefreshRate(state, action) {
+        UPDATE_REFRESH_RATE(state, action) {
             const { refresh_rate } = action.payload
             state.refresh_rate = refresh_rate
         },
-        updateApiMaxAttempt(state, action) {
+        UPDATE_API_MAX_ATTEMPT(state, action) {
             const { api_max_attempt } = action.payload
             state.api_max_retry_attempt = api_max_attempt
         },
+        CONFIG_LOADED() {},
     },
 })
 
 export const {
-    updateApiMaxAttempt,
-    updateBlockchainExplorer,
-    updateChainInfo,
-    updateRefreshRate
+    UPDATE_API_MAX_ATTEMPT,
+    UPDATE_BLOCKCHAIN_EXPLORER,
+    UPDATE_CHAIN_INFO,
+    UPDATE_REFRESH_RATE,
+    CONFIG_LOADED
 } = blockchainSlice.actions
 
 export default blockchainSlice.reducer;

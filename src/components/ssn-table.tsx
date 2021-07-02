@@ -7,6 +7,7 @@ import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, g
 import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
 import ReactTooltip from 'react-tooltip';
+import { useAppSelector } from '../store/hooks';
 
 
 function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
@@ -97,7 +98,7 @@ function SsnTable(props: any) {
     const role = props.currRole;
     
     const data: SsnStats[] = props.data;
-    const totalStakeAmt = props.totalStakeAmt;
+    const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
     const setDelegStakeModalData = props.setDelegStakeModalData;
 

@@ -5,6 +5,7 @@ const sagaMiddleware = createSagaMiddleware();
 
 export function startSagas() {
     sagaMiddleware.run(mySaga);
+    // sagaMiddleware.run(otherSaga)
 }
 
 export default sagaMiddleware;

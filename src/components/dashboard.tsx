@@ -128,7 +128,7 @@ function Dashboard(props: any) {
     const mountedRef = useRef(true);
 
     const [minDelegStake, setMinDelegStake] = useState('0');
-    const [totalStakeAmt, setTotalStakeAmt] = useState('0');
+    const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
     const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
     // data for each panel section
@@ -203,8 +203,7 @@ function Dashboard(props: any) {
     // passed to children components
     const getContractConstants = useCallback(async () => {
         let minDelegStake = '0';
-        let totalStakeAmt = '0';
-
+        
         ZilliqaAccount.getImplStateExplorerRetriable(impl, "mindelegstake")
             .then((contractState) => {
                 if (contractState === undefined || contractState === null || contractState === 'error') {
@@ -224,26 +223,6 @@ function Dashboard(props: any) {
                     return null;
                 }
                 setMinDelegStake(minDelegStake);
-            });
-        
-        ZilliqaAccount.getImplStateExplorerRetriable(impl, 'totalstakeamount')
-            .then((contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
-                    return null;
-                }
-                totalStakeAmt = contractState.totalstakeamount;
-            })
-            .catch((err) => {
-                console.error(err);
-                if (mountedRef.current) {
-                    setIsError(true);
-                }
-                return null;
-            })
-            .finally(() => {
-                if (mountedRef.current) {
-                    setTotalStakeAmt(totalStakeAmt);
-                }
             });
 
     }, [impl]);
@@ -270,12 +249,9 @@ function Dashboard(props: any) {
             }
 
             // compute global APY
-            const totalStakeAmtState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'totalstakeamount');
-            if (totalStakeAmtState['totalstakeamount']) {
-                let temp = new BigNumber(totalStakeAmtState['totalstakeamount']);
-                if (!temp.isEqualTo(0)) {
-                    globalAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2).toString();
-                }
+            let temp = new BigNumber(totalStakeAmt);
+            if (!temp.isEqualTo(0)) {
+                globalAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2).toString();
             }
 
             let totalDepositsBN = new BigNumber(0);
@@ -827,7 +803,7 @@ function Dashboard(props: any) {
      * When document has loaded, it start to observable network form zilpay.
      */
     useEffect(() => {
-        if (accountType === AccountType.ZILPAY) {
+        if (userState.account_type === AccountType.ZILPAY) {
             const zilPay = (window as any).zilPay;
 
             if (zilPay) {
@@ -1179,7 +1155,6 @@ function Dashboard(props: any) {
                                             <SsnTable 
                                                 currRole={currRole} 
                                                 data={ssnStats}
-                                                totalStakeAmt={totalStakeAmt}
                                                 showStakeBtn={true}
                                                 setDelegStakeModalData={setDelegStakeModalData}
                                                 />
