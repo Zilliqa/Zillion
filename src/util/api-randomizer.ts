@@ -1,7 +1,12 @@
-import store from "../store/store"
+import { getEnvironment, getNetworkConfigByEnv } from "./config-json-helper";
+import { Environment } from "./enum";
 
 const { Random, MersenneTwister19937 } = require("random-js");
 const randomJS = new Random(MersenneTwister19937.autoSeed());
+
+const network_config = getNetworkConfigByEnv();
+const default_api_list = (getEnvironment() === Environment.PROD) ? ["https://api.zilliqa.com"] : ["https://dev-api.zilliqa.com"]
+const API_LIST = network_config["api_list"] || default_api_list;
 
 /**
  * Randomize the API
@@ -12,12 +17,10 @@ export class ApiRandomizer {
     private static instance: ApiRandomizer;
     currentIndex: number;
     randomIndexList: [];
-    apiList: [];
 
     private constructor() {
         this.currentIndex = 0;
-        this.randomIndexList = [];
-        this.apiList = [];
+        this.randomIndexList = randomJS.shuffle(Array.from(Array(API_LIST.length).keys()));
     }
 
     public static getInstance(): ApiRandomizer {
@@ -27,25 +30,13 @@ export class ApiRandomizer {
         return ApiRandomizer.instance;
     }
 
-    public fetchSsnApi() {
-        if (this.apiList.length > 0) {
-            return;
-        }
-        const fetchedList = store.getState().blockchain.api_list;
-        this.apiList = [...fetchedList];
-        this.randomIndexList = randomJS.shuffle(Array.from(Array(this.apiList.length).keys()));
-    }
-
     public getRandomApi() {
-        let api = "";
-        let randomIndex = 0;
-
-        randomIndex = this.randomIndexList[this.currentIndex];
-        api = this.apiList[randomIndex];
+        let randomIndex = this.randomIndexList[this.currentIndex];
+        let api = API_LIST[randomIndex];
 
         // fetch next random index
         this.currentIndex = this.currentIndex + 1;
-        if (this.currentIndex === this.apiList.length) {
+        if (this.currentIndex === API_LIST.length) {
             // reset if reach the end
             this.currentIndex = 0;
         }

@@ -31,7 +31,6 @@ export const computeDelegRewardsRetriable = async (impl: string, networkURL: str
 
     for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
         try {
-            apiRandomizer.fetchSsnApi();
             const randomAPI = apiRandomizer.getRandomApi();
             result = await computeDelegRewards(impl, randomAPI, ssn, delegator);
             break;

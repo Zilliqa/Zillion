@@ -149,7 +149,6 @@ export const getBalance = async (address: string) => {
 // identical to getBalance except it uses a random API
 export const getBalanceWithNetwork = async (address: string) => {
     try {
-        apiRandomizer.fetchSsnApi();
         const randomAPI = apiRandomizer.getRandomApi();
         const zilliqaObj = new Zilliqa(randomAPI);
         const balance = await zilliqaObj.blockchain.getBalance(address);
@@ -250,7 +249,6 @@ export const getImplStateExplorer = async (implAddr: string, state: string, indi
     }
 
     try {
-        apiRandomizer.fetchSsnApi();
         const randomAPI = apiRandomizer.getRandomApi();
         const explorerZilliqa = new Zilliqa(randomAPI);
 
@@ -282,7 +280,6 @@ export const getImplStateExplorer = async (implAddr: string, state: string, indi
  */
 export const getNumTxBlocksExplorer = async () => {
     try {
-        apiRandomizer.fetchSsnApi();
         const randomAPI = apiRandomizer.getRandomApi();
         const explorerZilliqa = new Zilliqa(randomAPI);
         const info = await explorerZilliqa.blockchain.getBlockChainInfo();
@@ -303,7 +300,6 @@ export const getNumTxBlocksExplorer = async () => {
  */
 export const getTotalCoinSupplyWithNetwork = async () => {
     try {
-        apiRandomizer.fetchSsnApi();
         const randomAPI = apiRandomizer.getRandomApi();
         const zilliqaObj = new Zilliqa(randomAPI);
         const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
