@@ -6,17 +6,23 @@ import { createSlice } from '@reduxjs/toolkit'
 
 
 export interface StakingState {
-    total_stake_amount: string
+    min_deleg_stake: string,          // min amount to deleg in Qa
+    total_stake_amount: string  // sum of all stakes in contract Qa
 }
 
 const initialState: StakingState = {
-    total_stake_amount: '',
+    min_deleg_stake: '0',
+    total_stake_amount: '0',
 }
 
 const stakingSlice = createSlice({
     name: 'staking',
     initialState: initialState,
     reducers: {
+        UPDATE_MIN_DELEG(state, action) {
+            const { min_deleg_stake } = action.payload
+            state.min_deleg_stake = min_deleg_stake
+        },
         UPDATE_TOTAL_STAKE_AMOUNT(state, action) {
             const { total_stake_amount } = action.payload
             state.total_stake_amount = total_stake_amount
@@ -25,6 +31,7 @@ const stakingSlice = createSlice({
 })
 
 export const {
+    UPDATE_MIN_DELEG,
     UPDATE_TOTAL_STAKE_AMOUNT,
 } = stakingSlice.actions
 

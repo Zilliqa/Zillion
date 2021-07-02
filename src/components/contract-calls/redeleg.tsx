@@ -14,6 +14,7 @@ import { ProxyCalls, OperationStatus, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
+import { useAppSelector } from '../../store/hooks';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -84,12 +85,12 @@ function ReDelegateStakeModal(props: any) {
         impl,
         ledgerIndex,
         networkURL,
-        minDelegStake,
         nodeSelectorOptions, 
         transferStakeModalData,
         updateData,
         updateRecentTransactions } = props;
 
+    const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
 

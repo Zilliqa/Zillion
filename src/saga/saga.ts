@@ -4,7 +4,7 @@ import * as types from '../store/actionTypes';
 import { logger } from '../util/logger';
 import { getBlockchain } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
-import { UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
+import { UPDATE_MIN_DELEG, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 
 async function fetchContractState(contractAddress: string, field: string) {
     return await ZilliqaAccount.getImplStateExplorerRetriable(contractAddress, field);
@@ -17,14 +17,18 @@ function* watchInit() {
             // call zilliqa to fetch total stake amount
             // and save in store
             const { impl } = yield select(getBlockchain);
+            const { mindelegstake } = yield call(fetchContractState, impl, 'mindelegstake');
             const { totalstakeamount } = yield call(fetchContractState, impl, 'totalstakeamount');
+            logger("mindelegstake: %o", mindelegstake);
             logger("totalstakeamount: %o", totalstakeamount);
+
+            yield put(UPDATE_MIN_DELEG({ min_deleg_stake: mindelegstake }));
             yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
         } catch (e) {
             console.warn("fetch failed");
             console.warn(e);
         } finally {
-            // should be race
+            // TODO: should be race
             yield delay(10000);
         }
     }

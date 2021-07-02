@@ -23,7 +23,7 @@ function DelegateStakeModal(props: any) {
     const proxy = props.proxy;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
-    const minDelegStake = props.minDelegStake; // Qa
+    const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
 

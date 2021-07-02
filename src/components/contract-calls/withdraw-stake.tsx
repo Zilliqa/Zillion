@@ -12,6 +12,7 @@ import { fromBech32Address } from '@zilliqa-js/crypto';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -25,7 +26,7 @@ function WithdrawStakeModal(props: any) {
     const impl = props.impl;
     const networkURL = props.networkURL;
     const ledgerIndex = props.ledgerIndex;
-    const minDelegStake = props.minDelegStake; // Qa
+    const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const { withdrawStakeModalData, updateData, updateRecentTransactions } = props;
     const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';

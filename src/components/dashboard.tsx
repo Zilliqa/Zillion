@@ -127,7 +127,6 @@ function Dashboard(props: any) {
 
     const mountedRef = useRef(true);
 
-    const [minDelegStake, setMinDelegStake] = useState('0');
     const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
     const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
@@ -197,35 +196,6 @@ function Dashboard(props: any) {
 
             }), PromiseArea.PROMISE_GET_BALANCE);
     }, [userState.address_bech32, dispatch]);
-
-
-    // retrieve contract constants such as min stake
-    // passed to children components
-    const getContractConstants = useCallback(async () => {
-        let minDelegStake = '0';
-        
-        ZilliqaAccount.getImplStateExplorerRetriable(impl, "mindelegstake")
-            .then((contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
-                    return null;
-                }
-                minDelegStake = contractState.mindelegstake;
-            })
-            .catch((err) => {
-                console.error(err);
-                if (mountedRef.current) {
-                    setIsError(true);
-                }
-                return null;
-            })
-            .finally(() => {
-                if (!mountedRef.current) {
-                    return null;
-                }
-                setMinDelegStake(minDelegStake);
-            });
-
-    }, [impl]);
 
 
     /* 
@@ -326,7 +296,7 @@ function Dashboard(props: any) {
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
-    }, [impl, userState.address_base16, networkURL]);
+    }, [impl, userState.address_base16, networkURL, totalStakeAmt]);
 
 
     /* fetch data for delegator pending stake withdrawal */
@@ -680,7 +650,6 @@ function Dashboard(props: any) {
     // load initial data
     useEffect(() => {
         getAccountBalance();
-        getContractConstants();
 
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
@@ -701,7 +670,6 @@ function Dashboard(props: any) {
         currRole,
         getAccountBalance, 
         getBlockRewardCountDown,
-        getContractConstants, 
         getDelegatorPendingWithdrawal,
         getDelegatorStats,
         getDelegatorSwapRequests,
@@ -712,7 +680,6 @@ function Dashboard(props: any) {
     // poll data
     useInterval(() => {
         getAccountBalance();
-        getContractConstants();
 
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
@@ -736,7 +703,6 @@ function Dashboard(props: any) {
         setIsRefreshDisabled(true);
 
         getAccountBalance();
-        getContractConstants();
 
         if (currRole === Role.DELEGATOR.toString()) {
             getDelegatorStats();
@@ -1210,7 +1176,6 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex}
-                minDelegStake={minDelegStake}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
                 delegStakeModalData={delegStakeModalData} />
@@ -1224,8 +1189,7 @@ function Dashboard(props: any) {
                 userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                transferStakeModalData={transferStakeModalData}
-                minDelegStake={minDelegStake} />
+                transferStakeModalData={transferStakeModalData} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
@@ -1235,8 +1199,7 @@ function Dashboard(props: any) {
                 userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
-                withdrawStakeModalData={withdrawStakeModalData}
-                minDelegStake={minDelegStake} />
+                withdrawStakeModalData={withdrawStakeModalData} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
