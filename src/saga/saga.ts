@@ -1,13 +1,17 @@
 import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as ZilliqaAccount from "../account";
-import * as types from '../store/actionTypes';
 import { logger } from '../util/logger';
-import { getBlockchain } from './selectors';
+import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
 import { UPDATE_MIN_DELEG, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
+import { POLL_BALANCE, UPDATE_BALANCE } from '../store/userSlice';
 
 async function fetchContractState(contractAddress: string, field: string) {
     return await ZilliqaAccount.getImplStateExplorerRetriable(contractAddress, field);
+}
+
+async function fetchUserBalance(address_bech32: string) {
+    return await ZilliqaAccount.getBalanceRetriable(address_bech32);
 }
 
 function* watchInit() {
@@ -32,6 +36,21 @@ function* watchInit() {
             yield delay(10000);
         }
     }
+}
+
+function* pollBalance() {
+        try {
+            logger("fetch user balance...");
+            const { address_bech32 } = yield select(getUserState)
+            logger("address: %o", address_bech32);
+            const { balance } = yield call(fetchUserBalance, address_bech32);
+            logger("balance: %o", balance);
+
+            yield put(UPDATE_BALANCE({ balance: balance }));
+        } catch (e) {
+            console.warn("fetch failed");
+            console.warn(e);
+        } 
 }
 
 function* mySaga() {

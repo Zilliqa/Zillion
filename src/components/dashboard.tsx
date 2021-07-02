@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { updateAddress, updateBalance } from '../store/userSlice';
+import { UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
@@ -191,7 +191,7 @@ function Dashboard(props: any) {
             .finally(() => {
                 if (mountedRef.current) {
                     console.log("updating wallet balance...");
-                    dispatch(updateBalance({ balance: currBalance }));
+                    dispatch(UPDATE_BALANCE({ balance: currBalance }));
                 }
 
             }), PromiseArea.PROMISE_GET_BALANCE);
@@ -646,7 +646,6 @@ function Dashboard(props: any) {
         setCurrRole(newRole);
     }, [impl, loginRole]);
 
-
     // load initial data
     useEffect(() => {
         getAccountBalance();
@@ -786,7 +785,7 @@ function Dashboard(props: any) {
                     console.log("zil pay account changing...");
                     initParams(account.base16, AccountType.ZILPAY);
                     const bech32 = toBech32Address(account.base16);
-                    dispatch(updateAddress({ address_base16: account.base16, address_bech32: bech32 }));
+                    dispatch(UPDATE_ADDRESS({ address_base16: account.base16, address_bech32: bech32 }));
                 });
 
                 return () => {

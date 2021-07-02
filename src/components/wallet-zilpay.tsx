@@ -3,7 +3,7 @@ import AppContext from '../contexts/appContext';
 import { AccountType, Environment } from '../util/enum';
 import Alert from './alert';
 
-import { initUser } from '../store/userSlice'
+import { INIT_USER, POLL_BALANCE } from '../store/userSlice'
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { useAppDispatch } from '../store/hooks';
 
@@ -56,8 +56,8 @@ function WalletZilPay(props: any) {
             updateNetwork(zilPay.wallet.net);
             await updateRole(base16, role);
 
-            dispatch(initUser({ address_base16: base16, address_bech32: bech32Address, account_type: AccountType.ZILPAY, authenticated: true }));
-
+            dispatch(INIT_USER({ address_base16: base16, address_bech32: bech32Address, account_type: AccountType.ZILPAY, authenticated: true }));
+            
             // request parent to redirect to dashboard
             props.onSuccessCallback();
         } catch (err) {

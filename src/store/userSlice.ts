@@ -32,27 +32,28 @@ const userSlice = createSlice({
     name: 'user',
     initialState: initialState,
     reducers: {
-        initUser(state, action) {
+        INIT_USER(state, action) {
             const { address_base16, address_bech32, account_type, authenticated } = action.payload
             state.address_base16 = address_base16.toLowerCase()
             state.address_bech32 = address_bech32.toLowerCase()
             state.account_type = account_type
             state.authenticated = authenticated
         },
-        updateAddress(state, action) {
+        POLL_BALANCE() {},
+        UPDATE_ADDRESS(state, action) {
             const { address_base16, address_bech32 } = action.payload
             state.address_base16 = address_base16.toLowerCase()
             state.address_bech32 = address_bech32.toLowerCase()
         },
-        updateBalance(state, action) {
+        UPDATE_BALANCE(state, action) {
             const { balance } = action.payload
             state.balance = balance
         },
-        updateLedgerIndex(state, action) {
+        UPDATE_LEDGER_INDEX(state, action) {
             const { ledger_index } = action.payload
             state.ledger_index = ledger_index
         },
-        reset(state) {
+        RESET(state) {
             state = initialState
         },
     },
@@ -64,11 +65,12 @@ const userSlice = createSlice({
 })
 
 export const {
-    initUser,
-    updateAddress,
-    updateBalance,
-    updateLedgerIndex,
-    reset,
+    INIT_USER,
+    POLL_BALANCE,
+    UPDATE_ADDRESS,
+    UPDATE_BALANCE,
+    UPDATE_LEDGER_INDEX,
+    RESET,
 } = userSlice.actions
 
 export default userSlice.reducer;
