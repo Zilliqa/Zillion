@@ -85,12 +85,13 @@ function ReDelegateStakeModal(props: any) {
         impl,
         ledgerIndex,
         networkURL,
-        nodeSelectorOptions, 
+        // nodeSelectorOptions, 
         transferStakeModalData,
         updateData,
         updateRecentTransactions } = props;
 
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
+    const nodeSelectorOptions = useAppSelector(state => state.staking.ssn_dropdown_list);
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
 

@@ -1,11 +1,10 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as ZilliqaAccount from '../../account';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, showWalletsPrompt } from '../../util/utils';
 import Alert from '../alert';
-import AppContext from '../../contexts/appContext';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
@@ -25,15 +24,19 @@ import SwapImg3 from "../../static/swap_img3.png";
 import SwapImg4 from "../../static/swap_img4.png";
 import SwapImg5 from "../../static/swap_img5.png";
 import { isStorageAvailable } from '../../util/use-local-storage';
+import { useAppSelector } from '../../store/hooks';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
 
 function SwapDelegModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-    
-    const {proxy, impl, ledgerIndex, networkURL, ssnstatsList, swapDelegModalData, userAddress, updateData, updateRecentTransactions} = props;
+    const {networkURL, swapDelegModalData, updateData, updateRecentTransactions} = props;
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const accountType = useAppSelector(state => state.user.account_type);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const userAddress = useAppSelector(state => state.user.address_bech32);
+    const ssnstatsList = useAppSelector(state => state.staking.ssn_list);
     const proxyChecksum = bech32ToChecksum(proxy);
 
     // transfer all stakes to this new deleg

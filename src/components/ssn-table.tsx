@@ -96,9 +96,8 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 
 function SsnTable(props: any) {
     const role = props.currRole;
-    
-    const data: SsnStats[] = props.data;
     const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
+    const ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
     const setDelegStakeModalData = props.setDelegStakeModalData;
 
@@ -232,7 +231,7 @@ function SsnTable(props: any) {
         <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_SSN_STATS} />
         <Table 
             columns={columns} 
-            data={data} 
+            data={ssnList} 
             className={props.tableId} 
             hiddenColumns={getHiddenColumns()} 
             showStakeBtn={showStakeBtn}

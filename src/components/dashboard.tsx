@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { fetchBalance, POLL_BALANCE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
@@ -136,12 +136,9 @@ function Dashboard(props: any) {
     const [delegPendingStakeWithdrawalStats, setDelegPendingStakeWithdrawalStats] = useState([] as any);
     const [totalPendingWithdrawalAmt, setTotalPendingWithdrawalAmt] = useState('0');
     const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
-    const [ssnStats, setSsnStats] = useState([] as SsnStats[]);
 
     // block countdown to reward distribution
     const [blockCountToReward, setBlockCountToReward] = useState('0');
-
-    const [nodeOptions, setNodeOptions] = useState([] as NodeOptions[]);
     
     // data for each contract modal
     const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
@@ -517,80 +514,80 @@ function Dashboard(props: any) {
     }, [impl, userState.address_base16]);
 
 
-    /* 
-    * fetch data for ssn panel
-    * fetch node operator names and address for dropdowns options in the modal
-    */
-    const getSsnStats = useCallback(() => {
-        let tempNodeOptions: NodeOptions[] = [];
-        let output: SsnStats[] = [];
+    // /* 
+    // * fetch data for ssn panel
+    // * fetch node operator names and address for dropdowns options in the modal
+    // */
+    // const getSsnStats = useCallback(() => {
+    //     let tempNodeOptions: NodeOptions[] = [];
+    //     let output: SsnStats[] = [];
 
-        trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssnlist')
-            .then(async (contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
-                    return null;
-                }
+    //     trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssnlist')
+    //         .then(async (contractState) => {
+    //             if (contractState === undefined || contractState === null || contractState === 'error') {
+    //                 return null;
+    //             }
 
-                // get number of delegators
-                const delegNumState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssn_deleg_amt');
+    //             // get number of delegators
+    //             const delegNumState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssn_deleg_amt');
 
-                for (const ssnAddress in contractState['ssnlist']) {
-                    const ssnArgs = contractState['ssnlist'][ssnAddress]['arguments'];
+    //             for (const ssnAddress in contractState['ssnlist']) {
+    //                 const ssnArgs = contractState['ssnlist'][ssnAddress]['arguments'];
 
-                    let delegNum = '0';
-                    let status = SsnStatus.INACTIVE;
+    //                 let delegNum = '0';
+    //                 let status = SsnStatus.INACTIVE;
 
-                    // get ssn status
-                    if (ssnArgs[0]['constructor'] === 'True') {
-                        status = SsnStatus.ACTIVE;
-                    }
+    //                 // get ssn status
+    //                 if (ssnArgs[0]['constructor'] === 'True') {
+    //                     status = SsnStatus.ACTIVE;
+    //                 }
 
-                    if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
-                        ssnAddress in delegNumState['ssn_deleg_amt']) {
-                        delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
-                    }
+    //                 if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
+    //                     ssnAddress in delegNumState['ssn_deleg_amt']) {
+    //                     delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
+    //                 }
 
-                    // for ssn table
-                    const data: SsnStats = {
-                        address: toBech32Address(ssnAddress),
-                        name: ssnArgs[3],
-                        apiUrl: ssnArgs[5],
-                        stakeAmt: ssnArgs[1],
-                        bufferedDeposits: ssnArgs[6],
-                        commRate: ssnArgs[7],
-                        commReward: ssnArgs[8],
-                        delegNum: delegNum,
-                        status: status,
-                    }
+    //                 // for ssn table
+    //                 const data: SsnStats = {
+    //                     address: toBech32Address(ssnAddress),
+    //                     name: ssnArgs[3],
+    //                     apiUrl: ssnArgs[5],
+    //                     stakeAmt: ssnArgs[1],
+    //                     bufferedDeposits: ssnArgs[6],
+    //                     commRate: ssnArgs[7],
+    //                     commReward: ssnArgs[8],
+    //                     delegNum: delegNum,
+    //                     status: status,
+    //                 }
 
-                    // for use as dropdown options in the modals
-                    const operatorOption: NodeOptions = {
-                        address: toBech32Address(ssnAddress),
-                        name: ssnArgs[3],
-                        stakeAmt: ssnArgs[1],
-                        delegNum: delegNum,
-                        commRate: ssnArgs[7],
-                    }
+    //                 // for use as dropdown options in the modals
+    //                 const operatorOption: NodeOptions = {
+    //                     address: toBech32Address(ssnAddress),
+    //                     name: ssnArgs[3],
+    //                     stakeAmt: ssnArgs[1],
+    //                     delegNum: delegNum,
+    //                     commRate: ssnArgs[7],
+    //                 }
 
-                    output.push(data);
-                    tempNodeOptions.push(operatorOption);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-                if (mountedRef.current) {
-                    setIsError(true);
-                }
-                return null;
-            })
-            .finally(() => {
-                if (mountedRef.current) {
-                    console.log("updating dashboard ssn stats...");
-                    setSsnStats([...output]);
-                    setNodeOptions([...tempNodeOptions]);
-                }
-            }), PromiseArea.PROMISE_GET_SSN_STATS);
-    }, [impl]);
+    //                 output.push(data);
+    //                 tempNodeOptions.push(operatorOption);
+    //             }
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //             if (mountedRef.current) {
+    //                 setIsError(true);
+    //             }
+    //             return null;
+    //         })
+    //         .finally(() => {
+    //             if (mountedRef.current) {
+    //                 console.log("updating dashboard ssn stats...");
+    //                 setSsnStats([...output]);
+    //                 setNodeOptions([...tempNodeOptions]);
+    //             }
+    //         }), PromiseArea.PROMISE_GET_SSN_STATS);
+    // }, [impl]);
 
 
     const toggleTheme = () => {
@@ -659,7 +656,7 @@ function Dashboard(props: any) {
             getOperatorStats();
         }
 
-        getSsnStats();
+        // getSsnStats();
 
         return () => {
             mountedRef.current = false;
@@ -673,7 +670,7 @@ function Dashboard(props: any) {
         getDelegatorStats,
         getDelegatorSwapRequests,
         getOperatorStats,
-        getSsnStats
+        // getSsnStats
     ]);
 
     // poll data
@@ -689,7 +686,7 @@ function Dashboard(props: any) {
             getOperatorStats();
         }
 
-        getSsnStats();
+        // getSsnStats();
 
     }, mountedRef, refresh_rate_config);
 
@@ -712,7 +709,7 @@ function Dashboard(props: any) {
             getOperatorStats();
         }
 
-        getSsnStats();
+        // getSsnStats();
 
         // prevent users from spamming manual refresh
         await timeout(Constants.MANUAL_REFRESH_DELAY);
@@ -1118,8 +1115,7 @@ function Dashboard(props: any) {
                                         </div>
                                         <div className="col-12 text-center">
                                             <SsnTable 
-                                                currRole={currRole} 
-                                                data={ssnStats}
+                                                currRole={currRole}
                                                 showStakeBtn={true}
                                                 setDelegStakeModalData={setDelegStakeModalData}
                                                 />
@@ -1184,7 +1180,6 @@ function Dashboard(props: any) {
                 impl={impl} 
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex} 
-                nodeSelectorOptions={nodeOptions}
                 userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions}
@@ -1218,14 +1213,9 @@ function Dashboard(props: any) {
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
             
-            <SwapDelegModal 
-                proxy={proxy}
-                impl={impl}  
+            <SwapDelegModal  
                 networkURL={networkURL}
-                ledgerIndex={ledgerIndex}
-                ssnstatsList={ssnStats}
                 swapDelegModalData={swapDelegModalData}
-                userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
                 
