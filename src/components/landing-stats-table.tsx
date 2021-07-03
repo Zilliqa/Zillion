@@ -6,6 +6,8 @@ import { Constants, PromiseArea, OperationStatus } from '../util/enum';
 import { convertZilToQa, convertQaToCommaStr, convertGzilToCommaStr } from '../util/utils';
 import { useInterval } from '../util/use-interval';
 import SpinnerNormal from './spinner-normal';
+import { useAppSelector } from '../store/hooks';
+import { getRefreshRate } from '../util/config-json-helper';
 
 const BigNumber = require('bignumber.js');
 
@@ -13,8 +15,8 @@ const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); // 110000 * 17
 
 function LandingStatsTable(props: any) {
-    const impl = props.impl;
-    const refresh = props.refresh ? props.refresh : Constants.REFRESH_RATE;
+    const impl = useAppSelector(state => state.blockchain.impl)
+    const refresh = getRefreshRate() ? getRefreshRate() : Constants.REFRESH_RATE
     const [showSpinner, setShowSpinner] = useState(true);
     const mountedRef = useRef(true);
 

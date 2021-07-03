@@ -2,12 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import AnimatedNumber from "react-animated-numbers"
 import { trackPromise } from 'react-promise-tracker';
 import * as ZilliqaAccount from '../account';
+import { useAppSelector } from '../store/hooks';
 import { OperationStatus } from '../util/enum';
 import { calculateBlockRewardCountdown } from '../util/utils';
 
 
 function RewardCountdownTable(props: any) {
-    const networkURL = props.network;
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
     const mountedRef = useRef(true);
 
     // for populating rewards distribution countdown
