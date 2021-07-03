@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, Role } from '../util/enum'
+import * as ZilliqaAccount from "../account";
 
 interface UserState {
     address_bech32: string,
@@ -21,8 +22,9 @@ const initialState: UserState = {
     role: Role.NONE,
 }
 
-export const fetchBalance = createAsyncThunk('user/fetchBalance', async () => {
-    // fetch from zil account?
+export const fetchBalance = createAsyncThunk('user/fetchBalance', async (address: string) => {
+    const response = await ZilliqaAccount.getBalanceRetriable(address);
+    return response;
 })
 
 /**
@@ -58,9 +60,9 @@ const userSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        // builder.addCase(fetchBalance.fulfilled, (state, { payload }) => {
-        //     state.balance = payload
-        // })
+        builder.addCase(fetchBalance.fulfilled, (state, { payload } ) => {
+            state.balance = payload
+        })
     },
 })
 

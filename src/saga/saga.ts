@@ -5,6 +5,7 @@ import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
 import { UPDATE_MIN_DELEG, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 import { POLL_BALANCE, UPDATE_BALANCE } from '../store/userSlice';
+import { RootState } from '../store/store';
 
 async function fetchContractState(contractAddress: string, field: string) {
     return await ZilliqaAccount.getImplStateExplorerRetriable(contractAddress, field);
@@ -43,7 +44,7 @@ function* pollBalance() {
             logger("fetch user balance...");
             const { address_bech32 } = yield select(getUserState)
             logger("address: %o", address_bech32);
-            const { balance } = yield call(fetchUserBalance, address_bech32);
+            const balance: string = yield call(fetchUserBalance, address_bech32);
             logger("balance: %o", balance);
 
             yield put(UPDATE_BALANCE({ balance: balance }));
@@ -56,6 +57,7 @@ function* pollBalance() {
 function* mySaga() {
     yield take(CONFIG_LOADED) // wait for app to load details from config
     yield fork(watchInit)
+    yield takeEvery(POLL_BALANCE, pollBalance)
 }
 
 export default mySaga;

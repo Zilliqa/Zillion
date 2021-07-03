@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { fetchBalance, POLL_BALANCE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
