@@ -58,6 +58,7 @@ export enum OperationStatus {
     ERROR = "ERROR",
     SUCCESS = "SUCCESS",
     PENDING = "PENDING",
+    IDLE = "IDLE",
 }
 
 export enum PromiseArea {

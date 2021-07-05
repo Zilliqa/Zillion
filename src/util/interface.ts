@@ -55,6 +55,16 @@ interface NodeOptions {
     commRate: string,
 }
 
+interface LandingStats {
+    circulatingSupplyStake: string,
+    nodesNum: string,
+    delegNum: string,
+    gzil: string,
+    remainingGzil: string,
+    totalDeposits: string,
+    estRealtimeAPY: string,
+}
+
 interface TransferStakeModalData {
     ssnName: string,
     ssnAddress: string,
@@ -72,11 +82,22 @@ interface SwapDelegModalData {
     requestorList: string[],
 }
 
+export const initialLandingStats: LandingStats = {
+    circulatingSupplyStake: '0',
+    nodesNum: '0',
+    delegNum: '0',
+    gzil: '0',
+    remainingGzil: '0',
+    totalDeposits: '0',
+    estRealtimeAPY: '0',
+}
+
 export type {
     ClaimedRewardModalData,
     DelegateStakeModalData,
     DelegStats,
     DelegStakingPortfolioStats,
+    LandingStats,
     NodeOptions,
     OperatorStats,
     SsnStats,
