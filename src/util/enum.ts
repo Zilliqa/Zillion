@@ -56,7 +56,7 @@ export enum NetworkURL {
 
 export enum OperationStatus {
     ERROR = "ERROR",
-    SUCCESS = "SUCCESS",
+    COMPLETE = "COMPLETE",
     PENDING = "PENDING",
     IDLE = "IDLE",
 }

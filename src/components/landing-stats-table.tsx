@@ -131,7 +131,7 @@ function LandingStatsTable(props: any) {
             <div className="col-12 align-items-center">
                 { loading === OperationStatus.PENDING && <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> }
                 
-                { loading === OperationStatus.SUCCESS && 
+                { loading === OperationStatus.COMPLETE && 
 
                 <>
                 <div className="row pb-3 mx-auto justify-content-center">

@@ -17,6 +17,7 @@ export interface StakingState {
     ssn_list: SsnStats[],                       // hold all the list of ssn info
     zil_max_supply: string,
     is_landing_stats_loading: OperationStatus   // landing stats status indicator
+    is_ssn_stats_loading: OperationStatus       // ssn table status indicator
 }
 
 const initialState: StakingState = {
@@ -29,6 +30,7 @@ const initialState: StakingState = {
     ssn_list: [],
     zil_max_supply: '0',
     is_landing_stats_loading: OperationStatus.IDLE,
+    is_ssn_stats_loading: OperationStatus.IDLE,
 }
 
 const stakingSlice = createSlice({
@@ -67,12 +69,12 @@ const stakingSlice = createSlice({
             const { zil_max_supply } = action.payload
             state.zil_max_supply = zil_max_supply
         },
-        BEGIN_FETCH_LANDING_STATS(state) {
-            state.is_landing_stats_loading = OperationStatus.PENDING
+        UPDATE_FETCH_LANDING_STATS_STATUS(state, action) {
+            state.is_landing_stats_loading = action.payload
         },
-        END_FETCH_LANDING_STATS(state) {
-            state.is_landing_stats_loading = OperationStatus.SUCCESS
-        }
+        UPDATE_FETCH_SSN_STATS_STATUS(state, action) {
+            state.is_ssn_stats_loading = action.payload
+        },
     },
 })
 
@@ -85,8 +87,8 @@ export const {
     UPDATE_SSN_DROPDOWN_LIST,
     UPDATE_SSN_LIST,
     UPDATE_ZIL_MAX_SUPPLY,
-    BEGIN_FETCH_LANDING_STATS,
-    END_FETCH_LANDING_STATS,
+    UPDATE_FETCH_LANDING_STATS_STATUS,
+    UPDATE_FETCH_SSN_STATS_STATUS
 } = stakingSlice.actions
 
 export default stakingSlice.reducer;

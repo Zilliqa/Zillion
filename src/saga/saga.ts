@@ -3,7 +3,7 @@ import * as ZilliqaAccount2 from "../account";
 import { logger } from '../util/logger';
 import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
-import { BEGIN_FETCH_LANDING_STATS, END_FETCH_LANDING_STATS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
+import { UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 import { POLL_BALANCE, UPDATE_BALANCE } from '../store/userSlice';
 import { RootState } from '../store/store';
 import { Constants, OperationStatus, SsnStatus } from '../util/enum';
@@ -58,7 +58,7 @@ function isRespOk(obj: any): boolean {
  */
 function* watchInitOnce() {
     try {
-        yield put(BEGIN_FETCH_LANDING_STATS());
+        yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.PENDING));
         logger("fetching contract data (I) once...");
         const { impl } = yield select(getBlockchain);
         const { mindelegstake } = yield call(ZilAccount.getImplStateRetriable, impl, 'mindelegstake');
@@ -113,9 +113,9 @@ function* watchInitOnce() {
         yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
         yield put(UPDATE_GZIL_ADDRESS({ gzil_address: gziladdr }));
         yield put(UPDATE_GZIL_TOTAL_SUPPLY({ gzil_total_supply: total_supply }));
-        yield put(END_FETCH_LANDING_STATS());
+        yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.COMPLETE));
     } catch (e) {
-        console.warn("fetch failed");
+        console.warn("fetch home data failed");
         console.warn(e);
     }
 }
@@ -126,6 +126,7 @@ function* watchInitOnce() {
 function* watchInitLoop() {
     while (true) {
         try {
+            yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.PENDING));
             logger("fetching contract data (II) poll...");
             const { impl } = yield select(getBlockchain);
 
@@ -171,6 +172,7 @@ function* watchInitLoop() {
             // yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
             yield put(UPDATE_SSN_DROPDOWN_LIST({ dropdown_list: dropdown_list }));
             yield put(UPDATE_SSN_LIST({ ssn_list: ssn_list }));
+            yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.COMPLETE));
         } catch (e) {
             console.warn("fetch failed");
             console.warn(e);

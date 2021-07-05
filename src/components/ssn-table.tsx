@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 // import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 
-import { PromiseArea, SsnStatus, Role, ContractState } from '../util/enum';
+import { PromiseArea, SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress } from '../util/utils';
 import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
 import ReactTooltip from 'react-tooltip';
 import { useAppSelector } from '../store/hooks';
+import SpinnerNormal from './spinner-normal';
 
 
 function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
@@ -97,6 +98,7 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 function SsnTable(props: any) {
     const role = props.currRole;
     const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
+    const loading: OperationStatus = useAppSelector(state => state.staking.is_ssn_stats_loading);
     const ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
     const setDelegStakeModalData = props.setDelegStakeModalData;
@@ -228,14 +230,20 @@ function SsnTable(props: any) {
     
     return (
         <>
-        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_SSN_STATS} />
-        <Table 
-            columns={columns} 
-            data={ssnList} 
-            className={props.tableId} 
-            hiddenColumns={getHiddenColumns()} 
-            showStakeBtn={showStakeBtn}
+        { 
+            loading === OperationStatus.PENDING && 
+            <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> 
+        }
+        {
+            loading === OperationStatus.COMPLETE &&
+            <Table 
+                columns={columns} 
+                data={ssnList} 
+                className={props.tableId} 
+                hiddenColumns={getHiddenColumns()} 
+                showStakeBtn={showStakeBtn}
              />
+        }
         </>
     );
 }
