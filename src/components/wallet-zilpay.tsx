@@ -57,7 +57,6 @@ function WalletZilPay(props: any) {
             await updateRole(base16, role);
 
             dispatch(INIT_USER({ address_base16: base16, address_bech32: bech32Address, account_type: AccountType.ZILPAY, authenticated: true, selected_role: role }));
-            dispatch(QUERY_AND_UPDATE_ROLE());
             
             // request parent to redirect to dashboard
             props.onSuccessCallback();
