@@ -4,9 +4,9 @@ import { logger } from '../util/logger';
 import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
 import { UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
-import { POLL_BALANCE, UPDATE_BALANCE } from '../store/userSlice';
+import { POLL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
 import { RootState } from '../store/store';
-import { Constants, OperationStatus, SsnStatus } from '../util/enum';
+import { Constants, OperationStatus, Role, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { ZilAccount } from '../zilliqa';
@@ -198,10 +198,37 @@ function* pollBalance() {
         } 
 }
 
+/**
+ * checks if the connected wallet is an operator or delegator and update the role in the store accordingly
+ */
+function* queryAndUpdateRole() {
+    try {
+        const { address_base16, selected_role } = yield select(getUserState);
+        const { impl } = yield select(getBlockchain);
+        const isOperator: boolean = yield call(ZilAccount.isOperator, impl, address_base16);
+        logger("is user an operator? ", isOperator);
+        let role;
+        if (selected_role === Role.OPERATOR && !isOperator) {
+            console.error("user is not operator");
+            role = Role.DELEGATOR;
+        } else if (selected_role === Role.OPERATOR && isOperator) {
+            role = Role.OPERATOR;
+        } else {
+            // defaults to delegator
+            role = Role.DELEGATOR;
+        }
+        yield put(UPDATE_ROLE({ role: role }));
+    } catch (e) {
+        console.warn("query and update role failed");
+        console.warn(e);
+    }
+}
+
 function* mySaga() {
     yield take(CONFIG_LOADED) // wait for app to load details from config
     yield fork(watchInitOnce)
     yield fork(watchInitLoop)
+    yield takeEvery(QUERY_AND_UPDATE_ROLE, queryAndUpdateRole)
     // yield takeEvery(POLL_BALANCE, pollBalance)
 }
 

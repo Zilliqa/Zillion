@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { QUERY_AND_UPDATE_ROLE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
@@ -114,7 +114,7 @@ function Dashboard(props: any) {
     const appContext = useContext(AppContext);
     const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
 
-    const [currRole, setCurrRole] = useState(loginRole);
+    // const [currRole, setCurrRole] = useState(loginRole);
 
     const userState = useAppSelector(state => state.user);
 
@@ -624,35 +624,35 @@ function Dashboard(props: any) {
     // update current role is used for ZilPay
     // due to account switch on the fly
     // role is always compared against the selected role at home page
-    const updateCurrentRole = useCallback(async (userBase16Address: string, currImpl?: string) => {
-        // setState is async
-        // use input params to get latest impl and network
-        let newRole = "";
-        let implAddress = currImpl ? currImpl : impl;
+    // const updateCurrentRole = useCallback(async (userBase16Address: string, currImpl?: string) => {
+    //     // setState is async
+    //     // use input params to get latest impl and network
+    //     let newRole = "";
+    //     let implAddress = currImpl ? currImpl : impl;
 
-        console.log("updating current role...%o", userBase16Address);
+    //     console.log("updating current role...%o", userBase16Address);
 
-        const isOperator = await ZilliqaAccount.isOperator(implAddress, userBase16Address);
+    //     const isOperator = await ZilliqaAccount.isOperator(implAddress, userBase16Address);
 
-        // login role is set by context during wallet access
-        if (loginRole === Role.OPERATOR.toString() && isOperator) {
-            newRole = Role.OPERATOR.toString();
-        } else {
-            newRole = Role.DELEGATOR.toString();
-        }
-        setCurrRole(newRole);
-    }, [impl, loginRole]);
+    //     // login role is set by context during wallet access
+    //     if (loginRole === Role.OPERATOR.toString() && isOperator) {
+    //         newRole = Role.OPERATOR.toString();
+    //     } else {
+    //         newRole = Role.DELEGATOR.toString();
+    //     }
+    //     setCurrRole(newRole);
+    // }, [impl, loginRole]);
 
     // load initial data
     useEffect(() => {
         getAccountBalance();
 
-        if (currRole === Role.DELEGATOR.toString()) {
+        if (userState.role === Role.DELEGATOR) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
             getDelegatorSwapRequests();
             getBlockRewardCountDown();
-        } else if (currRole === Role.OPERATOR.toString()) {
+        } else if (userState.role === Role.OPERATOR) {
             getOperatorStats();
         }
 
@@ -663,7 +663,7 @@ function Dashboard(props: any) {
         }
 
     }, [
-        currRole,
+        userState.role,
         getAccountBalance, 
         getBlockRewardCountDown,
         getDelegatorPendingWithdrawal,
@@ -677,12 +677,12 @@ function Dashboard(props: any) {
     useInterval(() => {
         getAccountBalance();
 
-        if (currRole === Role.DELEGATOR.toString()) {
+        if (userState.role === Role.DELEGATOR) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
             getDelegatorSwapRequests();
             getBlockRewardCountDown();
-        } else if (currRole === Role.OPERATOR.toString()) {
+        } else if (userState.role === Role.OPERATOR) {
             getOperatorStats();
         }
 
@@ -700,12 +700,12 @@ function Dashboard(props: any) {
 
         getAccountBalance();
 
-        if (currRole === Role.DELEGATOR.toString()) {
+        if (userState.role === Role.DELEGATOR) {
             getDelegatorStats();
             getDelegatorPendingWithdrawal();
             getDelegatorSwapRequests();
             getBlockRewardCountDown();
-        } else if (currRole === Role.OPERATOR.toString()) {
+        } else if (userState.role === Role.OPERATOR) {
             getOperatorStats();
         }
 
@@ -819,8 +819,8 @@ function Dashboard(props: any) {
         if (!userState.address_base16) {
             return;
         }
-        updateCurrentRole(userState.address_base16);
-    }, [userState.address_base16, updateCurrentRole]);
+        dispatch(QUERY_AND_UPDATE_ROLE());
+    }, [userState.address_base16, dispatch]);
 
     
     // prevent user from refreshing
@@ -965,9 +965,7 @@ function Dashboard(props: any) {
                                 {/* delegator section */}
                                 {/* complete withdrawal */}
                                 {
-                                    (currRole === Role.DELEGATOR.toString()) &&
-
-                                    
+                                    (userState.role === Role.DELEGATOR) &&
 
                                     <CompleteWithdrawalTable 
                                         impl={impl} 
@@ -979,7 +977,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (currRole === Role.OPERATOR.toString()) &&
+                                    (userState.role === Role.OPERATOR) &&
 
                                     <>
                                     {/* node operator section */}
@@ -1021,7 +1019,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (currRole === Role.DELEGATOR.toString()) &&
+                                    (userState.role === Role.DELEGATOR) &&
                                     <>
                                     {/* delegator statistics */}
 
@@ -1046,7 +1044,7 @@ function Dashboard(props: any) {
                                 }
 
                                 {
-                                    (currRole === Role.DELEGATOR.toString()) &&
+                                    (userState.role === Role.DELEGATOR) &&
                                     <>
                                     {/* delegator portfolio */}
 
@@ -1079,7 +1077,7 @@ function Dashboard(props: any) {
 
                                 {/* operator statistics */}
                                 {
-                                    (currRole === Role.OPERATOR.toString()) &&
+                                    (userState.role === Role.OPERATOR) &&
 
                                    <div id="operator-stats-details" className="p-4 dashboard-card container-fluid">
                                         <div className="row">
@@ -1115,7 +1113,6 @@ function Dashboard(props: any) {
                                         </div>
                                         <div className="col-12 text-center">
                                             <SsnTable 
-                                                currRole={currRole}
                                                 showStakeBtn={true}
                                                 setDelegStakeModalData={setDelegStakeModalData}
                                                 />

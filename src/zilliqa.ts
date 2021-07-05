@@ -24,7 +24,10 @@ export class ZilAccount {
         return result;
     }
 
-    static getTotalCoinSupply = async () => {
+    /**
+     * fetch the total zil coin supply
+     */
+    static getTotalCoinSupply = async (): Promise<any> => {
         let result;
         for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
             result = await ZilAccount.getActualTotalCoinSupply();
@@ -33,6 +36,26 @@ export class ZilAccount {
             }
         }
         return result;
+    }
+
+    /**
+     * checks if the connected wallet is a node operator
+     * 
+     * @param impl      contract implementation address
+     * @param address   base16 wallet address to check
+     * @returns true if the connected wallet is a node operator, false otherwise
+     */
+    static isOperator = async (impl: string, address: string): Promise<any> => {
+        if (!impl || !address) {
+            return false;
+        }
+        logger("check is operator: ", address);
+        const response = await ZilAccount.getImplStateRetriable(impl, "ssnlist", [address]);
+
+        if (!response || response === null || response === OperationStatus.ERROR) {
+            return false;
+        }
+        return true;
     }
 
     private static getActualTotalCoinSupply = async () => {
@@ -55,9 +78,9 @@ export class ZilAccount {
      * sets the network but doesn't affect the rest of the zilliqa calls such as sending transaction
      * which depends on the main zilliqa object
      * 
-     * @param impl 
-     * @param state 
-     * @param indices 
+     * @param impl      implementation contract in checksum format
+     * @param state     name of the variable in the contract
+     * @param indices   JSOn array to specify the indices if the variable is a map type
      */
     private static getImplState = async (impl: string, state: string, indices?: any) => {
         if (!impl) {

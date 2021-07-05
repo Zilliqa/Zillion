@@ -96,7 +96,7 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 }
 
 function SsnTable(props: any) {
-    const role = props.currRole;
+    const role = useAppSelector(state => state.user.role);
     const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_ssn_stats_loading);
     const ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
