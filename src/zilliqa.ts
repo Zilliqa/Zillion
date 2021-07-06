@@ -25,6 +25,23 @@ export class ZilAccount {
     }
 
     /**
+     * query the wallet balance
+     * 
+     * @param address wallet address in base16 or bech32 format
+     * @returns amount in zils, returns '0' if the balance cannot be found
+     */
+    static getBalance = async (address: string): Promise<string> => {
+        let result;
+        for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
+            result = await ZilAccount.getActualBalance(address);
+            if (result !== OperationStatus.ERROR) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
      * fetch the total zil coin supply
      */
     static getTotalCoinSupply = async (): Promise<any> => {
@@ -68,6 +85,21 @@ export class ZilAccount {
                 return OperationStatus.ERROR;
             }
             return response.result;
+        } catch (err) {
+            return OperationStatus.ERROR;
+        }
+    }
+
+    private static getActualBalance = async (address: string) => {
+        try {
+            const randomAPI = API_RANDOMIZER.getRandomApi();
+            const zilliqa = new Zilliqa(randomAPI);
+            const response =  await zilliqa.blockchain.getBalance(address);
+
+            if (!response.hasOwnProperty("result") || response.result.balance === undefined) {
+                return "0";
+            }
+            return response.result.balance;
         } catch (err) {
             return OperationStatus.ERROR;
         }

@@ -44,6 +44,7 @@ const userSlice = createSlice({
             state.authenticated = authenticated
             state.selected_role = selected_role
         },
+        QUERY_AND_UPDATE_BALANCE() {},
         QUERY_AND_UPDATE_ROLE() {}, 
         POLL_BALANCE() {},
         UPDATE_ADDRESS(state, action) {
@@ -76,6 +77,7 @@ const userSlice = createSlice({
 
 export const {
     INIT_USER,
+    QUERY_AND_UPDATE_BALANCE,
     QUERY_AND_UPDATE_ROLE,
     POLL_BALANCE,
     UPDATE_ADDRESS,

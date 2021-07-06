@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { QUERY_AND_UPDATE_ROLE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
@@ -645,7 +645,7 @@ function Dashboard(props: any) {
 
     // load initial data
     useEffect(() => {
-        getAccountBalance();
+        // getAccountBalance();
 
         if (userState.role === Role.DELEGATOR) {
             getDelegatorStats();
@@ -664,7 +664,7 @@ function Dashboard(props: any) {
 
     }, [
         userState.role,
-        getAccountBalance, 
+        // getAccountBalance, 
         getBlockRewardCountDown,
         getDelegatorPendingWithdrawal,
         getDelegatorStats,
@@ -675,7 +675,7 @@ function Dashboard(props: any) {
 
     // poll data
     useInterval(() => {
-        getAccountBalance();
+        // getAccountBalance();
 
         if (userState.role === Role.DELEGATOR) {
             getDelegatorStats();
@@ -698,7 +698,7 @@ function Dashboard(props: any) {
     const updateData = async () => {
         setIsRefreshDisabled(true);
 
-        getAccountBalance();
+        // getAccountBalance();
 
         if (userState.role === Role.DELEGATOR) {
             getDelegatorStats();
@@ -820,6 +820,7 @@ function Dashboard(props: any) {
             return;
         }
         dispatch(QUERY_AND_UPDATE_ROLE());
+        dispatch(QUERY_AND_UPDATE_BALANCE());
     }, [userState.address_base16, dispatch]);
 
     

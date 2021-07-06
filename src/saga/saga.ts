@@ -256,9 +256,9 @@ function* mySaga() {
     yield take(CONFIG_LOADED) // wait for app to load details from config
     yield fork(watchInitOnce)
     yield fork(watchInitLoop)
-    yield takeLatest(QUERY_AND_UPDATE_ROLE, queryAndUpdateRole)
-    yield take(INIT_USER)
-    yield fork(watchPollUserData)
+    // yield takeLatest(QUERY_AND_UPDATE_ROLE, queryAndUpdateRole)
+    // yield take(INIT_USER)
+    // yield fork(watchPollUserData)
     // yield takeEvery(POLL_BALANCE, pollBalance)
 }
 
