@@ -100,6 +100,11 @@ export const initialLandingStats: LandingStats = {
     estRealtimeAPY: '0',
 }
 
+export const initialSwapDelegModalData: SwapDelegModalData = {
+    swapRecipientAddress: '',
+    requestorList: []
+}
+
 export type {
     ClaimedRewardModalData,
     DelegateStakeModalData,

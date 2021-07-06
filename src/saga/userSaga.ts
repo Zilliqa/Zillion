@@ -3,9 +3,9 @@ import { BigNumber } from 'bignumber.js';
 import { Task } from 'redux-saga';
 import { call, cancel, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { UPDATE_DELEG_PORTFOLIO, UPDATE_DELEG_STATS, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/stakingSlice';
-import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE } from '../store/userSlice';
+import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL } from '../store/userSlice';
 import { OperationStatus, Role } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, LandingStats, SsnStats } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, LandingStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { ZilAccount } from '../zilliqa';
@@ -152,8 +152,51 @@ function* populateStakingPortfolio() {
     }
 }
 
+/**
+ * popoulate swap deleg requests
+ */
+function* populateSwapRequests() {
+    logger("populate swap requests");
+    try {
+        const { address_base16 } = yield select(getUserState);
+        const { impl } = yield select(getBlockchain);
+        const { deleg_swap_request } = yield call(ZilAccount.getImplStateRetriable, impl, 'deleg_swap_request');
+
+        let swapRecipientAddress = '';
+        let requestorList: any = [];
+        
+        if (address_base16 in deleg_swap_request) {
+            swapRecipientAddress = deleg_swap_request[address_base16];
+        }
+
+        // get the list of requestors that is pending for this wallet to accept
+        // reverse the mapping
+        let reverseMap = Object.keys(deleg_swap_request).reduce((newMap: any, k) => {
+            let receipientAddr = deleg_swap_request[k];
+            newMap[receipientAddr] = newMap[receipientAddr] || [];
+            newMap[receipientAddr].push(k)
+            return newMap;
+        }, {});
+
+        if (address_base16 in reverseMap) {
+            requestorList = reverseMap[address_base16];
+        }
+
+        const swapDelegModal : SwapDelegModalData = {
+            swapRecipientAddress: swapRecipientAddress,
+            requestorList: requestorList
+        }
+
+        yield put(UPDATE_SWAP_DELEG_MODAL({ swap_deleg_modal: swapDelegModal }));
+    } catch (e) {
+        console.warn("populate swap requests failed");
+        console.warn(e);
+    }
+}
+
 function* pollDelegatorData() {
     yield fork(populateStakingPortfolio)
+    yield fork(populateSwapRequests)
 }
 
 function* watchPollUserData() {

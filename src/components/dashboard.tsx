@@ -650,7 +650,7 @@ function Dashboard(props: any) {
         if (userState.role === Role.DELEGATOR) {
             // getDelegatorStats();
             getDelegatorPendingWithdrawal();
-            getDelegatorSwapRequests();
+            // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
             getOperatorStats();
@@ -668,7 +668,7 @@ function Dashboard(props: any) {
         getBlockRewardCountDown,
         getDelegatorPendingWithdrawal,
         // getDelegatorStats,
-        getDelegatorSwapRequests,
+        // getDelegatorSwapRequests,
         getOperatorStats,
         // getSsnStats
     ]);
@@ -680,7 +680,7 @@ function Dashboard(props: any) {
         if (userState.role === Role.DELEGATOR) {
             // getDelegatorStats();
             getDelegatorPendingWithdrawal();
-            getDelegatorSwapRequests();
+            // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
             getOperatorStats();
@@ -703,7 +703,7 @@ function Dashboard(props: any) {
         if (userState.role === Role.DELEGATOR) {
             // getDelegatorStats();
             getDelegatorPendingWithdrawal();
-            getDelegatorSwapRequests();
+            // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
             getOperatorStats();
@@ -1203,7 +1203,6 @@ function Dashboard(props: any) {
             
             <SwapDelegModal  
                 networkURL={networkURL}
-                swapDelegModalData={swapDelegModalData}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
                 

@@ -25,12 +25,14 @@ import SwapImg4 from "../../static/swap_img4.png";
 import SwapImg5 from "../../static/swap_img5.png";
 import { isStorageAvailable } from '../../util/use-local-storage';
 import { useAppSelector } from '../../store/hooks';
+import { SwapDelegModalData } from '../../util/interface';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
 
 function SwapDelegModal(props: any) {
-    const {networkURL, swapDelegModalData, updateData, updateRecentTransactions} = props;
+    const {networkURL, updateData, updateRecentTransactions} = props;
+    const swapDelegModalData: SwapDelegModalData = useAppSelector(state => state.user.swap_deleg_modal_data);
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
     const accountType = useAppSelector(state => state.user.account_type);

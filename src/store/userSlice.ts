@@ -1,17 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, Role } from '../util/enum'
 import * as ZilliqaAccount from "../account";
+import { initialSwapDelegModalData, SwapDelegModalData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
     address_base16: string,
     account_type: AccountType,
     authenticated: boolean,
-    balance: string,               // zils in Qa
+    balance: string,                                    // zils in Qa
     gzil_balance: string,
     ledger_index: number,
-    role: Role,                    // actual role
-    selected_role: Role,           // role that the user selects when signing in
+    role: Role,                                         // actual role
+    selected_role: Role,                                // role that the user selects when signing in
+    swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
 }
 
 const initialState: UserState = {
@@ -24,6 +26,7 @@ const initialState: UserState = {
     ledger_index: LedgerIndex.DEFAULT,
     role: Role.NONE,
     selected_role: Role.NONE,
+    swap_deleg_modal_data: initialSwapDelegModalData,
 }
 
 export const fetchBalance = createAsyncThunk('user/fetchBalance', async (address: string) => {
@@ -71,6 +74,10 @@ const userSlice = createSlice({
             const { role } = action.payload
             state.role = role
         },
+        UPDATE_SWAP_DELEG_MODAL(state, action) {
+            const { swap_deleg_modal } = action.payload
+            state.swap_deleg_modal_data = swap_deleg_modal
+        },
         RESET(state) {
             state = initialState
         },
@@ -93,6 +100,7 @@ export const {
     UPDATE_GZIL_BALANCE,
     UPDATE_LEDGER_INDEX,
     UPDATE_ROLE,
+    UPDATE_SWAP_DELEG_MODAL,
     RESET,
 } = userSlice.actions
 

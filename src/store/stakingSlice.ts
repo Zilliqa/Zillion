@@ -4,7 +4,7 @@
 
 import { createSlice } from '@reduxjs/toolkit'
 import { OperationStatus } from '../util/enum'
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialLandingStats, LandingStats, NodeOptions, SsnStats } from '../util/interface'
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialLandingStats, initialSwapDelegModalData, LandingStats, NodeOptions, SsnStats, SwapDelegModalData } from '../util/interface'
 
 
 export interface StakingState {
@@ -13,10 +13,12 @@ export interface StakingState {
     min_deleg_stake: string,                                    // min amount to deleg in Qa
     total_stake_amount: string                                  // sum of all stakes in contract Qa
     ssn_dropdown_list: NodeOptions[]                            // to display ssn list as dropdown options in redeleg modal
+    
     deleg_stats: DelegStats,                                    // data for delegator stats
     deleg_staking_portfolio_list: DelegStakingPortfolioStats[], // list of ssn info that a delegator has staked with
     landing_stats: LandingStats,                                // data for landing stats page 
     ssn_list: SsnStats[],                                       // hold all the list of ssn info
+    
     zil_max_supply: string,
     is_deleg_stats_loading: OperationStatus,                    // delegator stats and staking portfolio status indicator
     is_landing_stats_loading: OperationStatus,                  // landing stats status indicator
