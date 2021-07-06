@@ -6,6 +6,8 @@ import IconQuestionCircle from './icons/question-circle';
 import Spinner from './spinner';
 import { PromiseArea, ButtonText, ContractState } from '../util/enum';
 import { convertQaToCommaStr } from '../util/utils';
+import { PendingWithdrawStats } from '../util/interface';
+import { useAppSelector } from '../store/hooks';
 
 
 function Table({ columns, data, tableId }: any) {
@@ -57,7 +59,7 @@ function Table({ columns, data, tableId }: any) {
 }
 
 function CompleteWithdrawalTable(props: any) {
-    const data = props.data;
+    const data: PendingWithdrawStats[] = useAppSelector(state => state.user.pending_withdraw_list);
     const totalClaimableAmt = props.totalClaimableAmt;
 
     const columns = useMemo(

@@ -3,9 +3,9 @@ import { BigNumber } from 'bignumber.js';
 import { Task } from 'redux-saga';
 import { call, cancel, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { UPDATE_DELEG_PORTFOLIO, UPDATE_DELEG_STATS, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/stakingSlice';
-import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL } from '../store/userSlice';
+import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST } from '../store/userSlice';
 import { OperationStatus, Role } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, LandingStats, SsnStats, SwapDelegModalData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, LandingStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { ZilAccount } from '../zilliqa';
@@ -80,11 +80,11 @@ function* queryAndUpdateGzil() {
         const { address_base16 } = yield select(getUserState);
         const { gzil_address } = yield select(getStakingState);
 
-        const { balances } = yield call(ZilAccount.getImplStateRetriable, gzil_address, 'balances', [address_base16]);
-        logger("gzil response: ", balances);
+        const response: Object = yield call(ZilAccount.getImplStateRetriable, gzil_address, 'balances', [address_base16]);
+        logger("gzil response: ", response);
 
-        if (isRespOk(balances)) {
-            yield put(UPDATE_GZIL_BALANCE({ gzil_balance: balances[address_base16] }));
+        if (isRespOk(response)) {
+            yield put(UPDATE_GZIL_BALANCE({ gzil_balance: (response as any)['balanaces'][address_base16] }));
         }
     } catch (e) {
         console.warn("query and update gzil failed");
@@ -103,22 +103,23 @@ function* populateStakingPortfolio() {
 
         const { address_base16, gzil_balance } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
-        const { deposit_amt_deleg } = yield call(ZilAccount.getImplStateRetriable, impl, 'deposit_amt_deleg', [address_base16]);
-        logger("deposit deleg list: ", deposit_amt_deleg);
+        const response: Object = yield call(ZilAccount.getImplStateRetriable, impl, 'deposit_amt_deleg', [address_base16]);
+        logger("deposit deleg list: ", response);
 
-        if (!isRespOk(deposit_amt_deleg)) {
+        if (!isRespOk(response)) {
             // user has no stake
             return;
         }
 
         const { landing_stats, ssn_list } = yield select(getStakingState);
+        const depositAmtDeleg = (response as any)['deposit_amt_deleg'][address_base16];
         let staking_portfolio_list: DelegStakingPortfolioStats[] = [];
         let totalDeposits = new BigNumber(0);
         let totalRewards = new BigNumber(0);
         
-        for (const ssnAddress in deposit_amt_deleg[address_base16]) {
+        for (const ssnAddress in depositAmtDeleg) {
             // compute total deposits
-            const deposit = new BigNumber(deposit_amt_deleg[address_base16][ssnAddress]);
+            const deposit = new BigNumber(depositAmtDeleg[ssnAddress]);
             totalDeposits = totalDeposits.plus(deposit);
 
             // compute zil rewards
@@ -194,9 +195,70 @@ function* populateSwapRequests() {
     }
 }
 
+function* populatePendingWithdrawal() {
+    logger("popoulate pending withdrawal");
+    try {
+        const { address_base16 } = yield select(getUserState);
+        const { impl } = yield select(getBlockchain);
+        const response: Object = yield call(ZilAccount.getImplStateRetriable, impl, 'withdrawal_pending', [address_base16]);
+
+        logger("pending withdrawal: ", response);
+
+        if (!isRespOk(response)) {
+            return;
+        }
+
+        let progress = '0';
+        let pendingWithdrawList: PendingWithdrawStats[] = [];
+        const pendingWithdrawal = (response as any)['withdrawal_pending'][address_base16];
+        const { min_bnum_req } = yield select(getStakingState);
+        const numTxBlk: string = yield call(ZilAccount.getNumTxBlocks);
+        const currBlkNum = isRespOk(numTxBlk) ? new BigNumber(numTxBlk).minus(1) : new BigNumber(0);
+
+        logger("asdasd", pendingWithdrawal);
+
+        for (const blkNum in pendingWithdrawal) {
+            // compute each pending stake withdrawal progress
+            let pendingAmt = new BigNumber(pendingWithdrawal[blkNum]);
+            let blkNumCheck = new BigNumber(blkNum).plus(min_bnum_req);
+            let blkNumCountdown = blkNumCheck.minus(currBlkNum); // may be negative
+            let completed = new BigNumber(0);
+
+            // compute progress using blk num countdown ratio
+            if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                // can withdraw
+                // totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                blkNumCountdown = new BigNumber(0);
+                completed = new BigNumber(1);
+            } else {
+                // still have pending blks
+                // 1 - (countdown/blk_req)
+                const processed = blkNumCountdown.dividedBy(min_bnum_req);
+                completed = new BigNumber(1).minus(processed);
+            }
+
+            // convert progress to percentage
+            progress = completed.times(100).toFixed(2);
+
+            pendingWithdrawList.push({
+                amount: `${pendingAmt}`,
+                blkNumCountdown: `${blkNumCountdown}`,
+                blkNumCheck: `${blkNumCheck}`,
+                progress: `${progress}`
+            } as PendingWithdrawStats)
+        }
+        logger(pendingWithdrawList);
+        yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: pendingWithdrawList }));
+    } catch (e) {
+        console.warn("populate pending withdrawal failed");
+        console.warn(e);
+    }
+}
+
 function* pollDelegatorData() {
     yield fork(populateStakingPortfolio)
     yield fork(populateSwapRequests)
+    yield fork(populatePendingWithdrawal)
 }
 
 function* watchPollUserData() {

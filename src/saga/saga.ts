@@ -3,7 +3,7 @@ import * as ZilliqaAccount2 from "../account";
 import { logger } from '../util/logger';
 import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
-import { UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
+import { UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 import { INIT_USER, POLL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
 import { Constants, OperationStatus, Role, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
@@ -66,6 +66,9 @@ function* watchInitOnce() {
         const { totalstakeamount } = yield call(ZilAccount.getImplStateRetriable, impl, 'totalstakeamount');
         logger("totalstakeamount: %o", totalstakeamount);
 
+        const { bnum_req } = yield call(ZilAccount.getImplStateRetriable, impl, 'bnum_req');
+        logger("bnum req: ", bnum_req);
+
         const { gziladdr } = yield call(ZilAccount.getImplStateRetriable, impl, 'gziladdr');
         const { total_supply } = yield call(ZilAccount.getImplStateRetriable, gziladdr, 'total_supply');
         logger("gziladdr: ", gziladdr);
@@ -108,6 +111,7 @@ function* watchInitOnce() {
             yield put(UPDATE_LANDING_STATS({ landing_stats: landingStats }));
         }
 
+        yield put(UPDATE_MIN_BNUM_REQ({ min_bnum_req: bnum_req }));
         yield put(UPDATE_MIN_DELEG({ min_deleg_stake: mindelegstake }));
         yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
         yield put(UPDATE_GZIL_ADDRESS({ gzil_address: gziladdr }));

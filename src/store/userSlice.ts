@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, Role } from '../util/enum'
 import * as ZilliqaAccount from "../account";
-import { initialSwapDelegModalData, SwapDelegModalData } from '../util/interface';
+import { initialSwapDelegModalData, PendingWithdrawStats, SwapDelegModalData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
@@ -13,6 +13,7 @@ interface UserState {
     ledger_index: number,
     role: Role,                                         // actual role
     selected_role: Role,                                // role that the user selects when signing in
+    pending_withdraw_list: PendingWithdrawStats[]       // track pending withdrawals
     swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
 }
 
@@ -26,6 +27,7 @@ const initialState: UserState = {
     ledger_index: LedgerIndex.DEFAULT,
     role: Role.NONE,
     selected_role: Role.NONE,
+    pending_withdraw_list: [],
     swap_deleg_modal_data: initialSwapDelegModalData,
 }
 
@@ -70,6 +72,10 @@ const userSlice = createSlice({
             const { ledger_index } = action.payload
             state.ledger_index = ledger_index
         },
+        UPDATE_PENDING_WITHDRAWAL_LIST(state, action) {
+            const { pending_withdraw_list } = action.payload
+            state.pending_withdraw_list = pending_withdraw_list
+        },
         UPDATE_ROLE(state, action) {
             const { role } = action.payload
             state.role = role
@@ -99,6 +105,7 @@ export const {
     UPDATE_BALANCE,
     UPDATE_GZIL_BALANCE,
     UPDATE_LEDGER_INDEX,
+    UPDATE_PENDING_WITHDRAWAL_LIST,
     UPDATE_ROLE,
     UPDATE_SWAP_DELEG_MODAL,
     RESET,

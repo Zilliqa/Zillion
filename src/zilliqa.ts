@@ -42,6 +42,20 @@ export class ZilAccount {
     }
 
     /**
+     * query the current number of tx blocks
+     */
+    static getNumTxBlocks = async () => {
+        let result;
+        for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
+            result = await ZilAccount.getActualNumTxBlocks();
+            if (result !== OperationStatus.ERROR) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
      * fetch the total zil coin supply
      */
     static getTotalCoinSupply = async (): Promise<any> => {
@@ -73,6 +87,21 @@ export class ZilAccount {
             return false;
         }
         return true;
+    }
+
+    private static getActualNumTxBlocks = async () => {
+        try {
+            const randomAPI = API_RANDOMIZER.getRandomApi();
+            const zilliqa = new Zilliqa(randomAPI);
+            const response =  await zilliqa.blockchain.getBlockChainInfo();
+
+            if (!response.hasOwnProperty("result") || response.result === undefined) {
+                return OperationStatus.ERROR;
+            }
+            return response.result.NumTxBlocks;
+        } catch (err) {
+            return OperationStatus.ERROR;
+        }
     }
 
     private static getActualTotalCoinSupply = async () => {

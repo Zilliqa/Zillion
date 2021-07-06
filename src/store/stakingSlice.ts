@@ -11,6 +11,7 @@ export interface StakingState {
     gzil_address: string,
     gzil_total_supply: string,                                  // number of gzils currently minted,
     min_deleg_stake: string,                                    // min amount to deleg in Qa
+    min_bnum_req: string,                                       // min required block number to allow users to perform complete withdrawal
     total_stake_amount: string                                  // sum of all stakes in contract Qa
     ssn_dropdown_list: NodeOptions[]                            // to display ssn list as dropdown options in redeleg modal
     
@@ -31,6 +32,7 @@ const initialState: StakingState = {
     gzil_address: '',
     gzil_total_supply: '0',
     landing_stats: initialLandingStats,
+    min_bnum_req: '0',
     min_deleg_stake: '0',
     total_stake_amount: '0',
     ssn_dropdown_list: [],
@@ -64,6 +66,10 @@ const stakingSlice = createSlice({
         UPDATE_LANDING_STATS(state, action) {
             const { landing_stats } = action.payload
             state.landing_stats = landing_stats;
+        },
+        UPDATE_MIN_BNUM_REQ(state, action) {
+            const { min_bnum_req } = action.payload
+            state.min_bnum_req = min_bnum_req
         },
         UPDATE_MIN_DELEG(state, action) {
             const { min_deleg_stake } = action.payload
@@ -103,6 +109,7 @@ export const {
     UPDATE_GZIL_ADDRESS,
     UPDATE_GZIL_TOTAL_SUPPLY,
     UPDATE_LANDING_STATS,
+    UPDATE_MIN_BNUM_REQ,
     UPDATE_MIN_DELEG,
     UPDATE_TOTAL_STAKE_AMOUNT,
     UPDATE_SSN_DROPDOWN_LIST,

@@ -35,6 +35,13 @@ interface OperatorStats {
     receiver: string,
 }
 
+interface PendingWithdrawStats {
+    amount: string,
+    blkNumCountdown: string,
+    blkNumCheck: string,
+    progress: string,
+}
+
 interface SsnStats {
     address: string,
     name: string,
@@ -113,6 +120,7 @@ export type {
     LandingStats,
     NodeOptions,
     OperatorStats,
+    PendingWithdrawStats,
     SsnStats,
     SwapDelegModalData,
     TransferStakeModalData,
