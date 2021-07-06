@@ -15,7 +15,7 @@ import IconEditBox from '../icons/edit-box-line';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import ReactTooltip from 'react-tooltip';
-import { computeDelegRewardsRetriable } from '../../util/reward-calculator';
+import { computeDelegRewards } from '../../util/reward-calculator';
 
 import SwapImg from "../../static/swap_img0.png";
 import SwapImg1 from "../../static/swap_img1.png";
@@ -309,7 +309,7 @@ function SwapDelegModal(props: any) {
 
         for (let ssnAddress in ssnlist) {
             // check rewards
-            const rewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, wallet));
+            const rewards = new BN(await computeDelegRewards(impl, ssnAddress, wallet));
 
             if (rewards.gt(new BN(0))) {
                 let msg = `${targetName} ${displayAddr} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`

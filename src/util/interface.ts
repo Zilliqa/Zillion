@@ -82,6 +82,14 @@ interface SwapDelegModalData {
     requestorList: string[],
 }
 
+export const initialDelegStats: DelegStats = {
+    globalAPY: '0',
+    zilRewards: '0',
+    gzilRewards: '0',
+    gzilBalance: '0',
+    totalDeposits: '0',
+}
+
 export const initialLandingStats: LandingStats = {
     circulatingSupplyStake: '0',
     nodesNum: '0',

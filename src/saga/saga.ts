@@ -5,7 +5,6 @@ import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
 import { UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 import { INIT_USER, POLL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
-import { RootState } from '../store/store';
 import { Constants, OperationStatus, Role, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
@@ -225,32 +224,32 @@ function* queryAndUpdateRole() {
     }
 }
 
-function* pollOperatorData() {
-    logger("polling operator data")
-}
+// function* pollOperatorData() {
+//     logger("polling operator data")
+// }
 
-function* pollDelegatorData() {
-    logger("polling user data")
-}
+// function* pollDelegatorData() {
+//     logger("polling user data")
+// }
 
-function* watchPollUserData() {
-    while (true) {
-        try {
-            const { role } = yield select(getUserState);
-            if (role === Role.OPERATOR) {
-                yield call(pollOperatorData);
-            } else {
-                yield call(pollDelegatorData);
-            }
-        } catch (e) {
-            console.warn("poll user data failed");
-            console.warn(e);
-        } finally {
-            yield delay(10000);
-        }
-    }
+// function* watchPollUserData() {
+//     while (true) {
+//         try {
+//             const { role } = yield select(getUserState);
+//             if (role === Role.OPERATOR) {
+//                 yield call(pollOperatorData);
+//             } else {
+//                 yield call(pollDelegatorData);
+//             }
+//         } catch (e) {
+//             console.warn("poll user data failed");
+//             console.warn(e);
+//         } finally {
+//             yield delay(10000);
+//         }
+//     }
 
-}
+// }
 
 function* mySaga() {
     yield take(CONFIG_LOADED) // wait for app to load details from config

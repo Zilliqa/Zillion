@@ -118,7 +118,7 @@ function Explorer(props: any) {
                     totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
 
                     // compute zil rewards
-                    const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnAddress, wallet)).toString();
+                    const delegRewards = new BN(await computeDelegRewards(impl, ssnAddress, wallet)).toString();
                     totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
 
                     // append data to list of staked nodes

@@ -40,7 +40,7 @@ import IconMoon from './icons/moon';
 
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
-import { computeDelegRewardsRetriable } from '../util/reward-calculator';
+import { computeDelegRewards } from '../util/reward-calculator';
 import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData, SwapDelegModalData } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 
 
@@ -238,7 +238,7 @@ function Dashboard(props: any) {
                 totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
 
                 // compute zil rewards
-                const delegRewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, userBase16Address)).toString();
+                const delegRewards = new BN(await computeDelegRewards(impl, ssnAddress, userBase16Address)).toString();
                 // const delegRewards = new BN(0);
                 totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
 
@@ -293,7 +293,7 @@ function Dashboard(props: any) {
             }
         }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
-    }, [impl, userState.address_base16, networkURL, totalStakeAmt]);
+    }, [impl, userState.address_base16, totalStakeAmt]);
 
 
     /* fetch data for delegator pending stake withdrawal */
@@ -648,7 +648,7 @@ function Dashboard(props: any) {
         // getAccountBalance();
 
         if (userState.role === Role.DELEGATOR) {
-            getDelegatorStats();
+            // getDelegatorStats();
             getDelegatorPendingWithdrawal();
             getDelegatorSwapRequests();
             getBlockRewardCountDown();
@@ -667,7 +667,7 @@ function Dashboard(props: any) {
         // getAccountBalance, 
         getBlockRewardCountDown,
         getDelegatorPendingWithdrawal,
-        getDelegatorStats,
+        // getDelegatorStats,
         getDelegatorSwapRequests,
         getOperatorStats,
         // getSsnStats
@@ -678,7 +678,7 @@ function Dashboard(props: any) {
         // getAccountBalance();
 
         if (userState.role === Role.DELEGATOR) {
-            getDelegatorStats();
+            // getDelegatorStats();
             getDelegatorPendingWithdrawal();
             getDelegatorSwapRequests();
             getBlockRewardCountDown();
@@ -701,7 +701,7 @@ function Dashboard(props: any) {
         // getAccountBalance();
 
         if (userState.role === Role.DELEGATOR) {
-            getDelegatorStats();
+            // getDelegatorStats();
             getDelegatorPendingWithdrawal();
             getDelegatorSwapRequests();
             getBlockRewardCountDown();
@@ -821,6 +821,7 @@ function Dashboard(props: any) {
         }
         dispatch(QUERY_AND_UPDATE_ROLE());
         dispatch(QUERY_AND_UPDATE_BALANCE());
+        dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
     }, [userState.address_base16, dispatch]);
 
     
@@ -1031,12 +1032,6 @@ function Dashboard(props: any) {
                                             </div> 
                                             <div className="col-12 text-center">
                                                 <DelegatorStatsTable 
-                                                    impl={impl} 
-                                                    network={networkURL} 
-                                                    refresh={refresh_rate_config} 
-                                                    userAddress={userState.address_bech32}
-                                                    data={delegStats}
-                                                    totalPendingWithdrawalAmt={totalPendingWithdrawalAmt}
                                                     blockCountToReward={blockCountToReward} />
                                             </div>
                                         </div>
@@ -1058,11 +1053,6 @@ function Dashboard(props: any) {
                                                 <div className="inner-section">
                                                     <h6 className="inner-section-heading px-4 pt-4 pb-3">Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
                                                     <StakingPortfolio 
-                                                        impl={impl} 
-                                                        network={networkURL} 
-                                                        refresh={refresh_rate_config} 
-                                                        userAddress={userState.address_bech32}
-                                                        data={delegStakingStats}
                                                         setClaimedRewardModalData={setClaimedRewardModalData}
                                                         setTransferStakeModalData={setTransferStakeModalData}
                                                         setWithdrawStakeModalData={setWithdrawStakeModalData} />

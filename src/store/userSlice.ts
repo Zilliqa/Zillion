@@ -8,9 +8,10 @@ interface UserState {
     account_type: AccountType,
     authenticated: boolean,
     balance: string,               // zils in Qa
+    gzil_balance: string,
     ledger_index: number,
     role: Role,                    // actual role
-    selected_role: Role,            // role that the user selects when signing in
+    selected_role: Role,           // role that the user selects when signing in
 }
 
 const initialState: UserState = {
@@ -19,6 +20,7 @@ const initialState: UserState = {
     account_type: AccountType.NONE,
     authenticated: false,
     balance: '0',
+    gzil_balance: '0',
     ledger_index: LedgerIndex.DEFAULT,
     role: Role.NONE,
     selected_role: Role.NONE,
@@ -45,6 +47,7 @@ const userSlice = createSlice({
             state.selected_role = selected_role
         },
         QUERY_AND_UPDATE_BALANCE() {},
+        QUERY_AND_UPDATE_GZIL_BALANCE() {},
         QUERY_AND_UPDATE_ROLE() {}, 
         POLL_BALANCE() {},
         UPDATE_ADDRESS(state, action) {
@@ -55,6 +58,10 @@ const userSlice = createSlice({
         UPDATE_BALANCE(state, action) {
             const { balance } = action.payload
             state.balance = balance
+        },
+        UPDATE_GZIL_BALANCE(state, action) {
+            const { gzil_balance } = action.payload
+            state.gzil_balance = gzil_balance
         },
         UPDATE_LEDGER_INDEX(state, action) {
             const { ledger_index } = action.payload
@@ -78,10 +85,12 @@ const userSlice = createSlice({
 export const {
     INIT_USER,
     QUERY_AND_UPDATE_BALANCE,
+    QUERY_AND_UPDATE_GZIL_BALANCE,
     QUERY_AND_UPDATE_ROLE,
     POLL_BALANCE,
     UPDATE_ADDRESS,
     UPDATE_BALANCE,
+    UPDATE_GZIL_BALANCE,
     UPDATE_LEDGER_INDEX,
     UPDATE_ROLE,
     RESET,

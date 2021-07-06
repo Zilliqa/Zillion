@@ -4,23 +4,28 @@
 
 import { createSlice } from '@reduxjs/toolkit'
 import { OperationStatus } from '../util/enum'
-import { initialLandingStats, LandingStats, NodeOptions, SsnStats } from '../util/interface'
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialLandingStats, LandingStats, NodeOptions, SsnStats } from '../util/interface'
 
 
 export interface StakingState {
     gzil_address: string,
-    gzil_total_supply: string,                  // number of gzils currently minted,
-    min_deleg_stake: string,                    // min amount to deleg in Qa
-    total_stake_amount: string                  // sum of all stakes in contract Qa
-    ssn_dropdown_list: NodeOptions[]            // to display ssn list as dropdown options in redeleg modal
-    landing_stats: LandingStats,                // data for landing stats page 
-    ssn_list: SsnStats[],                       // hold all the list of ssn info
+    gzil_total_supply: string,                                  // number of gzils currently minted,
+    min_deleg_stake: string,                                    // min amount to deleg in Qa
+    total_stake_amount: string                                  // sum of all stakes in contract Qa
+    ssn_dropdown_list: NodeOptions[]                            // to display ssn list as dropdown options in redeleg modal
+    deleg_stats: DelegStats,                                    // data for delegator stats
+    deleg_staking_portfolio_list: DelegStakingPortfolioStats[], // list of ssn info that a delegator has staked with
+    landing_stats: LandingStats,                                // data for landing stats page 
+    ssn_list: SsnStats[],                                       // hold all the list of ssn info
     zil_max_supply: string,
-    is_landing_stats_loading: OperationStatus   // landing stats status indicator
-    is_ssn_stats_loading: OperationStatus       // ssn table status indicator
+    is_deleg_stats_loading: OperationStatus,                    // delegator stats and staking portfolio status indicator
+    is_landing_stats_loading: OperationStatus,                  // landing stats status indicator
+    is_ssn_stats_loading: OperationStatus                       // ssn table status indicator
 }
 
 const initialState: StakingState = {
+    deleg_stats: initialDelegStats,
+    deleg_staking_portfolio_list: [],
     gzil_address: '',
     gzil_total_supply: '0',
     landing_stats: initialLandingStats,
@@ -29,6 +34,7 @@ const initialState: StakingState = {
     ssn_dropdown_list: [],
     ssn_list: [],
     zil_max_supply: '0',
+    is_deleg_stats_loading: OperationStatus.IDLE,
     is_landing_stats_loading: OperationStatus.IDLE,
     is_ssn_stats_loading: OperationStatus.IDLE,
 }
@@ -37,6 +43,14 @@ const stakingSlice = createSlice({
     name: 'staking',
     initialState: initialState,
     reducers: {
+        UPDATE_DELEG_STATS(state, action) {
+            const { deleg_stats } = action.payload
+            state.deleg_stats = deleg_stats
+        },
+        UPDATE_DELEG_PORTFOLIO(state, action) {
+            const { portfolio_list } = action.payload
+            state.deleg_staking_portfolio_list = portfolio_list
+        },
         UPDATE_GZIL_ADDRESS(state, action) {
             const { gzil_address } = action.payload
             state.gzil_address = gzil_address
@@ -69,6 +83,9 @@ const stakingSlice = createSlice({
             const { zil_max_supply } = action.payload
             state.zil_max_supply = zil_max_supply
         },
+        UPDATE_FETCH_DELEG_STATS_STATUS(state, action) {
+            state.is_deleg_stats_loading = action.payload
+        },
         UPDATE_FETCH_LANDING_STATS_STATUS(state, action) {
             state.is_landing_stats_loading = action.payload
         },
@@ -79,6 +96,8 @@ const stakingSlice = createSlice({
 })
 
 export const {
+    UPDATE_DELEG_STATS,
+    UPDATE_DELEG_PORTFOLIO,
     UPDATE_GZIL_ADDRESS,
     UPDATE_GZIL_TOTAL_SUPPLY,
     UPDATE_LANDING_STATS,
@@ -87,6 +106,7 @@ export const {
     UPDATE_SSN_DROPDOWN_LIST,
     UPDATE_SSN_LIST,
     UPDATE_ZIL_MAX_SUPPLY,
+    UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_LANDING_STATS_STATUS,
     UPDATE_FETCH_SSN_STATS_STATUS
 } = stakingSlice.actions
