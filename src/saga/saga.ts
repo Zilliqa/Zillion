@@ -117,7 +117,7 @@ function* watchInitOnce() {
         yield put(UPDATE_GZIL_ADDRESS({ gzil_address: gziladdr }));
         yield put(UPDATE_GZIL_TOTAL_SUPPLY({ gzil_total_supply: total_supply }));
         yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.COMPLETE));
-        yield put(PRELOAD_INFO_READY());
+        yield put(PRELOAD_INFO_READY()); // inform other saga that preloaded info is in store
     } catch (e) {
         console.warn("fetch home data failed");
         console.warn(e);

@@ -10,10 +10,12 @@ import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
 
 const { BN } = require('@zilliqa-js/util');
 
 function UpdateCommRateModal(props: any) {
+    const commRate = useAppSelector(state => state.user.operator_stats.commRate);
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
@@ -124,7 +126,7 @@ function UpdateCommRateModal(props: any) {
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
                                     <h3>Current Commission Rate</h3>
-                                    <span>{currentRate ? convertToProperCommRate(currentRate).toFixed(2) : '0.00'}&#37;</span>
+                                    <span>{commRate ? convertToProperCommRate(commRate).toFixed(2) : '0.00'}&#37;</span>
                                 </div>
                             </div>
                             <div className="input-group mb-4">

@@ -653,7 +653,7 @@ function Dashboard(props: any) {
             // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
-            getOperatorStats();
+            // getOperatorStats();
         }
 
         // getSsnStats();
@@ -669,7 +669,7 @@ function Dashboard(props: any) {
         // getDelegatorPendingWithdrawal,
         // getDelegatorStats,
         // getDelegatorSwapRequests,
-        getOperatorStats,
+        // getOperatorStats,
         // getSsnStats
     ]);
 
@@ -683,7 +683,7 @@ function Dashboard(props: any) {
             // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
-            getOperatorStats();
+            // getOperatorStats();
         }
 
         // getSsnStats();
@@ -706,7 +706,7 @@ function Dashboard(props: any) {
             // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
-            getOperatorStats();
+            // getOperatorStats();
         }
 
         // getSsnStats();
@@ -979,7 +979,7 @@ function Dashboard(props: any) {
                                     {/* node operator section */}
 
                                     <div className="p-4 mt-4 dashboard-card">
-                                        <h5 className="card-title mb-4">Hi {operatorStats.name ? operatorStats.name : 'Operator'}! What would you like to do today?</h5>
+                                        <h5 className="card-title mb-4">Hi {userState.operator_stats.name ? userState.operator_stats.name : 'Operator'}! What would you like to do today?</h5>
                                         <button 
                                             type="button" 
                                             className="btn btn-contract mr-4 shadow-none" 
@@ -1070,12 +1070,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">My Node Performance</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <OperatorStatsTable 
-                                                    impl={impl} 
-                                                    network={networkURL} 
-                                                    refresh={refresh_rate_config} 
-                                                    userAddress={userState.address_bech32}
-                                                    data={operatorStats} />
+                                                <OperatorStatsTable />
                                             </div>
                                         </div>
                                     </div>
@@ -1125,7 +1120,6 @@ function Dashboard(props: any) {
                 proxy={proxy}
                 impl={impl} 
                 networkURL={networkURL} 
-                currentRate={operatorStats.commRate} 
                 ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
@@ -1134,7 +1128,6 @@ function Dashboard(props: any) {
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                currentReceiver={operatorStats.receiver} 
                 ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
@@ -1143,7 +1136,6 @@ function Dashboard(props: any) {
                 proxy={proxy} 
                 impl={impl} 
                 networkURL={networkURL} 
-                currentRewards={operatorStats.commReward} 
                 ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />

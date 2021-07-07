@@ -10,14 +10,16 @@ import AppContext from '../../contexts/appContext';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
 
 const { BN } = require('@zilliqa-js/util');
 
 function WithdrawCommModal(props: any) {
+    const commRewards = useAppSelector(state => state.user.operator_stats.commReward);
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
-    const { proxy, currentRewards, networkURL, ledgerIndex, updateData, updateRecentTransactions } = props;
+    const { proxy, networkURL, ledgerIndex, updateData, updateRecentTransactions } = props;
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
 
@@ -101,10 +103,10 @@ function WithdrawCommModal(props: any) {
                                 <div className="row node-details-wrapper mb-4">
                                     <div className="col node-details-panel">
                                         <h3>Commission Rewards</h3>
-                                        <span>{currentRewards ? convertQaToCommaStr(currentRewards) : '0.000'} ZIL?</span>
+                                        <span>{commRewards ? convertQaToCommaStr(commRewards) : '0.000'} ZIL</span>
                                     </div>
                                 </div>
-                                <p>Are you sure you wish to withdraw <strong>{currentRewards ? convertQaToCommaStr(currentRewards) : '0.000'}</strong> ZIL</p>
+                                <p>Are you sure you wish to withdraw <strong>{commRewards ? convertQaToCommaStr(commRewards) : '0.000'}</strong> ZIL?</p>
                                 <div className="d-flex mt-2">
                                     <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawComm}>Withdraw</button>
                                 </div>

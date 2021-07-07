@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { AccountType, LedgerIndex, Role } from '../util/enum'
+import { AccountType, LedgerIndex, OperationStatus, Role } from '../util/enum'
 import * as ZilliqaAccount from "../account";
-import { initialSwapDelegModalData, PendingWithdrawStats, SwapDelegModalData } from '../util/interface';
+import { initialOperatorStats, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, SwapDelegModalData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
@@ -14,8 +14,10 @@ interface UserState {
     ledger_index: number,
     role: Role,                                         // actual role
     selected_role: Role,                                // role that the user selects when signing in
+    operator_stats: OperatorStats                       // track the operator stats, if user is an operator
     pending_withdraw_list: PendingWithdrawStats[]       // track pending withdrawals
     swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
+    is_operator_stats_loading: OperationStatus          // status indicator for loading operator stats
 }
 
 const initialState: UserState = {
@@ -28,9 +30,11 @@ const initialState: UserState = {
     complete_withdrawal_amt: '0',
     ledger_index: LedgerIndex.DEFAULT,
     role: Role.NONE,
+    operator_stats: initialOperatorStats,
     selected_role: Role.NONE,
     pending_withdraw_list: [],
     swap_deleg_modal_data: initialSwapDelegModalData,
+    is_operator_stats_loading: OperationStatus.IDLE,
 }
 
 export const fetchBalance = createAsyncThunk('user/fetchBalance', async (address: string) => {
@@ -78,6 +82,10 @@ const userSlice = createSlice({
             const { ledger_index } = action.payload
             state.ledger_index = ledger_index
         },
+        UPDATE_OPERATOR_STATS(state, action) {
+            const { operator_stats } = action.payload
+            state.operator_stats = operator_stats
+        },
         UPDATE_PENDING_WITHDRAWAL_LIST(state, action) {
             const { pending_withdraw_list } = action.payload
             state.pending_withdraw_list = pending_withdraw_list
@@ -89,6 +97,9 @@ const userSlice = createSlice({
         UPDATE_SWAP_DELEG_MODAL(state, action) {
             const { swap_deleg_modal } = action.payload
             state.swap_deleg_modal_data = swap_deleg_modal
+        },
+        UPDATE_FETCH_OPERATOR_STATS_STATUS(state, action) {
+            state.is_operator_stats_loading = action.payload
         },
         RESET(state) {
             state = initialState
@@ -112,9 +123,11 @@ export const {
     UPDATE_COMPLETE_WITHDRAWAL_AMT,
     UPDATE_GZIL_BALANCE,
     UPDATE_LEDGER_INDEX,
+    UPDATE_OPERATOR_STATS,
     UPDATE_PENDING_WITHDRAWAL_LIST,
     UPDATE_ROLE,
     UPDATE_SWAP_DELEG_MODAL,
+    UPDATE_FETCH_OPERATOR_STATS_STATUS,
     RESET,
 } = userSlice.actions
 

@@ -10,11 +10,13 @@ import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
 
 const { BN } = require('@zilliqa-js/util');
 
 
 function UpdateReceiverAddress(props: any) {
+    const receiver = useAppSelector(state => state.user.operator_stats.receiver);
     const appContext = useContext(AppContext);
     const { accountType } = appContext;
 
@@ -116,7 +118,7 @@ function UpdateReceiverAddress(props: any) {
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
                                     <h3>Current Receiving Address</h3>
-                                    <span>{currentReceiver ? currentReceiver : 'none'}</span>
+                                    <span>{receiver ? receiver : 'none'}</span>
                                 </div>
                             </div>
                             <input type="text" className="mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in bech32 format" />
