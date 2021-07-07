@@ -60,7 +60,7 @@ function Table({ columns, data, tableId }: any) {
 
 function CompleteWithdrawalTable(props: any) {
     const data: PendingWithdrawStats[] = useAppSelector(state => state.user.pending_withdraw_list);
-    const totalClaimableAmt = props.totalClaimableAmt;
+    const completeWithdrawAmt = useAppSelector(state => state.user.complete_withdrawal_amt);
 
     const columns = useMemo(
         () => [
@@ -98,7 +98,7 @@ function CompleteWithdrawalTable(props: any) {
                     </div>
                     <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
                         <div>
-                            <span><em>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</em></span>
+                            <span><em>You can now withdraw <strong>{convertQaToCommaStr(completeWithdrawAmt)}</strong> ZIL</em></span>
                         </div>
                         <div className="btn-group">
                             { 

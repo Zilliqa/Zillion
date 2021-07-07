@@ -3,12 +3,12 @@ import * as ZilliqaAccount2 from "../account";
 import { logger } from '../util/logger';
 import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
-import { UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
+import { PRELOAD_INFO_READY, UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 import { INIT_USER, POLL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
 import { Constants, OperationStatus, Role, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
-import { ZilAccount } from '../zilliqa';
+import { ZilSdk } from '../zilliqa-api';
 import { convertZilToQa } from '../util/utils';
 import BigNumber from 'bignumber.js';
 
@@ -60,30 +60,30 @@ function* watchInitOnce() {
         yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.PENDING));
         logger("fetching contract data (I) once...");
         const { impl } = yield select(getBlockchain);
-        const { mindelegstake } = yield call(ZilAccount.getImplStateRetriable, impl, 'mindelegstake');
+        const { mindelegstake } = yield call(ZilSdk.getSmartContractSubState, impl, 'mindelegstake');
         logger("mindelegstake: %o", mindelegstake);
 
-        const { totalstakeamount } = yield call(ZilAccount.getImplStateRetriable, impl, 'totalstakeamount');
+        const { totalstakeamount } = yield call(ZilSdk.getSmartContractSubState, impl, 'totalstakeamount');
         logger("totalstakeamount: %o", totalstakeamount);
 
-        const { bnum_req } = yield call(ZilAccount.getImplStateRetriable, impl, 'bnum_req');
+        const { bnum_req } = yield call(ZilSdk.getSmartContractSubState, impl, 'bnum_req');
         logger("bnum req: ", bnum_req);
 
-        const { gziladdr } = yield call(ZilAccount.getImplStateRetriable, impl, 'gziladdr');
-        const { total_supply } = yield call(ZilAccount.getImplStateRetriable, gziladdr, 'total_supply');
+        const { gziladdr } = yield call(ZilSdk.getSmartContractSubState, impl, 'gziladdr');
+        const { total_supply } = yield call(ZilSdk.getSmartContractSubState, gziladdr, 'total_supply');
         logger("gziladdr: ", gziladdr);
         logger("gzil minted: ", total_supply);
 
         // populate landing stats data
-        const { last_withdraw_cycle_deleg } = yield call(ZilAccount.getImplStateRetriable, impl, 'last_withdraw_cycle_deleg');
+        const { last_withdraw_cycle_deleg } = yield call(ZilSdk.getSmartContractSubState, impl, 'last_withdraw_cycle_deleg');
         
         if (isRespOk(last_withdraw_cycle_deleg)) {
-            const { comm_for_ssn } = yield call(ZilAccount.getImplStateRetriable, impl, 'comm_for_ssn');
+            const { comm_for_ssn } = yield call(ZilSdk.getSmartContractSubState, impl, 'comm_for_ssn');
             const nodesNum = isRespOk(comm_for_ssn) ? Object.keys(comm_for_ssn).length.toString() : '0';
             const delegNum = Object.keys(last_withdraw_cycle_deleg).length.toString();
             
             let circulatingSupplyStake = '0';
-            const totalCoinSupply: string = yield call(ZilAccount.getTotalCoinSupply);
+            const totalCoinSupply: string = yield call(ZilSdk.getTotalCoinSupply);
             if (isRespOk(totalCoinSupply)) {
                 const totalCoinSupplyBN = new BigNumber(convertZilToQa(totalCoinSupply));
                 circulatingSupplyStake = (new BigNumber(totalstakeamount).dividedBy(totalCoinSupplyBN)).times(100).toFixed(5);
@@ -117,6 +117,7 @@ function* watchInitOnce() {
         yield put(UPDATE_GZIL_ADDRESS({ gzil_address: gziladdr }));
         yield put(UPDATE_GZIL_TOTAL_SUPPLY({ gzil_total_supply: total_supply }));
         yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.COMPLETE));
+        yield put(PRELOAD_INFO_READY());
     } catch (e) {
         console.warn("fetch home data failed");
         console.warn(e);
@@ -133,8 +134,8 @@ function* watchInitLoop() {
             logger("fetching contract data (II) poll...");
             const { impl } = yield select(getBlockchain);
 
-            const { ssnlist } = yield call(ZilAccount.getImplStateRetriable, impl, 'ssnlist');
-            const { ssn_deleg_amt } = yield call(ZilAccount.getImplStateRetriable, impl, 'ssn_deleg_amt');
+            const { ssnlist } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist');
+            const { ssn_deleg_amt } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssn_deleg_amt');
 
             logger("ssnlist: ", ssnlist);
             logger("ssn_deleg_amt: ", ssn_deleg_amt);
@@ -209,7 +210,7 @@ function* queryAndUpdateRole() {
     try {
         const { address_base16, selected_role } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
-        const isOperator: boolean = yield call(ZilAccount.isOperator, impl, address_base16);
+        const isOperator: boolean = yield call(ZilSdk.isOperator, impl, address_base16);
 
         let role;
         if (selected_role === Role.OPERATOR && !isOperator) {

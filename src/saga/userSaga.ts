@@ -2,13 +2,13 @@ import { toBech32Address } from '@zilliqa-js/zilliqa';
 import { BigNumber } from 'bignumber.js';
 import { Task } from 'redux-saga';
 import { call, cancel, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
-import { UPDATE_DELEG_PORTFOLIO, UPDATE_DELEG_STATS, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/stakingSlice';
-import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST } from '../store/userSlice';
+import { PRELOAD_INFO_READY, UPDATE_DELEG_PORTFOLIO, UPDATE_DELEG_STATS, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/stakingSlice';
+import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT } from '../store/userSlice';
 import { OperationStatus, Role } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, LandingStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { ZilAccount } from '../zilliqa';
+import { ZilSdk } from '../zilliqa-api';
 import { getUserState, getBlockchain, getStakingState } from './selectors';
 
 
@@ -35,7 +35,7 @@ function* queryAndUpdateBalance() {
     logger("check balance");
     try {
         const { address_base16 } = yield select(getUserState);
-        const balance: string = yield call(ZilAccount.getBalance, address_base16);
+        const balance: string = yield call(ZilSdk.getBalance, address_base16);
         logger("user balance: ", balance);
         yield put(UPDATE_BALANCE({ balance: balance }));
     } catch (e) {
@@ -52,7 +52,7 @@ function* queryAndUpdateBalance() {
     try {
         const { address_base16, selected_role } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
-        const isOperator: boolean = yield call(ZilAccount.isOperator, impl, address_base16);
+        const isOperator: boolean = yield call(ZilSdk.isOperator, impl, address_base16);
 
         let role;
         if (selected_role === Role.OPERATOR && !isOperator) {
@@ -77,14 +77,24 @@ function* queryAndUpdateBalance() {
 function* queryAndUpdateGzil() {
     logger("check gzil");
     try {
+        const { impl } = yield select(getBlockchain);
         const { address_base16 } = yield select(getUserState);
+        
+        let gzilAddrResolved;
         const { gzil_address } = yield select(getStakingState);
-
-        const response: Object = yield call(ZilAccount.getImplStateRetriable, gzil_address, 'balances', [address_base16]);
+        if (gzil_address && gzil_address !== null) {
+            gzilAddrResolved = gzil_address;
+        } else {
+            // gzil_address param might be empty because the store is not updated yet
+            const { gziladdr } = yield call(ZilSdk.getSmartContractSubState, impl, 'gziladdr');
+            gzilAddrResolved = gziladdr;
+        }
+        
+        const response: Object = yield call(ZilSdk.getSmartContractSubState, gzilAddrResolved, 'balances', [address_base16]);
         logger("gzil response: ", response);
 
         if (isRespOk(response)) {
-            yield put(UPDATE_GZIL_BALANCE({ gzil_balance: (response as any)['balanaces'][address_base16] }));
+            yield put(UPDATE_GZIL_BALANCE({ gzil_balance: (response as any)['balances'][address_base16] }));
         }
     } catch (e) {
         console.warn("query and update gzil failed");
@@ -103,7 +113,7 @@ function* populateStakingPortfolio() {
 
         const { address_base16, gzil_balance } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
-        const response: Object = yield call(ZilAccount.getImplStateRetriable, impl, 'deposit_amt_deleg', [address_base16]);
+        const response: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [address_base16]);
         logger("deposit deleg list: ", response);
 
         if (!isRespOk(response)) {
@@ -161,7 +171,7 @@ function* populateSwapRequests() {
     try {
         const { address_base16 } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
-        const { deleg_swap_request } = yield call(ZilAccount.getImplStateRetriable, impl, 'deleg_swap_request');
+        const { deleg_swap_request } = yield call(ZilSdk.getSmartContractSubState, impl, 'deleg_swap_request');
 
         let swapRecipientAddress = '';
         let requestorList: any = [];
@@ -200,7 +210,7 @@ function* populatePendingWithdrawal() {
     try {
         const { address_base16 } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
-        const response: Object = yield call(ZilAccount.getImplStateRetriable, impl, 'withdrawal_pending', [address_base16]);
+        const response: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'withdrawal_pending', [address_base16]);
 
         logger("pending withdrawal: ", response);
 
@@ -210,12 +220,11 @@ function* populatePendingWithdrawal() {
 
         let progress = '0';
         let pendingWithdrawList: PendingWithdrawStats[] = [];
+        let totalWithdrawAmt = new BigNumber(0);
         const pendingWithdrawal = (response as any)['withdrawal_pending'][address_base16];
         const { min_bnum_req } = yield select(getStakingState);
-        const numTxBlk: string = yield call(ZilAccount.getNumTxBlocks);
+        const numTxBlk: string = yield call(ZilSdk.getNumTxBlocks);
         const currBlkNum = isRespOk(numTxBlk) ? new BigNumber(numTxBlk).minus(1) : new BigNumber(0);
-
-        logger("asdasd", pendingWithdrawal);
 
         for (const blkNum in pendingWithdrawal) {
             // compute each pending stake withdrawal progress
@@ -227,7 +236,7 @@ function* populatePendingWithdrawal() {
             // compute progress using blk num countdown ratio
             if (blkNumCountdown.isLessThanOrEqualTo(0)) {
                 // can withdraw
-                // totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                totalWithdrawAmt = totalWithdrawAmt.plus(pendingAmt)
                 blkNumCountdown = new BigNumber(0);
                 completed = new BigNumber(1);
             } else {
@@ -248,7 +257,9 @@ function* populatePendingWithdrawal() {
             } as PendingWithdrawStats)
         }
         logger(pendingWithdrawList);
+        
         yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: pendingWithdrawList }));
+        yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: `${totalWithdrawAmt}` }));
     } catch (e) {
         console.warn("populate pending withdrawal failed");
         console.warn(e);
@@ -285,6 +296,7 @@ function* userSaga() {
     yield takeLatest(QUERY_AND_UPDATE_ROLE, queryAndUpdateRole)
     yield takeLatest(QUERY_AND_UPDATE_BALANCE, queryAndUpdateBalance)
     yield takeLatest(QUERY_AND_UPDATE_GZIL_BALANCE, queryAndUpdateGzil)
+    yield take(PRELOAD_INFO_READY)
     yield fork(watchPollUserData)
 }
 

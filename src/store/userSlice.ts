@@ -10,6 +10,7 @@ interface UserState {
     authenticated: boolean,
     balance: string,                                    // zils in Qa
     gzil_balance: string,
+    complete_withdrawal_amt: string,                    // amount that is allowed to complete withdraw
     ledger_index: number,
     role: Role,                                         // actual role
     selected_role: Role,                                // role that the user selects when signing in
@@ -24,6 +25,7 @@ const initialState: UserState = {
     authenticated: false,
     balance: '0',
     gzil_balance: '0',
+    complete_withdrawal_amt: '0',
     ledger_index: LedgerIndex.DEFAULT,
     role: Role.NONE,
     selected_role: Role.NONE,
@@ -64,6 +66,10 @@ const userSlice = createSlice({
             const { balance } = action.payload
             state.balance = balance
         },
+        UPDATE_COMPLETE_WITHDRAWAL_AMT(state, action) {
+            const { complete_withdrawal_amt } = action.payload
+            state.complete_withdrawal_amt = complete_withdrawal_amt
+        },
         UPDATE_GZIL_BALANCE(state, action) {
             const { gzil_balance } = action.payload
             state.gzil_balance = gzil_balance
@@ -103,6 +109,7 @@ export const {
     POLL_BALANCE,
     UPDATE_ADDRESS,
     UPDATE_BALANCE,
+    UPDATE_COMPLETE_WITHDRAWAL_AMT,
     UPDATE_GZIL_BALANCE,
     UPDATE_LEDGER_INDEX,
     UPDATE_PENDING_WITHDRAWAL_LIST,

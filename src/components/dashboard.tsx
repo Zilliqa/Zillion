@@ -649,7 +649,7 @@ function Dashboard(props: any) {
 
         if (userState.role === Role.DELEGATOR) {
             // getDelegatorStats();
-            getDelegatorPendingWithdrawal();
+            // getDelegatorPendingWithdrawal();
             // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
@@ -666,7 +666,7 @@ function Dashboard(props: any) {
         userState.role,
         // getAccountBalance, 
         getBlockRewardCountDown,
-        getDelegatorPendingWithdrawal,
+        // getDelegatorPendingWithdrawal,
         // getDelegatorStats,
         // getDelegatorSwapRequests,
         getOperatorStats,
@@ -679,7 +679,7 @@ function Dashboard(props: any) {
 
         if (userState.role === Role.DELEGATOR) {
             // getDelegatorStats();
-            getDelegatorPendingWithdrawal();
+            // getDelegatorPendingWithdrawal();
             // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
@@ -702,7 +702,7 @@ function Dashboard(props: any) {
 
         if (userState.role === Role.DELEGATOR) {
             // getDelegatorStats();
-            getDelegatorPendingWithdrawal();
+            // getDelegatorPendingWithdrawal();
             // getDelegatorSwapRequests();
             getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
@@ -969,13 +969,7 @@ function Dashboard(props: any) {
                                 {
                                     (userState.role === Role.DELEGATOR) &&
 
-                                    <CompleteWithdrawalTable 
-                                        impl={impl} 
-                                        network={networkURL} 
-                                        refresh={refresh_rate_config} 
-                                        userAddress={userState.address_bech32}
-                                        data={delegPendingStakeWithdrawalStats}
-                                        totalClaimableAmt={totalClaimableAmt} />
+                                    <CompleteWithdrawalTable />
                                 }
 
                                 {

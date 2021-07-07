@@ -47,6 +47,7 @@ const stakingSlice = createSlice({
     name: 'staking',
     initialState: initialState,
     reducers: {
+        PRELOAD_INFO_READY() {},
         UPDATE_DELEG_STATS(state, action) {
             const { deleg_stats } = action.payload
             state.deleg_stats = deleg_stats
@@ -104,6 +105,7 @@ const stakingSlice = createSlice({
 })
 
 export const {
+    PRELOAD_INFO_READY,
     UPDATE_DELEG_STATS,
     UPDATE_DELEG_PORTFOLIO,
     UPDATE_GZIL_ADDRESS,
