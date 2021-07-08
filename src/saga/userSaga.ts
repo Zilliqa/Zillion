@@ -3,12 +3,11 @@ import { BigNumber } from 'bignumber.js';
 import { Task } from 'redux-saga';
 import { call, cancel, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import { PRELOAD_INFO_READY, UPDATE_DELEG_PORTFOLIO, UPDATE_DELEG_STATS, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/stakingSlice';
-import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS } from '../store/userSlice';
+import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS, QUERY_AND_UPDATE_DELEGATOR_STATS, QUERY_AND_UPDATE_OPERATOR_STATS, POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS } from '../store/userSlice';
 import { OperationStatus, Role } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { calculateBlockRewardCountdown } from '../util/utils';
 import { ZilSdk } from '../zilliqa-api';
 import { getUserState, getBlockchain, getStakingState } from './selectors';
 
@@ -105,7 +104,6 @@ function* queryAndUpdateGzil() {
 
 /**
  * populate delegator staking portfolio and delegator stats
- * @returns 
  */
 function* populateStakingPortfolio() {
     logger("populate staking portfolio");
@@ -117,13 +115,9 @@ function* populateStakingPortfolio() {
         const response: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [address_base16]);
         logger("deposit deleg list: ", response);
 
-        if (!isRespOk(response)) {
-            // user has no stake
-            return;
-        }
 
         const { landing_stats, ssn_list } = yield select(getStakingState);
-        const depositAmtDeleg = (response as any)['deposit_amt_deleg'][address_base16];
+        const depositAmtDeleg = (response as any)['deposit_amt_deleg'][address_base16] || null;
         let staking_portfolio_list: DelegStakingPortfolioStats[] = [];
         let totalDeposits = new BigNumber(0);
         let totalRewards = new BigNumber(0);
@@ -134,7 +128,8 @@ function* populateStakingPortfolio() {
             totalDeposits = totalDeposits.plus(deposit);
 
             // compute zil rewards
-            const rewards = new BigNumber(yield call(computeDelegRewards, impl, ssnAddress, address_base16));
+            const delegRewards: string = yield call(computeDelegRewards, impl, ssnAddress, address_base16)
+            const rewards = new BigNumber(delegRewards);
             totalRewards = totalRewards.plus(rewards);
 
             const ssnAddressBech32 = toBech32Address(ssnAddress);
@@ -157,10 +152,12 @@ function* populateStakingPortfolio() {
 
         yield put(UPDATE_DELEG_STATS({ deleg_stats: delegStats }));
         yield put(UPDATE_DELEG_PORTFOLIO({ portfolio_list: staking_portfolio_list }));
-        yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
     } catch (e) {
         console.warn("populate staking portfolio failed");
         console.warn(e);
+        yield put(UPDATE_DELEG_STATS({ deleg_stats: initialDelegStats }));
+    } finally {
+        yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
     }
 }
 
@@ -219,7 +216,7 @@ function* populatePendingWithdrawal() {
         logger("pending withdrawal: ", response);
 
         if (!isRespOk(response)) {
-            return;
+            throw new Error("no pending withdrawal for address");
         }
 
         let progress = '0';
@@ -267,6 +264,8 @@ function* populatePendingWithdrawal() {
     } catch (e) {
         console.warn("populate pending withdrawal failed");
         console.warn(e);
+        yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: [] }));
+        yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: "0" }));
     }
 }
 
@@ -299,7 +298,7 @@ function* populateOperatorStats() {
         const response: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist', [address_base16]);
 
         if (!isRespOk(response)) {
-            return;
+            throw new Error("no such operator");
         }
 
         const ssnInfo = (response as any)['ssnlist'][address_base16];
@@ -320,10 +319,12 @@ function* populateOperatorStats() {
         }
 
         yield put(UPDATE_OPERATOR_STATS({ operator_stats: operatorStats }));
-        yield put(UPDATE_FETCH_OPERATOR_STATS_STATUS(OperationStatus.COMPLETE));
     } catch (e) {
         console.warn("populate operator stats failed");
         console.warn(e);
+        yield put(UPDATE_OPERATOR_STATS({ operator_stats: initialOperatorStats }));
+    } finally {
+        yield put(UPDATE_FETCH_OPERATOR_STATS_STATUS(OperationStatus.COMPLETE));
     }
 }
 
@@ -331,14 +332,31 @@ function* pollOperatorData() {
     yield fork(populateOperatorStats)
 }
 
-function* watchPollUserData() {
+/**
+ * reload user data when zilpay change account
+ * stop the current poll and resume back later
+ */
+function* queryAndUpdateStats() {
+    yield put(POLL_USER_DATA_STOP());
+
+    const { role } = yield select(getUserState);
+    if (role === Role.OPERATOR) {
+        yield call(pollOperatorData)
+    } else {
+        yield call(pollDelegatorData)
+    }
+
+    yield put(POLL_USER_DATA_START());
+}
+
+function* pollUserSaga() {
     while (true) {
         try {
             const { role } = yield select(getUserState);
             if (role === Role.OPERATOR) {
-                yield call(pollOperatorData);
+                yield call(pollOperatorData)
             } else {
-                yield call(pollDelegatorData);
+                yield call(pollDelegatorData)
             }
         } catch (e) {
             console.warn("poll user data failed");
@@ -349,16 +367,27 @@ function* watchPollUserData() {
     }
 }
 
+function* watchPollUserData() {
+    while (true) {
+        yield take(POLL_USER_DATA_START);
+        yield race([
+            call(pollUserSaga),
+            take(POLL_USER_DATA_STOP),
+        ]);
+    }
+}
+
 function* userSaga() {
     yield take(INIT_USER)
     yield takeLatest(QUERY_AND_UPDATE_ROLE, queryAndUpdateRole)
     yield takeLatest(QUERY_AND_UPDATE_BALANCE, queryAndUpdateBalance)
     yield takeLatest(QUERY_AND_UPDATE_GZIL_BALANCE, queryAndUpdateGzil)
+    yield takeLatest(QUERY_AND_UPDATE_DELEGATOR_STATS, pollDelegatorData)
+    yield takeLatest(QUERY_AND_UPDATE_OPERATOR_STATS, pollOperatorData)
+    yield takeLatest(QUERY_AND_UPDATE_USER_STATS, queryAndUpdateStats)
 
-    // only start polling data when role and other important info is loaded
     yield take([PRELOAD_INFO_READY, UPDATE_ROLE])
     yield fork(watchPollUserData)
-    // yield takeLatest([PRELOAD_INFO_READY, UPDATE_ROLE], watchPollUserData)
 }
 
 export default userSaga;

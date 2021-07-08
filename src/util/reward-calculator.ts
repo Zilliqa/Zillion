@@ -1,12 +1,11 @@
 import { ApiRandomizer } from "./api-randomizer";
+import { getApiMaxRetry } from "./config-json-helper";
 
 const apiRandomizer = ApiRandomizer.getInstance();
 const { RewardCalculator } = require('./calculator');
 
 // config.js from public folder
- // max retry attempt: 10 tries
-let { api_max_retry_attempt } = (window as { [key: string]: any })['config'];
-api_max_retry_attempt = api_max_retry_attempt ? api_max_retry_attempt : 10;
+const API_MAX_ATTEMPT = getApiMaxRetry();
 
 let rewardCalculator: typeof RewardCalculator;
 
@@ -14,7 +13,7 @@ export const computeDelegRewardsExec = async (impl: string, networkURL: string, 
     if (!rewardCalculator) {
         rewardCalculator = new RewardCalculator(networkURL, impl);
         try {
-            await rewardCalculator.compute_maps(delegator);
+            await rewardCalculator.compute_maps();
         } catch (err) {
             // error with fetching; api error
             // set to null to re-declare a new object with a new api
@@ -23,13 +22,13 @@ export const computeDelegRewardsExec = async (impl: string, networkURL: string, 
         }
     }
 
-    return rewardCalculator.get_rewards(ssn, delegator);
+    return await rewardCalculator.get_rewards(ssn, delegator);
 };
 
 export const computeDelegRewards = async (impl: string, ssn: string, delegator: string) => {
     let result;
 
-    for (let attempt = 0; attempt < api_max_retry_attempt; attempt++) {
+    for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
         try {
             const randomAPI = apiRandomizer.getRandomApi();
             result = await computeDelegRewardsExec(impl, randomAPI, ssn, delegator);

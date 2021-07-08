@@ -89,8 +89,7 @@ export const convertQaToZilFull = (amount: string) => {
 
 // convert gzil amount in 15 decimal places to a comma represented string
 export const convertGzilToCommaStr = (inputVal: string) => {
-    const decimalPlaces = new BigNumber(10**15);
-    const gzil = new BigNumber(inputVal).dividedBy(decimalPlaces).toFixed(3);
+    const gzil = new BigNumber(inputVal).shiftedBy(-15).toFixed(3);
     const splitAmt = gzil.split('.');
 
     // add comma separator to front part

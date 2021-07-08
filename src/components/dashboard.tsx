@@ -54,8 +54,9 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { POLL_USER_DATA_START, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, QUERY_AND_UPDATE_ROLE, QUERY_AND_UPDATE_USER_STATS, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { logger } from '../util/logger';
 
 
 const BigNumber = require('bignumber.js');
@@ -809,19 +810,20 @@ function Dashboard(props: any) {
         // eslint-disable-next-line
     }, [isError, userState.authenticated, props.history]);
 
-    // change to correct role for zilpay switch
-    // this is equilvant to a setState callback for setCurrWalletAddress, setNetworkURL
-    // because setState is async - have to execute these functions from useEffect
-    // when wallet address change (zilpay switch account)
-    // when network change (zilpay switch network)
+    // useEffect(() => {
+    //     dispatch(POLL_USER_DATA_START());
+    // }, [dispatch])
+
+    // change to correct role
     useEffect(() => {
-        console.log("unified change network");
+        logger("change role")
         if (!userState.address_base16) {
             return;
         }
         dispatch(QUERY_AND_UPDATE_ROLE());
         dispatch(QUERY_AND_UPDATE_BALANCE());
         dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
+        dispatch(QUERY_AND_UPDATE_USER_STATS());
     }, [userState.address_base16, dispatch]);
 
     

@@ -59,8 +59,13 @@ const userSlice = createSlice({
         },
         QUERY_AND_UPDATE_BALANCE() {},
         QUERY_AND_UPDATE_GZIL_BALANCE() {},
-        QUERY_AND_UPDATE_ROLE() {}, 
+        QUERY_AND_UPDATE_ROLE() {},
+        QUERY_AND_UPDATE_DELEGATOR_STATS() {},
+        QUERY_AND_UPDATE_OPERATOR_STATS() {}, 
+        QUERY_AND_UPDATE_USER_STATS() {},
         POLL_BALANCE() {},
+        POLL_USER_DATA_START() {},
+        POLL_USER_DATA_STOP() {},
         UPDATE_ADDRESS(state, action) {
             const { address_base16, address_bech32 } = action.payload
             state.address_base16 = address_base16.toLowerCase()
@@ -117,7 +122,12 @@ export const {
     QUERY_AND_UPDATE_BALANCE,
     QUERY_AND_UPDATE_GZIL_BALANCE,
     QUERY_AND_UPDATE_ROLE,
+    QUERY_AND_UPDATE_DELEGATOR_STATS,
+    QUERY_AND_UPDATE_OPERATOR_STATS,
+    QUERY_AND_UPDATE_USER_STATS,
     POLL_BALANCE,
+    POLL_USER_DATA_START,
+    POLL_USER_DATA_STOP,
     UPDATE_ADDRESS,
     UPDATE_BALANCE,
     UPDATE_COMPLETE_WITHDRAWAL_AMT,

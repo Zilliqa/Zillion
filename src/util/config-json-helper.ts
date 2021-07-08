@@ -25,7 +25,7 @@ export const getRefreshRate = () => {
 }
 
 export const getApiMaxRetry = () => {
-    return api_max_retry_attempt;
+    return api_max_retry_attempt || 10;
 }
 
 // returns entire networks_config json
