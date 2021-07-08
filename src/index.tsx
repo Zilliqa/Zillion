@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import store from './store/store'
 import { CONFIG_LOADED, UPDATE_API_MAX_ATTEMPT, UPDATE_BLOCKCHAIN_EXPLORER, UPDATE_CHAIN_INFO, UPDATE_REFRESH_RATE } from './store/blockchainSlice';
 import { getApiMaxRetry, getBlockchainExplorer, getNetworkConfigByEnv, getRefreshRate } from './util/config-json-helper';
+import { POLL_STAKING_DATA_START } from './store/stakingSlice';
 
 
 const network_config = getNetworkConfigByEnv()
@@ -29,6 +30,7 @@ store.dispatch(UPDATE_REFRESH_RATE({ refresh_rate: getRefreshRate() }));
 store.dispatch(UPDATE_API_MAX_ATTEMPT({ api_max_attempt: getApiMaxRetry() }));
 store.dispatch(UPDATE_BLOCKCHAIN_EXPLORER({ blockchain_explorer: getBlockchainExplorer() }));
 store.dispatch(CONFIG_LOADED()); // informs saga to start polling data
+store.dispatch(POLL_STAKING_DATA_START());
 
 ReactDOM.render(
   <React.StrictMode>

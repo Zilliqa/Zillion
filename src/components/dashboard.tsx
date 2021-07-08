@@ -57,6 +57,10 @@ import WarningDashboardBanner from './warning-dashboard-banner';
 import { POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, QUERY_AND_UPDATE_ROLE, QUERY_AND_UPDATE_USER_STATS, RESET_USER_STATE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logger } from '../util/logger';
+import { getEnvironment, getNetworks, NetworkConfig, Networks } from '../util/config-json-helper';
+import { UPDATE_CHAIN_INFO } from '../store/blockchainSlice';
+import { ZilSigner } from '../zilliqa-signer';
+import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 
 
 const BigNumber = require('bignumber.js');
@@ -118,13 +122,16 @@ function Dashboard(props: any) {
     // const [currRole, setCurrRole] = useState(loginRole);
 
     const userState = useAppSelector(state => state.user);
+    const blockchainState = useAppSelector(state => state.blockchain);
 
     // config.js from public folder
+    const env = getEnvironment();
     const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
     const [proxy, setProxy] = useState(networks_config[network].proxy);
     const [impl, setImpl] = useState(networks_config[network].impl)
 
     const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
+    const networks: Networks = getNetworks();
 
     const mountedRef = useRef(true);
 
@@ -725,7 +732,9 @@ function Dashboard(props: any) {
         setRecentTransactions(txns);
     }, [userState.address_bech32, proxy, networkURL]);
 
+    // for zilpay to toggle different network
     const networkChanger = (net: string) => {
+        let label;
         let networkLabel = "";
         let url = '';
 
@@ -735,11 +744,13 @@ function Dashboard(props: any) {
                 Alert("info", "Info", "You are on Mainnet.");
                 networkLabel = NetworkLabel.MAINNET;
                 url = NetworkURL.MAINNET;
+                label = NetworkLabel.MAINNET;
                 break;
             case NetworkLabel.TESTNET:
                 networkLabel = NetworkLabel.TESTNET;
                 url = NetworkURL.TESTNET;
-                if (environment_config === Environment.PROD) {
+                label = NetworkLabel.TESTNET;
+                if (env === Environment.PROD) {
                     // warn users not to switch to testnet on production
                     Alert("warn", "Testnet not supported", "Please switch to Mainnet via ZilPay.");
                 }
@@ -748,14 +759,26 @@ function Dashboard(props: any) {
             case NetworkLabel.PRIVATE:
                 networkLabel = NetworkLabel.ISOLATED_SERVER;
                 url = NetworkURL.ISOLATED_SERVER;
-                if (environment_config === Environment.PROD) {
+                label = NetworkLabel.ISOLATED_SERVER;
+                if (env === Environment.PROD) {
                     // warn users not to switch to testnet on production
                     Alert("warn", "Private network not supported", "Please switch to Mainnet via ZilPay.");
                 }
                 break;
             default:
+                label = NetworkLabel.TESTNET;
                 break;
         }
+
+        const networkConfig: NetworkConfig = networks[label];
+        dispatch(UPDATE_CHAIN_INFO({
+            proxy: networkConfig.proxy || '',
+            impl: networkConfig.impl || '',
+            blockchain: networkConfig.blockchain || '',
+            staking_viewer: networkConfig.node_status || '',
+            api_list: networkConfig.api_list || [],
+        }));
+        // ZilSigner.changeNetwork(url);
 
         ZilliqaAccount.changeNetwork(url);
         updateNetwork(networkLabel);
@@ -799,7 +822,7 @@ function Dashboard(props: any) {
     }, []);
 
     useEffect(() => {
-        if (environment_config === Environment.DEV) {
+        if (env === Environment.DEV) {
             // disable auth check for development
             return;
         }
@@ -827,6 +850,20 @@ function Dashboard(props: any) {
         dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
         dispatch(QUERY_AND_UPDATE_USER_STATS());
     }, [userState.address_base16, dispatch]);
+
+    // change network from zilpay
+    useEffect(() => {
+        logger("change network")
+        if (!blockchainState.blockchain) {
+            return;
+        }
+        ZilSigner.changeNetwork(blockchainState.blockchain);
+        dispatch(QUERY_AND_UPDATE_ROLE());
+        dispatch(QUERY_AND_UPDATE_BALANCE());
+        dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
+        dispatch(QUERY_AND_UPDATE_USER_STATS());
+        dispatch(QUERY_AND_UPDATE_STAKING_STATS());
+    }, [blockchainState.blockchain, dispatch])
 
     
     // prevent user from refreshing

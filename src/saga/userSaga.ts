@@ -157,6 +157,7 @@ function* populateStakingPortfolio() {
         console.warn("populate staking portfolio failed");
         console.warn(e);
         yield put(UPDATE_DELEG_STATS({ deleg_stats: initialDelegStats }));
+        yield put(UPDATE_DELEG_PORTFOLIO({ portfolio_list: [] }));
     } finally {
         yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
     }

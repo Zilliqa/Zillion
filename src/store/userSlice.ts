@@ -57,15 +57,6 @@ const userSlice = createSlice({
             state.authenticated = authenticated
             state.selected_role = selected_role
         },
-        QUERY_AND_UPDATE_BALANCE() {},
-        QUERY_AND_UPDATE_GZIL_BALANCE() {},
-        QUERY_AND_UPDATE_ROLE() {},
-        QUERY_AND_UPDATE_DELEGATOR_STATS() {},
-        QUERY_AND_UPDATE_OPERATOR_STATS() {}, 
-        QUERY_AND_UPDATE_USER_STATS() {},
-        POLL_BALANCE() {},
-        POLL_USER_DATA_START() {},
-        POLL_USER_DATA_STOP() {},
         UPDATE_ADDRESS(state, action) {
             const { address_base16, address_bech32 } = action.payload
             state.address_base16 = address_base16.toLowerCase()
@@ -121,6 +112,15 @@ const userSlice = createSlice({
             state.swap_deleg_modal_data = initialState.swap_deleg_modal_data
             state.is_operator_stats_loading = initialState.is_operator_stats_loading
         },
+        QUERY_AND_UPDATE_BALANCE() {},
+        QUERY_AND_UPDATE_GZIL_BALANCE() {},
+        QUERY_AND_UPDATE_ROLE() {},
+        QUERY_AND_UPDATE_DELEGATOR_STATS() {},
+        QUERY_AND_UPDATE_OPERATOR_STATS() {}, 
+        QUERY_AND_UPDATE_USER_STATS() {},
+        POLL_BALANCE() {},
+        POLL_USER_DATA_START() {},
+        POLL_USER_DATA_STOP() {},
     },
     extraReducers: (builder) => {
         builder.addCase(fetchBalance.fulfilled, (state, { payload } ) => {
