@@ -33,11 +33,13 @@ import IconSearch from './icons/search';
 import WarningBanner from './warning-banner';
 
 import RewardCountdownTable from './reward-countdown-table';
-import { useAppSelector } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { getEnvironment } from '../util/config-json-helper';
+import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 
 
 function Home(props: any) {
+  const dispatch = useAppDispatch();
   const appContext = useContext(AppContext);
   const chainInfo = useAppSelector(state => state.blockchain);
   const { updateNetwork } = appContext;
@@ -263,7 +265,8 @@ function Home(props: any) {
     }
 
     // eslint-disable-next-line
-  }, [selectedNetwork]);
+    dispatch(QUERY_AND_UPDATE_STAKING_STATS());
+  }, [selectedNetwork, dispatch]);
 
   useEffect(() => {
     window.onbeforeunload = null;

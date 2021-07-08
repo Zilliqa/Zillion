@@ -30,7 +30,6 @@ store.dispatch(UPDATE_REFRESH_RATE({ refresh_rate: getRefreshRate() }));
 store.dispatch(UPDATE_API_MAX_ATTEMPT({ api_max_attempt: getApiMaxRetry() }));
 store.dispatch(UPDATE_BLOCKCHAIN_EXPLORER({ blockchain_explorer: getBlockchainExplorer() }));
 store.dispatch(CONFIG_LOADED()); // informs saga to start polling data
-store.dispatch(POLL_STAKING_DATA_START());
 
 ReactDOM.render(
   <React.StrictMode>

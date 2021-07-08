@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { getNetworkConfigByEnv } from '../util/config-json-helper'
 
 export interface BlockchainState {
     proxy: string,
@@ -46,6 +47,15 @@ const blockchainSlice = createSlice({
             const { api_max_attempt } = action.payload
             state.api_max_retry_attempt = api_max_attempt
         },
+        RESET_BLOCKCHAIN_STATE(state) {
+            // reset config on logout
+            const networkConfig = getNetworkConfigByEnv()
+            state.proxy = networkConfig.proxy
+            state.impl = networkConfig.impl
+            state.blockchain = networkConfig.blockchain
+            state.staking_viewer = networkConfig.node_status
+            state.api_list = networkConfig.api_list
+        },
         CONFIG_LOADED() {},
     },
 })
@@ -55,6 +65,7 @@ export const {
     UPDATE_BLOCKCHAIN_EXPLORER,
     UPDATE_CHAIN_INFO,
     UPDATE_REFRESH_RATE,
+    RESET_BLOCKCHAIN_STATE,
     CONFIG_LOADED
 } = blockchainSlice.actions
 

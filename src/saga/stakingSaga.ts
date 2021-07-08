@@ -254,6 +254,9 @@ function* pollStakingData() {
 function* queryAndUpdateStats() {
     yield put(POLL_STAKING_DATA_STOP());
     yield call(pollStakingData);
+
+    // delay before start to poll again
+    yield delay(30000);
     yield put(POLL_STAKING_DATA_START());
 }
 
@@ -265,7 +268,7 @@ function* pollStakingSaga() {
             console.warn("poll staking data failed");
             console.warn(e);
         } finally {
-            yield delay(10000);
+            yield delay(30000);
         }
     }
 }
@@ -283,13 +286,9 @@ function* watchPollStakingData() {
 function* stakingSaga() {
     yield take(CONFIG_LOADED) // wait for app to load details from config
     yield fork(watchInitOnce)
-    // yield fork(watchInitLoop)
+    
     yield fork(watchPollStakingData)
     yield takeLatest(QUERY_AND_UPDATE_STAKING_STATS, queryAndUpdateStats)
-    // yield takeLatest(QUERY_AND_UPDATE_ROLE, queryAndUpdateRole)
-    // yield take(INIT_USER)
-    // yield fork(watchPollUserData)
-    // yield takeEvery(POLL_BALANCE, pollBalance)
 }
 
 export default stakingSaga;

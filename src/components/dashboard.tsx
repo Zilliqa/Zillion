@@ -58,7 +58,7 @@ import { POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_BALANCE, QU
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logger } from '../util/logger';
 import { getEnvironment, getNetworks, NetworkConfig, Networks } from '../util/config-json-helper';
-import { UPDATE_CHAIN_INFO } from '../store/blockchainSlice';
+import { RESET_BLOCKCHAIN_STATE, UPDATE_CHAIN_INFO } from '../store/blockchainSlice';
 import { ZilSigner } from '../zilliqa-signer';
 import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 
@@ -170,6 +170,7 @@ function Dashboard(props: any) {
         logger("directing to main");
         dispatch(POLL_USER_DATA_STOP());
         dispatch(RESET_USER_STATE());
+        dispatch(RESET_BLOCKCHAIN_STATE());
         props.history.push("/");
     }
 
@@ -845,9 +846,9 @@ function Dashboard(props: any) {
         if (!userState.address_base16) {
             return;
         }
-        dispatch(QUERY_AND_UPDATE_ROLE());
-        dispatch(QUERY_AND_UPDATE_BALANCE());
-        dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
+        // dispatch(QUERY_AND_UPDATE_ROLE());
+        // dispatch(QUERY_AND_UPDATE_BALANCE());
+        // dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
         dispatch(QUERY_AND_UPDATE_USER_STATS());
     }, [userState.address_base16, dispatch]);
 
@@ -858,9 +859,9 @@ function Dashboard(props: any) {
             return;
         }
         ZilSigner.changeNetwork(blockchainState.blockchain);
-        dispatch(QUERY_AND_UPDATE_ROLE());
-        dispatch(QUERY_AND_UPDATE_BALANCE());
-        dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
+        // dispatch(QUERY_AND_UPDATE_ROLE());
+        // dispatch(QUERY_AND_UPDATE_BALANCE());
+        // dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
         dispatch(QUERY_AND_UPDATE_USER_STATS());
         dispatch(QUERY_AND_UPDATE_STAKING_STATS());
     }, [blockchainState.blockchain, dispatch])
