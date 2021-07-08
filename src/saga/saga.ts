@@ -3,13 +3,13 @@ import * as ZilliqaAccount2 from "../account";
 import { logger } from '../util/logger';
 import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
-import { PRELOAD_INFO_READY, UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
+import { PRELOAD_INFO_READY, UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_REWARD_BLK_COUNTDOWN, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 import { INIT_USER, POLL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
 import { Constants, OperationStatus, Role, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { ZilSdk } from '../zilliqa-api';
-import { convertZilToQa } from '../util/utils';
+import { calculateBlockRewardCountdown, convertZilToQa } from '../util/utils';
 import BigNumber from 'bignumber.js';
 
 const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
@@ -132,7 +132,7 @@ function* watchInitLoop() {
         try {
             yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.PENDING));
             logger("fetching contract data (II) poll...");
-            const { impl } = yield select(getBlockchain);
+            const { impl, blockchain } = yield select(getBlockchain);
 
             const { ssnlist } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist');
             const { ssn_deleg_amt } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssn_deleg_amt');
@@ -173,9 +173,20 @@ function* watchInitLoop() {
                 dropdown_list.push(dropdownOptions);
             }
 
+            // populate number of blocks before rewards are issued
+            // for deleg stats
+            let rewardBlkCountdown = 0;
+            const numTxBlk: string = yield call(ZilSdk.getNumTxBlocks);
+
+            if (isRespOk(numTxBlk)) {
+                const currBlkNum = parseInt(numTxBlk) - 1;
+                rewardBlkCountdown = yield call(calculateBlockRewardCountdown, currBlkNum, blockchain)
+            }
+
             // yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
             yield put(UPDATE_SSN_DROPDOWN_LIST({ dropdown_list: dropdown_list }));
             yield put(UPDATE_SSN_LIST({ ssn_list: ssn_list }));
+            yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: `${rewardBlkCountdown}` }))
             yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.COMPLETE));
         } catch (e) {
             console.warn("fetch failed");

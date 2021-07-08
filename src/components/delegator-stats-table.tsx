@@ -12,7 +12,7 @@ function DelegatorStatsTable(props: any) {
     const data: DelegStats = useAppSelector(state => state.staking.deleg_stats);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_deleg_stats_loading);
     // const totalPendingWithdrawalAmt = props.totalPendingWithdrawalAmt; // Qa
-    const blockCountToReward = props.blockCountToReward ? props.blockCountToReward : 'N/A';
+    const blockCountToReward = useAppSelector(state => state.staking.reward_blk_countdown);
 
     return (
         <>

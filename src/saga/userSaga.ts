@@ -2,12 +2,13 @@ import { toBech32Address } from '@zilliqa-js/zilliqa';
 import { BigNumber } from 'bignumber.js';
 import { Task } from 'redux-saga';
 import { call, cancel, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
-import { PRELOAD_INFO_READY, UPDATE_DELEG_PORTFOLIO, UPDATE_DELEG_STATS, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/stakingSlice';
+import { PRELOAD_INFO_READY, UPDATE_DELEG_PORTFOLIO, UPDATE_DELEG_STATS, UPDATE_FETCH_DELEG_STATS_STATUS, UPDATE_REWARD_BLK_COUNTDOWN } from '../store/stakingSlice';
 import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS, QUERY_AND_UPDATE_DELEGATOR_STATS, QUERY_AND_UPDATE_OPERATOR_STATS, POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS } from '../store/userSlice';
 import { OperationStatus, Role } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
+import { calculateBlockRewardCountdown } from '../util/utils';
 import { ZilSdk } from '../zilliqa-api';
 import { getUserState, getBlockchain, getStakingState } from './selectors';
 
@@ -269,23 +270,10 @@ function* populatePendingWithdrawal() {
     }
 }
 
-/**
- * populate number of blocks countdown before rewards are issued
- */
-function* populateRewardBlkCountDown() {
-    logger("populate reward blk countdown");
-    try {
-    } catch (e) {
-        console.warn("populate reward blk countdown failed");
-        console.warn(e);
-    }
-}
-
 function* pollDelegatorData() {
     yield fork(populateStakingPortfolio)
     yield fork(populateSwapRequests)
     yield fork(populatePendingWithdrawal)
-    // yield fork(populateRewardBlkCountDown)
 }
 
 function* populateOperatorStats() {

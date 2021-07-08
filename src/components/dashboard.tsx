@@ -654,7 +654,7 @@ function Dashboard(props: any) {
             // getDelegatorStats();
             // getDelegatorPendingWithdrawal();
             // getDelegatorSwapRequests();
-            getBlockRewardCountDown();
+            // getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
             // getOperatorStats();
         }
@@ -668,7 +668,7 @@ function Dashboard(props: any) {
     }, [
         userState.role,
         // getAccountBalance, 
-        getBlockRewardCountDown,
+        // getBlockRewardCountDown,
         // getDelegatorPendingWithdrawal,
         // getDelegatorStats,
         // getDelegatorSwapRequests,
@@ -684,7 +684,7 @@ function Dashboard(props: any) {
             // getDelegatorStats();
             // getDelegatorPendingWithdrawal();
             // getDelegatorSwapRequests();
-            getBlockRewardCountDown();
+            // getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
             // getOperatorStats();
         }
@@ -707,7 +707,7 @@ function Dashboard(props: any) {
             // getDelegatorStats();
             // getDelegatorPendingWithdrawal();
             // getDelegatorSwapRequests();
-            getBlockRewardCountDown();
+            // getBlockRewardCountDown();
         } else if (userState.role === Role.OPERATOR) {
             // getOperatorStats();
         }
@@ -1029,8 +1029,7 @@ function Dashboard(props: any) {
                                                 <h5 className="card-title mb-4">Overview</h5>
                                             </div> 
                                             <div className="col-12 text-center">
-                                                <DelegatorStatsTable 
-                                                    blockCountToReward={blockCountToReward} />
+                                                <DelegatorStatsTable />
                                             </div>
                                         </div>
                                     </div>
