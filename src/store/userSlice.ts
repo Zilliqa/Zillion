@@ -106,8 +106,20 @@ const userSlice = createSlice({
         UPDATE_FETCH_OPERATOR_STATS_STATUS(state, action) {
             state.is_operator_stats_loading = action.payload
         },
-        RESET(state) {
-            state = initialState
+        RESET_USER_STATE(state) {
+            state.address_bech32 = initialState.address_bech32
+            state.address_base16 = initialState.address_base16
+            state.account_type = initialState.account_type
+            state.authenticated = initialState.authenticated
+            state.balance = initialState.balance
+            state.gzil_balance = initialState.gzil_balance
+            state.complete_withdrawal_amt = initialState.complete_withdrawal_amt
+            state.ledger_index = initialState.ledger_index
+            state.role = initialState.role
+            state.operator_stats = initialState.operator_stats
+            state.pending_withdraw_list = initialState.pending_withdraw_list
+            state.swap_deleg_modal_data = initialState.swap_deleg_modal_data
+            state.is_operator_stats_loading = initialState.is_operator_stats_loading
         },
     },
     extraReducers: (builder) => {
@@ -138,7 +150,7 @@ export const {
     UPDATE_ROLE,
     UPDATE_SWAP_DELEG_MODAL,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
-    RESET,
+    RESET_USER_STATE,
 } = userSlice.actions
 
 export default userSlice.reducer;

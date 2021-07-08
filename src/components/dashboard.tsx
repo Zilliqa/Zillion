@@ -54,7 +54,7 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { POLL_USER_DATA_START, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, QUERY_AND_UPDATE_ROLE, QUERY_AND_UPDATE_USER_STATS, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, QUERY_AND_UPDATE_ROLE, QUERY_AND_UPDATE_USER_STATS, RESET_USER_STATE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logger } from '../util/logger';
 
@@ -160,7 +160,9 @@ function Dashboard(props: any) {
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
         appContext.cleanUp();
-        console.log("directing to dashboard");
+        logger("directing to main");
+        dispatch(POLL_USER_DATA_STOP());
+        dispatch(RESET_USER_STATE());
         props.history.push("/");
     }
 
@@ -454,65 +456,65 @@ function Dashboard(props: any) {
     }, [networkURL]);
 
 
-    /* fetch data for operator stats panel */
-    const getOperatorStats = useCallback(() => {
-        let name = initOperatorStats.name;
-        let stakeAmt = initOperatorStats.stakeAmt;
-        let bufferedDeposits = initOperatorStats.bufferedDeposits;
-        let delegNum = initOperatorStats.delegNum;
-        let commRate = initOperatorStats.commRate;
-        let commReward = initOperatorStats.commReward;
-        let receiver = initOperatorStats.receiver;
+    // /* fetch data for operator stats panel */
+    // const getOperatorStats = useCallback(() => {
+    //     let name = initOperatorStats.name;
+    //     let stakeAmt = initOperatorStats.stakeAmt;
+    //     let bufferedDeposits = initOperatorStats.bufferedDeposits;
+    //     let delegNum = initOperatorStats.delegNum;
+    //     let commRate = initOperatorStats.commRate;
+    //     let commReward = initOperatorStats.commReward;
+    //     let receiver = initOperatorStats.receiver;
 
-        const userBase16Address = userState.address_base16;
+    //     const userBase16Address = userState.address_base16;
 
-        trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssnlist', [userBase16Address])
-            .then(async (contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
-                    return null;
-                }
+    //     trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssnlist', [userBase16Address])
+    //         .then(async (contractState) => {
+    //             if (contractState === undefined || contractState === null || contractState === 'error') {
+    //                 return null;
+    //             }
 
-                const ssnArgs = contractState['ssnlist'][userBase16Address]['arguments'];
+    //             const ssnArgs = contractState['ssnlist'][userBase16Address]['arguments'];
 
-                // get number of delegators
-                const delegNumState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssn_deleg_amt', [userBase16Address]);
+    //             // get number of delegators
+    //             const delegNumState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssn_deleg_amt', [userBase16Address]);
 
-                if (delegNumState !== undefined && delegNumState !== 'error' && delegNumState !== null) {
-                    delegNum = Object.keys(delegNumState['ssn_deleg_amt'][userBase16Address]).length.toString();
-                }
+    //             if (delegNumState !== undefined && delegNumState !== 'error' && delegNumState !== null) {
+    //                 delegNum = Object.keys(delegNumState['ssn_deleg_amt'][userBase16Address]).length.toString();
+    //             }
 
-                name = ssnArgs[3];
-                stakeAmt = ssnArgs[1];
-                bufferedDeposits = ssnArgs[6];
-                commRate = ssnArgs[7];
-                commReward = ssnArgs[8];
-                receiver = toBech32Address(ssnArgs[9])
-            })
-            .catch((err) => {
-                console.error(err);
-                if (mountedRef.current) {
-                    setIsError(true);
-                }
-                return null;
-            })
-            .finally(() => {
+    //             name = ssnArgs[3];
+    //             stakeAmt = ssnArgs[1];
+    //             bufferedDeposits = ssnArgs[6];
+    //             commRate = ssnArgs[7];
+    //             commReward = ssnArgs[8];
+    //             receiver = toBech32Address(ssnArgs[9])
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //             if (mountedRef.current) {
+    //                 setIsError(true);
+    //             }
+    //             return null;
+    //         })
+    //         .finally(() => {
                 
-                if (mountedRef.current) {
-                    console.log("updating operator stats...");
-                    const data: OperatorStats = {
-                        name: name,
-                        stakeAmt: stakeAmt,
-                        bufferedDeposits: bufferedDeposits,
-                        commRate: commRate,
-                        commReward: commReward,
-                        delegNum: delegNum,
-                        receiver: receiver,
-                    }
-                    setOperatorStats(data);
-                }
+    //             if (mountedRef.current) {
+    //                 console.log("updating operator stats...");
+    //                 const data: OperatorStats = {
+    //                     name: name,
+    //                     stakeAmt: stakeAmt,
+    //                     bufferedDeposits: bufferedDeposits,
+    //                     commRate: commRate,
+    //                     commReward: commReward,
+    //                     delegNum: delegNum,
+    //                     receiver: receiver,
+    //                 }
+    //                 setOperatorStats(data);
+    //             }
 
-            }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
-    }, [impl, userState.address_base16]);
+    //         }), PromiseArea.PROMISE_GET_OPERATOR_STATS);
+    // }, [impl, userState.address_base16]);
 
 
     // /* 
