@@ -6,24 +6,23 @@ import * as ZilliqaAccount from '../../account';
 import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr } from '../../util/utils';
-import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { StakeModalData } from '../../util/interface';
+import { ZilSigner } from '../../zilliqa-signer';
 
 const BigNumber = require('bignumber.js');
 const { BN, units } = require('@zilliqa-js/util');
 
 
 function DelegateStakeModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-
     const proxy = props.proxy;
-    const ledgerIndex = props.ledgerIndex;
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const networkURL = props.networkURL;
+    const accountType = useAppSelector(state => state.user.account_type);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
@@ -111,9 +110,20 @@ function DelegateStakeModal(props: any) {
         setIsPending(OperationStatus.PENDING);
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        // trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        //     .then((result) => {
+        //         console.log(result);
+        //         if (result === OperationStatus.ERROR) {
+        //             Alert('error', "Transaction Error", "Please try again.");
+        //         } else {
+        //             setTxnId(result)
+        //         }
+        //     }).finally(() => {
+        //         setIsPending('');
+        //     }));
+
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
@@ -121,7 +131,8 @@ function DelegateStakeModal(props: any) {
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     const setDefaultStakeAmt = useCallback(() => {

@@ -362,80 +362,80 @@ function Dashboard(props: any) {
     }, [impl, userState.address_base16]);
 
     // get swap requests
-    const getDelegatorSwapRequests = useCallback(() => {
-        let swapRecipientAddress = '';
-        let requestorList: any = [];
+    // const getDelegatorSwapRequests = useCallback(() => {
+    //     let swapRecipientAddress = '';
+    //     let requestorList: any = [];
 
-        trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, "deleg_swap_request")
-            .then(async (contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
-                    return null;
-                }
+    //     trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, "deleg_swap_request")
+    //         .then(async (contractState) => {
+    //             if (contractState === undefined || contractState === null || contractState === 'error') {
+    //                 return null;
+    //             }
 
-                const wallet = userState.address_base16;
+    //             const wallet = userState.address_base16;
 
-                if (wallet in contractState['deleg_swap_request']) {
-                    swapRecipientAddress = contractState['deleg_swap_request'][wallet];
-                }
+    //             if (wallet in contractState['deleg_swap_request']) {
+    //                 swapRecipientAddress = contractState['deleg_swap_request'][wallet];
+    //             }
 
-                // get the list of requestors that is pending for this wallet to accept
-                // reverse the mapping
-                let reverseMap = Object.keys(contractState['deleg_swap_request']).reduce((newMap: any, k) => {
-                    let receipientAddr = contractState['deleg_swap_request'][k];
-                    newMap[receipientAddr] = newMap[receipientAddr] || [];
-                    newMap[receipientAddr].push(k)
-                    return newMap;
-                }, {});
+    //             // get the list of requestors that is pending for this wallet to accept
+    //             // reverse the mapping
+    //             let reverseMap = Object.keys(contractState['deleg_swap_request']).reduce((newMap: any, k) => {
+    //                 let receipientAddr = contractState['deleg_swap_request'][k];
+    //                 newMap[receipientAddr] = newMap[receipientAddr] || [];
+    //                 newMap[receipientAddr].push(k)
+    //                 return newMap;
+    //             }, {});
 
-                if (wallet in reverseMap) {
-                    requestorList = reverseMap[wallet];
-                }
+    //             if (wallet in reverseMap) {
+    //                 requestorList = reverseMap[wallet];
+    //             }
 
-            })
-            .catch((err) => {
-                console.error(err);
-                return null;
-            })
-            .finally(() => {
-                if (mountedRef.current) {
-                    console.log("updating delegator swap requests...");
-                    const data: SwapDelegModalData = {
-                        swapRecipientAddress: swapRecipientAddress,
-                        requestorList: requestorList,
-                    }
-                    console.log(data);
-                    setSwapDelegModalData(data);
-                }
-            }), PromiseArea.PROMISE_GET_DELEG_SWAP_REQUESTS);
-    }, [impl, userState.address_base16]);
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //             return null;
+    //         })
+    //         .finally(() => {
+    //             if (mountedRef.current) {
+    //                 console.log("updating delegator swap requests...");
+    //                 const data: SwapDelegModalData = {
+    //                     swapRecipientAddress: swapRecipientAddress,
+    //                     requestorList: requestorList,
+    //                 }
+    //                 console.log(data);
+    //                 setSwapDelegModalData(data);
+    //             }
+    //         }), PromiseArea.PROMISE_GET_DELEG_SWAP_REQUESTS);
+    // }, [impl, userState.address_base16]);
 
 
     // compute number of blocks left before rewards are issued
-    const getBlockRewardCountDown = useCallback(() => {
-        let tempBlockRewardCount = '0';
+    // const getBlockRewardCountDown = useCallback(() => {
+    //     let tempBlockRewardCount = '0';
 
-        trackPromise(ZilliqaAccount.getNumTxBlocksExplorerRetriable()
-            .then((state) => {
-                if (state === undefined || state === OperationStatus.ERROR) {
-                    return null;
-                }
-                const currentBlkNum = parseInt(state) - 1;
-                const blockCountdown = calculateBlockRewardCountdown(currentBlkNum, networkURL);
-                tempBlockRewardCount = blockCountdown.toString();
-            })
-            .catch((err) => {
-                console.error(err);
-                if (mountedRef.current) {
-                    setIsError(true);
-                }
-                return null;
-            }).finally(() => {
-                console.log("updating block countdown to reward");
-                if (mountedRef.current) {
-                    setBlockCountToReward(tempBlockRewardCount);
-                }
-            }));
-    }, [networkURL]);
+    //     trackPromise(ZilliqaAccount.getNumTxBlocksExplorerRetriable()
+    //         .then((state) => {
+    //             if (state === undefined || state === OperationStatus.ERROR) {
+    //                 return null;
+    //             }
+    //             const currentBlkNum = parseInt(state) - 1;
+    //             const blockCountdown = calculateBlockRewardCountdown(currentBlkNum, networkURL);
+    //             tempBlockRewardCount = blockCountdown.toString();
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //             if (mountedRef.current) {
+    //                 setIsError(true);
+    //             }
+    //             return null;
+    //         }).finally(() => {
+    //             console.log("updating block countdown to reward");
+    //             if (mountedRef.current) {
+    //                 setBlockCountToReward(tempBlockRewardCount);
+    //             }
+    //         }));
+    // }, [networkURL]);
 
 
     // /* fetch data for operator stats panel */
@@ -629,51 +629,51 @@ function Dashboard(props: any) {
     // }, [impl, loginRole]);
 
     // load initial data
-    useEffect(() => {
-        // getAccountBalance();
+    // useEffect(() => {
+    //     // getAccountBalance();
 
-        if (userState.role === Role.DELEGATOR) {
-            // getDelegatorStats();
-            // getDelegatorPendingWithdrawal();
-            // getDelegatorSwapRequests();
-            // getBlockRewardCountDown();
-        } else if (userState.role === Role.OPERATOR) {
-            // getOperatorStats();
-        }
+    //     if (userState.role === Role.DELEGATOR) {
+    //         // getDelegatorStats();
+    //         // getDelegatorPendingWithdrawal();
+    //         // getDelegatorSwapRequests();
+    //         // getBlockRewardCountDown();
+    //     } else if (userState.role === Role.OPERATOR) {
+    //         // getOperatorStats();
+    //     }
 
-        // getSsnStats();
+    //     // getSsnStats();
 
-        return () => {
-            mountedRef.current = false;
-        }
+    //     return () => {
+    //         mountedRef.current = false;
+    //     }
 
-    }, [
-        userState.role,
-        // getAccountBalance, 
-        // getBlockRewardCountDown,
-        // getDelegatorPendingWithdrawal,
-        // getDelegatorStats,
-        // getDelegatorSwapRequests,
-        // getOperatorStats,
-        // getSsnStats
-    ]);
+    // }, [
+    //     userState.role,
+    //     // getAccountBalance, 
+    //     // getBlockRewardCountDown,
+    //     // getDelegatorPendingWithdrawal,
+    //     // getDelegatorStats,
+    //     // getDelegatorSwapRequests,
+    //     // getOperatorStats,
+    //     // getSsnStats
+    // ]);
 
-    // poll data
-    useInterval(() => {
-        // getAccountBalance();
+    // // poll data
+    // useInterval(() => {
+    //     // getAccountBalance();
 
-        if (userState.role === Role.DELEGATOR) {
-            // getDelegatorStats();
-            // getDelegatorPendingWithdrawal();
-            // getDelegatorSwapRequests();
-            // getBlockRewardCountDown();
-        } else if (userState.role === Role.OPERATOR) {
-            // getOperatorStats();
-        }
+    //     if (userState.role === Role.DELEGATOR) {
+    //         // getDelegatorStats();
+    //         // getDelegatorPendingWithdrawal();
+    //         // getDelegatorSwapRequests();
+    //         // getBlockRewardCountDown();
+    //     } else if (userState.role === Role.OPERATOR) {
+    //         // getOperatorStats();
+    //     }
 
-        // getSsnStats();
+    //     // getSsnStats();
 
-    }, mountedRef, refresh_rate_config);
+    // }, mountedRef, refresh_rate_config);
 
     const timeout = (delay: number) => {
         return new Promise(res => setTimeout(res, delay));
@@ -770,7 +770,7 @@ function Dashboard(props: any) {
             const zilPay = (window as any).zilPay;
 
             if (zilPay) {
-                console.log("zil pay method ...");
+                logger("zil pay method ...");
                 // switch to the zilpay network on load
                 networkChanger(zilPay.wallet.net);
 
@@ -780,8 +780,7 @@ function Dashboard(props: any) {
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
                 accountStreamChanged.subscribe((account: any) => {
-                    console.log("zil pay account changing...");
-                    initParams(account.base16, AccountType.ZILPAY);
+                    logger("zil pay account changing...");
                     const bech32 = toBech32Address(account.base16);
                     dispatch(UPDATE_ADDRESS({ address_base16: account.base16, address_bech32: bech32 }));
                 });
@@ -809,6 +808,11 @@ function Dashboard(props: any) {
 
         // eslint-disable-next-line
     }, [isError, userState.authenticated, props.history]);
+
+    useEffect(() => {
+        logger("zilsigner change network");
+        ZilSigner.changeNetwork(blockchainState.blockchain);
+    }, [blockchainState.blockchain]);
 
     useEffect(() => {
         // update user stats on dashboard load
@@ -912,7 +916,7 @@ function Dashboard(props: any) {
                                 <IconShuffle width="16" height="16"/>
                                 {
                                     //@ts-ignore
-                                    <span badge={swapDelegModalData.swapRecipientAddress ? (swapDelegModalData.requestorList.length+1) : swapDelegModalData.requestorList.length}></span>
+                                    <span badge={userState.swap_deleg_modal_data.swapRecipientAddress ? (userState.swap_deleg_modal_data.requestorList.length+1) : userState.swap_deleg_modal_data.requestorList.length}></span>
                                 }
                         </button>
 

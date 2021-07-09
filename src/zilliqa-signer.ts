@@ -1,29 +1,19 @@
-import { HTTPProvider } from "@zilliqa-js/core";
-import { AccountType, Constants, NetworkURL, OperationStatus } from "./util/enum";
+import { fromBech32Address, validation, Zilliqa } from "@zilliqa-js/zilliqa";
+import { BN, Long } from '@zilliqa-js/util'
+import { RPCMethod } from "@zilliqa-js/core"
+import { LedgerZilliqa } from "./ledger-zilliqa";
+import { AccountType, Constants, LedgerIndex, NetworkURL, OperationStatus } from "./util/enum";
 import { logger } from "./util/logger";
 
-const { Zilliqa } = require('@zilliqa-js/zilliqa');
-const { Network } = require('@zilliqa-js/blockchain');
-const { TransactionFactory } = require('@zilliqa-js/account');
-const { Blockchain } = require('@zilliqa-js/blockchain');
-const { Contracts } = require('@zilliqa-js/contract');
 const { bytes } = require('@zilliqa-js/util');
 
 
-let zilliqa = new Zilliqa("");
+let zilliqa: Zilliqa = new Zilliqa("");
 let chainId = 1;
 let msgVersion = 1;
 let gasPrice = `${Constants.DEFAULT_GAS_PRICE}`;
 let gasLimit = `${Constants.DEFAULT_GAS_LIMIT}`;
 
-Zilliqa.prototype.setProvider = function(provider: any) {
-    this.blockchain.provider = provider;
-    this.wallet.provider = this.blockchain.provider;
-    this.blockchain = new Blockchain(this.wallet.provider, this.wallet);
-    this.network = new Network(this.wallet.provider, this.wallet);
-    this.contracts = new Contracts(this.wallet.provider, this.wallet);
-    this.transactions = new TransactionFactory(this.wallet.provider, this.wallet);
-};
 
 export class ZilSigner {
 
@@ -32,7 +22,8 @@ export class ZilSigner {
      * @param networkURL api url
      */
     static changeNetwork = async (networkURL: string): Promise<void> => {
-        zilliqa.setProvider(new HTTPProvider(networkURL));
+        // zilliqa.setProvider(new HTTPProvider(networkURL));
+        zilliqa = new Zilliqa(networkURL);
 
         switch (networkURL) {
             case NetworkURL.MAINNET: {
@@ -78,7 +69,7 @@ export class ZilSigner {
         let result = "";
         switch (account) {
             case AccountType.LEDGER:
-                // result = await ledgerSign();
+                result = await ZilSigner.ledgerSign(txParams, ledgerIndex!);
                 break;
             case AccountType.ZILPAY:
                 result = await ZilSigner.zilPaySign(txParams);
@@ -107,6 +98,77 @@ export class ZilSigner {
     }
 
     /**
+     * create and sign txn with ledger
+     */
+    private static ledgerSign = async (txParams: any, ledgerIndex: number) => {
+        logger("activate ledger signer");
+        if (ledgerIndex === null || ledgerIndex === LedgerIndex.DEFAULT) {
+            throw new Error("no ledger index found");
+        }
+        const transport = await LedgerZilliqa.getTransport();
+        const ledger = new LedgerZilliqa(transport);
+        const result = await ledger.getPublicAddress(ledgerIndex);
+
+        // get public key
+        let pubKey = result.pubKey;
+
+        // get user base 16 address
+        let userWalletAddress = result.pubAddr;
+        if (validation.isBech32(userWalletAddress)) {
+            userWalletAddress = fromBech32Address(userWalletAddress);
+        }
+
+        logger("wallet: ", userWalletAddress);
+
+        // get nonce
+        let nonce = await ZilSigner.getNonce(userWalletAddress);
+
+        try {
+            const txnParams = {
+                version: bytes.pack(chainId, msgVersion),
+                toAddr: txParams.toAddr,
+                amount: `${txParams.amount}`,
+                code: txParams.code,
+                data: txParams.data,
+                gasPrice: `${gasPrice}`,
+                gasLimit: `${gasLimit}`,
+                nonce: nonce,
+                pubKey: pubKey,
+                signature: "",
+            }
+
+            const signature = await ledger.signTxn(ledgerIndex, txnParams);
+            const signedTx = {
+                ...txnParams,
+                amount: `${txParams.amount}`,
+                gasPrice: `${gasPrice}`,
+                gasLimit: `${gasLimit}`,
+                signature
+            }
+            logger("signed tx: ", signedTx);
+
+            // send the signed transaction
+            try {
+                const response = await zilliqa.provider.send(RPCMethod.CreateTransaction, { ...signedTx });
+                if (response.error !== undefined) {
+                    throw new Error(response.error.message)
+                }
+                return response.result.TranID
+            } catch (err) {
+                console.log("something is wrong with broadcasting the transaction :%o", JSON.stringify(err));
+                return OperationStatus.ERROR;
+            }
+
+        } catch (err) {
+            console.error("error ledger sign - something is wrong with signing the transaction: %o", JSON.stringify(err));
+            return OperationStatus.ERROR;
+        
+        } finally {
+            transport.close();
+        }
+    }
+
+    /**
      * create and sign txn with zilpay
      */
     private static zilPaySign = async (txParams: any) => {
@@ -116,8 +178,8 @@ export class ZilSigner {
                 toAddr: txParams.toAddr,
                 amount: txParams.amount,
                 data: txParams.data,
-                gasPrice: gasPrice,
-                gasLimit: gasLimit,
+                gasPrice: new BN(gasPrice),
+                gasLimit: Long.fromNumber(Number(gasLimit)),
                 version: bytes.pack(chainId, msgVersion),
             },
             true
@@ -142,8 +204,8 @@ export class ZilSigner {
                 toAddr: txParams.toAddr,
                 amount: txParams.amount,
                 data: txParams.data,
-                gasPrice: gasPrice,
-                gasLimit: gasLimit,
+                gasPrice: new BN(gasPrice),
+                gasLimit: Long.fromNumber(Number(gasLimit)),
                 version: bytes.pack(chainId, msgVersion),
             },
             true
@@ -152,11 +214,26 @@ export class ZilSigner {
 
         try {
             const txn = await zilliqa.blockchain.createTransaction(tx);
-            return txn.id;
+            return txn.id || '';
         } catch (err) {
             console.error("error sdk sign - something is wrong with broadcasting the transaction: ", JSON.stringify(err));
             console.error(err);
             return OperationStatus.ERROR;
+        }
+    }
+
+    private static getNonce = async (address: string) => {
+        try {
+            const balance = await zilliqa.blockchain.getBalance(address);
+            if (balance.error && balance.error.code === -5) {
+                logger("account has no balance");
+                return -1;
+            }
+            return parseInt(balance.result.nonce) + 1;
+        } catch (err) {
+            console.error("error get nonce from ledger");
+            console.error(err);
+            return -1;
         }
     }
 

@@ -2,12 +2,16 @@ import React, { useContext, useState } from 'react';
 import AppContext from '../contexts/appContext';
 import Alert from './alert';
 import { AccountType } from '../util/enum';
-import { convertQaToCommaStr } from '../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr } from '../util/utils';
 import * as ZilliqaAccount from "../account";
 
 import { LedgerZilliqa } from '../ledger-zilliqa';
 
 import $ from "jquery";
+import { INIT_USER, UPDATE_LEDGER_INDEX } from '../store/userSlice';
+import { useAppDispatch } from '../store/hooks';
+import { logger } from '../util/logger';
+import { ZilSdk } from '../zilliqa-api';
 
 
 interface LedgerAccount {
@@ -17,9 +21,9 @@ interface LedgerAccount {
 }
 
 function LedgerWallet(props: any) {
-
-    const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateLedgerIndex, updateRole } = appContext;
+    const dispatch = useAppDispatch();
+    // const appContext = useContext(AppContext);
+    // const { initParams, updateAuth, updateLedgerIndex, updateRole } = appContext;
 
     const defaultLedgerIndex = 0;
     const [ledgerIndex, setLedgerIndex] = useState(0);
@@ -41,7 +45,7 @@ function LedgerWallet(props: any) {
 
             const result = await ledger!.getPublicAddress(currentLedgerIndex);
             const currAddress = result.pubAddr;
-            const balance = await ZilliqaAccount.getBalance(currAddress);
+            const balance = await ZilSdk.getBalance(currAddress);
 
             const currLedgerAccount: LedgerAccount = {
                 hwIndex: currentLedgerIndex,
@@ -78,14 +82,12 @@ function LedgerWallet(props: any) {
             // show loading state
             props.onWalletLoadingCallback();
 
-            console.log("ledger wallet address: %o", selectedLedgerAddress);
-            console.log("ledger wallet index: %o", hwIndex);
+            logger("ledger wallet address: %o", selectedLedgerAddress);
+            logger("ledger wallet index: %o", hwIndex);
 
-            // update context
-            initParams(selectedLedgerAddress, AccountType.LEDGER);
-            await updateRole(selectedLedgerAddress, role);
-            updateLedgerIndex(hwIndex);
-            updateAuth()
+            const base16Address = bech32ToChecksum(selectedLedgerAddress).toLowerCase();
+            dispatch(INIT_USER({ address_base16: base16Address, address_bech32: selectedLedgerAddress, account_type: AccountType.LEDGER, authenticated: true, selected_role: role }));
+            dispatch(UPDATE_LEDGER_INDEX({ ledger_index: hwIndex }));
 
             // no error
             // call parent function to redirect to dashboard
