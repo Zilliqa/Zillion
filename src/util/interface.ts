@@ -1,15 +1,3 @@
-interface ClaimedRewardModalData {
-    ssnName: string,
-    ssnAddress: string,
-    rewards: string,
-}
-
-interface DelegateStakeModalData {
-    ssnName: string,
-    ssnAddress: string,
-    commRate: string,
-}
-
 interface DelegStats {
     globalAPY: string,
     zilRewards: string,
@@ -82,18 +70,6 @@ interface StakeModalData {
     delegAmt: string,
 }
 
-interface TransferStakeModalData {
-    ssnName: string,
-    ssnAddress: string,
-    delegAmt: string,
-}
-
-interface WithdrawStakeModalData {
-    ssnName: string,
-    ssnAddress: string,
-    delegAmt: string,
-}
-
 interface SwapDelegModalData {
     swapRecipientAddress: string,
     requestorList: string[],
@@ -127,18 +103,6 @@ export const initialOperatorStats: OperatorStats = {
     receiver: '0',
 }
 
-export const initialClaimedRewardModalData: ClaimedRewardModalData = {
-    ssnName: '',
-    ssnAddress: '',
-    rewards: '0'
-}
-
-export const initialDelegStakeModalData: DelegateStakeModalData = {
-    ssnName: '',
-    ssnAddress: '',
-    commRate: '0'
-}
-
 export const initialSwapDelegModalData: SwapDelegModalData = {
     swapRecipientAddress: '',
     requestorList: []
@@ -153,8 +117,6 @@ export const initialStakeModalData: StakeModalData = {
 }
 
 export type {
-    ClaimedRewardModalData,
-    DelegateStakeModalData,
     DelegStats,
     DelegStakingPortfolioStats,
     LandingStats,
@@ -164,6 +126,4 @@ export type {
     SsnStats,
     StakeModalData,
     SwapDelegModalData,
-    TransferStakeModalData,
-    WithdrawStakeModalData
 }

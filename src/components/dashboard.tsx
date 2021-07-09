@@ -41,7 +41,7 @@ import IconMoon from './icons/moon';
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, ClaimedRewardModalData, WithdrawStakeModalData, TransferStakeModalData, DelegateStakeModalData, SwapDelegModalData } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import Footer from './footer';
