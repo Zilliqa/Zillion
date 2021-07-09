@@ -3,7 +3,7 @@ import { logger } from '../util/logger';
 import { getBlockchain, getUserState } from './selectors';
 import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
 import { POLL_STAKING_DATA_START, POLL_STAKING_DATA_STOP, PRELOAD_INFO_READY, QUERY_AND_UPDATE_STAKING_STATS, UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_REWARD_BLK_COUNTDOWN, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
-import { INIT_USER, POLL_BALANCE, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
+import { INIT_USER, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
 import { Constants, OperationStatus, Role, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
@@ -95,85 +95,14 @@ function* watchInitOnce() {
         yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
         yield put(UPDATE_GZIL_ADDRESS({ gzil_address: gziladdr }));
         yield put(UPDATE_GZIL_TOTAL_SUPPLY({ gzil_total_supply: total_supply }));
-        yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.COMPLETE));
-        yield put(PRELOAD_INFO_READY()); // inform other saga that preloaded info is in store
+
     } catch (e) {
         console.warn("fetch home data failed");
         console.warn(e);
-    }
-}
 
-/**
- * continuously poll these data
- */
-function* watchInitLoop() {
-    while (true) {
-        try {
-            yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.PENDING));
-            logger("fetching contract data (II) poll...");
-            const { impl, blockchain } = yield select(getBlockchain);
-
-            const { ssnlist } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist');
-            const { ssn_deleg_amt } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssn_deleg_amt');
-
-            logger("ssnlist: ", ssnlist);
-            logger("ssn_deleg_amt: ", ssn_deleg_amt);
-
-            let dropdown_list: NodeOptions[] = [];
-            let ssn_list: SsnStats[] = [];
-            for (const ssnAddress in ssnlist) {
-                const ssnArgs = ssnlist[ssnAddress]['arguments'];
-                const status = (ssnArgs[0]['constructor'] === 'True') ? SsnStatus.ACTIVE : SsnStatus.INACTIVE;
-                const delegNum = Object.keys(ssn_deleg_amt[ssnAddress]).length.toString()
-
-                // for ssn table
-                const ssnStats: SsnStats = {
-                    address: toBech32Address(ssnAddress),
-                    name: ssnArgs[3],
-                    apiUrl: ssnArgs[5],
-                    stakeAmt: ssnArgs[1],
-                    bufferedDeposits: ssnArgs[6],
-                    commRate: ssnArgs[7],
-                    commReward: ssnArgs[8],
-                    delegNum: delegNum,
-                    status: status,
-                }
-
-                // for use as dropdown options in the modals
-                const dropdownOptions: NodeOptions = {
-                    address: toBech32Address(ssnAddress),
-                    name: ssnArgs[3],
-                    stakeAmt: ssnArgs[1],
-                    delegNum: delegNum,
-                    commRate: ssnArgs[7],
-                }
-
-                ssn_list.push(ssnStats);
-                dropdown_list.push(dropdownOptions);
-            }
-
-            // populate number of blocks before rewards are issued
-            // for deleg stats
-            let rewardBlkCountdown = 0;
-            const numTxBlk: string = yield call(ZilSdk.getNumTxBlocks);
-
-            if (isRespOk(numTxBlk)) {
-                const currBlkNum = parseInt(numTxBlk) - 1;
-                rewardBlkCountdown = yield call(calculateBlockRewardCountdown, currBlkNum, blockchain)
-            }
-
-            // yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
-            yield put(UPDATE_SSN_DROPDOWN_LIST({ dropdown_list: dropdown_list }));
-            yield put(UPDATE_SSN_LIST({ ssn_list: ssn_list }));
-            yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: `${rewardBlkCountdown}` }))
-            yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.COMPLETE));
-        } catch (e) {
-            console.warn("fetch failed");
-            console.warn(e);
-        } finally {
-            // TODO: should be race
-            yield delay(10000);
-        }
+    } finally {
+        yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.COMPLETE));
+        yield put(PRELOAD_INFO_READY()); // inform other saga that preloaded info is in store
     }
 }
 

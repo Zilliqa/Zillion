@@ -7,8 +7,9 @@ import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, g
 import { SsnStats, DelegateStakeModalData } from '../util/interface';
 import Spinner from './spinner';
 import ReactTooltip from 'react-tooltip';
-import { useAppSelector } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import SpinnerNormal from './spinner-normal';
+import { UPDATE_DELEG_STAKE_MODAL } from '../store/userSlice';
 
 
 function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
@@ -96,20 +97,21 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 }
 
 function SsnTable(props: any) {
+    const dispatch = useAppDispatch();
     const role = useAppSelector(state => state.user.role);
     const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_ssn_stats_loading);
     const ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
-    const setDelegStakeModalData = props.setDelegStakeModalData;
 
     const handleStake = (name: string, address: string, commRate: string) => {
         // set dashboard state variable
-        setDelegStakeModalData((prevData: DelegateStakeModalData) => ({
-            ...prevData,
-            ssnName: name,
-            ssnAddress: address,
-            commRate: commRate,
+        dispatch(UPDATE_DELEG_STAKE_MODAL({
+            deleg_stake_modal: {
+                ssnName: name,
+                ssnAddress: address,
+                commRate: commRate
+            } as DelegateStakeModalData
         }));
     }
 

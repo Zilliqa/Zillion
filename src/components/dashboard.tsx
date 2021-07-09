@@ -91,12 +91,6 @@ const initClaimedRewardModalData: ClaimedRewardModalData = {
     rewards: '0'
 }
 
-const initDelegStakeModalData: DelegateStakeModalData = {
-    ssnName: '',
-    ssnAddress: '',
-    commRate: '0'
-}
-
 const initTransferStakeModalData: TransferStakeModalData = {
     ssnName: '',
     ssnAddress: '',
@@ -152,7 +146,6 @@ function Dashboard(props: any) {
     
     // data for each contract modal
     const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
-    const [delegStakeModalData, setDelegStakeModalData] = useState<DelegateStakeModalData>(initDelegStakeModalData);
     const [transferStakeModalData, setTransferStakeModalData] = useState<TransferStakeModalData>(initTransferStakeModalData);
     const [withdrawStakeModalData, setWithdrawStakeModalData] = useState<WithdrawStakeModalData>(initWithdrawStakeModalData);
     const [swapDelegModalData, setSwapDelegModalData] = useState<SwapDelegModalData>(initSwapDelegModalData);
@@ -1143,10 +1136,7 @@ function Dashboard(props: any) {
                                             </p>
                                         </div>
                                         <div className="col-12 text-center">
-                                            <SsnTable 
-                                                showStakeBtn={true}
-                                                setDelegStakeModalData={setDelegStakeModalData}
-                                                />
+                                            <SsnTable showStakeBtn={true} />
                                         </div>
                                     </div>
                                 </div>
@@ -1197,8 +1187,7 @@ function Dashboard(props: any) {
                 networkURL={networkURL} 
                 ledgerIndex={ledgerIndex}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions}
-                delegStakeModalData={delegStakeModalData} />
+                updateRecentTransactions={updateRecentTransactions} />
 
             <ReDelegateStakeModal 
                 proxy={proxy} 

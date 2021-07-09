@@ -1,7 +1,6 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, OperationStatus, Role } from '../util/enum'
-import * as ZilliqaAccount from "../account";
-import { initialOperatorStats, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, SwapDelegModalData } from '../util/interface';
+import { DelegateStakeModalData, initialDelegStakeModalData, initialOperatorStats, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, SwapDelegModalData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
@@ -16,6 +15,7 @@ interface UserState {
     selected_role: Role,                                // role that the user selects when signing in
     operator_stats: OperatorStats                       // track the operator stats, if user is an operator
     pending_withdraw_list: PendingWithdrawStats[]       // track pending withdrawals
+    deleg_stake_modal_data: DelegateStakeModalData      // track which ssn the delegator has selected to stake 
     swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
     is_operator_stats_loading: OperationStatus          // status indicator for loading operator stats
 }
@@ -33,14 +33,11 @@ const initialState: UserState = {
     operator_stats: initialOperatorStats,
     selected_role: Role.NONE,
     pending_withdraw_list: [],
+    deleg_stake_modal_data: initialDelegStakeModalData,
     swap_deleg_modal_data: initialSwapDelegModalData,
     is_operator_stats_loading: OperationStatus.IDLE,
 }
 
-export const fetchBalance = createAsyncThunk('user/fetchBalance', async (address: string) => {
-    const response = await ZilliqaAccount.getBalanceRetriable(address);
-    return response;
-})
 
 /**
  * stores user's wallet information
@@ -69,6 +66,10 @@ const userSlice = createSlice({
         UPDATE_COMPLETE_WITHDRAWAL_AMT(state, action) {
             const { complete_withdrawal_amt } = action.payload
             state.complete_withdrawal_amt = complete_withdrawal_amt
+        },
+        UPDATE_DELEG_STAKE_MODAL(state, action) {
+            const { deleg_stake_modal } = action.payload
+            state.deleg_stake_modal_data = deleg_stake_modal
         },
         UPDATE_GZIL_BALANCE(state, action) {
             const { gzil_balance } = action.payload
@@ -109,6 +110,7 @@ const userSlice = createSlice({
             state.role = initialState.role
             state.operator_stats = initialState.operator_stats
             state.pending_withdraw_list = initialState.pending_withdraw_list
+            state.deleg_stake_modal_data = initialState.deleg_stake_modal_data
             state.swap_deleg_modal_data = initialState.swap_deleg_modal_data
             state.is_operator_stats_loading = initialState.is_operator_stats_loading
         },
@@ -118,14 +120,8 @@ const userSlice = createSlice({
         QUERY_AND_UPDATE_DELEGATOR_STATS() {},
         QUERY_AND_UPDATE_OPERATOR_STATS() {}, 
         QUERY_AND_UPDATE_USER_STATS() {},
-        POLL_BALANCE() {},
         POLL_USER_DATA_START() {},
         POLL_USER_DATA_STOP() {},
-    },
-    extraReducers: (builder) => {
-        builder.addCase(fetchBalance.fulfilled, (state, { payload } ) => {
-            state.balance = payload
-        })
     },
 })
 
@@ -137,12 +133,12 @@ export const {
     QUERY_AND_UPDATE_DELEGATOR_STATS,
     QUERY_AND_UPDATE_OPERATOR_STATS,
     QUERY_AND_UPDATE_USER_STATS,
-    POLL_BALANCE,
     POLL_USER_DATA_START,
     POLL_USER_DATA_STOP,
     UPDATE_ADDRESS,
     UPDATE_BALANCE,
     UPDATE_COMPLETE_WITHDRAWAL_AMT,
+    UPDATE_DELEG_STAKE_MODAL,
     UPDATE_GZIL_BALANCE,
     UPDATE_LEDGER_INDEX,
     UPDATE_OPERATOR_STATS,

@@ -117,6 +117,12 @@ export const initialOperatorStats: OperatorStats = {
     receiver: '0',
 }
 
+export const initialDelegStakeModalData: DelegateStakeModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    commRate: '0'
+}
+
 export const initialSwapDelegModalData: SwapDelegModalData = {
     swapRecipientAddress: '',
     requestorList: []

@@ -11,6 +11,7 @@ import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
+import { DelegateStakeModalData } from '../../util/interface';
 
 const BigNumber = require('bignumber.js');
 const { BN, units } = require('@zilliqa-js/util');
@@ -27,7 +28,8 @@ function DelegateStakeModal(props: any) {
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
 
-    const { delegStakeModalData, updateData, updateRecentTransactions } = props;
+    const { updateData, updateRecentTransactions } = props;
+    const delegStakeModalData: DelegateStakeModalData = useAppSelector(state => state.user.deleg_stake_modal_data);
 
     const ssnAddress = delegStakeModalData.ssnAddress; // bech32
 

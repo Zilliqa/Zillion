@@ -3,7 +3,7 @@ import AppContext from '../contexts/appContext';
 import { AccountType, Environment } from '../util/enum';
 import Alert from './alert';
 
-import { INIT_USER, POLL_BALANCE, QUERY_AND_UPDATE_ROLE } from '../store/userSlice'
+import { INIT_USER, QUERY_AND_UPDATE_ROLE } from '../store/userSlice'
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { useAppDispatch } from '../store/hooks';
 
