@@ -1,9 +1,8 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import * as ZilliqaAccount from '../../account';
-import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
@@ -19,9 +18,9 @@ const { BN, units } = require('@zilliqa-js/util');
 
 
 function DelegateStakeModal(props: any) {
-    const proxy = props.proxy;
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
-    const networkURL = props.networkURL;
     const accountType = useAppSelector(state => state.user.account_type);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
@@ -109,18 +108,6 @@ function DelegateStakeModal(props: any) {
 
         setIsPending(OperationStatus.PENDING);
         showWalletsPrompt(accountType);
-
-        // trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
-        //     .then((result) => {
-        //         console.log(result);
-        //         if (result === OperationStatus.ERROR) {
-        //             Alert('error', "Transaction Error", "Please try again.");
-        //         } else {
-        //             setTxnId(result)
-        //         }
-        //     }).finally(() => {
-        //         setIsPending('');
-        //     }));
 
         trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {

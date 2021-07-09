@@ -1162,10 +1162,6 @@ function Dashboard(props: any) {
                 updateRecentTransactions={updateRecentTransactions} />
 
             <DelegateStakeModal 
-                proxy={proxy} 
-                impl={impl} 
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
