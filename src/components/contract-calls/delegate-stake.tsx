@@ -11,7 +11,7 @@ import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
-import { DelegateStakeModalData } from '../../util/interface';
+import { StakeModalData } from '../../util/interface';
 
 const BigNumber = require('bignumber.js');
 const { BN, units } = require('@zilliqa-js/util');
@@ -29,9 +29,9 @@ function DelegateStakeModal(props: any) {
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
 
     const { updateData, updateRecentTransactions } = props;
-    const delegStakeModalData: DelegateStakeModalData = useAppSelector(state => state.user.deleg_stake_modal_data);
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
 
-    const ssnAddress = delegStakeModalData.ssnAddress; // bech32
+    const ssnAddress = stakeModalData.ssnAddress; // bech32
 
     const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
     const [txnId, setTxnId] = useState('');
@@ -185,12 +185,12 @@ function DelegateStakeModal(props: any) {
                         <div className="modal-body">
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel mr-4">
-                                    <h3>{delegStakeModalData.ssnName}</h3>
-                                    <span>{delegStakeModalData.ssnAddress}</span>
+                                    <h3>{stakeModalData.ssnName}</h3>
+                                    <span>{stakeModalData.ssnAddress}</span>
                                 </div>
                                 <div className="col node-details-panel">
                                     <h3>Commission Rate</h3>
-                                    <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
+                                    <span>{convertToProperCommRate(stakeModalData.commRate).toFixed(2)}%</span>
                                 </div>
                             </div>
 

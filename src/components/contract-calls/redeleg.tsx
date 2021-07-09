@@ -15,6 +15,7 @@ import { computeDelegRewards } from '../../util/reward-calculator';
 
 import { fromBech32Address } from '@zilliqa-js/crypto';
 import { useAppSelector } from '../../store/hooks';
+import { StakeModalData } from '../../util/interface';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -86,16 +87,18 @@ function ReDelegateStakeModal(props: any) {
         ledgerIndex,
         networkURL,
         // nodeSelectorOptions, 
-        transferStakeModalData,
+        // transferStakeModalData,
         updateData,
         updateRecentTransactions } = props;
 
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const nodeSelectorOptions = useAppSelector(state => state.staking.ssn_dropdown_list);
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
+
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
 
-    const fromSsn = transferStakeModalData.ssnAddress; // bech32
+    const fromSsn = stakeModalData.ssnAddress; // bech32
     const [toSsn, setToSsn] = useState('');
     const [toSsnName, setToSsnName] = useState('');
     const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
@@ -200,7 +203,7 @@ function ReDelegateStakeModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
-        const currentAmtQa = transferStakeModalData.delegAmt;
+        const currentAmtQa = stakeModalData.delegAmt;
         const leftOverQa = new BN(currentAmtQa).sub(new BN(delegAmtQa));
 
         // check if redeleg more than current deleg amount
@@ -260,13 +263,13 @@ function ReDelegateStakeModal(props: any) {
 
     // set default transfer amt to current stake amt
     const setDefaultDelegAmt = useCallback(() => {
-        if (transferStakeModalData.delegAmt) {
-            const tempDelegAmt = convertQaToZilFull(transferStakeModalData.delegAmt);
+        if (stakeModalData.delegAmt) {
+            const tempDelegAmt = convertQaToZilFull(stakeModalData.delegAmt);
             setDelegAmt(tempDelegAmt);
         } else {
             setDelegAmt('0');
         }
-    }, [transferStakeModalData.delegAmt]);
+    }, [stakeModalData.delegAmt]);
 
     const handleClose = () => {
         // txn success
@@ -386,12 +389,12 @@ function ReDelegateStakeModal(props: any) {
                                     <small><strong>From</strong></small>
                                     <div className="row node-details-wrapper mb-4">
                                         <div className="col node-details-panel mr-4">
-                                            <h3>{transferStakeModalData.ssnName}</h3>
-                                            <span>{transferStakeModalData.ssnAddress}</span>
+                                            <h3>{stakeModalData.ssnName}</h3>
+                                            <span>{stakeModalData.ssnAddress}</span>
                                         </div>
                                         <div className="col node-details-panel">
                                             <h3>Current Deposit</h3>
-                                            <span>{convertQaToCommaStr(transferStakeModalData.delegAmt)} ZIL</span>
+                                            <span>{convertQaToCommaStr(stakeModalData.delegAmt)} ZIL</span>
                                         </div>
                                     </div>
 
@@ -437,7 +440,7 @@ function ReDelegateStakeModal(props: any) {
                                         <Table 
                                             columns={columns} 
                                             data={nodeSelectorOptions} 
-                                            senderAddress={transferStakeModalData.ssnAddress} 
+                                            senderAddress={stakeModalData.ssnAddress} 
                                             handleNodeSelect={handleNodeSelect}
                                             hiddenColumns={getHiddenColumns()} />
                                     </div>

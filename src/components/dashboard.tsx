@@ -85,24 +85,6 @@ const initOperatorStats: OperatorStats = {
     receiver: '0',
 }
 
-const initClaimedRewardModalData: ClaimedRewardModalData = {
-    ssnName: '',
-    ssnAddress: '',
-    rewards: '0'
-}
-
-const initTransferStakeModalData: TransferStakeModalData = {
-    ssnName: '',
-    ssnAddress: '',
-    delegAmt: '0'
-}
-
-const initWithdrawStakeModalData: WithdrawStakeModalData = {
-    ssnName: '',
-    ssnAddress: '',
-    delegAmt: '0'
-}
-
 const initSwapDelegModalData: SwapDelegModalData = {
     swapRecipientAddress: '',
     requestorList: []
@@ -145,9 +127,6 @@ function Dashboard(props: any) {
     const [blockCountToReward, setBlockCountToReward] = useState('0');
     
     // data for each contract modal
-    const [claimedRewardsModalData, setClaimedRewardModalData] = useState<ClaimedRewardModalData>(initClaimedRewardModalData);
-    const [transferStakeModalData, setTransferStakeModalData] = useState<TransferStakeModalData>(initTransferStakeModalData);
-    const [withdrawStakeModalData, setWithdrawStakeModalData] = useState<WithdrawStakeModalData>(initWithdrawStakeModalData);
     const [swapDelegModalData, setSwapDelegModalData] = useState<SwapDelegModalData>(initSwapDelegModalData);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
@@ -1090,10 +1069,7 @@ function Dashboard(props: any) {
                                             <div className="col-12 mt-2 px-4 text-center">
                                                 <div className="inner-section">
                                                     <h6 className="inner-section-heading px-4 pt-4 pb-3">Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
-                                                    <StakingPortfolio 
-                                                        setClaimedRewardModalData={setClaimedRewardModalData}
-                                                        setTransferStakeModalData={setTransferStakeModalData}
-                                                        setWithdrawStakeModalData={setWithdrawStakeModalData} />
+                                                    <StakingPortfolio />
                                                 </div>
                                             </div>
                                             <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">
@@ -1154,7 +1130,7 @@ function Dashboard(props: any) {
                 </div>
             </div>
 
-            <Footer networkLabel={convertNetworkUrlToLabel(networkURL)} />
+            <Footer />
             <DisclaimerModal />
 
             <UpdateCommRateModal 
@@ -1196,8 +1172,7 @@ function Dashboard(props: any) {
                 ledgerIndex={ledgerIndex} 
                 userAddress={userState.address_bech32}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions}
-                transferStakeModalData={transferStakeModalData} />
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawStakeModal 
                 proxy={proxy} 
@@ -1206,8 +1181,7 @@ function Dashboard(props: any) {
                 ledgerIndex={ledgerIndex} 
                 userAddress={userState.address_bech32}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions}
-                withdrawStakeModalData={withdrawStakeModalData} />
+                updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawRewardModal 
                 proxy={proxy} 
@@ -1216,8 +1190,7 @@ function Dashboard(props: any) {
                 ledgerIndex={ledgerIndex} 
                 userAddress={userState.address_bech32}
                 updateData={updateData}
-                updateRecentTransactions={updateRecentTransactions}
-                claimedRewardsModalData={claimedRewardsModalData} />
+                updateRecentTransactions={updateRecentTransactions} />
 
             <CompleteWithdrawModal 
                 proxy={proxy}

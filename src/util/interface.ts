@@ -72,6 +72,16 @@ interface LandingStats {
     estRealtimeAPY: string,
 }
 
+// unified interface to hold all staking information
+// that a delegator has selected from dropdown
+interface StakeModalData {
+    ssnName: string,
+    ssnAddress: string,
+    commRate: string,
+    rewards: string,
+    delegAmt: string,
+}
+
 interface TransferStakeModalData {
     ssnName: string,
     ssnAddress: string,
@@ -117,6 +127,12 @@ export const initialOperatorStats: OperatorStats = {
     receiver: '0',
 }
 
+export const initialClaimedRewardModalData: ClaimedRewardModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    rewards: '0'
+}
+
 export const initialDelegStakeModalData: DelegateStakeModalData = {
     ssnName: '',
     ssnAddress: '',
@@ -126,6 +142,14 @@ export const initialDelegStakeModalData: DelegateStakeModalData = {
 export const initialSwapDelegModalData: SwapDelegModalData = {
     swapRecipientAddress: '',
     requestorList: []
+}
+
+export const initialStakeModalData: StakeModalData = {
+    ssnName: '',
+    ssnAddress: '',
+    commRate: '0',
+    rewards: '0',
+    delegAmt: '0',
 }
 
 export type {
@@ -138,6 +162,7 @@ export type {
     OperatorStats,
     PendingWithdrawStats,
     SsnStats,
+    StakeModalData,
     SwapDelegModalData,
     TransferStakeModalData,
     WithdrawStakeModalData

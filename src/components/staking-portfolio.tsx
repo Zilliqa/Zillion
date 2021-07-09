@@ -66,14 +66,6 @@ function StakingPortfolio(props: any) {
     const data: DelegStakingPortfolioStats[] = useAppSelector(state => state.staking.deleg_staking_portfolio_list);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_deleg_stats_loading);
 
-    // from dashboard
-    // to be passed to delegator dropdown
-    const { 
-        setClaimedRewardModalData,
-        setTransferStakeModalData,
-        setWithdrawStakeModalData
-     } = props;
-
     const columns = useMemo(
         () => [
             {
@@ -100,16 +92,13 @@ function StakingPortfolio(props: any) {
                 Cell: ({ row }: any) =>
                     <>
                     <DelegatorDropdown
-                        setClaimedRewardModalData={setClaimedRewardModalData}
-                        setTransferStakeModalData={setTransferStakeModalData}
-                        setWithdrawStakeModalData={setWithdrawStakeModalData}
                         ssnName={row.original.ssnName}
                         ssnAddress={row.original.ssnAddress}
                         delegAmt={row.original.delegAmt}
                         rewards={row.original.rewards} />
                     </>
             }
-        ], [setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
+        ], []
     );
 
     return (

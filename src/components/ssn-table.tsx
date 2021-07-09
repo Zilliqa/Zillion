@@ -4,12 +4,12 @@ import { useTable, useSortBy } from 'react-table';
 
 import { PromiseArea, SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress } from '../util/utils';
-import { SsnStats, DelegateStakeModalData } from '../util/interface';
+import { SsnStats, DelegateStakeModalData, StakeModalData } from '../util/interface';
 import Spinner from './spinner';
 import ReactTooltip from 'react-tooltip';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import SpinnerNormal from './spinner-normal';
-import { UPDATE_DELEG_STAKE_MODAL } from '../store/userSlice';
+import { UPDATE_DELEG_STAKE_MODAL, UPDATE_STAKE_MODAL_DATA } from '../store/userSlice';
 
 
 function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
@@ -106,12 +106,12 @@ function SsnTable(props: any) {
 
     const handleStake = (name: string, address: string, commRate: string) => {
         // set dashboard state variable
-        dispatch(UPDATE_DELEG_STAKE_MODAL({
-            deleg_stake_modal: {
+        dispatch(UPDATE_STAKE_MODAL_DATA({
+            stake_modal: {
                 ssnName: name,
                 ssnAddress: address,
-                commRate: commRate
-            } as DelegateStakeModalData
+                commRate: commRate,
+            } as StakeModalData
         }));
     }
 

@@ -13,6 +13,7 @@ import { fromBech32Address } from '@zilliqa-js/crypto';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
+import { StakeModalData } from '../../util/interface';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -28,10 +29,11 @@ function WithdrawStakeModal(props: any) {
     const ledgerIndex = props.ledgerIndex;
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
-    const { withdrawStakeModalData, updateData, updateRecentTransactions } = props;
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
+    const { updateData, updateRecentTransactions } = props;
     const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
 
-    const ssnAddress = withdrawStakeModalData.ssnAddress; // bech32
+    const ssnAddress = stakeModalData.ssnAddress; // bech32
     const [withdrawAmt, setWithdrawAmt] = useState('0'); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -129,7 +131,7 @@ function WithdrawStakeModal(props: any) {
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-        const delegAmtQa = withdrawStakeModalData.delegAmt;
+        const delegAmtQa = stakeModalData.delegAmt;
         const leftOverQa = new BN(delegAmtQa).sub(new BN(withdrawAmtQa));
 
         // check if withdraw more than delegated
@@ -184,13 +186,13 @@ function WithdrawStakeModal(props: any) {
 
     // set default withdraw amount to current deleg amt
     const setDefaultWithdrawAmt = useCallback(() => {
-        if (withdrawStakeModalData.delegAmt) {
-            const tempDelegAmt = convertQaToZilFull(withdrawStakeModalData.delegAmt);
+        if (stakeModalData.delegAmt) {
+            const tempDelegAmt = convertQaToZilFull(stakeModalData.delegAmt);
             setWithdrawAmt(tempDelegAmt);
         } else {
             setWithdrawAmt('0');
         }
-    }, [withdrawStakeModalData.delegAmt]);
+    }, [stakeModalData.delegAmt]);
 
     const handleClose = () => {
         // txn success
@@ -245,12 +247,12 @@ function WithdrawStakeModal(props: any) {
                         <div className="modal-body">
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel mr-4">
-                                    <h3>{withdrawStakeModalData.ssnName}</h3>
-                                    <span>{withdrawStakeModalData.ssnAddress}</span>
+                                    <h3>{stakeModalData.ssnName}</h3>
+                                    <span>{stakeModalData.ssnAddress}</span>
                                 </div>
                                 <div className="col node-details-panel">
                                     <h3>Deposit</h3>
-                                    <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
+                                    <span>{convertQaToCommaStr(stakeModalData.delegAmt)} ZIL</span>
                                 </div>
                             </div>
 

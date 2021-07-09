@@ -10,6 +10,8 @@ import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { StakeModalData } from '../../util/interface';
+import { useAppSelector } from '../../store/hooks';
 
 const BigNumber = require('bignumber.js');
 const { BN } = require('@zilliqa-js/util');
@@ -22,9 +24,10 @@ function WithdrawRewardModal(props: any) {
     const proxy = props.proxy;
     const ledgerIndex = props.ledgerIndex;
     const networkURL = props.networkURL;
-    const { claimedRewardsModalData, updateData, updateRecentTransactions } = props;
+    const { updateData, updateRecentTransactions } = props;
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
 
-    const ssnAddress = claimedRewardsModalData.ssnAddress; // bech32
+    const ssnAddress = stakeModalData.ssnAddress; // bech32
 
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -120,13 +123,13 @@ function WithdrawRewardModal(props: any) {
                         <div className="modal-body">
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel mr-4">
-                                    <h3>{claimedRewardsModalData.ssnName}</h3>
-                                    <span>{claimedRewardsModalData.ssnAddress}</span>
+                                    <h3>{stakeModalData.ssnName}</h3>
+                                    <span>{stakeModalData.ssnAddress}</span>
                                 </div>
                                 <div className="col node-details-panel">
                                     <h3>Rewards</h3>
-                                    <span>{ new BigNumber(claimedRewardsModalData.rewards).isGreaterThanOrEqualTo(10**9) ? convertQaToCommaStr(claimedRewardsModalData.rewards) : convertQaToZilFull(claimedRewardsModalData.rewards)} ZIL</span>
-                                    <span className="gzil-rewards">({convertGzilToCommaStr(claimedRewardsModalData.rewards)} GZIL)</span>
+                                    <span>{ new BigNumber(stakeModalData.rewards).isGreaterThanOrEqualTo(10**9) ? convertQaToCommaStr(stakeModalData.rewards) : convertQaToZilFull(stakeModalData.rewards)} ZIL</span>
+                                    <span className="gzil-rewards">({convertGzilToCommaStr(stakeModalData.rewards)} GZIL)</span>
                                 </div>
                             </div>
                             <div className="d-flex mt-4">

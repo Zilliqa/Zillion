@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, OperationStatus, Role } from '../util/enum'
-import { DelegateStakeModalData, initialDelegStakeModalData, initialOperatorStats, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, SwapDelegModalData } from '../util/interface';
+import { ClaimedRewardModalData, DelegateStakeModalData, initialDelegStakeModalData, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData } from '../util/interface';
+import { logger } from '../util/logger';
 
 interface UserState {
     address_bech32: string,
@@ -15,7 +16,8 @@ interface UserState {
     selected_role: Role,                                // role that the user selects when signing in
     operator_stats: OperatorStats                       // track the operator stats, if user is an operator
     pending_withdraw_list: PendingWithdrawStats[]       // track pending withdrawals
-    deleg_stake_modal_data: DelegateStakeModalData      // track which ssn the delegator has selected to stake 
+    deleg_stake_modal_data: DelegateStakeModalData      // for dropdown use; track which ssn the delegator has selected to stake 
+    stake_modal_data: StakeModalData                    // hold info about a selected ssn; for dropdown selection use when choosing whether to stake, transfer, claim etc 
     swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
     is_operator_stats_loading: OperationStatus          // status indicator for loading operator stats
 }
@@ -34,6 +36,7 @@ const initialState: UserState = {
     selected_role: Role.NONE,
     pending_withdraw_list: [],
     deleg_stake_modal_data: initialDelegStakeModalData,
+    stake_modal_data: initialStakeModalData,
     swap_deleg_modal_data: initialSwapDelegModalData,
     is_operator_stats_loading: OperationStatus.IDLE,
 }
@@ -91,6 +94,10 @@ const userSlice = createSlice({
             const { role } = action.payload
             state.role = role
         },
+        UPDATE_STAKE_MODAL_DATA(state, action) {
+            const { stake_modal } = action.payload
+            state.stake_modal_data = {...stake_modal}
+        },
         UPDATE_SWAP_DELEG_MODAL(state, action) {
             const { swap_deleg_modal } = action.payload
             state.swap_deleg_modal_data = swap_deleg_modal
@@ -111,6 +118,7 @@ const userSlice = createSlice({
             state.operator_stats = initialState.operator_stats
             state.pending_withdraw_list = initialState.pending_withdraw_list
             state.deleg_stake_modal_data = initialState.deleg_stake_modal_data
+            state.stake_modal_data = initialState.stake_modal_data
             state.swap_deleg_modal_data = initialState.swap_deleg_modal_data
             state.is_operator_stats_loading = initialState.is_operator_stats_loading
         },
@@ -144,6 +152,7 @@ export const {
     UPDATE_OPERATOR_STATS,
     UPDATE_PENDING_WITHDRAWAL_LIST,
     UPDATE_ROLE,
+    UPDATE_STAKE_MODAL_DATA,
     UPDATE_SWAP_DELEG_MODAL,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
     RESET_USER_STATE,
