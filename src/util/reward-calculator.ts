@@ -1,5 +1,7 @@
+import store from "../store/store";
 import { ApiRandomizer } from "./api-randomizer";
 import { getApiMaxRetry } from "./config-json-helper";
+import { NetworkURL } from "./enum";
 
 const apiRandomizer = ApiRandomizer.getInstance();
 const { RewardCalculator } = require('./calculator');
@@ -30,7 +32,8 @@ export const computeDelegRewards = async (impl: string, ssn: string, delegator: 
 
     for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
         try {
-            const randomAPI = apiRandomizer.getRandomApi();
+            const { blockchain, api_list }  = store.getState().blockchain
+            const randomAPI = apiRandomizer.fetchApi(blockchain as NetworkURL, api_list);
             result = await computeDelegRewardsExec(impl, randomAPI, ssn, delegator);
             break;
         } catch (err) {

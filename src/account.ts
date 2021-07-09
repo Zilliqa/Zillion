@@ -10,6 +10,7 @@ import { fromBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
 import BN from 'bn.js';
 import { ApiRandomizer } from './util/api-randomizer';
+import store from './store/store';
 
 const { Zilliqa } = require('@zilliqa-js/zilliqa');
 const { Network } = require('@zilliqa-js/blockchain');
@@ -149,7 +150,8 @@ export const getBalance = async (address: string) => {
 // identical to getBalance except it uses a random API
 export const getBalanceWithNetwork = async (address: string) => {
     try {
-        const randomAPI = apiRandomizer.getRandomApi();
+        const { blockchain, api_list }  = store.getState().blockchain
+        const randomAPI = apiRandomizer.fetchApi(blockchain as NetworkURL, api_list);
         const zilliqaObj = new Zilliqa(randomAPI);
         const balance = await zilliqaObj.blockchain.getBalance(address);
         if (balance.result.balance === undefined) {
@@ -249,7 +251,8 @@ export const getImplStateExplorer = async (implAddr: string, state: string, indi
     }
 
     try {
-        const randomAPI = apiRandomizer.getRandomApi();
+        const { blockchain, api_list }  = store.getState().blockchain
+        const randomAPI = apiRandomizer.fetchApi(blockchain as NetworkURL, api_list);
         const explorerZilliqa = new Zilliqa(randomAPI);
 
         let contractState: any = null;
@@ -280,7 +283,8 @@ export const getImplStateExplorer = async (implAddr: string, state: string, indi
  */
 export const getNumTxBlocksExplorer = async () => {
     try {
-        const randomAPI = apiRandomizer.getRandomApi();
+        const { blockchain, api_list }  = store.getState().blockchain
+        const randomAPI = apiRandomizer.fetchApi(blockchain as NetworkURL, api_list);
         const explorerZilliqa = new Zilliqa(randomAPI);
         const info = await explorerZilliqa.blockchain.getBlockChainInfo();
         if (info === undefined && info.result === undefined) {
@@ -300,7 +304,8 @@ export const getNumTxBlocksExplorer = async () => {
  */
 export const getTotalCoinSupplyWithNetwork = async () => {
     try {
-        const randomAPI = apiRandomizer.getRandomApi();
+        const { blockchain, api_list }  = store.getState().blockchain
+        const randomAPI = apiRandomizer.fetchApi(blockchain as NetworkURL, api_list);
         const zilliqaObj = new Zilliqa(randomAPI);
         const totalCoinSupply = await zilliqaObj.blockchain.getTotalCoinSupply();
         return totalCoinSupply;

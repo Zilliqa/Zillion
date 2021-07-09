@@ -1,7 +1,8 @@
 import { Zilliqa } from "@zilliqa-js/zilliqa";
+import store from "./store/store";
 import { ApiRandomizer } from "./util/api-randomizer";
 import { getApiMaxRetry } from "./util/config-json-helper";
-import { OperationStatus } from "./util/enum";
+import { NetworkURL, OperationStatus } from "./util/enum";
 import { logger } from "./util/logger";
 
 const API_MAX_ATTEMPT = getApiMaxRetry();
@@ -91,7 +92,8 @@ export class ZilSdk {
 
     private static getActualNumTxBlocks = async () => {
         try {
-            const randomAPI = API_RANDOMIZER.getRandomApi();
+            const { blockchain, api_list }  = store.getState().blockchain
+            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
             const zilliqa = new Zilliqa(randomAPI);
             const response =  await zilliqa.blockchain.getBlockChainInfo();
 
@@ -106,7 +108,8 @@ export class ZilSdk {
 
     private static getActualTotalCoinSupply = async () => {
         try {
-            const randomAPI = API_RANDOMIZER.getRandomApi();
+            const { blockchain, api_list }  = store.getState().blockchain
+            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
             const zilliqa = new Zilliqa(randomAPI);
             const response =  await zilliqa.blockchain.getTotalCoinSupply();
 
@@ -121,7 +124,8 @@ export class ZilSdk {
 
     private static getActualBalance = async (address: string) => {
         try {
-            const randomAPI = API_RANDOMIZER.getRandomApi();
+            const { blockchain, api_list }  = store.getState().blockchain
+            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
             const zilliqa = new Zilliqa(randomAPI);
             const response =  await zilliqa.blockchain.getBalance(address);
 
@@ -150,7 +154,8 @@ export class ZilSdk {
         }
 
         try {
-            const randomAPI = API_RANDOMIZER.getRandomApi();
+            const { blockchain, api_list }  = store.getState().blockchain
+            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
             const zilliqa = new Zilliqa(randomAPI);
 
             let response: any = null;

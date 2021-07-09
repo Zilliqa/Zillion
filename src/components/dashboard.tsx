@@ -123,6 +123,8 @@ function Dashboard(props: any) {
 
     const userState = useAppSelector(state => state.user);
     const blockchainState = useAppSelector(state => state.blockchain);
+    const [walletAddress, setWalletAddress] = useState(userState.address_base16 || '');
+    const [blockchain, setBlockchain] = useState(blockchainState.blockchain || '');
 
     // config.js from public folder
     const env = getEnvironment();
@@ -836,35 +838,43 @@ function Dashboard(props: any) {
         // eslint-disable-next-line
     }, [isError, userState.authenticated, props.history]);
 
-    // useEffect(() => {
-    //     dispatch(POLL_USER_DATA_START());
-    // }, [dispatch])
+    useEffect(() => {
+        // update user stats on dashboard load
+        dispatch(QUERY_AND_UPDATE_USER_STATS());
+    }, [dispatch])
 
     // change to correct role
     useEffect(() => {
         logger("change role")
-        if (!userState.address_base16) {
-            return;
+        
+        if (walletAddress !== userState.address_base16) {
+            // address changed
+            dispatch(QUERY_AND_UPDATE_USER_STATS());
         }
-        // dispatch(QUERY_AND_UPDATE_ROLE());
-        // dispatch(QUERY_AND_UPDATE_BALANCE());
-        // dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
-        dispatch(QUERY_AND_UPDATE_USER_STATS());
-    }, [userState.address_base16, dispatch]);
 
-    // change network from zilpay
-    useEffect(() => {
-        logger("change network")
-        if (!blockchainState.blockchain) {
-            return;
+        if (blockchain !== blockchainState.blockchain) {
+            // network changed
+            dispatch(QUERY_AND_UPDATE_USER_STATS());
+            dispatch(QUERY_AND_UPDATE_STAKING_STATS());
         }
-        ZilSigner.changeNetwork(blockchainState.blockchain);
-        // dispatch(QUERY_AND_UPDATE_ROLE());
-        // dispatch(QUERY_AND_UPDATE_BALANCE());
-        // dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
-        dispatch(QUERY_AND_UPDATE_USER_STATS());
-        dispatch(QUERY_AND_UPDATE_STAKING_STATS());
-    }, [blockchainState.blockchain, dispatch])
+
+        setWalletAddress(userState.address_base16);
+        setBlockchain(blockchainState.blockchain);
+    }, [walletAddress, userState.address_base16, blockchain, blockchainState.blockchain, dispatch]);
+
+    // // change network from zilpay
+    // useEffect(() => {
+    //     logger("change network")
+    //     if (!blockchainState.blockchain) {
+    //         return;
+    //     }
+    //     ZilSigner.changeNetwork(blockchainState.blockchain);
+    //     // dispatch(QUERY_AND_UPDATE_ROLE());
+    //     // dispatch(QUERY_AND_UPDATE_BALANCE());
+    //     // dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
+    //     dispatch(QUERY_AND_UPDATE_USER_STATS());
+    //     dispatch(QUERY_AND_UPDATE_STAKING_STATS());
+    // }, [blockchainState.blockchain, dispatch])
 
     
     // prevent user from refreshing
