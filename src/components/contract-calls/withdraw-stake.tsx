@@ -1,37 +1,34 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
-import * as ZilliqaAccount from '../../account';
-import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull } from '../../util/utils';
-import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
-import { fromBech32Address } from '@zilliqa-js/crypto';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { StakeModalData } from '../../util/interface';
+import { ZilSdk } from '../../zilliqa-api';
+import { ZilSigner } from '../../zilliqa-signer';
 
 
 const { BN, units } = require('@zilliqa-js/util');
 
 
 function WithdrawStakeModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-
-    const proxy = props.proxy;
-    const impl = props.impl;
-    const networkURL = props.networkURL;
-    const ledgerIndex = props.ledgerIndex;
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const userBase16Address = useAppSelector(state => state.user.address_base16);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
     const { updateData, updateRecentTransactions } = props;
-    const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
 
     const ssnAddress = stakeModalData.ssnAddress; // bech32
     const [withdrawAmt, setWithdrawAmt] = useState('0'); // in ZIL
@@ -43,8 +40,8 @@ function WithdrawStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         
-        const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, "lastrewardcycle");
-        const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
+        const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
+        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
         if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
             return false;
@@ -171,9 +168,8 @@ function WithdrawStakeModal(props: any) {
         
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
@@ -181,7 +177,8 @@ function WithdrawStakeModal(props: any) {
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     // set default withdraw amount to current deleg amt

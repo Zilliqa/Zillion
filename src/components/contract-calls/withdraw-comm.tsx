@@ -1,25 +1,26 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
-import { OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import { bech32ToChecksum, convertQaToCommaStr, showWalletsPrompt } from '../../util/utils';
-import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
 
-import AppContext from '../../contexts/appContext';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
+import { ZilSigner } from '../../zilliqa-signer';
 
 const { BN } = require('@zilliqa-js/util');
 
 function WithdrawCommModal(props: any) {
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
     const commRewards = useAppSelector(state => state.user.operator_stats.commReward);
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
 
-    const { proxy, networkURL, ledgerIndex, updateData, updateRecentTransactions } = props;
+    const { updateData, updateRecentTransactions } = props;
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
 
@@ -44,17 +45,17 @@ function WithdrawCommModal(props: any) {
 
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
-                    setTxnId(result);
+                    setTxnId(result)
                 }
-        }).finally(() => {
-            setIsPending('');
-        }));
+            }).finally(() => {
+                setIsPending('');
+            })
+        );
     }
 
     const handleClose = () => {

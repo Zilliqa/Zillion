@@ -1,29 +1,26 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
-import * as ZilliqaAccount from '../../account';
-import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
 import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr } from '../../util/utils';
-import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { StakeModalData } from '../../util/interface';
 import { useAppSelector } from '../../store/hooks';
+import { ZilSigner } from '../../zilliqa-signer';
 
 const BigNumber = require('bignumber.js');
 const { BN } = require('@zilliqa-js/util');
 
 
 function WithdrawRewardModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-
-    const proxy = props.proxy;
-    const ledgerIndex = props.ledgerIndex;
-    const networkURL = props.networkURL;
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
     const { updateData, updateRecentTransactions } = props;
     const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
 
@@ -65,9 +62,8 @@ function WithdrawRewardModal(props: any) {
         
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
@@ -75,7 +71,8 @@ function WithdrawRewardModal(props: any) {
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     const handleClose = () => {

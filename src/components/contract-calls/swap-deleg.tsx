@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import * as ZilliqaAccount from '../../account';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
-import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, showWalletsPrompt } from '../../util/utils';
 import Alert from '../alert';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
@@ -26,15 +25,18 @@ import SwapImg5 from "../../static/swap_img5.png";
 import { isStorageAvailable } from '../../util/use-local-storage';
 import { useAppSelector } from '../../store/hooks';
 import { SwapDelegModalData } from '../../util/interface';
+import { ZilSigner } from '../../zilliqa-signer';
+import { ZilSdk } from '../../zilliqa-api';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
 
 function SwapDelegModal(props: any) {
-    const {networkURL, updateData, updateRecentTransactions} = props;
+    const {updateData, updateRecentTransactions} = props;
     const swapDelegModalData: SwapDelegModalData = useAppSelector(state => state.user.swap_deleg_modal_data);
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
     const accountType = useAppSelector(state => state.user.account_type);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const userAddress = useAppSelector(state => state.user.address_bech32);
@@ -187,16 +189,17 @@ function SwapDelegModal(props: any) {
 
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
-        .then((result) => {
-            if (result === OperationStatus.ERROR) {
-                Alert('error', "Transaction Error", "Please try again.");
-            } else {
-                setTxnId(result);
-            }
-        }).finally(() => {
-            setIsPending('');
-        }));
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
+            .then((result) => {
+                if (result === OperationStatus.ERROR) {
+                    Alert('error', "Transaction Error", "Please try again.");
+                } else {
+                    setTxnId(result)
+                }
+            }).finally(() => {
+                setIsPending('');
+            })
+        );
     }
 
     const confirmDelegSwap = async (requestorAddr: string) => {
@@ -288,10 +291,10 @@ function SwapDelegModal(props: any) {
         let displayAddr = getTruncatedAddress(address);
         let targetName = address === userAddress ? "Your wallet" : invokerMethod === "RequestSwap" ? "The recipient" : "The requestor"
 
-        const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "lastrewardcycle");
-        const lbdc = await  ZilliqaAccount.getImplStateExplorerRetriable(impl, "last_buf_deposit_cycle_deleg", [wallet]);
-        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "deposit_amt_deleg", [wallet]);
-        const buff_deposit_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "buff_deposit_deleg", [wallet]);
+        const lrc = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
+        const lbdc = await  ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [wallet]);
+        const deposit_amt_deleg_map = await ZilSdk.getSmartContractSubState(impl, "deposit_amt_deleg", [wallet]);
+        const buff_deposit_deleg_map = await ZilSdk.getSmartContractSubState(impl, "buff_deposit_deleg", [wallet]);
         
         if (lrc === undefined || lrc === "error") {
             return false;
@@ -355,7 +358,7 @@ function SwapDelegModal(props: any) {
     const hasStaked = async (address: string) => {
         let wallet = fromBech32Address(address).toLowerCase();
 
-        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "deposit_amt_deleg", [wallet]);
+        const deposit_amt_deleg_map = await ZilSdk.getSmartContractSubState(impl, "deposit_amt_deleg", [wallet]);
 
         if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null || deposit_amt_deleg_map.length === 0) {
             return false;
@@ -369,7 +372,7 @@ function SwapDelegModal(props: any) {
     const hasPendingWithdrawal = async (address: string) => {
         let wallet = fromBech32Address(address).toLowerCase();
 
-        const pending_withdrawal_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, "withdrawal_pending", [wallet]);
+        const pending_withdrawal_map = await ZilSdk.getSmartContractSubState(impl, "withdrawal_pending", [wallet]);
 
         if (pending_withdrawal_map === undefined || pending_withdrawal_map === "error" || pending_withdrawal_map === null || pending_withdrawal_map.length === 0) {
             return false;

@@ -1138,26 +1138,14 @@ function Dashboard(props: any) {
             <DisclaimerModal />
 
             <UpdateCommRateModal 
-                proxy={proxy}
-                impl={impl} 
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
-            <UpdateReceiverAddress 
-                proxy={proxy} 
-                impl={impl} 
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex}
+            <UpdateReceiverAddress
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawCommModal 
-                proxy={proxy} 
-                impl={impl} 
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
@@ -1165,43 +1153,23 @@ function Dashboard(props: any) {
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
-            <ReDelegateStakeModal 
-                proxy={proxy} 
-                impl={impl} 
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex} 
-                userAddress={userState.address_bech32}
+            <ReDelegateStakeModal
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
-            <WithdrawStakeModal 
-                proxy={proxy} 
-                impl={impl} 
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex} 
-                userAddress={userState.address_bech32}
+            <WithdrawStakeModal
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawRewardModal 
-                proxy={proxy} 
-                impl={impl} 
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex} 
-                userAddress={userState.address_bech32}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <CompleteWithdrawModal 
-                proxy={proxy}
-                impl={impl}  
-                networkURL={networkURL} 
-                ledgerIndex={ledgerIndex}
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
             
-            <SwapDelegModal  
-                networkURL={networkURL}
+            <SwapDelegModal
                 updateData={updateData}
                 updateRecentTransactions={updateRecentTransactions} />
                 

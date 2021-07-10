@@ -1,21 +1,20 @@
-import React, { useState, useContext, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTable, useSortBy } from 'react-table';
 import ReactTooltip from 'react-tooltip';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import * as ZilliqaAccount from '../../account';
-import AppContext from '../../contexts/appContext';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull } from '../../util/utils';
-import { ProxyCalls, OperationStatus, TransactionType } from '../../util/enum';
+import { ProxyCalls, OperationStatus, TransactionType, AccountType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
-import { fromBech32Address } from '@zilliqa-js/crypto';
 import { useAppSelector } from '../../store/hooks';
 import { StakeModalData } from '../../util/interface';
+import { ZilSdk } from '../../zilliqa-api';
+import { ZilSigner } from '../../zilliqa-signer';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -78,26 +77,18 @@ function Table({ columns, data, tableId, senderAddress, handleNodeSelect, hidden
 
 
 function ReDelegateStakeModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-    
-    const { 
-        proxy,
-        impl,
-        ledgerIndex,
-        networkURL,
-        // nodeSelectorOptions, 
-        // transferStakeModalData,
-        updateData,
-        updateRecentTransactions } = props;
-
+    const { updateData, updateRecentTransactions } = props;
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const userBase16Address = useAppSelector(state => state.user.address_base16);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const nodeSelectorOptions = useAppSelector(state => state.staking.ssn_dropdown_list);
     const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
 
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
-    const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
-
     const fromSsn = stakeModalData.ssnAddress; // bech32
     const [toSsn, setToSsn] = useState('');
     const [toSsnName, setToSsnName] = useState('');
@@ -112,8 +103,8 @@ function ReDelegateStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         
-        const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, "lastrewardcycle");
-        const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
+        const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
+        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
         if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
             return false;
@@ -248,9 +239,8 @@ function ReDelegateStakeModal(props: any) {
 
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
@@ -258,7 +248,8 @@ function ReDelegateStakeModal(props: any) {
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     // set default transfer amt to current stake amt
