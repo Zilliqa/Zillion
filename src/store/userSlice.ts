@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, OperationStatus, Role } from '../util/enum'
-import { initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData } from '../util/interface';
-import { logger } from '../util/logger';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
@@ -14,6 +13,8 @@ interface UserState {
     ledger_index: number,
     role: Role,                                         // actual role
     selected_role: Role,                                // role that the user selects when signing in
+    deleg_stats: DelegStats,                            // track the delegator stats, i fuser is a delegator
+    deleg_staking_portfolio_list: DelegStakingPortfolioStats[],     // list of ssn info that a delegator has staked with
     operator_stats: OperatorStats                       // track the operator stats, if user is an operator
     pending_withdraw_list: PendingWithdrawStats[]       // track pending withdrawals
     stake_modal_data: StakeModalData                    // hold info about a selected ssn; for dropdown selection use when choosing whether to stake, transfer, claim etc 
@@ -33,6 +34,8 @@ const initialState: UserState = {
     role: Role.NONE,
     operator_stats: initialOperatorStats,
     selected_role: Role.NONE,
+    deleg_stats: initialDelegStats,
+    deleg_staking_portfolio_list: [],
     pending_withdraw_list: [],
     stake_modal_data: initialStakeModalData,
     swap_deleg_modal_data: initialSwapDelegModalData,
@@ -67,6 +70,14 @@ const userSlice = createSlice({
         UPDATE_COMPLETE_WITHDRAWAL_AMT(state, action) {
             const { complete_withdrawal_amt } = action.payload
             state.complete_withdrawal_amt = complete_withdrawal_amt
+        },
+        UPDATE_DELEG_STATS(state, action) {
+            const { deleg_stats } = action.payload
+            state.deleg_stats = deleg_stats
+        },
+        UPDATE_DELEG_PORTFOLIO(state, action) {
+            const { portfolio_list } = action.payload
+            state.deleg_staking_portfolio_list = portfolio_list
         },
         UPDATE_GZIL_BALANCE(state, action) {
             const { gzil_balance } = action.payload
@@ -109,6 +120,8 @@ const userSlice = createSlice({
             state.complete_withdrawal_amt = initialState.complete_withdrawal_amt
             state.ledger_index = initialState.ledger_index
             state.role = initialState.role
+            state.deleg_stats = initialState.deleg_stats
+            state.deleg_staking_portfolio_list = initialState.deleg_staking_portfolio_list
             state.operator_stats = initialState.operator_stats
             state.pending_withdraw_list = initialState.pending_withdraw_list
             state.stake_modal_data = initialState.stake_modal_data
@@ -139,6 +152,8 @@ export const {
     UPDATE_ADDRESS,
     UPDATE_BALANCE,
     UPDATE_COMPLETE_WITHDRAWAL_AMT,
+    UPDATE_DELEG_STATS,
+    UPDATE_DELEG_PORTFOLIO,
     UPDATE_GZIL_BALANCE,
     UPDATE_LEDGER_INDEX,
     UPDATE_OPERATOR_STATS,

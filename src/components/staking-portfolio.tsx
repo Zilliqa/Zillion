@@ -63,7 +63,7 @@ function Table({ columns, data }: any) {
 function StakingPortfolio(props: any) {
     // const networkURL = props.network;
     // const data: DelegStakingPortfolioStats[] = props.data;
-    const data: DelegStakingPortfolioStats[] = useAppSelector(state => state.staking.deleg_staking_portfolio_list);
+    const data: DelegStakingPortfolioStats[] = useAppSelector(state => state.user.deleg_staking_portfolio_list);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_deleg_stats_loading);
 
     const columns = useMemo(

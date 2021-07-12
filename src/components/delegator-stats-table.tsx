@@ -9,7 +9,7 @@ import SpinnerNormal from './spinner-normal';
 
 function DelegatorStatsTable(props: any) {
     // const data = props.data;
-    const data: DelegStats = useAppSelector(state => state.staking.deleg_stats);
+    const data: DelegStats = useAppSelector(state => state.user.deleg_stats);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_deleg_stats_loading);
     // const totalPendingWithdrawalAmt = props.totalPendingWithdrawalAmt; // Qa
     const blockCountToReward = useAppSelector(state => state.staking.reward_blk_countdown);

@@ -4,7 +4,7 @@
 
 import { createSlice } from '@reduxjs/toolkit'
 import { OperationStatus } from '../util/enum'
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialLandingStats, LandingStats, NodeOptions, SsnStats } from '../util/interface'
+import { initialLandingStats, LandingStats, NodeOptions, SsnStats } from '../util/interface'
 
 
 export interface StakingState {
@@ -16,8 +16,6 @@ export interface StakingState {
     total_stake_amount: string                                  // sum of all stakes in contract Qa
     ssn_dropdown_list: NodeOptions[]                            // to display ssn list as dropdown options in redeleg modal
     
-    deleg_stats: DelegStats,                                    // data for delegator stats
-    deleg_staking_portfolio_list: DelegStakingPortfolioStats[], // list of ssn info that a delegator has staked with
     landing_stats: LandingStats,                                // data for landing stats page 
     ssn_list: SsnStats[],                                       // hold all the list of ssn info
     
@@ -28,8 +26,6 @@ export interface StakingState {
 }
 
 const initialState: StakingState = {
-    deleg_stats: initialDelegStats,
-    deleg_staking_portfolio_list: [],
     gzil_address: '',
     gzil_total_supply: '0',
     landing_stats: initialLandingStats,
@@ -49,14 +45,6 @@ const stakingSlice = createSlice({
     name: 'staking',
     initialState: initialState,
     reducers: {
-        UPDATE_DELEG_STATS(state, action) {
-            const { deleg_stats } = action.payload
-            state.deleg_stats = deleg_stats
-        },
-        UPDATE_DELEG_PORTFOLIO(state, action) {
-            const { portfolio_list } = action.payload
-            state.deleg_staking_portfolio_list = portfolio_list
-        },
         UPDATE_GZIL_ADDRESS(state, action) {
             const { gzil_address } = action.payload
             state.gzil_address = gzil_address
@@ -118,8 +106,6 @@ export const {
     POLL_STAKING_DATA_START,
     POLL_STAKING_DATA_STOP,
     QUERY_AND_UPDATE_STAKING_STATS,
-    UPDATE_DELEG_STATS,
-    UPDATE_DELEG_PORTFOLIO,
     UPDATE_GZIL_ADDRESS,
     UPDATE_GZIL_TOTAL_SUPPLY,
     UPDATE_LANDING_STATS,
