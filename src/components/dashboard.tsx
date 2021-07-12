@@ -77,7 +77,6 @@ function Dashboard(props: any) {
     const [blockchain, setBlockchain] = useState(blockchainState.blockchain || '');
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
-    const [isError, setIsError] = useState(false);
     const [isTxnNotify, setIsTxnNotify] = useState(false);
     const [ariaExpanded, setAriaExpanded] = useState(false);
 
@@ -230,12 +229,12 @@ function Dashboard(props: any) {
             return;
         }
 
-        if (!userState.authenticated || isError) {
+        if (!userState.authenticated) {
             // redirect to login request
             props.history.push("/oops");
         }
 
-    }, [env, isError, userState.authenticated, props.history]);
+    }, [env, userState.authenticated, props.history]);
 
     // change to correct role
     useEffect(() => {

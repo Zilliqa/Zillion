@@ -178,14 +178,9 @@ function Home(props: any) {
   useEffect(() => {
     if (env === Environment.PROD) {
       setSelectedNetwork(Network.MAINNET);
-      // ZilliqaAccount.changeNetwork(NetworkURL.MAINNET);
-
     } else {
       setSelectedNetwork(Network.TESTNET);
-      // ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
-
-    // eslint-disable-next-line
     dispatch(QUERY_AND_UPDATE_STAKING_STATS());
   }, [env, selectedNetwork, dispatch]);
 
