@@ -1,3 +1,6 @@
+/**
+ * @deprecated
+ */
 import React, { useState } from "react";
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { validation } from '@zilliqa-js/util';
