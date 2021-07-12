@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { withRouter } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 
-import { AccountType, Environment, Network, Role, NetworkURL, ContractState } from '../util/enum';
+import { AccountType, Environment, Network, Role, ContractState } from '../util/enum';
 import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
-import * as ZilliqaAccount from "../account";
 import Footer from './footer';
 
 import WalletKeystore from './wallet-keystore';
@@ -165,11 +164,11 @@ function Home(props: any) {
   useEffect(() => {
     if (env === Environment.PROD) {
       setSelectedNetwork(Network.MAINNET);
-      ZilliqaAccount.changeNetwork(NetworkURL.MAINNET);
+      // ZilliqaAccount.changeNetwork(NetworkURL.MAINNET);
 
     } else {
       setSelectedNetwork(Network.TESTNET);
-      ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
+      // ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
 
     // eslint-disable-next-line

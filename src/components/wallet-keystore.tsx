@@ -1,84 +1,83 @@
-import React, { Component } from 'react';
+import { toBech32Address } from '@zilliqa-js/zilliqa';
+import React, { useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { INIT_USER } from '../store/userSlice';
+import { AccountType, OperationStatus } from '../util/enum';
+import { logger } from '../util/logger';
+import { ZilSigner } from '../zilliqa-signer';
 import Alert from './alert';
 
+function WalletKeystore(props: any) {
+    const dispatch = useAppDispatch();
+    const blockchain = useAppSelector(state => state.blockchain.blockchain);
+    const [filename, setFilename] = useState("");
+    const [passphrase, setPassphrase] = useState("");
+    const [keystore, setKeystore] = useState();
+    
+    const selectedRole = props.role;
 
-class WalletKeystore extends Component<any, any> {
-
-    constructor(props: any) {
-        super(props);
-        this.state = {
-            filename: "",
-            passphrase: "",
-            keystore: "",
-        }
-    }
-
-    componentDidMount() {
-        // may need to load the account first?
-    }
-
-    handleFile = (e: any) => {
+    const handleFile = (e: any) => {
         let keystoreFile = e.target.files[0];
-        this.setState({filename: keystoreFile.name});
-        this.setState({keystore: keystoreFile});
+        setFilename(keystoreFile.name);
+        setKeystore(keystoreFile);
     }
 
-    handlePassword = (e: any) => {
-        this.setState({passphrase: e.target.value})
+    const handlePassword = (e: any) => {
+        setPassphrase(e.target.value);
     }
 
-    handleError = () => {
-        Alert('error', 'Keystore Decrypt Error', 'Please ensure your passphrase is correct.')
-    }
+    const unlockWallet = () => {
+        if (keystore === undefined || keystore === null || keystore === "") {
+            Alert('error', 'Keystore not found', 'Please upload a keystore file.');
+            return;
+        }
 
-    unlockWallet = () => {
-        if (this.state.keystore !== "") {
-            const reader = new FileReader();
+        const reader = new FileReader();
+        reader.readAsText(keystore!);
 
-            reader.readAsText(this.state.keystore);
+        reader.onload = async () => {
+            // show loading state
+            props.onWalletLoadingCallback();
 
-            reader.onload = async () => {
-                // have to try catch the add wallet error
-                // const keystoreJSON = reader.result as string;
-                // const address = await ZilSdk.addWalletByKeystore(keystoreJSON, this.state.passphrase);
+            const keystoreJSON = reader.result as string;
+            await ZilSigner.changeNetwork(blockchain); // adjust to correct network and gas
+            const address = await ZilSigner.addWalletByKeystore(keystoreJSON, passphrase); // base16 with 0x
 
-                // if (address !== "error") {
-                //     console.log("wallet add success: %o", address);
-                //     // show loading state
-                //     this.props.onWalletLoadingCallback();
+            if (address !== OperationStatus.ERROR) {
+                logger("wallet add success: ", address);
 
-                //     // no error
-                //     // call parent function to redirect to dashboard
-                //     this.props.onSuccessCallback();
-                // } else {
-                //     this.handleError();
-                // }
+                const bech32Address = toBech32Address(address);
+                // need to dispatch
+                dispatch(INIT_USER({ address_base16: address.toLowerCase(), address_bech32: bech32Address, account_type: AccountType.KEYSTORE, authenticated: true, selected_role: selectedRole }));
+
+                // call parent function to redirect to dashboard
+                props.onSuccessCallback();
+            } else {
+                Alert('error', 'Keystore Decrypt Error', 'Please ensure your passphrase is correct.');
             }
-
-            reader.onerror = (e) => {
-                console.error(e);
-            }
+        }
+        
+        reader.onerror = (e) => {
+            console.error(e);
         }
     }
 
-    render() {
-        return (
-            <div className="wallet-access">
-                <h2>Access wallet via Keystore</h2>
-                <div>
-                    <div id="keystore">
-                        <p className="file-name">{this.state.filename}</p>
-                        <label htmlFor="browsekeystore">{this.state.filename ? "Select wallet file" : "Select wallet file"}</label>
-                        <input type="file" id="browsekeystore" onChange={this.handleFile} />
-                    </div>
-                    <input id="keystore-passphrase" type="password" name="password" className="p-2" placeholder="Enter your passphrase" value={this.state.passphrase} onChange={this.handlePassword}/>
+    return (
+        <div className="wallet-access">
+            <h2>Access wallet via Keystore</h2>
+            <div>
+                <div id="keystore">
+                    <p className="file-name">{filename}</p>
+                    <label htmlFor="browsekeystore">{filename ? "Select wallet file" : "Select wallet file"}</label>
+                    <input type="file" id="browsekeystore" onChange={handleFile} />
                 </div>
-                <br/>
-                <button type="button" className="btn btn-user-action mx-2" onClick={this.unlockWallet}>Unlock Wallet</button>
-                <button type="button" className="btn btn-user-action-cancel mx-2" onClick={this.props.onReturnCallback}>Back</button>
+                <input id="keystore-passphrase" type="password" name="password" className="p-2" placeholder="Enter your passphrase" value={passphrase} onChange={handlePassword}/>
             </div>
-        );
-    }
+            <br/>
+            <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Unlock Wallet</button>
+            <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
+        </div>
+    );
 }
 
 export default WalletKeystore;
