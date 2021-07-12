@@ -82,12 +82,10 @@ function LedgerWallet(props: any) {
             logger("ledger wallet index: %o", hwIndex);
 
             const base16Address = bech32ToChecksum(selectedLedgerAddress).toLowerCase();
-            dispatch(INIT_USER({ address_base16: base16Address, address_bech32: selectedLedgerAddress, account_type: AccountType.LEDGER, authenticated: true, selected_role: selectedRole }));
-            dispatch(UPDATE_LEDGER_INDEX({ ledger_index: hwIndex }));
 
             // no error
             // call parent function to redirect to dashboard
-            props.onSuccessCallback();
+            props.onSuccessCallback(base16Address, selectedLedgerAddress, AccountType.LEDGER, hwIndex);
         } catch (err) {
             console.error("error unlocking ledger...:%o", err);
             Alert('error', 'Unable to access ledger', 'Have you unlock the PIN code?');

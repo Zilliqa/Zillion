@@ -40,18 +40,15 @@ function WalletKeystore(props: any) {
             props.onWalletLoadingCallback();
 
             const keystoreJSON = reader.result as string;
-            await ZilSigner.changeNetwork(blockchain); // adjust to correct network and gas
             const address = await ZilSigner.addWalletByKeystore(keystoreJSON, passphrase); // base16 with 0x
 
             if (address !== OperationStatus.ERROR) {
                 logger("wallet add success: ", address);
 
                 const bech32Address = toBech32Address(address);
-                // need to dispatch
-                dispatch(INIT_USER({ address_base16: address.toLowerCase(), address_bech32: bech32Address, account_type: AccountType.KEYSTORE, authenticated: true, selected_role: selectedRole }));
 
                 // call parent function to redirect to dashboard
-                props.onSuccessCallback();
+                props.onSuccessCallback(address.toLowerCase(), bech32Address, AccountType.KEYSTORE);
             } else {
                 Alert('error', 'Keystore Decrypt Error', 'Please ensure your passphrase is correct.');
             }

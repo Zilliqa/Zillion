@@ -342,7 +342,7 @@ function* queryAndUpdateStats() {
     }
 
     // delay before start to poll again
-    yield delay(30000);
+    yield delay(60000);
     yield put(POLL_USER_DATA_START());
 }
 
@@ -359,7 +359,7 @@ function* pollUserSaga() {
             console.warn("poll user data failed");
             console.warn(e);
         } finally {
-            yield delay(30000);
+            yield delay(60000);
         }
     }
 }

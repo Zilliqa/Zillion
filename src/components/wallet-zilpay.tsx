@@ -2,7 +2,7 @@ import React from 'react';
 import { AccountType, Environment } from '../util/enum';
 import Alert from './alert';
 
-import { INIT_USER } from '../store/userSlice'
+import { INIT_USER, QUERY_AND_UPDATE_USER_STATS } from '../store/userSlice'
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { useAppDispatch } from '../store/hooks';
 import { getEnvironment } from '../util/config-json-helper';
@@ -46,11 +46,9 @@ function WalletZilPay(props: any) {
 
             // request parent to show spinner while updating
             props.onWalletLoadingCallback();
-
-            dispatch(INIT_USER({ address_base16: base16, address_bech32: bech32Address, account_type: AccountType.ZILPAY, authenticated: true, selected_role: selectedRole }));
             
             // request parent to redirect to dashboard
-            props.onSuccessCallback();
+            props.onSuccessCallback(base16, bech32Address, AccountType.ZILPAY);
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
             Alert('error', 'Unable to access ZilPay', 'Please check if there is a new ZilPay version or clear your browser cache.');

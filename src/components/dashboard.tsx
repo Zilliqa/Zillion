@@ -774,15 +774,15 @@ function Dashboard(props: any) {
         // eslint-disable-next-line
     }, [isError, userState.authenticated, props.history]);
 
-    useEffect(() => {
-        logger("zilsigner change network");
-        ZilSigner.changeNetwork(blockchainState.blockchain);
-    }, [blockchainState.blockchain]);
+    // useEffect(() => {
+    //     logger("zilsigner change network");
+    //     ZilSigner.changeNetwork(blockchainState.blockchain);
+    // }, [blockchainState.blockchain]);
 
-    useEffect(() => {
-        // update user stats on dashboard load
-        dispatch(QUERY_AND_UPDATE_USER_STATS());
-    }, [dispatch])
+    // useEffect(() => {
+    //     // update user stats on dashboard load
+    //     dispatch(QUERY_AND_UPDATE_USER_STATS());
+    // }, [dispatch])
 
     // change to correct role
     useEffect(() => {
@@ -797,6 +797,7 @@ function Dashboard(props: any) {
             // network changed
             dispatch(QUERY_AND_UPDATE_USER_STATS());
             dispatch(QUERY_AND_UPDATE_STAKING_STATS());
+            ZilSigner.changeNetwork(blockchainState.blockchain);
         }
 
         setWalletAddress(userState.address_base16);

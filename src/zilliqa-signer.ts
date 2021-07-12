@@ -8,8 +8,8 @@ import { logger } from "./util/logger";
 const { bytes } = require('@zilliqa-js/util');
 
 
-let zilliqa: Zilliqa = new Zilliqa("");
-let chainId = 1;
+let zilliqa: Zilliqa = new Zilliqa("https://dev-api.zilliqa.com"); // defaults to testnet, would be updated during login
+let chainId = 333;
 let msgVersion = 1;
 let gasPrice = `${Constants.DEFAULT_GAS_PRICE}`;
 let gasLimit = `${Constants.DEFAULT_GAS_LIMIT}`;

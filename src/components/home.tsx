@@ -30,6 +30,9 @@ import RewardCountdownTable from './reward-countdown-table';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { getEnvironment } from '../util/config-json-helper';
 import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
+import { logger } from '../util/logger';
+import { INIT_USER, QUERY_AND_UPDATE_USER_STATS, UPDATE_LEDGER_INDEX } from '../store/userSlice';
+import { ZilSigner } from '../zilliqa-signer';
 
 
 function Home(props: any) {
@@ -65,10 +68,21 @@ function Home(props: any) {
     return new Promise(res => setTimeout(res, delay));
   }
 
-  const redirectToDashboard = async () => {
+  const redirectToDashboard = async (addressBase16: string, addressBech32: string, accountType: AccountType, ledgerIndex?: number) => {
+    // login success
+    // update store and signer network
+    dispatch(INIT_USER({ address_base16: addressBase16, address_bech32: addressBech32, account_type: accountType, authenticated: true, selected_role: role }));
+    dispatch(QUERY_AND_UPDATE_USER_STATS());
+    await ZilSigner.changeNetwork(chainInfo.blockchain);
+
+    if (accountType === AccountType.LEDGER && typeof(ledgerIndex) !== 'undefined') {
+      // update ledger index to store if using ledger
+      dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
+    }
+
     // add some delay
     await timeout(1000);
-    console.log("directing to dashboard");
+    logger("directing to dashboard");
     props.history.push("/dashboard");
   }
 
