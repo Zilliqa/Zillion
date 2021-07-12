@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
-import AppContext from "../contexts/appContext";
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel, calculateBlockRewardCountdown } from '../util/utils';
 import * as ZilliqaAccount from "../account";
@@ -41,7 +40,7 @@ import IconMoon from './icons/moon';
 import useDarkMode from '../util/use-dark-mode';
 import { useInterval } from '../util/use-interval';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats, NodeOptions, OperatorStats, SsnStats, SwapDelegModalData } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import Footer from './footer';
@@ -54,18 +53,13 @@ import 'tippy.js/animations/shift-away-subtle.css';
 import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, QUERY_AND_UPDATE_ROLE, QUERY_AND_UPDATE_USER_STATS, RESET_USER_STATE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, RESET_USER_STATE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logger } from '../util/logger';
 import { getEnvironment, getNetworks, NetworkConfig, Networks } from '../util/config-json-helper';
 import { RESET_BLOCKCHAIN_STATE, UPDATE_CHAIN_INFO } from '../store/blockchainSlice';
 import { ZilSigner } from '../zilliqa-signer';
 import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
-
-
-const BigNumber = require('bignumber.js');
-const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString();
-
 
 const initDelegStats: DelegStats = {
     globalAPY: '0',
@@ -75,45 +69,25 @@ const initDelegStats: DelegStats = {
     totalDeposits: '0',
 }
 
-const initOperatorStats: OperatorStats = {
-    name: '',
-    stakeAmt: '0',
-    bufferedDeposits: '0',
-    commRate: '0',
-    commReward: '0',
-    delegNum: '0',
-    receiver: '0',
-}
-
-const initSwapDelegModalData: SwapDelegModalData = {
-    swapRecipientAddress: '',
-    requestorList: []
-}
-
 function Dashboard(props: any) {
     const dispatch = useAppDispatch();
-    const appContext = useContext(AppContext);
-    const { accountType, address, isAuth, loginRole, ledgerIndex, network, initParams, updateNetwork } = appContext;
-
-    // const [currRole, setCurrRole] = useState(loginRole);
 
     const userState = useAppSelector(state => state.user);
     const blockchainState = useAppSelector(state => state.blockchain);
-    const [walletAddress, setWalletAddress] = useState(userState.address_base16 || '');
-    const [blockchain, setBlockchain] = useState(blockchainState.blockchain || '');
 
     // config.js from public folder
     const env = getEnvironment();
-    const { blockchain_explorer_config, networks_config, refresh_rate_config, environment_config } = (window as { [key: string]: any })['config'];
-    const [proxy, setProxy] = useState(networks_config[network].proxy);
-    const [impl, setImpl] = useState(networks_config[network].impl)
-
-    const [networkURL, setNetworkURL] = useState(networks_config[network].blockchain);
     const networks: Networks = getNetworks();
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
+
+    const [walletAddress, setWalletAddress] = useState(userState.address_base16 || '');
+    const [blockchain, setBlockchain] = useState(blockchainState.blockchain || '');
 
     const mountedRef = useRef(true);
 
-    const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
     const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
 
     // data for each panel section
@@ -121,13 +95,6 @@ function Dashboard(props: any) {
     const [delegStakingStats, setDelegStakingStats] = useState([] as DelegStakingPortfolioStats[]);
     const [delegPendingStakeWithdrawalStats, setDelegPendingStakeWithdrawalStats] = useState([] as any);
     const [totalPendingWithdrawalAmt, setTotalPendingWithdrawalAmt] = useState('0');
-    const [operatorStats, setOperatorStats] = useState<OperatorStats>(initOperatorStats);
-
-    // block countdown to reward distribution
-    const [blockCountToReward, setBlockCountToReward] = useState('0');
-    
-    // data for each contract modal
-    const [swapDelegModalData, setSwapDelegModalData] = useState<SwapDelegModalData>(initSwapDelegModalData);
 
     const [isRefreshDisabled, setIsRefreshDisabled] = useState(false);
     const [isError, setIsError] = useState(false);
@@ -140,7 +107,6 @@ function Dashboard(props: any) {
 
     const cleanUp = () => {
         ZilliqaAccount.cleanUp();
-        appContext.cleanUp();
         logger("directing to main");
         dispatch(POLL_USER_DATA_STOP());
         dispatch(RESET_USER_STATE());
@@ -156,210 +122,210 @@ function Dashboard(props: any) {
         setIsTxnNotify(false);
     }
 
-    const getAccountBalance = useCallback(() => {
-        let currBalance = '0';
+    // const getAccountBalance = useCallback(() => {
+    //     let currBalance = '0';
 
-        trackPromise(ZilliqaAccount.getBalanceRetriable(userState.address_bech32)
-            .then((balance) => {
-                currBalance = balance;
-            })
-            .catch((err) => {
-                console.error(err);
-                if (mountedRef.current) {
-                    setIsError(true);
-                }
-                return null;
-            })
-            .finally(() => {
-                if (mountedRef.current) {
-                    console.log("updating wallet balance...");
-                    dispatch(UPDATE_BALANCE({ balance: currBalance }));
-                }
+    //     trackPromise(ZilliqaAccount.getBalanceRetriable(userState.address_bech32)
+    //         .then((balance) => {
+    //             currBalance = balance;
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //             if (mountedRef.current) {
+    //                 setIsError(true);
+    //             }
+    //             return null;
+    //         })
+    //         .finally(() => {
+    //             if (mountedRef.current) {
+    //                 console.log("updating wallet balance...");
+    //                 dispatch(UPDATE_BALANCE({ balance: currBalance }));
+    //             }
 
-            }), PromiseArea.PROMISE_GET_BALANCE);
-    }, [userState.address_bech32, dispatch]);
+    //         }), PromiseArea.PROMISE_GET_BALANCE);
+    // }, [userState.address_bech32, dispatch]);
 
 
     /* 
     * fetch data for delegator stats panel
     * fetch data for delegator staking portfolio
     */
-    const getDelegatorStats = useCallback(() => {
-        let output: DelegStakingPortfolioStats[] = [];
-        let globalAPY = initDelegStats.globalAPY;
-        let zilRewards = initDelegStats.zilRewards;
-        let gzilRewards = initDelegStats.gzilRewards;
-        let gzilBalance = initDelegStats.gzilBalance;
-        let totalDeposits = initDelegStats.totalDeposits;
+    // const getDelegatorStats = useCallback(() => {
+    //     let output: DelegStakingPortfolioStats[] = [];
+    //     let globalAPY = initDelegStats.globalAPY;
+    //     let zilRewards = initDelegStats.zilRewards;
+    //     let gzilRewards = initDelegStats.gzilRewards;
+    //     let gzilBalance = initDelegStats.gzilBalance;
+    //     let totalDeposits = initDelegStats.totalDeposits;
         
-        const userBase16Address = userState.address_base16;
+    //     const userBase16Address = userState.address_base16;
 
-        trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'deposit_amt_deleg', [userBase16Address])
-        .then(async (contractState) => {
-            if (contractState === undefined || contractState === null || contractState === 'error') {
-                return null;
-            }
+    //     trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'deposit_amt_deleg', [userBase16Address])
+    //     .then(async (contractState) => {
+    //         if (contractState === undefined || contractState === null || contractState === 'error') {
+    //             return null;
+    //         }
 
-            // compute global APY
-            let temp = new BigNumber(totalStakeAmt);
-            if (!temp.isEqualTo(0)) {
-                globalAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2).toString();
-            }
+    //         // compute global APY
+    //         let temp = new BigNumber(totalStakeAmt);
+    //         if (!temp.isEqualTo(0)) {
+    //             globalAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2).toString();
+    //         }
 
-            let totalDepositsBN = new BigNumber(0);
-            let totalZilRewardsBN = new BigNumber(0);
-            const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
+    //         let totalDepositsBN = new BigNumber(0);
+    //         let totalZilRewardsBN = new BigNumber(0);
+    //         const depositDelegList = contractState['deposit_amt_deleg'][userBase16Address];
 
-            // fetch ssnlist for the names
-            const ssnContractState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssnlist');
+    //         // fetch ssnlist for the names
+    //         const ssnContractState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssnlist');
 
-            for (const ssnAddress in depositDelegList) {
-                if (!depositDelegList.hasOwnProperty(ssnAddress)) {
-                    continue;
-                }
+    //         for (const ssnAddress in depositDelegList) {
+    //             if (!depositDelegList.hasOwnProperty(ssnAddress)) {
+    //                 continue;
+    //             }
 
-                // compute total deposits
-                const delegAmtQaBN = new BigNumber(depositDelegList[ssnAddress]);
-                totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
+    //             // compute total deposits
+    //             const delegAmtQaBN = new BigNumber(depositDelegList[ssnAddress]);
+    //             totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
 
-                // compute zil rewards
-                const delegRewards = new BN(await computeDelegRewards(impl, ssnAddress, userBase16Address)).toString();
-                // const delegRewards = new BN(0);
-                totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
+    //             // compute zil rewards
+    //             const delegRewards = new BN(await computeDelegRewards(impl, ssnAddress, userBase16Address)).toString();
+    //             // const delegRewards = new BN(0);
+    //             totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
 
-                // for staking portfolio section
-                const data: DelegStakingPortfolioStats = {
-                    ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
-                    ssnAddress: toBech32Address(ssnAddress),
-                    delegAmt: delegAmtQaBN.toString(),
-                    rewards: delegRewards.toString(),
-                }
-                output.push(data);
-            }
+    //             // for staking portfolio section
+    //             const data: DelegStakingPortfolioStats = {
+    //                 ssnName: ssnContractState['ssnlist'][ssnAddress]['arguments'][3],
+    //                 ssnAddress: toBech32Address(ssnAddress),
+    //                 delegAmt: delegAmtQaBN.toString(),
+    //                 rewards: delegRewards.toString(),
+    //             }
+    //             output.push(data);
+    //         }
 
-            totalDeposits = totalDepositsBN.toString();
-            zilRewards = totalZilRewardsBN.toString();
+    //         totalDeposits = totalDepositsBN.toString();
+    //         zilRewards = totalZilRewardsBN.toString();
 
-            // compute gzil rewards
-            // converted to gzil when display
-            gzilRewards = totalZilRewardsBN;
+    //         // compute gzil rewards
+    //         // converted to gzil when display
+    //         gzilRewards = totalZilRewardsBN;
 
-            // get gzil balance
-            const gzilAddressState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'gziladdr');
-            if (gzilAddressState.gziladdr) {
-                const gzilContractState = await ZilliqaAccount.getImplStateExplorerRetriable(gzilAddressState['gziladdr'], "balances", [userBase16Address]);
-                if (gzilContractState && gzilContractState !== 'error') {
-                    gzilBalance = gzilContractState["balances"][userBase16Address];
-                }
-            }
+    //         // get gzil balance
+    //         const gzilAddressState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'gziladdr');
+    //         if (gzilAddressState.gziladdr) {
+    //             const gzilContractState = await ZilliqaAccount.getImplStateExplorerRetriable(gzilAddressState['gziladdr'], "balances", [userBase16Address]);
+    //             if (gzilContractState && gzilContractState !== 'error') {
+    //                 gzilBalance = gzilContractState["balances"][userBase16Address];
+    //             }
+    //         }
 
-        })
-        .catch((err) => {
-            console.error(err);
-            if (mountedRef.current) {
-                setIsError(true);
-            }
-            return null;
-        })
-        .finally(() => {
-            if (mountedRef.current) {
-                console.log("updating delegator stats...");
-                const data: DelegStats = {
-                    globalAPY: globalAPY,
-                    zilRewards: zilRewards,
-                    gzilRewards: gzilRewards,
-                    gzilBalance: gzilBalance,
-                    totalDeposits: totalDeposits,
-                }
-                setDelegStats(data);
+    //     })
+    //     .catch((err) => {
+    //         console.error(err);
+    //         if (mountedRef.current) {
+    //             setIsError(true);
+    //         }
+    //         return null;
+    //     })
+    //     .finally(() => {
+    //         if (mountedRef.current) {
+    //             console.log("updating delegator stats...");
+    //             const data: DelegStats = {
+    //                 globalAPY: globalAPY,
+    //                 zilRewards: zilRewards,
+    //                 gzilRewards: gzilRewards,
+    //                 gzilBalance: gzilBalance,
+    //                 totalDeposits: totalDeposits,
+    //             }
+    //             setDelegStats(data);
 
-                console.log("updating delegator staking portfolio...");
-                setDelegStakingStats([...output]);
-            }
-        }), PromiseArea.PROMISE_GET_DELEG_STATS);
+    //             console.log("updating delegator staking portfolio...");
+    //             setDelegStakingStats([...output]);
+    //         }
+    //     }), PromiseArea.PROMISE_GET_DELEG_STATS);
 
-    }, [impl, userState.address_base16, totalStakeAmt]);
+    // }, [impl, userState.address_base16, totalStakeAmt]);
 
 
     /* fetch data for delegator pending stake withdrawal */
-    const getDelegatorPendingWithdrawal = useCallback(() => {
-        let totalClaimableAmtBN = new BigNumber(0); // Qa
-        let totalPendingAmtBN = new BigNumber(0); // Qa, for deleg stats panel
-        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
-        let progress = '0';
+    // const getDelegatorPendingWithdrawal = useCallback(() => {
+    //     let totalClaimableAmtBN = new BigNumber(0); // Qa
+    //     let totalPendingAmtBN = new BigNumber(0); // Qa, for deleg stats panel
+    //     let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
+    //     let progress = '0';
         
-        const wallet = userState.address_base16;
+    //     const wallet = userState.address_base16;
 
-        trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'withdrawal_pending', [wallet])
-            .then(async (contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
-                    return null;
-                }
+    //     trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'withdrawal_pending', [wallet])
+    //         .then(async (contractState) => {
+    //             if (contractState === undefined || contractState === null || contractState === 'error') {
+    //                 return null;
+    //             }
 
-                const blkNumPendingWithdrawal = contractState['withdrawal_pending'][wallet];
+    //             const blkNumPendingWithdrawal = contractState['withdrawal_pending'][wallet];
 
-                // get min bnum req
-                const blkNumReqState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'bnum_req');
-                const blkNumReq = blkNumReqState['bnum_req'];
-                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorerRetriable();
+    //             // get min bnum req
+    //             const blkNumReqState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'bnum_req');
+    //             const blkNumReq = blkNumReqState['bnum_req'];
+    //             const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorerRetriable();
 
-                let currentBlkNum = new BigNumber(0);
-                if (txBlockNumRes !== OperationStatus.ERROR) {
-                    currentBlkNum = new BigNumber(txBlockNumRes).minus(1);
-                }
+    //             let currentBlkNum = new BigNumber(0);
+    //             if (txBlockNumRes !== OperationStatus.ERROR) {
+    //                 currentBlkNum = new BigNumber(txBlockNumRes).minus(1);
+    //             }
 
-                // compute each of the pending withdrawal progress
-                for (const blkNum in blkNumPendingWithdrawal) {
-                    if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
-                        continue;
-                    }
+    //             // compute each of the pending withdrawal progress
+    //             for (const blkNum in blkNumPendingWithdrawal) {
+    //                 if (!blkNumPendingWithdrawal.hasOwnProperty(blkNum)) {
+    //                     continue;
+    //                 }
         
-                    // compute each pending stake withdrawal progress
-                    let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
-                    let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
-                    let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
-                    let completed = new BigNumber(0);
+    //                 // compute each pending stake withdrawal progress
+    //                 let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
+    //                 let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
+    //                 let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
+    //                 let completed = new BigNumber(0);
         
-                    // compute progress using blk num countdown ratio
-                    if (blkNumCountdown.isLessThanOrEqualTo(0)) {
-                        // can withdraw
-                        totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
-                        blkNumCountdown = new BigNumber(0);
-                        completed = new BigNumber(1);
-                    } else {
-                        // still have pending blks
-                        // 1 - (countdown/blk_req)
-                        const processed = blkNumCountdown.dividedBy(blkNumReq);
-                        completed = new BigNumber(1).minus(processed);
-                    }
+    //                 // compute progress using blk num countdown ratio
+    //                 if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+    //                     // can withdraw
+    //                     totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+    //                     blkNumCountdown = new BigNumber(0);
+    //                     completed = new BigNumber(1);
+    //                 } else {
+    //                     // still have pending blks
+    //                     // 1 - (countdown/blk_req)
+    //                     const processed = blkNumCountdown.dividedBy(blkNumReq);
+    //                     completed = new BigNumber(1).minus(processed);
+    //                 }
         
-                    // convert progress to percentage
-                    progress = completed.times(100).toFixed(2);
+    //                 // convert progress to percentage
+    //                 progress = completed.times(100).toFixed(2);
         
-                    // record the stake withdrawal progress
-                    pendingStakeWithdrawalList.push({
-                        amount: pendingAmt.toString(),
-                        blkNumCountdown: blkNumCountdown.toString(),
-                        blkNumCheck: blkNumCheck.toString(),
-                        progress: progress.toString(),
-                    });
+    //                 // record the stake withdrawal progress
+    //                 pendingStakeWithdrawalList.push({
+    //                     amount: pendingAmt.toString(),
+    //                     blkNumCountdown: blkNumCountdown.toString(),
+    //                     blkNumCheck: blkNumCheck.toString(),
+    //                     progress: progress.toString(),
+    //                 });
 
-                    // add total pending amt for deleg stats panel
-                    totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmt);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-                return null;
-            })
-            .finally(() => {
-                if (mountedRef.current) {
-                    setDelegPendingStakeWithdrawalStats([...pendingStakeWithdrawalList]);
-                    setTotalClaimableAmt(totalClaimableAmtBN.toString());
-                    setTotalPendingWithdrawalAmt(totalPendingAmtBN.toString());
-                }
-            }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
-    }, [impl, userState.address_base16]);
+    //                 // add total pending amt for deleg stats panel
+    //                 totalPendingAmtBN = totalPendingAmtBN.plus(pendingAmt);
+    //             }
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //             return null;
+    //         })
+    //         .finally(() => {
+    //             if (mountedRef.current) {
+    //                 setDelegPendingStakeWithdrawalStats([...pendingStakeWithdrawalList]);
+    //                 setTotalClaimableAmt(totalClaimableAmtBN.toString());
+    //                 setTotalPendingWithdrawalAmt(totalPendingAmtBN.toString());
+    //             }
+    //         }), PromiseArea.PROMISE_GET_PENDING_WITHDRAWAL);
+    // }, [impl, userState.address_base16]);
 
     // get swap requests
     // const getDelegatorSwapRequests = useCallback(() => {
@@ -755,11 +721,11 @@ function Dashboard(props: any) {
         }));
         // ZilSigner.changeNetwork(url);
 
-        ZilliqaAccount.changeNetwork(url);
-        updateNetwork(networkLabel);
-        setNetworkURL(url);
-        setProxy(networks_config[networkLabel].proxy);
-        setImpl(networks_config[networkLabel].impl);
+        // ZilliqaAccount.changeNetwork(url);
+        // updateNetwork(networkLabel);
+        // setNetworkURL(url);
+        // setProxy(networks_config[networkLabel].proxy);
+        // setImpl(networks_config[networkLabel].impl);
     }
 
     /**
@@ -1105,8 +1071,8 @@ function Dashboard(props: any) {
                                         <div className="col">
                                             <h5 className="card-title mb-4">Staked Seed Nodes</h5>
                                             <p className="info mt-4">Please refer to our&nbsp; 
-                                                <a className="info-link" href={networks_config[convertNetworkUrlToLabel(networkURL)].node_status ? 
-                                                    networks_config[convertNetworkUrlToLabel(networkURL)].node_status : 
+                                                <a className="info-link" href={blockchainState.staking_viewer ? 
+                                                    blockchainState.staking_viewer : 
                                                     "https://zilliqa.com/"} 
                                                         target="_blank" 
                                                         rel="noopener noreferrer">

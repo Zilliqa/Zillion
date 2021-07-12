@@ -1,22 +1,20 @@
-import React, { useContext } from 'react';
-import AppContext from '../contexts/appContext';
+import React from 'react';
 import { AccountType, Environment } from '../util/enum';
 import Alert from './alert';
 
-import { INIT_USER, QUERY_AND_UPDATE_ROLE } from '../store/userSlice'
+import { INIT_USER } from '../store/userSlice'
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { useAppDispatch } from '../store/hooks';
+import { getEnvironment } from '../util/config-json-helper';
 
 
 function WalletZilPay(props: any) {
     const dispatch = useAppDispatch()
-    const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateNetwork, updateRole } = appContext;
 
-    const role = props.role;
+    const selectedRole = props.role;
 
     // config.js from public folder
-    const { environment_config } = (window as { [key: string]: any })['config'];
+    const env = getEnvironment();
 
     const unlockWallet = async () => {
 
@@ -46,17 +44,10 @@ function WalletZilPay(props: any) {
             const { base16 } = zilPay.wallet.defaultAccount;
             const bech32Address = toBech32Address(base16);
 
-            // request parent to show spinner while updating context
+            // request parent to show spinner while updating
             props.onWalletLoadingCallback();
 
-            // update context
-            // need await for update role for it to complete, otherwise context is empty
-            // update with zilpay selected network
-            initParams(base16, AccountType.ZILPAY);
-            updateNetwork(zilPay.wallet.net);
-            await updateRole(base16, role);
-
-            dispatch(INIT_USER({ address_base16: base16, address_bech32: bech32Address, account_type: AccountType.ZILPAY, authenticated: true, selected_role: role }));
+            dispatch(INIT_USER({ address_base16: base16, address_bech32: bech32Address, account_type: AccountType.ZILPAY, authenticated: true, selected_role: selectedRole }));
             
             // request parent to redirect to dashboard
             props.onSuccessCallback();
@@ -71,7 +62,7 @@ function WalletZilPay(props: any) {
         <div className="wallet-access">
             <h2>Access wallet using ZilPay</h2>
             
-            { environment_config === Environment.PROD ? 
+            { env === Environment.PROD ? 
                 <p className="my-4"><strong>Note:</strong> We remind all users to set your ZilPay network to <strong>Mainnet</strong></p> :
                 <p className="my-4"><strong>Note:</strong> We remind all users to set your ZilPay network to <strong>Testnet</strong></p>
             }

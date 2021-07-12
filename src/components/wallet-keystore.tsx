@@ -1,13 +1,8 @@
 import React, { Component } from 'react';
-import AppContext from '../contexts/appContext';
 import Alert from './alert';
-import * as Account from '../account';
-import { AccountType } from '../util/enum';
 
 
 class WalletKeystore extends Component<any, any> {
-
-    static contextType = AppContext;
 
     constructor(props: any) {
         super(props);
@@ -44,25 +39,20 @@ class WalletKeystore extends Component<any, any> {
 
             reader.onload = async () => {
                 // have to try catch the add wallet error
-                const keystoreJSON = reader.result as string;
-                const address = await Account.addWalletByKeystore(keystoreJSON, this.state.passphrase);
+                // const keystoreJSON = reader.result as string;
+                // const address = await ZilSdk.addWalletByKeystore(keystoreJSON, this.state.passphrase);
 
-                if (address !== "error") {
-                    console.log("wallet add success: %o", address);
-                    // show loading state
-                    this.props.onWalletLoadingCallback();
+                // if (address !== "error") {
+                //     console.log("wallet add success: %o", address);
+                //     // show loading state
+                //     this.props.onWalletLoadingCallback();
 
-                    // update context
-                    this.context.initParams(address, AccountType.KEYSTORE);
-                    await this.context.updateRole(address, this.props.role);
-                    this.context.updateAuth();
-
-                    // no error
-                    // call parent function to redirect to dashboard
-                    this.props.onSuccessCallback();
-                } else {
-                    this.handleError();
-                }
+                //     // no error
+                //     // call parent function to redirect to dashboard
+                //     this.props.onSuccessCallback();
+                // } else {
+                //     this.handleError();
+                // }
             }
 
             reader.onerror = (e) => {

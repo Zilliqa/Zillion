@@ -1,15 +1,11 @@
-import React, { useState, useContext } from 'react';
-import AppContext from '../contexts/appContext';
+/**
+ * @deprecated
+ */
+import React, { useState } from 'react';
 import Alert from './alert';
-import * as Account from '../account';
-import { AccountType } from '../util/enum';
 
 
 function MnemonicWallet(props: any) {
-
-    const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateRole } = appContext;
-
     const role = props.role;
     const [mnemonic, setMnemonic] = useState('');
     const [mnemonicIndex, setMnemonicIndex] = useState(0);
@@ -35,24 +31,24 @@ function MnemonicWallet(props: any) {
         console.log("unlock by mnemonic");
         // console.log("mnemonic: %o", mnemonic);
         // console.log("mnemonic index: %o", mnemonicIndex);
-        const address = await Account.addWalletByMnemonic(mnemonic, mnemonicIndex, password);
+        // const address = await Account.addWalletByMnemonic(mnemonic, mnemonicIndex, password);
 
-        if (address !== "error") {
-            console.log("wallet add success: %o", address);
-            // show loading state
-            props.onWalletLoadingCallback();
+        // if (address !== "error") {
+        //     console.log("wallet add success: %o", address);
+        //     // show loading state
+        //     props.onWalletLoadingCallback();
 
-            // update context
-            initParams(address, AccountType.MNEMONIC);
-            await updateRole(address, role);
-            updateAuth();
+        //     // update context
+        //     initParams(address, AccountType.MNEMONIC);
+        //     await updateRole(address, role);
+        //     updateAuth();
 
-            // no error
-            // call parent function to redirect to dashboard
-            props.onSuccessCallback();
-        } else {
-            handleError();
-        }
+        //     // no error
+        //     // call parent function to redirect to dashboard
+        //     props.onSuccessCallback();
+        // } else {
+        //     handleError();
+        // }
     };
 
     return (

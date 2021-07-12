@@ -1,10 +1,8 @@
-import React, { useState, useContext, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { withRouter } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { trackPromise } from 'react-promise-tracker';
 
-import { AccountType, Environment, Network, Role, NetworkURL, SsnStatus, PromiseArea, ContractState } from '../util/enum';
-import AppContext from "../contexts/appContext";
+import { AccountType, Environment, Network, Role, NetworkURL, ContractState } from '../util/enum';
 import DisclaimerModal from './disclaimer';
 import SsnTable from './ssn-table';
 import * as ZilliqaAccount from "../account";
@@ -23,10 +21,7 @@ import IconMoon from './icons/moon';
 import ZillionLogo from '../static/zillion.svg';
 import ZillionLightLogo from '../static/light/zillion.svg';
 import LandingStatsTable from './landing-stats-table';
-import { SsnStats } from '../util/interface';
 
-import { toBech32Address } from '@zilliqa-js/crypto';
-import { useInterval } from '../util/use-interval';
 import useDarkMode from '../util/use-dark-mode';
 import { ToastContainer } from 'react-toastify';
 import IconSearch from './icons/search';
@@ -40,9 +35,7 @@ import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 
 function Home(props: any) {
   const dispatch = useAppDispatch();
-  const appContext = useContext(AppContext);
   const chainInfo = useAppSelector(state => state.blockchain);
-  const { updateNetwork } = appContext;
 
   // config.js from public folder
   const env = getEnvironment();
@@ -62,8 +55,6 @@ function Home(props: any) {
   });
 
   const darkMode = useDarkMode(true);
-
-  const mountedRef = useRef(true);
 
   // trigger show wallets to choose
   const resetWalletsClicked = () => {
@@ -86,11 +77,6 @@ function Home(props: any) {
     setAccessMethod(access);
   }
 
-  const handleChangeNetwork = (e: any) => {
-    setSelectedNetwork(e.target.value);
-    updateNetwork(e.target.value);
-  }
-
   const handleShowAccessMethod = (selectedRole: string) => {
     setRole(selectedRole);
     setShowAccessMethod(true);
@@ -105,82 +91,6 @@ function Home(props: any) {
     setShowAccessMethod(false);
     setAccessMethod('');
   }
-
-  // /* fetch data for contract constants */
-  // const getContractConstants = useCallback(() => {
-  //   let totalStakeAmt = '0';
-  //   let impl = chainInfo.impl;
-
-  //   ZilliqaAccount.getImplStateExplorerRetriable(impl, 'totalstakeamount')
-  //   .then((contractState) => {
-  //       if (contractState === undefined || contractState === null || contractState === 'error') {
-  //           return null;
-  //       }
-  //       totalStakeAmt = contractState.totalstakeamount;
-  //   })
-  //   .finally(() => {
-  //       if (mountedRef.current) {
-  //           setTotalStakeAmt(totalStakeAmt);
-  //       }
-  //   });
-  // }, [chainInfo.impl]);
-
-  
-  // /* fetch data for ssn panel */
-  // const getSsnStats = useCallback(() => {
-  //     let output: SsnStats[] = [];
-  //     let impl = chainInfo.impl;
-
-  //     trackPromise(ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssnlist')
-  //         .then(async (contractState) => {
-  //             if (contractState === undefined || contractState === null || contractState === 'error') {
-  //                 return null;
-  //             }
-
-  //             // get number of delegators for all ssn
-  //             const delegNumState = await ZilliqaAccount.getImplStateExplorerRetriable(impl, 'ssn_deleg_amt');
-
-  //             for (const ssnAddress in contractState['ssnlist']) {
-  //                 const ssnArgs = contractState['ssnlist'][ssnAddress]['arguments'];
-  //                 let delegNum = '0';
-  //                 let status = SsnStatus.INACTIVE;
-
-  //                 // get ssn status
-  //                 if (ssnArgs[0]['constructor'] === 'True') {
-  //                     status = SsnStatus.ACTIVE;
-  //                 }
-
-  //                 // get the actual number of delegators from the map
-  //                 if (delegNumState.hasOwnProperty('ssn_deleg_amt') &&
-  //                     ssnAddress in delegNumState['ssn_deleg_amt']) {
-  //                     delegNum = Object.keys(delegNumState['ssn_deleg_amt'][ssnAddress]).length.toString();
-  //                 }
-
-  //                 const data: SsnStats = {
-  //                     address: toBech32Address(ssnAddress),
-  //                     name: ssnArgs[3],
-  //                     apiUrl: ssnArgs[5],
-  //                     stakeAmt: ssnArgs[1],
-  //                     bufferedDeposits: ssnArgs[6],
-  //                     commRate: ssnArgs[7],
-  //                     commReward: ssnArgs[8],
-  //                     delegNum: delegNum,
-  //                     status: status,
-  //                 }
-
-  //                 output.push(data);
-  //             }
-  //         })
-  //         .finally(() => {
-
-  //             if (mountedRef.current) {
-  //                 console.log("updating main ssn stats...");
-  //                 setSsnStats([...output]);
-  //             }
-  //         }), PromiseArea.PROMISE_GET_SSN_STATS);
-
-  // }, [chainInfo.impl]);
-
     
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
@@ -255,37 +165,20 @@ function Home(props: any) {
   useEffect(() => {
     if (env === Environment.PROD) {
       setSelectedNetwork(Network.MAINNET);
-      updateNetwork(Network.MAINNET);
       ZilliqaAccount.changeNetwork(NetworkURL.MAINNET);
 
-    } else if (env === Environment.STAGE) {
+    } else {
       setSelectedNetwork(Network.TESTNET);
-      updateNetwork(Network.TESTNET);
       ZilliqaAccount.changeNetwork(NetworkURL.TESTNET);
     }
 
     // eslint-disable-next-line
     dispatch(QUERY_AND_UPDATE_STAKING_STATS());
-  }, [selectedNetwork, dispatch]);
+  }, [env, selectedNetwork, dispatch]);
 
   useEffect(() => {
     window.onbeforeunload = null;
   }, []);
-
-  // // load initial data
-  // useEffect(() => {
-  //   getContractConstants();
-  //   getSsnStats();
-  //   return () => {
-  //     mountedRef.current = false;
-  //   }
-  // }, [getContractConstants, getSsnStats])
-
-  // // poll data
-  // useInterval(() => {
-  //   getContractConstants();
-  //   getSsnStats();
-  // }, mountedRef, chainInfo.refresh_rate);
 
 
   return (
@@ -312,18 +205,6 @@ function Home(props: any) {
                   }
                 </button>
               </div>
-
-              {
-                env === Environment.DEV && 
-
-                <div className="form-group">
-                    <select id="home-network-selector" value={selectedNetwork} onChange={handleChangeNetwork} className="form-control-xs">
-                        <option value={Network.TESTNET}>Testnet</option>
-                        <option value={Network.MAINNET}>Mainnet</option>
-                        <option value={Network.ISOLATED_SERVER}>Isolated Server</option>
-                    </select>
-                </div>
-              }
 
               { 
                 ( env === Environment.STAGE || env === Environment.PROD ) && 

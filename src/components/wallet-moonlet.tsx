@@ -1,4 +1,7 @@
-import React, { useState, useContext} from 'react';
+/**
+ * @deprecated
+ */
+import React from 'react';
 
 function MoonletWallet(props: any) {
 

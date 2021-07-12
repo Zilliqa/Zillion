@@ -1,9 +1,7 @@
-import React, { useContext, useState } from 'react';
-import AppContext from '../contexts/appContext';
+import React, { useState } from 'react';
 import Alert from './alert';
 import { AccountType } from '../util/enum';
 import { bech32ToChecksum, convertQaToCommaStr } from '../util/utils';
-import * as ZilliqaAccount from "../account";
 
 import { LedgerZilliqa } from '../ledger-zilliqa';
 
@@ -22,14 +20,12 @@ interface LedgerAccount {
 
 function LedgerWallet(props: any) {
     const dispatch = useAppDispatch();
-    // const appContext = useContext(AppContext);
-    // const { initParams, updateAuth, updateLedgerIndex, updateRole } = appContext;
 
     const defaultLedgerIndex = 0;
     const [ledgerIndex, setLedgerIndex] = useState(0);
     const [ledgerAccounts, setLedgerAccounts] = useState([] as LedgerAccount[]);
 
-    const role = props.role;
+    const selectedRole = props.role;
 
     const handleClose = () => {
         setLedgerIndex(defaultLedgerIndex);
@@ -86,7 +82,7 @@ function LedgerWallet(props: any) {
             logger("ledger wallet index: %o", hwIndex);
 
             const base16Address = bech32ToChecksum(selectedLedgerAddress).toLowerCase();
-            dispatch(INIT_USER({ address_base16: base16Address, address_bech32: selectedLedgerAddress, account_type: AccountType.LEDGER, authenticated: true, selected_role: role }));
+            dispatch(INIT_USER({ address_base16: base16Address, address_bech32: selectedLedgerAddress, account_type: AccountType.LEDGER, authenticated: true, selected_role: selectedRole }));
             dispatch(UPDATE_LEDGER_INDEX({ ledger_index: hwIndex }));
 
             // no error

@@ -1,4 +1,5 @@
 /**
+ * @deprecated
  * Modified for Zilliqa
  * Reference from https://github.com/zillet/zillet/blob/master/app/plugins/zillet.js
  */
