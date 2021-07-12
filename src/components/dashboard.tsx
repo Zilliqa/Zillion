@@ -5,7 +5,6 @@ import ReactTooltip from 'react-tooltip';
 
 import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel, calculateBlockRewardCountdown } from '../util/utils';
-import * as ZilliqaAccount from "../account";
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
@@ -106,7 +105,7 @@ function Dashboard(props: any) {
     const darkMode = useDarkMode(true);
 
     const cleanUp = () => {
-        ZilliqaAccount.cleanUp();
+        // ZilliqaAccount.cleanUp();
         logger("directing to main");
         dispatch(POLL_USER_DATA_STOP());
         dispatch(RESET_USER_STATE());

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
-import * as ZilliqaAccount from '../../account';
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
@@ -57,7 +56,7 @@ function DelegateStakeModal(props: any) {
                     return null;
                 }
 
-                const gasFeesQa = ZilliqaAccount.getGasFees();
+                const gasFeesQa = ZilSigner.getGasFees();
                 const combinedFees = new BigNumber(delegAmtQa).plus(gasFeesQa);
                 const combinedFeesZil = units.fromQa(new BN(combinedFees.toString()), units.Units.Zil);
                 const remaningBalance = new BigNumber(balance).minus(delegAmtQa);

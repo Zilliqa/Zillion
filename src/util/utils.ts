@@ -1,5 +1,5 @@
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
-import { Explorer, NetworkURL, Network, TransactionType, AccountType, Constants } from './enum';
+import { Explorer, NetworkURL, Network, TransactionType, AccountType, Constants, OperationStatus } from './enum';
 import Alert from '../components/alert';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
@@ -227,4 +227,20 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
     const blockCountdown = rewardBlockCount - blockTraverse;
     
     return blockCountdown;
+}
+
+/**
+ * used to check if response from fetching a contract state has any errors
+ * @param obj the contract result
+ * @returns true if response has no errors, false otherwise
+ */
+ export const isRespOk = (obj: any): boolean => {
+    if (
+        obj !== undefined &&
+        obj !== null &&
+        obj !== OperationStatus.ERROR
+    ) {
+        return true;
+    }
+    return false;
 }

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import AnimatedNumber from "react-animated-numbers"
 import { trackPromise } from 'react-promise-tracker';
-import * as ZilliqaAccount from '../account';
 import { useAppSelector } from '../store/hooks';
 import { OperationStatus } from '../util/enum';
 import { calculateBlockRewardCountdown } from '../util/utils';
+import { ZilSdk } from '../zilliqa-api';
 
 
 function RewardCountdownTable(props: any) {
@@ -21,7 +21,7 @@ function RewardCountdownTable(props: any) {
         let tempBlockRewardCount = '0';
         let tempExpectedBlockNum = '0';
 
-        trackPromise(ZilliqaAccount.getNumTxBlocksExplorerRetriable()
+        trackPromise(ZilSdk.getNumTxBlocks()
             .then((state) => {
                 if (state === undefined || state === OperationStatus.ERROR) {
                     return null;

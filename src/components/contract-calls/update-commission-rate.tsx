@@ -4,7 +4,6 @@ import { trackPromise } from 'react-promise-tracker';
 
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate, showWalletsPrompt } from '../../util/utils';
-import * as ZilliqaAccount from "../../account";
 import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';

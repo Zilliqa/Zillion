@@ -3,15 +3,14 @@ import { trackPromise } from 'react-promise-tracker';
 import DisclaimerModal from './disclaimer';
 import Footer from './footer';
 
-import * as ZilliqaAccount from '../account';
 import { Environment, Network, PromiseArea, ContractState, OperationStatus } from '../util/enum';
-import { DelegStats, DelegStakingPortfolioStats } from '../util/interface';
+import { DelegStats, DelegStakingPortfolioStats, initialDelegStats, PendingWithdrawStats } from '../util/interface';
 
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { validation } from "@zilliqa-js/util";
 import { computeDelegRewards } from '../util/reward-calculator';
 import BN from 'bn.js';
-import { convertQaToCommaStr, convertGzilToCommaStr } from '../util/utils';
+import { convertQaToCommaStr, convertGzilToCommaStr, isRespOk } from '../util/utils';
 import Spinner from './spinner';
 import useDarkMode from '../util/use-dark-mode';
 
@@ -24,34 +23,25 @@ import ExplorerStakingPortfolio from './explorer-staking-portfolio';
 import WarningBanner from './warning-banner';
 import ExplorerPendingWithdrawalTable from './explorer-pending-withdrawal-table';
 import RewardCountdownTable from './reward-countdown-table';
-
-
-
-const BigNumber = require('bignumber.js');
-
-const initDelegStats: DelegStats = {
-    globalAPY: '0',
-    zilRewards: '0',
-    gzilRewards: '0',
-    gzilBalance: '0',
-    totalDeposits: '0',
-}
+import { getEnvironment } from '../util/config-json-helper';
+import { useAppSelector } from '../store/hooks';
+import { ZilSdk } from '../zilliqa-api';
+import { BigNumber } from 'bignumber.js';
 
 function Explorer(props: any) {
     const address = props.match.params.address; // bech32 wallet address;
     const [walletBase16Address, setWalletBase16Address] = useState('');
     const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
-    const [delegStats, setDelegStats] = useState<DelegStats>(initDelegStats);
+    const [delegStats, setDelegStats] = useState<DelegStats>(initialDelegStats);
     const [stakedNodeList, setStakedNodeList] = useState([] as DelegStakingPortfolioStats[]);
 
-    const [pendingWithdrawalList, setPendingWithdrawlList] = useState([] as any);
-    const [totalClaimableAmt, setTotalClaimableAmt] = useState('0');
+    const [pendingWithdrawalList, setPendingWithdrawlList] = useState([] as PendingWithdrawStats[]);
+    const [totalWithdrawAmt, setTotalWithdrawAmt] = useState('0');
 
     // config.js from public folder
-    const { networks_config, environment_config } = (window as { [key: string]: any })['config'];
-    const network = environment_config === Environment.PROD ? Network.MAINNET : Network.TESTNET;
-    const networkURL = networks_config[network].blockchain;
-    const impl = networks_config[network].impl;
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const env = getEnvironment();
+    const network = env === Environment.PROD ? Network.MAINNET : Network.TESTNET;
 
     const mountedRef = useRef(true);
 
@@ -83,11 +73,8 @@ function Explorer(props: any) {
     }, [address]);
     
     useEffect(() => {
-        let globalAPY = initDelegStats.globalAPY;
-        let zilRewards = initDelegStats.zilRewards;
-        let gzilRewards = initDelegStats.gzilRewards;
-        let gzilBalance = initDelegStats.gzilBalance;
-        let totalDeposits = initDelegStats.totalDeposits;
+        let totalDeposits = new BigNumber(0);
+        let totalRewards = new BigNumber(0);
         let wallet = getWalletAddress();
         let stakedNodesList: DelegStakingPortfolioStats[] = [];
 
@@ -95,18 +82,16 @@ function Explorer(props: any) {
             setWalletBase16Address(wallet);
         }
 
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, 'deposit_amt_deleg', [wallet])
+        trackPromise(ZilSdk.getSmartContractSubState(impl, 'deposit_amt_deleg', [wallet])
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === OperationStatus.ERROR) {
                     return null;
                 }
 
-                let totalDepositsBN = new BigNumber(0);
-                let totalZilRewardsBN = new BigNumber(0);
                 const depositDelegList = contractState['deposit_amt_deleg'][wallet];
 
                 // fetch the ssn information for each deposit
-                const ssnContractState = await ZilliqaAccount.getImplStateExplorer(impl, 'ssnlist');
+                const ssnContractState = await ZilSdk.getSmartContractSubState(impl, 'ssnlist');
 
                 for (const ssnAddress in depositDelegList) {
                     if (!depositDelegList.hasOwnProperty(ssnAddress)) {
@@ -115,28 +100,21 @@ function Explorer(props: any) {
 
                     // compute total deposits
                     const delegAmtQaBN = new BigNumber(depositDelegList[ssnAddress]);
-                    totalDepositsBN = totalDepositsBN.plus(delegAmtQaBN);
+                    totalDeposits = totalDeposits.plus(delegAmtQaBN);
 
                     // compute zil rewards
                     const delegRewards = new BN(await computeDelegRewards(impl, ssnAddress, wallet)).toString();
-                    totalZilRewardsBN = totalZilRewardsBN.plus(new BigNumber(delegRewards));
+                    totalRewards = totalRewards.plus(delegRewards);
 
                     // append data to list of staked nodes
                     const data: DelegStakingPortfolioStats = {
                         ssnName: ssnContractState["ssnlist"][ssnAddress]["arguments"][3],
                         ssnAddress: toBech32Address(ssnAddress),
-                        delegAmt: delegAmtQaBN.toString(),
-                        rewards: delegRewards.toString()
+                        delegAmt: `${delegAmtQaBN}`,
+                        rewards: `${delegRewards}`
                     }
                     stakedNodesList.push(data);
                 }
-
-                totalDeposits = totalDepositsBN.toString();
-                zilRewards = totalZilRewardsBN.toString();
-
-                // compute gzil rewards
-                // converted to gzil when display
-                gzilRewards = totalZilRewardsBN;
             })
             .catch((err) => {
                 console.error(err);
@@ -145,45 +123,39 @@ function Explorer(props: any) {
             .finally(() => {
                 if (mountedRef.current) {
                     const data : DelegStats = {
-                        globalAPY: globalAPY, // not use
-                        zilRewards: zilRewards,
-                        gzilRewards: gzilRewards,
-                        gzilBalance: gzilBalance, // not use
-                        totalDeposits: totalDeposits,
+                        ...initialDelegStats,
+                        zilRewards: `${totalRewards}`,
+                        gzilRewards: `${totalRewards}`,
+                        totalDeposits: `${totalDeposits}`,
                     }
                     setDelegStats(data);
                     setStakedNodeList([...stakedNodesList]);
                 }
             }), PromiseArea.PROMISE_GET_EXPLORER_STATS);
 
-    }, [impl, networkURL, address, getWalletAddress]);
+    }, [impl, address, getWalletAddress]);
 
 
     // compute pending withdrawal progress
     useEffect(() => {
         let wallet = getWalletAddress();
-        let totalClaimableAmtBN = new BigNumber(0); // Qa
-        let pendingStakeWithdrawalList: { amount: string, blkNumCountdown: string, blkNumCheck: string, progress: string }[] = [];
+        let pendingWithdrawList: PendingWithdrawStats[] = [];
+        let totalWithdrawAmt = new BigNumber(0);
         let progress = '0';
 
-
-        trackPromise(ZilliqaAccount.getImplStateExplorer(impl, 'withdrawal_pending', [wallet])
+        trackPromise(ZilSdk.getSmartContractSubState(impl, 'withdrawal_pending', [wallet])
             .then(async (contractState) => {
-                if (contractState === undefined || contractState === null || contractState === 'error') {
+                if (contractState === undefined || contractState === null || contractState === OperationStatus.ERROR) {
                     return null;
                 }
     
                 const blkNumPendingWithdrawal = contractState['withdrawal_pending'][wallet];
 
                 // get min bnum req
-                const blkNumReqState = await ZilliqaAccount.getImplStateExplorer(impl, 'bnum_req');
+                const blkNumReqState = await ZilSdk.getSmartContractSubState(impl, 'bnum_req');
                 const blkNumReq = blkNumReqState['bnum_req'];
-                const txBlockNumRes = await ZilliqaAccount.getNumTxBlocksExplorer();
-                
-                let currentBlkNum = new BigNumber(0);
-                if (txBlockNumRes !== OperationStatus.ERROR) {
-                    currentBlkNum = new BigNumber(txBlockNumRes).minus(1);
-                }
+                const numTxBlk = await ZilSdk.getNumTxBlocks();
+                const currBlkNum = isRespOk(numTxBlk) === true ? new BigNumber(numTxBlk!).minus(1) : new BigNumber(0);
 
                 // compute each of the pending withdrawal progress
                 for (const blkNum in blkNumPendingWithdrawal) {
@@ -194,13 +166,13 @@ function Explorer(props: any) {
                     // compute each pending stake withdrawal progress
                     let pendingAmt = new BigNumber(blkNumPendingWithdrawal[blkNum]);
                     let blkNumCheck = new BigNumber(blkNum).plus(blkNumReq);
-                    let blkNumCountdown = blkNumCheck.minus(currentBlkNum); // may be negative
+                    let blkNumCountdown = blkNumCheck.minus(currBlkNum); // may be negative
                     let completed = new BigNumber(0);
         
                     // compute progress using blk num countdown ratio
                     if (blkNumCountdown.isLessThanOrEqualTo(0)) {
                         // can withdraw
-                        totalClaimableAmtBN = totalClaimableAmtBN.plus(pendingAmt);
+                        totalWithdrawAmt = totalWithdrawAmt.plus(pendingAmt);
                         blkNumCountdown = new BigNumber(0);
                         completed = new BigNumber(1);
                     } else {
@@ -214,12 +186,12 @@ function Explorer(props: any) {
                     progress = completed.times(100).toFixed(2);
         
                     // record the stake withdrawal progress
-                    pendingStakeWithdrawalList.push({
-                        amount: pendingAmt.toString(),
-                        blkNumCountdown: blkNumCountdown.toString(),
-                        blkNumCheck: blkNumCheck.toString(),
-                        progress: progress.toString(),
-                    });
+                    pendingWithdrawList.push({
+                        amount: `${pendingAmt}`,
+                        blkNumCountdown: `${blkNumCountdown}`,
+                        blkNumCheck: `${blkNumCheck}`,
+                        progress: `${progress}`
+                    } as PendingWithdrawStats)
                 }
             })
             .catch((err) => {
@@ -228,11 +200,11 @@ function Explorer(props: any) {
             })
             .finally(() => {
                 if (mountedRef.current) {
-                    setPendingWithdrawlList([...pendingStakeWithdrawalList]);
-                    setTotalClaimableAmt(totalClaimableAmtBN.toString())
+                    setPendingWithdrawlList([...pendingWithdrawList]);
+                    setTotalWithdrawAmt(`${totalWithdrawAmt}`)
                 }
             }), PromiseArea.PROMISE_GET_EXPLORER_PENDING_WITHDRAWAL);
-    }, [impl, networkURL, getWalletAddress]);
+    }, [impl, getWalletAddress]);
 
     const redirectToMain = () => {
         props.history.push("/");
@@ -297,7 +269,7 @@ function Explorer(props: any) {
                         </div>
 
                         { 
-                            ( environment_config === Environment.STAGE || environment_config === Environment.PROD ) && 
+                            ( env === Environment.STAGE || env === Environment.PROD ) && 
                             <span className="mr-2">{network}</span>
                         }
 
@@ -329,7 +301,7 @@ function Explorer(props: any) {
 
                             <>
 
-                            <RewardCountdownTable network={networkURL} />
+                            <RewardCountdownTable />
 
                             <div id="delegator-stats-details" className="p-4 dashboard-card container">
                                 <div className="row">
@@ -371,16 +343,14 @@ function Explorer(props: any) {
                                         <h5 className="card-title mb-4 text-left">Nodes Staked</h5>
                                     </div>
                                     <div className="col-12">
-                                        <ExplorerStakingPortfolio 
-                                            network={networkURL} 
-                                            data={stakedNodeList} />
+                                        <ExplorerStakingPortfolio data={stakedNodeList} />
                                     </div>
                                 </div>
                             </div>
 
                             <ExplorerPendingWithdrawalTable
                                 data={pendingWithdrawalList}
-                                totalClaimableAmt={totalClaimableAmt} />
+                                totalWithdrawAmt={totalWithdrawAmt} />
                             </>
                         }
 

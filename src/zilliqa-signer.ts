@@ -98,6 +98,13 @@ export class ZilSigner {
     }
 
     /**
+     * returns the gas fee in Qa
+     */
+    static getGasFees = () => {
+        return new BN(gasLimit).mul(new BN(gasPrice));
+    }
+
+    /**
      * create and sign txn with ledger
      */
     private static ledgerSign = async (txParams: any, ledgerIndex: number) => {

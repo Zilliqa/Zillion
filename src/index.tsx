@@ -12,7 +12,6 @@ import { Provider } from 'react-redux';
 import store from './store/store'
 import { CONFIG_LOADED, UPDATE_API_MAX_ATTEMPT, UPDATE_BLOCKCHAIN_EXPLORER, UPDATE_CHAIN_INFO, UPDATE_REFRESH_RATE } from './store/blockchainSlice';
 import { getApiMaxRetry, getBlockchainExplorer, getNetworkConfigByEnv, getRefreshRate } from './util/config-json-helper';
-import { POLL_STAKING_DATA_START } from './store/stakingSlice';
 
 
 const network_config = getNetworkConfigByEnv()
