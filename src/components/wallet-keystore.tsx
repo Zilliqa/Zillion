@@ -1,20 +1,14 @@
 import { toBech32Address } from '@zilliqa-js/zilliqa';
 import React, { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { INIT_USER } from '../store/userSlice';
 import { AccountType, OperationStatus } from '../util/enum';
 import { logger } from '../util/logger';
 import { ZilSigner } from '../zilliqa-signer';
 import Alert from './alert';
 
 function WalletKeystore(props: any) {
-    const dispatch = useAppDispatch();
-    const blockchain = useAppSelector(state => state.blockchain.blockchain);
     const [filename, setFilename] = useState("");
     const [passphrase, setPassphrase] = useState("");
     const [keystore, setKeystore] = useState();
-    
-    const selectedRole = props.role;
 
     const handleFile = (e: any) => {
         let keystoreFile = e.target.files[0];

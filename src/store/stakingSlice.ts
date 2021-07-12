@@ -4,7 +4,7 @@
 
 import { createSlice } from '@reduxjs/toolkit'
 import { OperationStatus } from '../util/enum'
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialLandingStats, initialSwapDelegModalData, LandingStats, NodeOptions, SsnStats, SwapDelegModalData } from '../util/interface'
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialLandingStats, LandingStats, NodeOptions, SsnStats } from '../util/interface'
 
 
 export interface StakingState {

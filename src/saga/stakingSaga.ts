@@ -1,35 +1,17 @@
-import { call, delay, fork, put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { logger } from '../util/logger';
-import { getBlockchain, getUserState } from './selectors';
-import { BlockchainState, CONFIG_LOADED } from '../store/blockchainSlice';
+import { getBlockchain } from './selectors';
+import { CONFIG_LOADED } from '../store/blockchainSlice';
 import { POLL_STAKING_DATA_START, POLL_STAKING_DATA_STOP, PRELOAD_INFO_READY, QUERY_AND_UPDATE_STAKING_STATS, UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_REWARD_BLK_COUNTDOWN, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
-import { INIT_USER, QUERY_AND_UPDATE_ROLE, UPDATE_BALANCE, UPDATE_ROLE } from '../store/userSlice';
-import { Constants, OperationStatus, Role, SsnStatus } from '../util/enum';
+import { Constants, OperationStatus, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { ZilSdk } from '../zilliqa-api';
-import { calculateBlockRewardCountdown, convertZilToQa } from '../util/utils';
+import { calculateBlockRewardCountdown, convertZilToQa, isRespOk } from '../util/utils';
 import BigNumber from 'bignumber.js';
 
 const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); // 110000 * 17
-
-
-/**
- * used to check if response from fetching a contract state has any errors
- * @param obj the contract result
- * @returns true if response has no errors, false otherwise
- */
-function isRespOk(obj: any): boolean {
-    if (
-        obj !== undefined &&
-        obj !== null &&
-        obj !== OperationStatus.ERROR
-    ) {
-        return true;
-    }
-    return false;
-}
 
 /**
  * fetch these data only once
@@ -37,7 +19,7 @@ function isRespOk(obj: any): boolean {
 function* watchInitOnce() {
     try {
         yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.PENDING));
-        logger("fetching contract data (I) once...");
+        logger("fetching contract data once...");
         const { impl } = yield select(getBlockchain);
         const { mindelegstake } = yield call(ZilSdk.getSmartContractSubState, impl, 'mindelegstake');
         logger("mindelegstake: %o", mindelegstake);
@@ -185,7 +167,7 @@ function* queryAndUpdateStats() {
     yield call(pollStakingData);
 
     // delay before start to poll again
-    yield delay(30000);
+    yield delay(60000);
     yield put(POLL_STAKING_DATA_START());
 }
 
@@ -197,7 +179,7 @@ function* pollStakingSaga() {
             console.warn("poll staking data failed");
             console.warn(e);
         } finally {
-            yield delay(30000);
+            yield delay(60000);
         }
     }
 }

@@ -6,8 +6,6 @@ import { bech32ToChecksum, convertQaToCommaStr } from '../util/utils';
 import { LedgerZilliqa } from '../ledger-zilliqa';
 
 import $ from "jquery";
-import { INIT_USER, UPDATE_LEDGER_INDEX } from '../store/userSlice';
-import { useAppDispatch } from '../store/hooks';
 import { logger } from '../util/logger';
 import { ZilSdk } from '../zilliqa-api';
 
@@ -19,13 +17,9 @@ interface LedgerAccount {
 }
 
 function LedgerWallet(props: any) {
-    const dispatch = useAppDispatch();
-
     const defaultLedgerIndex = 0;
     const [ledgerIndex, setLedgerIndex] = useState(0);
     const [ledgerAccounts, setLedgerAccounts] = useState([] as LedgerAccount[]);
-
-    const selectedRole = props.role;
 
     const handleClose = () => {
         setLedgerIndex(defaultLedgerIndex);

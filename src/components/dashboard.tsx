@@ -644,27 +644,14 @@ function Dashboard(props: any) {
         return new Promise(res => setTimeout(res, delay));
     }
 
-    // manual poll the data
-    const updateData = async () => {
+    const pollData = async () => {
+        logger("polling data...")
         setIsRefreshDisabled(true);
-
-        // getAccountBalance();
-
-        if (userState.role === Role.DELEGATOR) {
-            // getDelegatorStats();
-            // getDelegatorPendingWithdrawal();
-            // getDelegatorSwapRequests();
-            // getBlockRewardCountDown();
-        } else if (userState.role === Role.OPERATOR) {
-            // getOperatorStats();
-        }
-
-        // getSsnStats();
-
-        // prevent users from spamming manual refresh
+        dispatch(QUERY_AND_UPDATE_USER_STATS());
+        dispatch(QUERY_AND_UPDATE_STAKING_STATS());
         await timeout(Constants.MANUAL_REFRESH_DELAY);
         setIsRefreshDisabled(false);
-    };
+    }
 
     // re-hydrate data from localstorage
     useEffect(() => {
@@ -771,8 +758,7 @@ function Dashboard(props: any) {
             props.history.push("/oops");
         }
 
-        // eslint-disable-next-line
-    }, [isError, userState.authenticated, props.history]);
+    }, [env, isError, userState.authenticated, props.history]);
 
     // useEffect(() => {
     //     logger("zilsigner change network");
@@ -793,32 +779,21 @@ function Dashboard(props: any) {
             dispatch(QUERY_AND_UPDATE_USER_STATS());
         }
 
+        setWalletAddress(userState.address_base16);
+    }, [walletAddress, userState.address_base16, dispatch]);
+
+    useEffect(() => {
+        logger("change network")
         if (blockchain !== blockchainState.blockchain) {
             // network changed
             dispatch(QUERY_AND_UPDATE_USER_STATS());
             dispatch(QUERY_AND_UPDATE_STAKING_STATS());
             ZilSigner.changeNetwork(blockchainState.blockchain);
         }
-
-        setWalletAddress(userState.address_base16);
         setBlockchain(blockchainState.blockchain);
-    }, [walletAddress, userState.address_base16, blockchain, blockchainState.blockchain, dispatch]);
 
-    // // change network from zilpay
-    // useEffect(() => {
-    //     logger("change network")
-    //     if (!blockchainState.blockchain) {
-    //         return;
-    //     }
-    //     ZilSigner.changeNetwork(blockchainState.blockchain);
-    //     // dispatch(QUERY_AND_UPDATE_ROLE());
-    //     // dispatch(QUERY_AND_UPDATE_BALANCE());
-    //     // dispatch(QUERY_AND_UPDATE_GZIL_BALANCE());
-    //     dispatch(QUERY_AND_UPDATE_USER_STATS());
-    //     dispatch(QUERY_AND_UPDATE_STAKING_STATS());
-    // }, [blockchainState.blockchain, dispatch])
+    }, [blockchain, blockchainState.blockchain, dispatch]);
 
-    
     // prevent user from refreshing
     useEffect(() => {
         window.onbeforeunload = (e: any) => {
@@ -951,7 +926,7 @@ function Dashboard(props: any) {
                         <div className="row">
                             <div className="col-12">
                                 <div className="d-flex justify-content-end">
-                                    <button type="button" className="btn btn-user-secondary-action shadow-none" onClick={updateData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
+                                    <button type="button" className="btn btn-user-secondary-action shadow-none" onClick={pollData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
                                         <span>Refresh</span>
                                     </ReactTooltip>
@@ -1104,39 +1079,39 @@ function Dashboard(props: any) {
             <DisclaimerModal />
 
             <UpdateCommRateModal 
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <UpdateReceiverAddress
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawCommModal 
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <DelegateStakeModal 
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <ReDelegateStakeModal
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawStakeModal
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <WithdrawRewardModal 
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
 
             <CompleteWithdrawModal 
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
             
             <SwapDelegModal
-                updateData={updateData}
+                updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
                 
         </div>

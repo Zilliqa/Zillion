@@ -2,17 +2,11 @@ import React from 'react';
 import { AccountType, Environment } from '../util/enum';
 import Alert from './alert';
 
-import { INIT_USER, QUERY_AND_UPDATE_USER_STATS } from '../store/userSlice'
 import { toBech32Address } from '@zilliqa-js/crypto';
-import { useAppDispatch } from '../store/hooks';
 import { getEnvironment } from '../util/config-json-helper';
 
 
 function WalletZilPay(props: any) {
-    const dispatch = useAppDispatch()
-
-    const selectedRole = props.role;
-
     // config.js from public folder
     const env = getEnvironment();
 

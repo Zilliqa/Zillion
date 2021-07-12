@@ -100,6 +100,7 @@ function* queryAndUpdateGzil() {
     } catch (e) {
         console.warn("query and update gzil failed");
         console.warn(e);
+        yield put(UPDATE_GZIL_BALANCE({ gzil_balance: "0" }));
     }
 }
 
@@ -109,8 +110,6 @@ function* queryAndUpdateGzil() {
 function* populateStakingPortfolio() {
     logger("populate staking portfolio");
     try {
-        yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.PENDING));
-
         const { address_base16, gzil_balance } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
         const response: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [address_base16]);
@@ -157,8 +156,6 @@ function* populateStakingPortfolio() {
         console.warn(e);
         yield put(UPDATE_DELEG_STATS({ deleg_stats: initialDelegStats }));
         yield put(UPDATE_DELEG_PORTFOLIO({ portfolio_list: [] }));
-    } finally {
-        yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
     }
 }
 
@@ -327,7 +324,8 @@ function* pollOperatorData() {
  */
 function* queryAndUpdateStats() {
     yield put(POLL_USER_DATA_STOP());
-
+    yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.PENDING));
+    
     yield all([
         call(queryAndUpdateRole),
         call(queryAndUpdateBalance),
@@ -341,14 +339,17 @@ function* queryAndUpdateStats() {
         yield call(pollDelegatorData)
     }
 
+    yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
     // delay before start to poll again
-    yield delay(60000);
+    yield delay(10000);
     yield put(POLL_USER_DATA_START());
 }
 
 function* pollUserSaga() {
     while (true) {
         try {
+            yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.PENDING));
+
             const { role } = yield select(getUserState);
             if (role === Role.OPERATOR) {
                 yield call(pollOperatorData)
@@ -359,7 +360,8 @@ function* pollUserSaga() {
             console.warn("poll user data failed");
             console.warn(e);
         } finally {
-            yield delay(60000);
+            yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
+            yield delay(10000);
         }
     }
 }

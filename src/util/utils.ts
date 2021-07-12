@@ -230,7 +230,7 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
 }
 
 /**
- * used to check if response from fetching a contract state has any errors
+ * used by saga to check if response from fetching a contract state has any errors
  * @param obj the contract result
  * @returns true if response has no errors, false otherwise
  */
