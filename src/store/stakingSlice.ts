@@ -19,8 +19,6 @@ export interface StakingState {
     landing_stats: LandingStats,                                // data for landing stats page 
     ssn_list: SsnStats[],                                       // hold all the list of ssn info
     
-    zil_max_supply: string,
-    is_deleg_stats_loading: OperationStatus,                    // delegator stats and staking portfolio status indicator
     is_landing_stats_loading: OperationStatus,                  // landing stats status indicator
     is_ssn_stats_loading: OperationStatus                       // ssn table status indicator
 }
@@ -35,8 +33,6 @@ const initialState: StakingState = {
     total_stake_amount: '0',
     ssn_dropdown_list: [],
     ssn_list: [],
-    zil_max_supply: '0',
-    is_deleg_stats_loading: OperationStatus.IDLE,
     is_landing_stats_loading: OperationStatus.IDLE,
     is_ssn_stats_loading: OperationStatus.IDLE,
 }
@@ -81,13 +77,6 @@ const stakingSlice = createSlice({
             const { ssn_list } = action.payload
             state.ssn_list = ssn_list
         },
-        UPDATE_ZIL_MAX_SUPPLY(state, action) {
-            const { zil_max_supply } = action.payload
-            state.zil_max_supply = zil_max_supply
-        },
-        UPDATE_FETCH_DELEG_STATS_STATUS(state, action) {
-            state.is_deleg_stats_loading = action.payload
-        },
         UPDATE_FETCH_LANDING_STATS_STATUS(state, action) {
             state.is_landing_stats_loading = action.payload
         },
@@ -115,8 +104,6 @@ export const {
     UPDATE_TOTAL_STAKE_AMOUNT,
     UPDATE_SSN_DROPDOWN_LIST,
     UPDATE_SSN_LIST,
-    UPDATE_ZIL_MAX_SUPPLY,
-    UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_LANDING_STATS_STATUS,
     UPDATE_FETCH_SSN_STATS_STATUS
 } = stakingSlice.actions

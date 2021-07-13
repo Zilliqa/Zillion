@@ -64,7 +64,7 @@ function StakingPortfolio(props: any) {
     // const networkURL = props.network;
     // const data: DelegStakingPortfolioStats[] = props.data;
     const data: DelegStakingPortfolioStats[] = useAppSelector(state => state.user.deleg_staking_portfolio_list);
-    const loading: OperationStatus = useAppSelector(state => state.staking.is_deleg_stats_loading);
+    const loading: OperationStatus = useAppSelector(state => state.user.is_deleg_stats_loading);
 
     const columns = useMemo(
         () => [

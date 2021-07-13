@@ -19,6 +19,7 @@ interface UserState {
     pending_withdraw_list: PendingWithdrawStats[]       // track pending withdrawals
     stake_modal_data: StakeModalData                    // hold info about a selected ssn; for dropdown selection use when choosing whether to stake, transfer, claim etc 
     swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
+    is_deleg_stats_loading: OperationStatus,            // delegator stats and staking portfolio status indicator
     is_operator_stats_loading: OperationStatus          // status indicator for loading operator stats
 }
 
@@ -39,6 +40,7 @@ const initialState: UserState = {
     pending_withdraw_list: [],
     stake_modal_data: initialStakeModalData,
     swap_deleg_modal_data: initialSwapDelegModalData,
+    is_deleg_stats_loading: OperationStatus.IDLE,
     is_operator_stats_loading: OperationStatus.IDLE,
 }
 
@@ -107,6 +109,9 @@ const userSlice = createSlice({
             const { swap_deleg_modal } = action.payload
             state.swap_deleg_modal_data = swap_deleg_modal
         },
+        UPDATE_FETCH_DELEG_STATS_STATUS(state, action) {
+            state.is_deleg_stats_loading = action.payload
+        },
         UPDATE_FETCH_OPERATOR_STATS_STATUS(state, action) {
             state.is_operator_stats_loading = action.payload
         },
@@ -126,6 +131,7 @@ const userSlice = createSlice({
             state.pending_withdraw_list = initialState.pending_withdraw_list
             state.stake_modal_data = initialState.stake_modal_data
             state.swap_deleg_modal_data = initialState.swap_deleg_modal_data
+            state.is_deleg_stats_loading = initialState.is_deleg_stats_loading
             state.is_operator_stats_loading = initialState.is_operator_stats_loading
         },
         QUERY_AND_UPDATE_BALANCE() {},
@@ -161,6 +167,7 @@ export const {
     UPDATE_ROLE,
     UPDATE_STAKE_MODAL_DATA,
     UPDATE_SWAP_DELEG_MODAL,
+    UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
     RESET_USER_STATE,
 } = userSlice.actions

@@ -65,6 +65,7 @@ function Dashboard(props: any) {
     const dispatch = useAppDispatch();
 
     const userState = useAppSelector(state => state.user);
+    const isDelegStatsLoading = useAppSelector(state => state.user.is_deleg_stats_loading);
     const blockchainState = useAppSelector(state => state.blockchain);
 
     // config.js from public folder
@@ -392,7 +393,13 @@ function Dashboard(props: any) {
                         <div className="row">
                             <div className="col-12">
                                 <div className="d-flex justify-content-end">
-                                    <button type="button" className="btn btn-user-secondary-action shadow-none" onClick={pollData} data-tip data-for="refresh-tip" disabled={isRefreshDisabled}><IconRefresh width="20" height="20" /></button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-user-secondary-action shadow-none" 
+                                        onClick={pollData} data-tip data-for="refresh-tip" 
+                                        disabled={isRefreshDisabled || isDelegStatsLoading === OperationStatus.PENDING}>
+                                            <IconRefresh width="20" height="20" />
+                                    </button>
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
                                         <span>Refresh</span>
                                     </ReactTooltip>
