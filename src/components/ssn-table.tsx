@@ -1,11 +1,9 @@
 import React, { useMemo } from 'react';
-// import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 
-import { PromiseArea, SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
+import { SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress } from '../util/utils';
 import { SsnStats, StakeModalData } from '../util/interface';
-import Spinner from './spinner';
 import ReactTooltip from 'react-tooltip';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import SpinnerNormal from './spinner-normal';
@@ -210,7 +208,7 @@ function SsnTable(props: any) {
                 tipText: ''
             }
             // eslint-disable-next-line
-        ],[totalStakeAmt, role]
+        ],[ssnList, role]
     )
 
     const getHiddenColumns = () => {

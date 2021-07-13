@@ -2,8 +2,7 @@ import React from 'react';
 import { convertQaToCommaStr, convertToProperCommRate } from '../util/utils';
 
 import { OperatorStats } from '../util/interface';
-import { OperationStatus, PromiseArea } from '../util/enum';
-import Spinner from './spinner';
+import { OperationStatus } from '../util/enum';
 import { useAppSelector } from '../store/hooks';
 import SpinnerNormal from './spinner-normal';
 

@@ -2,12 +2,12 @@ import { call, delay, fork, put, race, select, take, takeLatest } from 'redux-sa
 import { logger } from '../util/logger';
 import { getBlockchain } from './selectors';
 import { CONFIG_LOADED } from '../store/blockchainSlice';
-import { POLL_STAKING_DATA_START, POLL_STAKING_DATA_STOP, PRELOAD_INFO_READY, QUERY_AND_UPDATE_STAKING_STATS, UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_REWARD_BLK_COUNTDOWN, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
+import { POLL_STAKING_DATA_START, POLL_STAKING_DATA_STOP, PRELOAD_INFO_READY, QUERY_AND_UPDATE_STAKING_STATS, UPDATE_FETCH_LANDING_STATS_STATUS, UPDATE_FETCH_SSN_STATS_STATUS, UPDATE_GZIL_ADDRESS, UPDATE_GZIL_TOTAL_SUPPLY, UPDATE_LANDING_STATS, UPDATE_MIN_BNUM_REQ, UPDATE_MIN_DELEG, UPDATE_SSN_DROPDOWN_LIST, UPDATE_SSN_LIST, UPDATE_TOTAL_STAKE_AMOUNT } from '../store/stakingSlice';
 import { Constants, OperationStatus, SsnStatus } from '../util/enum';
 import { LandingStats, NodeOptions, SsnStats } from '../util/interface';
 import { toBech32Address } from '@zilliqa-js/crypto';
 import { ZilSdk } from '../zilliqa-api';
-import { calculateBlockRewardCountdown, convertZilToQa, isRespOk } from '../util/utils';
+import { convertZilToQa, isRespOk } from '../util/utils';
 import BigNumber from 'bignumber.js';
 
 const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
@@ -91,8 +91,8 @@ function* watchInitOnce() {
 function* pollStakingData() {
     try {
         yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.PENDING));
-        logger("fetching staking data...");
-        const { impl, blockchain } = yield select(getBlockchain);
+        logger("fetching ssn data...");
+        const { impl } = yield select(getBlockchain);
 
         const { ssnlist } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist');
         const { ssn_deleg_amt } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssn_deleg_amt');
@@ -133,26 +133,12 @@ function* pollStakingData() {
             dropdown_list.push(dropdownOptions);
         }
 
-        // populate number of blocks before rewards are issued
-        // for deleg stats
-        let rewardBlkCountdown = 0;
-        const numTxBlk: string = yield call(ZilSdk.getNumTxBlocks);
-
-        if (isRespOk(numTxBlk)) {
-            const currBlkNum = parseInt(numTxBlk) - 1;
-            rewardBlkCountdown = yield call(calculateBlockRewardCountdown, currBlkNum, blockchain)
-        }
-
-        // yield put(UPDATE_TOTAL_STAKE_AMOUNT({ total_stake_amount: totalstakeamount }));
         yield put(UPDATE_SSN_DROPDOWN_LIST({ dropdown_list: dropdown_list }));
         yield put(UPDATE_SSN_LIST({ ssn_list: ssn_list }));
-        yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: `${rewardBlkCountdown}` }))
     } catch (e) {
         console.warn("fetch failed");
-        console.warn(e);
         yield put(UPDATE_SSN_DROPDOWN_LIST({ dropdown_list: [] }));
         yield put(UPDATE_SSN_LIST({ ssn_list: [] }));
-        yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: "0" }))
     } finally {
         yield put(UPDATE_FETCH_SSN_STATS_STATUS(OperationStatus.COMPLETE));
     }

@@ -1,33 +1,16 @@
 import { toBech32Address } from '@zilliqa-js/zilliqa';
 import { BigNumber } from 'bignumber.js';
-import { Task } from 'redux-saga';
 import { all, call, cancel, delay, fork, put, race, select, take, takeEvery, takeLatest, takeLeading } from 'redux-saga/effects';
 import { PRELOAD_INFO_READY, UPDATE_FETCH_DELEG_STATS_STATUS, UPDATE_REWARD_BLK_COUNTDOWN } from '../store/stakingSlice';
-import { QUERY_AND_UPDATE_ROLE, INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, QUERY_AND_UPDATE_BALANCE, QUERY_AND_UPDATE_GZIL_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS, QUERY_AND_UPDATE_DELEGATOR_STATS, QUERY_AND_UPDATE_OPERATOR_STATS, POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, UPDATE_DELEG_STATS, UPDATE_DELEG_PORTFOLIO } from '../store/userSlice';
+import { INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS, POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, UPDATE_DELEG_STATS, UPDATE_DELEG_PORTFOLIO } from '../store/userSlice';
 import { OperationStatus, Role } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
-import { calculateBlockRewardCountdown } from '../util/utils';
+import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
 import { ZilSdk } from '../zilliqa-api';
 import { getUserState, getBlockchain, getStakingState } from './selectors';
 
-
-/**
- * used to check if response from fetching a contract state has any errors
- * @param obj the contract result
- * @returns true if response has no errors, false otherwise
- */
- function isRespOk(obj: any): boolean {
-    if (
-        obj !== undefined &&
-        obj !== null &&
-        obj !== OperationStatus.ERROR
-    ) {
-        return true;
-    }
-    return false;
-}
 
 /**
  * query the connected wallet's balance and update the balance in the store
@@ -41,7 +24,7 @@ function* queryAndUpdateBalance() {
         yield put(UPDATE_BALANCE({ balance: balance }));
     } catch (e) {
         console.warn("query and update balance failed");
-        console.warn(e);
+        yield put(UPDATE_BALANCE({ balance: "0" }));
     }
 }
 
@@ -94,7 +77,9 @@ function* queryAndUpdateGzil() {
         const response: Object = yield call(ZilSdk.getSmartContractSubState, gzilAddrResolved, 'balances', [address_base16]);
         logger("gzil response: ", response);
 
-        if (isRespOk(response)) {
+        if (!isRespOk(response)) {
+            yield put(UPDATE_GZIL_BALANCE({ gzil_balance: "0" }));
+        } else {
             yield put(UPDATE_GZIL_BALANCE({ gzil_balance: (response as any)['balances'][address_base16] }));
         }
     } catch (e) {
@@ -140,6 +125,8 @@ function* populateStakingPortfolio() {
             }
             staking_portfolio_list.push(stakingStats);
         }
+
+        logger("staking portfolio: ", staking_portfolio_list);
 
         const delegStats: DelegStats = {
             globalAPY: (landing_stats as LandingStats).estRealtimeAPY,
@@ -262,9 +249,29 @@ function* populatePendingWithdrawal() {
         yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: `${totalWithdrawAmt}` }));
     } catch (e) {
         console.warn("populate pending withdrawal failed");
-        console.warn(e);
         yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: [] }));
         yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: "0" }));
+    }
+}
+
+/**
+ * populate number of blocks before rewards are issued
+ * for deleg stats
+ */
+function* populateRewardBlkCountdown() {
+    try {
+        const { blockchain } = yield select(getBlockchain);
+        let rewardBlkCountdown = 0;
+        const numTxBlk: string = yield call(ZilSdk.getNumTxBlocks);
+
+        if (isRespOk(numTxBlk)) {
+            const currBlkNum = parseInt(numTxBlk) - 1;
+            rewardBlkCountdown = yield call(calculateBlockRewardCountdown, currBlkNum, blockchain)
+        }
+        yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: `${rewardBlkCountdown}` }))
+    } catch (e) {
+        console.warn("populate reward blk countdown failed");
+        yield put(UPDATE_REWARD_BLK_COUNTDOWN({ reward_blk_countdown: "0" }))
     }
 }
 
@@ -272,6 +279,7 @@ function* pollDelegatorData() {
     yield fork(populateStakingPortfolio)
     yield fork(populateSwapRequests)
     yield fork(populatePendingWithdrawal)
+    yield fork(populateRewardBlkCountdown)
 }
 
 function* populateOperatorStats() {
@@ -307,7 +315,6 @@ function* populateOperatorStats() {
         yield put(UPDATE_OPERATOR_STATS({ operator_stats: operatorStats }));
     } catch (e) {
         console.warn("populate operator stats failed");
-        console.warn(e);
         yield put(UPDATE_OPERATOR_STATS({ operator_stats: initialOperatorStats }));
     } finally {
         yield put(UPDATE_FETCH_OPERATOR_STATS_STATUS(OperationStatus.COMPLETE));
@@ -358,7 +365,6 @@ function* pollUserSaga() {
             }
         } catch (e) {
             console.warn("poll user data failed");
-            console.warn(e);
         } finally {
             yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
             yield delay(10000);
