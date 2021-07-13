@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr, validateBalance } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -11,6 +11,7 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 import { StakeModalData } from '../../util/interface';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
+import { units } from '@zilliqa-js/zilliqa';
 
 const BigNumber = require('bignumber.js');
 const { BN } = require('@zilliqa-js/util');
@@ -19,6 +20,7 @@ const { BN } = require('@zilliqa-js/util');
 function WithdrawRewardModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const { updateData, updateRecentTransactions } = props;
@@ -32,6 +34,15 @@ function WithdrawRewardModal(props: any) {
     const withdrawReward = async () => {
         if (!ssnAddress) {
             Alert('error', "Invalid Node", "Node address should be bech32 or checksum format");
+            return null;
+        }
+
+        if (!validateBalance(balance)) {
+            const gasFees = ZilSigner.getGasFees();
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
             return null;
         }
 

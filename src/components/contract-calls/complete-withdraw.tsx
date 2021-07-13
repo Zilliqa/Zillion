@@ -3,19 +3,21 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, showWalletsPrompt, validateBalance } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
+import { units } from '@zilliqa-js/zilliqa';
 
 const { BN } = require('@zilliqa-js/util');
 
 function CompleteWithdrawModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const { updateData, updateRecentTransactions } = props;
@@ -24,6 +26,15 @@ function CompleteWithdrawModal(props: any) {
     const [isPending, setIsPending] = useState('');
 
     const completeWithdraw = async () => {
+        if (!validateBalance(balance)) {
+            const gasFees = ZilSigner.getGasFees();
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
+        }
+
         // create tx params
 
         // toAddr: proxy address

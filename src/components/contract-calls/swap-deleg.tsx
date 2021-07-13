@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
-import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -27,6 +27,7 @@ import { useAppSelector } from '../../store/hooks';
 import { SwapDelegModalData } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
 import { ZilSdk } from '../../zilliqa-api';
+import { units } from '@zilliqa-js/zilliqa';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
@@ -37,6 +38,7 @@ function SwapDelegModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
     const accountType = useAppSelector(state => state.user.account_type);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const userAddress = useAppSelector(state => state.user.address_bech32);
@@ -183,6 +185,13 @@ function SwapDelegModal(props: any) {
     }
 
     const sendTxn = (txnType: TransactionType, txParams: any) => {
+        if (!validateBalance(balance)) {
+            const gasFees = ZilSigner.getGasFees();
+            Alert('error', "Insufficient Balance", "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
+        }
+
         // set txn type to store in cookie
         setTxnType(txnType.toString());
         setIsPending(OperationStatus.PENDING);

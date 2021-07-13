@@ -3,19 +3,21 @@ import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
-import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
+import { units } from '@zilliqa-js/zilliqa';
 
 const { BN } = require('@zilliqa-js/util');
 
 function UpdateCommRateModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const commRate = useAppSelector(state => state.user.operator_stats.commRate);
@@ -24,7 +26,6 @@ function UpdateCommRateModal(props: any) {
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
-
 
     const updateCommRate = async () => {
         if (!newRate || !newRate.match(/\d/)) {
@@ -37,6 +38,14 @@ function UpdateCommRateModal(props: any) {
             return null;
         }
 
+        if (!validateBalance(balance)) {
+            const gasFees = ZilSigner.getGasFees();
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
+        }
 
         // create tx params
 

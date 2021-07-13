@@ -81,6 +81,7 @@ function ReDelegateStakeModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
     const userBase16Address = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
@@ -176,6 +177,18 @@ function ReDelegateStakeModal(props: any) {
                 Alert('error', "Invalid Transfer Amount", "Please check your transfer amount again.");
                 return null;
             }
+        }
+
+        const gasFees = ZilSigner.getGasFees();
+        const combinedFees = new BN(delegAmtQa).plus(gasFees);
+        const isBalanceSufficient = new BN(balance).gte(combinedFees);
+
+        if (!isBalanceSufficient) {
+            Alert('error', 
+                "Insufficient Balance", 
+                "Your wallet balance is insufficient to pay for the staked amount and gas fees combined. Total amount required is " + units.fromQa(combinedFees, units.Units.Zil) + " ZIL.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
         }
 
         setIsPending(OperationStatus.PENDING);

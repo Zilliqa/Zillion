@@ -1,6 +1,7 @@
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Explorer, NetworkURL, Network, TransactionType, AccountType, Constants, OperationStatus } from './enum';
 import Alert from '../components/alert';
+import { ZilSigner } from '../zilliqa-signer';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
@@ -208,6 +209,18 @@ export const showWalletsPrompt = (accountType: string) => {
         Alert('info', "Info", "Please follow the instructions on ZilPay.");
         return;
     }
+}
+
+// check if wallet has sufficient balance to pay for gas fees
+// for used during contract calls
+// @param balance wallet balance in Qa
+// returns true if balance is greater than or equal to gas fees; otherwise returns false
+export const validateBalance = (balance: string) => {
+    const gasFees = ZilSigner.getGasFees();
+    if (new BN(balance).gte(new BN(gasFees))) {
+        return true;
+    }
+    return false;
 }
 
 export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkURL: string) => {

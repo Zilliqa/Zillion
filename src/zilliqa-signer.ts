@@ -100,7 +100,7 @@ export class ZilSigner {
     /**
      * returns the gas fee in Qa
      */
-    static getGasFees = () => {
+    static getGasFees = (): BN => {
         return new BN(gasLimit).mul(new BN(gasPrice));
     }
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
-import { bech32ToChecksum, convertQaToCommaStr, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 
 
@@ -10,12 +10,14 @@ import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
+import { units } from '@zilliqa-js/zilliqa';
 
 const { BN } = require('@zilliqa-js/util');
 
 function WithdrawCommModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const commRewards = useAppSelector(state => state.user.operator_stats.commReward);
@@ -25,6 +27,15 @@ function WithdrawCommModal(props: any) {
     const [isPending, setIsPending] = useState('');
 
     const withdrawComm = async () => {
+        if (!validateBalance(balance)) {
+            const gasFees = ZilSigner.getGasFees();
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
+        }
+
         // create tx params
 
         // toAddr: proxy address

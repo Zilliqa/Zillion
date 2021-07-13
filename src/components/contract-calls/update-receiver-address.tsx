@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import { bech32ToChecksum, showWalletsPrompt } from '../../util/utils';
+import { bech32ToChecksum, showWalletsPrompt, validateBalance } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import Alert from '../alert';
 
@@ -10,6 +10,7 @@ import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
+import { units } from '@zilliqa-js/zilliqa';
 
 const { BN } = require('@zilliqa-js/util');
 
@@ -17,6 +18,7 @@ const { BN } = require('@zilliqa-js/util');
 function UpdateReceiverAddress(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const receiver = useAppSelector(state => state.user.operator_stats.receiver);
@@ -29,6 +31,15 @@ function UpdateReceiverAddress(props: any) {
     const updateAddress = async () => {
         if (!newAddress) {
             Alert('error', "Invalid Address", "Receiving address should be bech32 or checksum format.");
+            return null;
+        }
+
+        if (!validateBalance(balance)) {
+            const gasFees = ZilSigner.getGasFees();
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
             return null;
         }
 
