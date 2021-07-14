@@ -1,4 +1,4 @@
-import { call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
+import { all, call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { logger } from '../util/logger';
 import { getBlockchain } from './selectors';
 import { CONFIG_LOADED } from '../store/blockchainSlice';
@@ -21,16 +21,27 @@ function* watchInitOnce() {
         yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.PENDING));
         logger("fetching contract data once...");
         const { impl } = yield select(getBlockchain);
-        const { mindelegstake } = yield call(ZilSdk.getSmartContractSubState, impl, 'mindelegstake');
+
+        const checksumImpl = impl.replace("0x", '')
+        let queries = [
+            [checksumImpl, 'mindelegstake', []],
+            [checksumImpl, 'totalstakeamount', []],
+            [checksumImpl, 'bnum_req', []],
+            [checksumImpl, 'gziladdr', []],
+        ];
+
+        const response: Object = yield call(ZilSdk.getSmartContractSubStateBatch, queries);
+        const mindelegstake = (response as any)[0]["result"]['mindelegstake'];
+        const totalstakeamount = (response as any)[1]["result"]['totalstakeamount'];
+        const bnum_req = (response as any)[2]["result"]['bnum_req'];
+        const gziladdr = (response as any)[3]["result"]['gziladdr'];
+
         logger("mindelegstake: %o", mindelegstake);
 
-        const { totalstakeamount } = yield call(ZilSdk.getSmartContractSubState, impl, 'totalstakeamount');
         logger("totalstakeamount: %o", totalstakeamount);
 
-        const { bnum_req } = yield call(ZilSdk.getSmartContractSubState, impl, 'bnum_req');
         logger("bnum req: ", bnum_req);
 
-        const { gziladdr } = yield call(ZilSdk.getSmartContractSubState, impl, 'gziladdr');
         const { total_supply } = yield call(ZilSdk.getSmartContractSubState, gziladdr, 'total_supply');
         logger("gziladdr: ", gziladdr);
         logger("gzil minted: ", total_supply);
@@ -81,7 +92,6 @@ function* watchInitOnce() {
     } catch (e) {
         console.warn("fetch home data failed");
         console.warn(e);
-
     } finally {
         yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.COMPLETE));
         yield put(PRELOAD_INFO_READY()); // inform other saga that preloaded info is in store
@@ -94,8 +104,18 @@ function* pollStakingData() {
         logger("fetching ssn data...");
         const { impl } = yield select(getBlockchain);
 
-        const { ssnlist } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist');
-        const { ssn_deleg_amt } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssn_deleg_amt');
+        const checksumImpl = impl.replace("0x", '')
+        let queries = [
+            [checksumImpl, 'ssnlist', []],
+            [checksumImpl, 'ssn_deleg_amt', []],
+        ];
+
+        const response: Object = yield call(ZilSdk.getSmartContractSubStateBatch, queries);
+        const ssnlist = (response as any)[0]["result"]["ssnlist"];
+        const ssn_deleg_amt = (response as any)[1]["result"]["ssn_deleg_amt"];
+
+        // const { ssnlist } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist');
+        // const { ssn_deleg_amt } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssn_deleg_amt');
 
         logger("ssnlist: ", ssnlist);
         logger("ssn_deleg_amt: ", ssn_deleg_amt);

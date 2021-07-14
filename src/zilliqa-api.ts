@@ -10,6 +10,40 @@ const API_RANDOMIZER = ApiRandomizer.getInstance();
 
 export class ZilSdk {
 
+    static getSmartContractSubStateBatch = async (queryList: any[]): Promise<any> => {
+        let result;
+        for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
+            result = await ZilSdk.getActualSmartContractSubStateBatch(queryList);
+            if (result !== OperationStatus.ERROR) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private static getActualSmartContractSubStateBatch = async (queryList: any[]): Promise<any> => {
+        try {
+            const { blockchain, api_list }  = store.getState().blockchain
+            const randomAPI = API_RANDOMIZER.fetchApi(blockchain as NetworkURL, api_list);
+            const zilliqa = new Zilliqa(randomAPI);
+
+            let response: any = await zilliqa.blockchain.getSmartContractSubStateBatch(queryList);
+
+            if (!response.hasOwnProperty("batch_result") || response.batch_result === undefined) {
+                return OperationStatus.ERROR;
+            }
+
+            // sort response by id in ascending order
+            return response.batch_result.sort(function (a: any, b: any) {
+                return (a.id - b.id);
+            });
+
+        } catch (err) {
+            logger(err);
+            return OperationStatus.ERROR;
+        }
+    }
+
     /**
      * query the contract state using random api
      * retry if there is an error in the response
