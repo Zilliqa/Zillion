@@ -3,14 +3,15 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr } from '../../util/utils';
-import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr, isDigits } from '../../util/utils';
+import { AccountType, Constants, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { StakeModalData } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
+import GasSettings from './gas-settings';
 
 const BigNumber = require('bignumber.js');
 const { BN, units } = require('@zilliqa-js/util');
@@ -24,6 +25,9 @@ function DelegateStakeModal(props: any) {
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
+    const [gasPrice, setGasPrice] = useState<string>(`${Constants.DEFAULT_GAS_PRICE}` || "0");
+    const [gasLimit, setGasLimit] = useState<string>(`${Constants.DEFAULT_GAS_LIMIT}` || "0");
+    const [gasOption, setGasOption] = useState(false);
 
     const { updateData, updateRecentTransactions } = props;
     const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
@@ -33,6 +37,7 @@ function DelegateStakeModal(props: any) {
     const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+
 
     const delegateStake = async () => {
         if (!ssnAddress) {
@@ -102,7 +107,9 @@ function DelegateStakeModal(props: any) {
                         value: `${ssnChecksumAddress}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         setIsPending(OperationStatus.PENDING);
@@ -144,11 +151,41 @@ function DelegateStakeModal(props: any) {
         setTimeout(() => {
             setDefaultStakeAmt();
             setTxnId('');
+            setGasOption(false);
+            setGasPrice(`${Constants.DEFAULT_GAS_PRICE}` || "0");
+            setGasLimit(`${Constants.DEFAULT_GAS_LIMIT}` || "0");
         }, 150);
     }
 
     const handleDelegAmt = (e: any) => {
         setDelegAmt(e.target.value);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(Constants.DEFAULT_GAS_PRICE.toString()))) {
+            setGasPrice(Constants.DEFAULT_GAS_PRICE.toString());
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(Constants.DEFAULT_GAS_LIMIT.toString());
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     useEffect(() => {
@@ -157,7 +194,7 @@ function DelegateStakeModal(props: any) {
 
     return (
         <div id="delegate-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="delegateStakeModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-lg" role="document">
                  <div className="modal-content">
                      {
                          isPending ?
@@ -191,14 +228,26 @@ function DelegateStakeModal(props: any) {
                                 </div>
                             </div>
 
-                            <div className="modal-label mb-2">Enter stake amount</div>
+                            <div className="modal-label mb-2"><strong>Enter stake amount</strong></div>
                             <div className="input-group mb-2">
                                 <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
                             </div>
-                            <p><small>Wallet balance: <strong>{convertQaToCommaStr(balance.toString())}</strong> ZIL</small></p>
+                            <p><small><strong>Available</strong>: <strong>{convertQaToCommaStr(balance.toString())}</strong> ZIL</small></p>
+
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
+
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>

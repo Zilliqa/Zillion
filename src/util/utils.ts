@@ -54,6 +54,12 @@ export const computeStakeAmtPercent = (inputStake: string, totalStake: string) =
     return stakePercentage;
 }
 
+// checks if input contains only postive numbers
+// returns true if so, otherwise returns false
+export const isDigits = (input: string) => {
+    return /^\d+$/.test(input);
+}
+
 // convert commission rate from percentage to contract comm rate
 // userInputRate is a float
 // returns a big number

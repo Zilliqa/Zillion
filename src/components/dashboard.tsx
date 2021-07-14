@@ -80,7 +80,6 @@ function Dashboard(props: any) {
     const darkMode = useDarkMode(true);
 
     const cleanUp = () => {
-        // ZilliqaAccount.cleanUp();
         logger("directing to main");
         dispatch(POLL_USER_DATA_STOP());
         dispatch(RESET_USER_STATE());
@@ -226,10 +225,13 @@ function Dashboard(props: any) {
 
         if (!userState.authenticated) {
             // redirect to login request
+            dispatch(POLL_USER_DATA_STOP());
+            dispatch(RESET_USER_STATE());
+            dispatch(RESET_BLOCKCHAIN_STATE());
             props.history.push("/oops");
         }
 
-    }, [env, userState.authenticated, props.history]);
+    }, [env, userState.authenticated, props.history, dispatch]);
 
     // change to correct role
     useEffect(() => {
