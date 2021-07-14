@@ -1,4 +1,4 @@
-import { all, call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
+import { call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { logger } from '../util/logger';
 import { getBlockchain } from './selectors';
 import { CONFIG_LOADED } from '../store/blockchainSlice';

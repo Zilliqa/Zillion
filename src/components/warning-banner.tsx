@@ -1,15 +1,16 @@
 import React from 'react';
+import { getEnvironment } from '../util/config-json-helper';
 import { Environment, ContractState } from '../util/enum';
 
 
 function WarningBanner(props: any) {
     // config.js from public folder
-    const { environment_config } = (window as { [key: string]: any })['config'];
+    const env = getEnvironment();
 
     return (
         <div id="banner" className="mb-4 text-center">
             { 
-                environment_config === Environment.PROD ? 
+                env === Environment.PROD ? 
                 <>
                 <div className="px-3 py-3"><strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.</div>
                 {

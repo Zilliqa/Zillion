@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
-import { trackPromise } from 'react-promise-tracker';
 import ReactTooltip from 'react-tooltip';
 
-import { PromiseArea, Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, SsnStatus, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
-import { convertQaToCommaStr, getAddressLink, convertZilToQa, convertNetworkUrlToLabel, calculateBlockRewardCountdown } from '../util/utils';
+import { Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
+import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
 import Alert from './alert';
@@ -37,9 +36,6 @@ import IconSun from './icons/sun';
 import IconMoon from './icons/moon';
 
 import useDarkMode from '../util/use-dark-mode';
-import { useInterval } from '../util/use-interval';
-import { computeDelegRewards } from '../util/reward-calculator';
-import { DelegStats, DelegStakingPortfolioStats } from '../util/interface';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
 
 import Footer from './footer';
@@ -48,11 +44,9 @@ import Tippy from '@tippyjs/react';
 import '../tippy.css';
 import 'tippy.js/animations/shift-away-subtle.css';
 
-
-import BN from 'bn.js';
 import WarningDashboardBanner from './warning-dashboard-banner';
 
-import { POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, RESET_USER_STATE, UPDATE_ADDRESS, UPDATE_BALANCE } from '../store/userSlice';
+import { POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, RESET_USER_STATE, UPDATE_ADDRESS } from '../store/userSlice';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logger } from '../util/logger';
 import { getEnvironment, getNetworks, NetworkConfig, Networks } from '../util/config-json-helper';

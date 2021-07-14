@@ -1,6 +1,6 @@
 import { toBech32Address } from '@zilliqa-js/zilliqa';
 import { BigNumber } from 'bignumber.js';
-import { all, call, cancel, delay, fork, put, race, select, take, takeEvery, takeLatest, takeLeading } from 'redux-saga/effects';
+import { all, call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { PRELOAD_INFO_READY, UPDATE_REWARD_BLK_COUNTDOWN } from '../store/stakingSlice';
 import { INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS, POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, UPDATE_DELEG_STATS, UPDATE_DELEG_PORTFOLIO, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/userSlice';
 import { OperationStatus, Role } from '../util/enum';

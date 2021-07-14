@@ -10,6 +10,10 @@ const API_RANDOMIZER = ApiRandomizer.getInstance();
 
 export class ZilSdk {
 
+    /**
+     * query the contract state using random api via batch JSON-RPC
+     * @param queryList an array of array in the form [ [impl_address, contract_field, [indices], [impl_address, contract_field2, [indices]] ] ]
+     */
     static getSmartContractSubStateBatch = async (queryList: any[]): Promise<any> => {
         let result;
         for (let attempt = 0; attempt < API_MAX_ATTEMPT; attempt++) {
