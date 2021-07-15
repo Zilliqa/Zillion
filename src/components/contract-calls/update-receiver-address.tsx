@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import { bech32ToChecksum, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import Alert from '../alert';
 
@@ -11,6 +11,8 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
 
 const { BN } = require('@zilliqa-js/util');
 
@@ -22,6 +24,12 @@ function UpdateReceiverAddress(props: any) {
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const receiver = useAppSelector(state => state.user.operator_stats.receiver);
+
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
 
     const { updateData, updateRecentTransactions } = props;
     const [newAddress, setNewAddress] = useState('');
@@ -63,7 +71,9 @@ function UpdateReceiverAddress(props: any) {
                         value: `${newReceivingAddress}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         setIsPending(OperationStatus.PENDING);
@@ -99,12 +109,42 @@ function UpdateReceiverAddress(props: any) {
             setNewAddress('');
             setTxnId('');
             setIsPending('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     return (
         <div id="update-recv-addr-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="updateRecvAddrModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -133,6 +173,16 @@ function UpdateReceiverAddress(props: any) {
                                 </div>
                             </div>
                             <input type="text" className="mb-4" value={newAddress} onChange={(e:any) => setNewAddress(e.target.value)} placeholder="Enter new address in bech32 format" />
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
                             <div className="d-flex mt-2">
                             <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={updateAddress}>Update</button>
                             </div>

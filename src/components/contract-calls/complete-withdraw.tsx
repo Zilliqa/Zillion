@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -11,6 +11,8 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
 
 const { BN } = require('@zilliqa-js/util');
 
@@ -24,6 +26,12 @@ function CompleteWithdrawModal(props: any) {
 
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
 
     const completeWithdraw = async () => {
         if (!validateBalance(balance)) {
@@ -47,7 +55,9 @@ function CompleteWithdrawModal(props: any) {
             data: JSON.stringify({
                 _tag: ProxyCalls.COMPLETE_WITHDRAWAL,
                 params: []
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         setIsPending(OperationStatus.PENDING);
@@ -81,12 +91,42 @@ function CompleteWithdrawModal(props: any) {
         toast.dismiss();
         setTimeout(() => {
             setTxnId('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     return (
         <div id="complete-withdrawal-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="completeWithdrawModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered" role="document">
                  <div className="modal-content">
                      {
                          isPending ?
@@ -109,7 +149,17 @@ function CompleteWithdrawModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p>Are you sure you wish to withdraw all your pending stakes?</p>
+                            <p className="mb-4">Are you sure you wish to withdraw all your pending stakes?</p>
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto" onClick={completeWithdraw}>Withdraw</button>
                             </div>

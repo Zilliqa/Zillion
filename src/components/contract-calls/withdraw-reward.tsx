@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr, validateBalance, isDigits } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -12,6 +12,7 @@ import { StakeModalData } from '../../util/interface';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
+import GasSettings from './gas-settings';
 
 const BigNumber = require('bignumber.js');
 const { BN } = require('@zilliqa-js/util');
@@ -30,6 +31,12 @@ function WithdrawRewardModal(props: any) {
 
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
 
     const withdrawReward = async () => {
         if (!ssnAddress) {
@@ -66,7 +73,9 @@ function WithdrawRewardModal(props: any) {
                         value: `${ssnChecksumAddress}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         setIsPending(OperationStatus.PENDING);
@@ -100,13 +109,42 @@ function WithdrawRewardModal(props: any) {
         toast.dismiss();
         setTimeout(() => {
             setTxnId('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
     }
     
-    
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
+    }
+
     return (
         <div id="withdraw-reward-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawRewardModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-lg" role="document">
                  <div className="modal-content">
                      {
                          isPending ?
@@ -139,6 +177,18 @@ function WithdrawRewardModal(props: any) {
                                     <span>{ new BigNumber(stakeModalData.rewards).isGreaterThanOrEqualTo(10**9) ? convertQaToCommaStr(stakeModalData.rewards) : convertQaToZilFull(stakeModalData.rewards)} ZIL</span>
                                     <span className="gzil-rewards">({convertGzilToCommaStr(stakeModalData.rewards)} GZIL)</span>
                                 </div>
+                            </div>
+                            <div className="mx-1">
+                                <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
                             </div>
                             <div className="d-flex mt-4">
                                 <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={withdrawReward}>Claim</button>

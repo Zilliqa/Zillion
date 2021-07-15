@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
-import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, convertToProperCommRate, isDigits, percentToContractCommRate, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -11,6 +11,8 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
 
 const { BN } = require('@zilliqa-js/util');
 
@@ -21,6 +23,12 @@ function UpdateCommRateModal(props: any) {
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const commRate = useAppSelector(state => state.user.operator_stats.commRate);
+
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
 
     const { updateData, updateRecentTransactions } = props;
     const [newRate, setNewRate] = useState('');
@@ -69,7 +77,9 @@ function UpdateCommRateModal(props: any) {
                         value: `${contractCommRate}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         setIsPending(OperationStatus.PENDING);
@@ -105,12 +115,42 @@ function UpdateCommRateModal(props: any) {
             setNewRate('');
             setTxnId('');
             setIsPending('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     return (
         <div id="update-comm-rate-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="updateCommRateModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -145,6 +185,16 @@ function UpdateCommRateModal(props: any) {
                                     <span className="input-group-text pl-4 pr-3">%</span>
                                 </div>
                             </div>
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
                             <div className="d-flex mt-2">
                                 <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={updateCommRate}>Update</button>
                             </div>

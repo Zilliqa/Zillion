@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -13,6 +13,8 @@ import { useAppSelector } from '../../store/hooks';
 import { StakeModalData } from '../../util/interface';
 import { ZilSdk } from '../../zilliqa-api';
 import { ZilSigner } from '../../zilliqa-signer';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -30,6 +32,12 @@ function WithdrawStakeModal(props: any) {
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
     const { updateData, updateRecentTransactions } = props;
+
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
 
     const ssnAddress = stakeModalData.ssnAddress; // bech32
     const [withdrawAmt, setWithdrawAmt] = useState('0'); // in ZIL
@@ -173,7 +181,9 @@ function WithdrawStakeModal(props: any) {
                         value: `${withdrawAmtQa}`,
                     },
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
         
         showWalletsPrompt(accountType);
@@ -216,11 +226,41 @@ function WithdrawStakeModal(props: any) {
         setTimeout(() => {
             setDefaultWithdrawAmt();
             setTxnId('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
     }
 
     const handleWithdrawAmt = (e: any) => {
         setWithdrawAmt(e.target.value);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     useEffect(() => {
@@ -229,7 +269,7 @@ function WithdrawStakeModal(props: any) {
 
     return (
         <div id="withdraw-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawStakeModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -263,13 +303,23 @@ function WithdrawStakeModal(props: any) {
                                 </div>
                             </div>
 
-                            <div className="modal-label mb-2">Enter withdrawal amount</div>
+                            <div className="modal-label mb-2"><strong>Enter withdrawal amount</strong></div>
                             <div className="input-group mb-4">
                                 <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
                             </div>
+                            <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto mt-2 shadow-none" onClick={withdrawStake}>Initiate</button>
                             </div>
