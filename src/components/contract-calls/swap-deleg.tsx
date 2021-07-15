@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
-import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, computeGasFees, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -197,7 +197,7 @@ function SwapDelegModal(props: any) {
 
     const sendTxn = (txnType: TransactionType, txParams: any) => {
         if (!validateBalance(balance)) {
-            const gasFees = ZilSigner.getGasFees();
+            const gasFees = computeGasFees(gasPrice, gasLimit);
             Alert('error', "Insufficient Balance", "Insufficient balance in wallet to pay for the gas fee.");
             Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
             setIsPending('');

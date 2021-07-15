@@ -64,11 +64,11 @@ function DelegateStakeModal(props: any) {
                     return null;
                 }
 
-                const gasFeesQa = ZilSigner.getGasFees();
+                const gasFeesQa = new BigNumber(gasPrice).multipliedBy(gasLimit);
                 const combinedFees = new BigNumber(delegAmtQa).plus(gasFeesQa);
                 const combinedFeesZil = units.fromQa(new BN(combinedFees.toString()), units.Units.Zil);
                 const remaningBalance = new BigNumber(balance).minus(delegAmtQa);
-                const isBalanceSufficient = remaningBalance.isGreaterThan(new BigNumber(gasFeesQa));
+                const isBalanceSufficient = remaningBalance.isGreaterThan(gasFeesQa);
 
                 if (!isBalanceSufficient) {
                     Alert('error', 

@@ -7,7 +7,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees } from '../../util/utils';
 import { ProxyCalls, OperationStatus, TransactionType, AccountType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -187,7 +187,7 @@ function ReDelegateStakeModal(props: any) {
             }
         }
 
-        const gasFees = ZilSigner.getGasFees();
+        const gasFees = computeGasFees(gasPrice, gasLimit);
         const combinedFees = new BN(delegAmtQa).plus(gasFees);
         const isBalanceSufficient = new BN(balance).gte(combinedFees);
 

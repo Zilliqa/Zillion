@@ -60,6 +60,10 @@ export const isDigits = (input: string) => {
     return /^\d+$/.test(input);
 }
 
+export const computeGasFees = (gasPrice: string, gasLimit: string) => {
+    return new BN(gasPrice).mul(gasLimit);
+}
+
 // convert commission rate from percentage to contract comm rate
 // userInputRate is a float
 // returns a big number

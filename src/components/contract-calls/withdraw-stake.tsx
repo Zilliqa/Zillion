@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits, computeGasFees } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -124,7 +124,7 @@ function WithdrawStakeModal(props: any) {
         }
 
         if (!validateBalance(balance)) {
-            const gasFees = ZilSigner.getGasFees();
+            const gasFees = computeGasFees(gasPrice, gasLimit);
             Alert('error', 
             "Insufficient Balance", 
             "Insufficient balance in wallet to pay for the gas fee.");

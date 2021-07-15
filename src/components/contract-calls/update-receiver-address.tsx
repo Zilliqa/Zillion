@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import { bech32ToChecksum, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, computeGasFees, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
 import Alert from '../alert';
 
@@ -43,7 +43,7 @@ function UpdateReceiverAddress(props: any) {
         }
 
         if (!validateBalance(balance)) {
-            const gasFees = ZilSigner.getGasFees();
+            const gasFees = computeGasFees(gasPrice, gasLimit);
             Alert('error', 
             "Insufficient Balance", 
             "Insufficient balance in wallet to pay for the gas fee.");
