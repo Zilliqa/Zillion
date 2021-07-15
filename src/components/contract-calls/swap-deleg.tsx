@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
-import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -28,6 +28,8 @@ import { SwapDelegModalData } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
 import { ZilSdk } from '../../zilliqa-api';
 import { units } from '@zilliqa-js/zilliqa';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
@@ -62,6 +64,12 @@ function SwapDelegModal(props: any) {
 
     const [tutorialStep, setTutorialStep] = useState(0); // for the help guide
 
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
+
     const cleanUp = () => {
         setNewDelegAddr('');
         setSelectedDelegAddr('');
@@ -76,6 +84,9 @@ function SwapDelegModal(props: any) {
         setShowConfirmSwapBox(false);
         setShowConfirmRejectBox(false);
         setTutorialStep(0);
+        setGasOption(false);
+        setGasPrice(defaultGasPrice);
+        setGasLimit(defaultGasLimit);
     }
 
     const validateAddress = (address: string) => {
@@ -189,6 +200,7 @@ function SwapDelegModal(props: any) {
             const gasFees = ZilSigner.getGasFees();
             Alert('error', "Insufficient Balance", "Insufficient balance in wallet to pay for the gas fee.");
             Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            setIsPending('');
             return null;
         }
 
@@ -242,7 +254,9 @@ function SwapDelegModal(props: any) {
                         value: `${requestorAddr}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.CONFIRM_DELEG_SWAP, txParams);
@@ -263,7 +277,9 @@ function SwapDelegModal(props: any) {
                         value: `${requestorAddr}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.REJECT_DELEG_SWAP, txParams);
@@ -438,7 +454,9 @@ function SwapDelegModal(props: any) {
                         value: `${fromBech32Address(newDelegAddr)}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.REQUEST_DELEG_SWAP, txParams);
@@ -453,10 +471,47 @@ function SwapDelegModal(props: any) {
             data: JSON.stringify({
                 _tag: ProxyCalls.REVOKE_DELEG_SWAP,
                 params: []
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.REVOKE_DELEG_SWAP, txParams);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
+    }
+
+    const onSelectTabs = (index: number) => {
+        // reset the advanced gas settings display on change tabs
+        setTabIndex(index);
+        setGasOption(false);
+        setGasPrice(defaultGasPrice);
+        setGasLimit(defaultGasLimit);
     }
 
     useEffect(() => {
@@ -473,7 +528,7 @@ function SwapDelegModal(props: any) {
 
     return (
         <div id="swap-deleg-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="swapDelegModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-dialog-scrollable modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -635,6 +690,16 @@ function SwapDelegModal(props: any) {
                                     <span>{newDelegAddr}</span>
                                 </div>
                             </div>
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
@@ -669,6 +734,18 @@ function SwapDelegModal(props: any) {
                                     <span>{convertBase16ToBech32(swapDelegModalData.swapRecipientAddress)}</span>
                                 </div>
                             </div>
+                            <div className="mx-1">
+                                <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
+                            </div>
                             <div className="d-flex mt-4">
                                 <div className="mx-auto">
                                     <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRevokeBox(false)}>
@@ -698,6 +775,19 @@ function SwapDelegModal(props: any) {
                                         <span>View Wallet on Zillion Explorer</span>
                                     </ReactTooltip>
                                 </div>
+                            </div>
+
+                            <div className="mx-1">
+                                <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
                             </div>
 
                             <div className="mb-4">
@@ -738,6 +828,19 @@ function SwapDelegModal(props: any) {
                                 </div>
                             </div>
 
+                            <div className="mx-1">
+                                <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
+                            </div>
+
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
@@ -772,7 +875,7 @@ function SwapDelegModal(props: any) {
                                 <strong>Help</strong>
                             </ReactTooltip>
                         </div>
-                        <Tabs selectedIndex={tabIndex} onSelect={index => setTabIndex(index)}>
+                        <Tabs selectedIndex={tabIndex} onSelect={(index) => onSelectTabs(index)}>
                             <TabList>
                                 <Tab>Change Stake Ownership { swapDelegModalData.swapRecipientAddress ? <span>(1)</span> : null }</Tab>
                                 <Tab>
