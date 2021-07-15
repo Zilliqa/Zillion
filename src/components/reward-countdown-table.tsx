@@ -3,6 +3,7 @@ import AnimatedNumber from "react-animated-numbers"
 import { trackPromise } from 'react-promise-tracker';
 import { useAppSelector } from '../store/hooks';
 import { OperationStatus } from '../util/enum';
+import { logger } from '../util/logger';
 import { calculateBlockRewardCountdown } from '../util/utils';
 import { ZilSdk } from '../zilliqa-api';
 
@@ -38,7 +39,7 @@ function RewardCountdownTable(props: any) {
                 console.error(err);
             })
             .finally(() => {
-                console.log("updating reward countdown table");
+                logger("updating reward countdown table");
                 if (mountedRef.current) {
                     setCurrentBlockNum(tempCurrentBlockNum);
                     setBlockCountToReward(tempBlockRewardCount);

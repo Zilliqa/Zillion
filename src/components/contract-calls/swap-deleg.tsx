@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
-import { bech32ToChecksum, computeGasFees, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, computeGasFees, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, isDigits, isRespOk, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -321,11 +321,11 @@ function SwapDelegModal(props: any) {
         const deposit_amt_deleg_map = await ZilSdk.getSmartContractSubState(impl, "deposit_amt_deleg", [wallet]);
         const buff_deposit_deleg_map = await ZilSdk.getSmartContractSubState(impl, "buff_deposit_deleg", [wallet]);
         
-        if (lrc === undefined || lrc === "error") {
+        if (!isRespOk(lrc)) {
             return false;
         }
 
-        if (lbdc === undefined || lbdc === "error") {
+        if (!isRespOk(lbdc)) {
             return false;
         }
 
@@ -385,7 +385,7 @@ function SwapDelegModal(props: any) {
 
         const deposit_amt_deleg_map = await ZilSdk.getSmartContractSubState(impl, "deposit_amt_deleg", [wallet]);
 
-        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null || deposit_amt_deleg_map.length === 0) {
+        if (!isRespOk(deposit_amt_deleg_map)) {
             return false;
         }
 
@@ -399,7 +399,7 @@ function SwapDelegModal(props: any) {
 
         const pending_withdrawal_map = await ZilSdk.getSmartContractSubState(impl, "withdrawal_pending", [wallet]);
 
-        if (pending_withdrawal_map === undefined || pending_withdrawal_map === "error" || pending_withdrawal_map === null || pending_withdrawal_map.length === 0) {
+        if (!isRespOk(pending_withdrawal_map)) {
             return false;
         }
 

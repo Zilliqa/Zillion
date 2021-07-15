@@ -131,7 +131,7 @@ function Home(props: any) {
   }
 
   const DisplayLoader = () => {
-    console.log("retrieving wallet info...");
+    logger("retrieving wallet info...");
     return (
       <div className="wallet-access">
         <h2>Retrieving wallet info...</h2>

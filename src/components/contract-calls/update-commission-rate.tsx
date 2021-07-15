@@ -13,6 +13,7 @@ import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
+import { logger } from '../../util/logger';
 
 const { BN } = require('@zilliqa-js/util');
 
@@ -61,7 +62,7 @@ function UpdateCommRateModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const contractCommRate = percentToContractCommRate(newRate);
 
-        console.log("my new rate: %o", contractCommRate);
+        logger("new rate: %o", contractCommRate);
 
         // gas price, gas limit declared in account.ts
         let txParams = {

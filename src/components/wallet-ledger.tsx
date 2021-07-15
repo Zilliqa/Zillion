@@ -56,7 +56,7 @@ function LedgerWallet(props: any) {
     }
 
     const unlockWallet = async (hwIndex: number) => {
-        console.log("unlock by hardware ledger");
+        logger("unlock by hardware ledger");
 
         if (typeof ledgerAccounts[hwIndex] === undefined) {
             console.error("no such ledger wallet index: %o", hwIndex);

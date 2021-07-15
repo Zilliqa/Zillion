@@ -97,11 +97,6 @@ export class RewardCalculator {
         if (deleg_stake_per_cycle_json !== null) {
             deleg_stake_per_cycle_map = deleg_stake_per_cycle_json[KEY_DELEG_PER_CYCLE][delegator.toLowerCase()][ssnaddr];
         }
-        
-        // remove this
-        // console.log(direct_deposit_map);
-        // console.log(buffer_deposit_map);
-        // console.log(deleg_stake_per_cycle_map);
 
         reward_list.forEach((cycle: number) => {
             // for every reward cycle, we need to get
@@ -146,9 +141,6 @@ export class RewardCalculator {
         var result_rewards = new BN(0);
 
         const stake_ssn_per_cycle_map = await this.contract.getSubState(KEY_STAKE_SSN_PER_CYCLE, [ssnaddr]);
-
-        // remove this
-        // console.log(stake_ssn_per_cycle_map);
 
         if (stake_ssn_per_cycle_map === null) {
             return result_rewards;

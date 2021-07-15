@@ -88,11 +88,6 @@ function DelegateStakeModal(props: any) {
 
         // create tx params
 
-        // toAddr: proxy address
-        // amount: amount in Qa to stake
-        console.log("ssn address: %o", ssnAddress);
-        console.log("proxy: %o", proxy);
-
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 

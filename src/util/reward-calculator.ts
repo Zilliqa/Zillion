@@ -39,7 +39,6 @@ export const computeDelegRewards = async (impl: string, ssn: string, delegator: 
         } catch (err) {
             // error with querying api
             // retry
-            // console.log("error detected compute rewards");
             continue;
         }
     }

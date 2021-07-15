@@ -7,7 +7,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees, isRespOk } from '../../util/utils';
 import { ProxyCalls, OperationStatus, TransactionType, AccountType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -17,6 +17,7 @@ import { ZilSdk } from '../../zilliqa-api';
 import { ZilSigner } from '../../zilliqa-signer';
 import GasSettings from './gas-settings';
 import BigNumber from 'bignumber.js';
+import { logger } from '../../util/logger';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -115,18 +116,18 @@ function ReDelegateStakeModal(props: any) {
         const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
         const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
-        if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
+        if (!isRespOk(last_reward_cycle_json)) {
             return false;
         }
 
-        if (last_buf_deposit_cycle_deleg_json === undefined || last_buf_deposit_cycle_deleg_json === 'error' || last_buf_deposit_cycle_deleg_json === null) {
+        if (!isRespOk(last_buf_deposit_cycle_deleg_json)) {
             return false;
         }
 
         // compute rewards
-        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address)).toString();
+        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address));
 
-        if (delegRewards !== "0") {
+        if (delegRewards.gt(new BN(0))) {
             Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before transferring.");
             return true;
         }
@@ -349,7 +350,7 @@ function ReDelegateStakeModal(props: any) {
     }
 
     const toggleNodeSelector = () => {
-        console.log("toggle node selector: %o", showNodeSelector);
+        logger("toggle node selector: %o", showNodeSelector);
         setShowNodeSelector(!showNodeSelector);
     }
 

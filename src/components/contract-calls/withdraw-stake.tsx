@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits, computeGasFees } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits, computeGasFees, isRespOk } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -15,6 +15,7 @@ import { ZilSdk } from '../../zilliqa-api';
 import { ZilSigner } from '../../zilliqa-signer';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
+import { logger } from '../../util/logger';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -52,19 +53,19 @@ function WithdrawStakeModal(props: any) {
         const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
         const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
-        if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
+        if (!isRespOk(last_reward_cycle_json)) {
             return false;
         }
 
-        if (last_buf_deposit_cycle_deleg_json === undefined || last_buf_deposit_cycle_deleg_json === 'error' || last_buf_deposit_cycle_deleg_json === null) {
+        if (!isRespOk(last_buf_deposit_cycle_deleg_json)) {
             return false;
         }
 
         // compute rewards
-        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address)).toString();
+        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address));
 
-        if (delegRewards !== "0") {
-            console.log("you have delegated rewards: %o", delegRewards);
+        if (delegRewards.gt(new BN(0))) {
+            logger("you have delegated rewards: %o", delegRewards);
             Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before withdrawing the staked amount.");
             return true;
         }

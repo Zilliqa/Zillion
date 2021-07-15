@@ -170,7 +170,7 @@ export class ZilSigner {
                 }
                 return response.result.TranID
             } catch (err) {
-                console.log("something is wrong with broadcasting the transaction :%o", JSON.stringify(err));
+                console.error("something is wrong with broadcasting the transaction :%o", JSON.stringify(err));
                 return OperationStatus.ERROR;
             }
 
