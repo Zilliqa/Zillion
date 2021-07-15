@@ -329,7 +329,7 @@ function SwapDelegModal(props: any) {
             return false;
         }
 
-        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null) {
+        if (!isRespOk(deposit_amt_deleg_map)) {
             // delegator has not delegate with any ssn
             // no need to perform further checks
             return false;
@@ -362,9 +362,7 @@ function SwapDelegModal(props: any) {
             // check buffered deposits (lrc-1)
             let lrc_o_minus = lrc_o - 1
             if (lrc_o_minus >= 0) {
-                if (buff_deposit_deleg_map !== undefined && 
-                    buff_deposit_deleg_map !== 'error' && 
-                    buff_deposit_deleg_map !== null &&  
+                if (isRespOk(buff_deposit_deleg_map) &&  
                     buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
                     if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet][ssnAddress].hasOwnProperty(lrc_o_minus)) {
                         let msg = `${targetName} ${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
