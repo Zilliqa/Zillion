@@ -43,7 +43,7 @@ export class ZilSdk {
             });
 
         } catch (err) {
-            logger(err);
+            console.error(err);
             return OperationStatus.ERROR;
         }
     }
@@ -187,7 +187,7 @@ export class ZilSdk {
      */
     private static getActualSmartContractSubState = async (impl: string, state: string, indices?: any) => {
         if (!impl) {
-            logger("error: get contract sub state - no implementation contract found");
+            console.error("error: get contract sub state - no implementation contract found");
             return OperationStatus.ERROR;
         }
 
@@ -209,7 +209,7 @@ export class ZilSdk {
             return response.result;
             
         } catch (err) {
-            logger(err);
+            console.error(err);
             return OperationStatus.ERROR;
         }
     }

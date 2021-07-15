@@ -9,9 +9,11 @@ import { toBech32Address } from '@zilliqa-js/crypto';
 import { ZilSdk } from '../zilliqa-api';
 import { convertZilToQa, isRespOk } from '../util/utils';
 import BigNumber from 'bignumber.js';
+import { getRefreshRate } from '../util/config-json-helper';
 
 const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
 const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); // 110000 * 17
+const REFRESH_INTERVAL = getRefreshRate();
 
 /**
  * fetch these data only once
@@ -19,7 +21,7 @@ const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); //
 function* watchInitOnce() {
     try {
         yield put(UPDATE_FETCH_LANDING_STATS_STATUS(OperationStatus.PENDING));
-        logger("fetching contract data once...");
+        console.log("fetching preload...");
         const { impl } = yield select(getBlockchain);
 
         const checksumImpl = impl.replace("0x", '')
@@ -114,9 +116,6 @@ function* pollStakingData() {
         const ssnlist = (response as any)[0]["result"]["ssnlist"];
         const ssn_deleg_amt = (response as any)[1]["result"]["ssn_deleg_amt"];
 
-        // const { ssnlist } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssnlist');
-        // const { ssn_deleg_amt } = yield call(ZilSdk.getSmartContractSubState, impl, 'ssn_deleg_amt');
-
         logger("ssnlist: ", ssnlist);
         logger("ssn_deleg_amt: ", ssn_deleg_amt);
 
@@ -173,7 +172,7 @@ function* queryAndUpdateStats() {
     yield call(pollStakingData);
 
     // delay before start to poll again
-    yield delay(60000);
+    yield delay(REFRESH_INTERVAL);
     yield put(POLL_STAKING_DATA_START());
 }
 
@@ -185,7 +184,7 @@ function* pollStakingSaga() {
             console.warn("poll staking data failed");
             console.warn(e);
         } finally {
-            yield delay(60000);
+            yield delay(REFRESH_INTERVAL);
         }
     }
 }

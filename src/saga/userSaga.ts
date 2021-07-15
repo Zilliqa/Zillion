@@ -3,6 +3,7 @@ import { BigNumber } from 'bignumber.js';
 import { all, call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { PRELOAD_INFO_READY, UPDATE_REWARD_BLK_COUNTDOWN } from '../store/stakingSlice';
 import { INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS, POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, UPDATE_DELEG_STATS, UPDATE_DELEG_PORTFOLIO, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/userSlice';
+import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
@@ -11,6 +12,7 @@ import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
 import { ZilSdk } from '../zilliqa-api';
 import { getUserState, getBlockchain, getStakingState } from './selectors';
 
+const REFRESH_INTERVAL = getRefreshRate();
 
 /**
  * query the connected wallet's balance and update the balance in the store
@@ -93,7 +95,7 @@ function* queryAndUpdateGzil() {
  * populate delegator staking portfolio and delegator stats
  */
 function* populateStakingPortfolio() {
-    logger("populate staking portfolio");
+    console.log("populate staking portfolio");
     try {
         const { address_base16, gzil_balance } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
@@ -150,7 +152,7 @@ function* populateStakingPortfolio() {
  * popoulate swap deleg requests
  */
 function* populateSwapRequests() {
-    logger("populate swap requests");
+    console.log("populate swap requests");
     try {
         const { address_base16 } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
@@ -193,7 +195,7 @@ function* populateSwapRequests() {
  * populate pending withdrawal
  */
 function* populatePendingWithdrawal() {
-    logger("populate pending withdrawal");
+    console.log("populate pending withdrawal");
     try {
         const { address_base16 } = yield select(getUserState);
         const { impl } = yield select(getBlockchain);
@@ -283,7 +285,7 @@ function* pollDelegatorData() {
 }
 
 function* populateOperatorStats() {
-    logger("populate operator stats");
+    console.log("populate operator stats");
     try {
         yield put(UPDATE_FETCH_OPERATOR_STATS_STATUS(OperationStatus.PENDING));
 
@@ -348,7 +350,7 @@ function* queryAndUpdateStats() {
 
     yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
     // delay before start to poll again
-    yield delay(10000);
+    yield delay(REFRESH_INTERVAL);
     yield put(POLL_USER_DATA_START());
 }
 
@@ -367,7 +369,7 @@ function* pollUserSaga() {
             console.warn("poll user data failed");
         } finally {
             yield put(UPDATE_FETCH_DELEG_STATS_STATUS(OperationStatus.COMPLETE));
-            yield delay(10000);
+            yield delay(REFRESH_INTERVAL);
         }
     }
 }

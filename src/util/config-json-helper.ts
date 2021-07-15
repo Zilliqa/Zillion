@@ -36,7 +36,7 @@ export const getBlockchainExplorer = () => {
     return blockchain_explorer_config;
 }
 
-export const getRefreshRate = () => {
+export const getRefreshRate = (): number => {
     return refresh_rate_config;
 }
 

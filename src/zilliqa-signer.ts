@@ -53,7 +53,7 @@ export class ZilSigner {
             const address =  await zilliqa.wallet.addByKeystore(keystore, passphrase);
             return address;
         } catch (err) {
-            logger("error: add wallet by keystore - ", err);
+            console.error("error: add wallet by keystore - ", err);
             return OperationStatus.ERROR;
         }
     }
@@ -80,7 +80,7 @@ export class ZilSigner {
                 result = await ZilSigner.sdkSign(txParams);
                 break;
             default:
-                logger("error: no such account type - ", account);
+                console.error("error: no such account type - ", account);
                 result = OperationStatus.ERROR;
                 break;
         }
@@ -160,7 +160,7 @@ export class ZilSigner {
                 gasLimit: `${gasLimit}`,
                 signature
             }
-            logger("signed tx: ", signedTx);
+            console.log("signed tx: ", signedTx);
 
             // send the signed transaction
             try {
@@ -199,7 +199,7 @@ export class ZilSigner {
             },
             true
         );
-        logger(tx);
+        console.log(tx);
 
         try {
             const txn = await zilPay.blockchain.createTransaction(tx);
@@ -225,7 +225,7 @@ export class ZilSigner {
             },
             true
         );
-        logger(tx);
+        console.log(tx);
 
         try {
             const txn = await zilliqa.blockchain.createTransaction(tx);
@@ -241,7 +241,7 @@ export class ZilSigner {
         try {
             const balance = await zilliqa.blockchain.getBalance(address);
             if (balance.error && balance.error.code === -5) {
-                logger("account has no balance");
+                console.error("account has no balance");
                 return -1;
             }
             return parseInt(balance.result.nonce) + 1;
@@ -258,7 +258,7 @@ export class ZilSigner {
             // something might be wrong with api
             gasPrice = `${Constants.DEFAULT_GAS_PRICE}`;
         } else {
-            logger("min gas price from api: ", minimumGasPrice.result);
+            console.log("min gas price from api: ", minimumGasPrice.result);
             gasPrice = minimumGasPrice.result;
         }
         return gasPrice;

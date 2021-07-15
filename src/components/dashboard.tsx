@@ -136,7 +136,7 @@ function Dashboard(props: any) {
     }
 
     const pollData = async () => {
-        logger("polling data...")
+        console.log("polling data...")
         setIsRefreshDisabled(true);
         dispatch(QUERY_AND_UPDATE_USER_STATS());
         dispatch(QUERY_AND_UPDATE_STAKING_STATS());
@@ -192,7 +192,6 @@ function Dashboard(props: any) {
             const zilPay = (window as any).zilPay;
 
             if (zilPay) {
-                logger("zil pay method ...");
                 // switch to the zilpay network on load
                 networkChanger(zilPay.wallet.net);
 
@@ -202,7 +201,7 @@ function Dashboard(props: any) {
                 networkStreamChanged.subscribe((net: string) => networkChanger(net));
                 
                 accountStreamChanged.subscribe((account: any) => {
-                    logger("zil pay account changing...");
+                    console.log("zil pay account changing...");
                     const bech32 = toBech32Address(account.base16);
                     dispatch(UPDATE_ADDRESS({ address_base16: account.base16, address_bech32: bech32 }));
                 });
@@ -235,7 +234,7 @@ function Dashboard(props: any) {
 
     // change to correct role
     useEffect(() => {
-        logger("change role")
+        console.log("change wallet")
         
         if (walletAddress !== userState.address_base16) {
             // address changed
@@ -246,7 +245,7 @@ function Dashboard(props: any) {
     }, [walletAddress, userState.address_base16, dispatch]);
 
     useEffect(() => {
-        logger("change network")
+        console.log("change network")
         if (blockchain !== blockchainState.blockchain) {
             // network changed
             dispatch(QUERY_AND_UPDATE_USER_STATS());
