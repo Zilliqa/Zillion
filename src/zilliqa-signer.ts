@@ -104,6 +104,14 @@ export class ZilSigner {
         return new BN(gasLimit).mul(new BN(gasPrice));
     }
 
+    static getDefaultGasPrice = (): string => {
+        return gasPrice;
+    }
+
+    static getDefaultGasLimit = (): string => {
+        return gasLimit;
+    }
+
     /**
      * create and sign txn with ledger
      */

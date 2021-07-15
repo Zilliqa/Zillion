@@ -217,6 +217,24 @@ input:focus {
   }
 }
 
+.advanced-btn {
+  font-size: 0.85em;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.advanced-btn-div {
+  color: var(--primary-color);
+  fill: var(--primary-color);
+}
+
+.advanced-btn-div:hover {
+  color: var(--primary-dark-color);
+  fill: var(--primary-dark-color);
+}
+
 .btn-notify-dropdown {
   width: 34px;
   height: 34px;
@@ -1421,10 +1439,11 @@ input:focus {
 }
 
 #fee-section-heading {
-  font-size: 0.65em;
+  font-size: 0.7em;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--primary-dark-color);
+  color: var(--primary-color);
 }
 
 #home-mini-navbar {
@@ -1824,14 +1843,7 @@ input:focus {
   color: var(--primary-color);
 }
 
-#delegate-stake-modal .btn-change-node {
-  font-size: 0.9em;
-  padding: 0;
-  margin: 0;
-  color: var(--primary-color);
-}
-
-#swap-deleg-modal .btn-change-node, #delegate-stake-modal .btn-change-node, #redeleg-stake-modal .btn-change-node:hover {
+#swap-deleg-modal .btn-change-node:hover, #redeleg-stake-modal .btn-change-node:hover {
   color: var(--primary-dark-color);
 }
 

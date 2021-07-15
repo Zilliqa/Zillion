@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr, isDigits } from '../../util/utils';
-import { AccountType, Constants, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -25,8 +25,11 @@ function DelegateStakeModal(props: any) {
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
-    const [gasPrice, setGasPrice] = useState<string>(`${Constants.DEFAULT_GAS_PRICE}` || "0");
-    const [gasLimit, setGasLimit] = useState<string>(`${Constants.DEFAULT_GAS_LIMIT}` || "0");
+    
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
     const [gasOption, setGasOption] = useState(false);
 
     const { updateData, updateRecentTransactions } = props;
@@ -152,8 +155,8 @@ function DelegateStakeModal(props: any) {
             setDefaultStakeAmt();
             setTxnId('');
             setGasOption(false);
-            setGasPrice(`${Constants.DEFAULT_GAS_PRICE}` || "0");
-            setGasLimit(`${Constants.DEFAULT_GAS_LIMIT}` || "0");
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
     }
 
@@ -162,8 +165,8 @@ function DelegateStakeModal(props: any) {
     }
 
     const onBlurGasPrice = () => {
-        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(Constants.DEFAULT_GAS_PRICE.toString()))) {
-            setGasPrice(Constants.DEFAULT_GAS_PRICE.toString());
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
             Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
         }
     }
@@ -177,7 +180,7 @@ function DelegateStakeModal(props: any) {
 
     const onBlurGasLimit = () => {
         if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
-            setGasLimit(Constants.DEFAULT_GAS_LIMIT.toString());
+            setGasLimit(defaultGasLimit);
         }
     }
 

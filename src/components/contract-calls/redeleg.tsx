@@ -7,7 +7,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits } from '../../util/utils';
 import { ProxyCalls, OperationStatus, TransactionType, AccountType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -15,6 +15,8 @@ import { useAppSelector } from '../../store/hooks';
 import { StakeModalData } from '../../util/interface';
 import { ZilSdk } from '../../zilliqa-api';
 import { ZilSigner } from '../../zilliqa-signer';
+import GasSettings from './gas-settings';
+import BigNumber from 'bignumber.js';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -98,6 +100,12 @@ function ReDelegateStakeModal(props: any) {
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
     const [showNodeSelector, setShowNodeSelector] = useState(false);
+
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
 
     
     // checks if there are any unwithdrawn rewards or buffered deposit
@@ -247,7 +255,9 @@ function ReDelegateStakeModal(props: any) {
                         value: `${delegAmtQa}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         showWalletsPrompt(accountType);
@@ -293,6 +303,9 @@ function ReDelegateStakeModal(props: any) {
             setTxnId('');
             setDefaultDelegAmt();
             setShowNodeSelector(false);
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
     }
 
@@ -306,6 +319,33 @@ function ReDelegateStakeModal(props: any) {
 
     const handleDelegAmt = (e: any) => {
         setDelegAmt(e.target.value);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     const toggleNodeSelector = () => {
@@ -363,7 +403,7 @@ function ReDelegateStakeModal(props: any) {
 
     return (
         <div id="redeleg-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="redelegModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -428,6 +468,17 @@ function ReDelegateStakeModal(props: any) {
                                         </div>
                                         </>
                                     }
+
+                                    <GasSettings
+                                        gasOption={gasOption}
+                                        gasPrice={gasPrice}
+                                        gasLimit={gasLimit}
+                                        setGasOption={setGasOption}
+                                        onBlurGasPrice={onBlurGasPrice}
+                                        onBlurGasLimit={onBlurGasLimit}
+                                        onGasPriceChange={onGasPriceChange}
+                                        onGasLimitChange={onGasLimitChange}
+                                    />
 
                                     <div className="d-flex">
                                         <button type="button" className="btn btn-user-action mt-2 mx-auto shadow-none" onClick={redeleg}>Transfer Stake</button>

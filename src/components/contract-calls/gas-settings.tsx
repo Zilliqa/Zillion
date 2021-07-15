@@ -27,7 +27,7 @@ function GasSettings(props: any) {
         <div>
             {
                 gasOption &&
-                <div className="mt-4 animate__animated animate__fadeIn">
+                <div className="mt-4">
                     <h3 id="fee-section-heading">Adjust Gas Fees</h3>
                     <div className="row my-4">
                         <div className="col mr-4">
@@ -62,12 +62,12 @@ function GasSettings(props: any) {
                     <span className="fee-head"><strong>Fee</strong>:  <span className="fee">{ computeGasFees().shiftedBy(-12).toFixed() }</span> ZIL</span>
                 </div>
                 <button 
-                    className="ml-auto btn btn-change-node shadow-none"
+                    className="ml-auto btn advanced-btn shadow-none"
                     onClick={() => setGasOption(!gasOption)}>
                         {
                             gasOption ? 
-                            <><IconArrowDropupLine width="28" height="28" className="icon-fill pb-1" /><span>Advanced Settings</span></> : 
-                            <><IconArrowDropdownLine width="28" height="28" className="icon-fill pb-1" /><span>Advanced Settings</span></>
+                            <div className="advanced-btn-div"><IconArrowDropupLine width="28" height="28" className="pb-1" /><span>Advanced Settings</span></div> : 
+                            <div className="advanced-btn-div"><IconArrowDropdownLine width="28" height="28" className="pb-1" /><span>Advanced Settings</span></div>
                         }
                 </button>
             </div>
