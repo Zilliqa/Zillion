@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
-// import ReactTooltip from "react-tooltip";
 import { useTable, useSortBy } from 'react-table';
 
-import { PromiseArea, SsnStatus, Role, ContractState } from '../util/enum';
+import { SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
 import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress } from '../util/utils';
-import { SsnStats, DelegateStakeModalData } from '../util/interface';
-import Spinner from './spinner';
+import { SsnStats, StakeModalData } from '../util/interface';
 import ReactTooltip from 'react-tooltip';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import SpinnerNormal from './spinner-normal';
+import { UPDATE_STAKE_MODAL_DATA } from '../store/userSlice';
 
 
 function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
@@ -94,21 +95,21 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 }
 
 function SsnTable(props: any) {
-    // const networkURL = props.network;
-    const role = props.currRole;
-    
-    const data: SsnStats[] = props.data;
-    const totalStakeAmt = props.totalStakeAmt;
+    const dispatch = useAppDispatch();
+    const role = useAppSelector(state => state.user.role);
+    const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
+    const loading: OperationStatus = useAppSelector(state => state.staking.is_ssn_stats_loading);
+    const ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
-    const setDelegStakeModalData = props.setDelegStakeModalData;
 
     const handleStake = (name: string, address: string, commRate: string) => {
         // set dashboard state variable
-        setDelegStakeModalData((prevData: DelegateStakeModalData) => ({
-            ...prevData,
-            ssnName: name,
-            ssnAddress: address,
-            commRate: commRate,
+        dispatch(UPDATE_STAKE_MODAL_DATA({
+            stake_modal: {
+                ssnName: name,
+                ssnAddress: address,
+                commRate: commRate,
+            } as StakeModalData
         }));
     }
 
@@ -207,7 +208,7 @@ function SsnTable(props: any) {
                 tipText: ''
             }
             // eslint-disable-next-line
-        ],[totalStakeAmt, role]
+        ],[ssnList, role]
     )
 
     const getHiddenColumns = () => {
@@ -229,14 +230,20 @@ function SsnTable(props: any) {
     
     return (
         <>
-        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_SSN_STATS} />
-        <Table 
-            columns={columns} 
-            data={data} 
-            className={props.tableId} 
-            hiddenColumns={getHiddenColumns()} 
-            showStakeBtn={showStakeBtn}
+        { 
+            loading === OperationStatus.PENDING && 
+            <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> 
+        }
+        {
+            loading === OperationStatus.COMPLETE &&
+            <Table 
+                columns={columns} 
+                data={ssnList} 
+                className={props.tableId} 
+                hiddenColumns={getHiddenColumns()} 
+                showStakeBtn={showStakeBtn}
              />
+        }
         </>
     );
 }

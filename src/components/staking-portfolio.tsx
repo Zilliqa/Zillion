@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
 import ReactTooltip from 'react-tooltip';
 
-import { PromiseArea } from '../util/enum';
+import { OperationStatus } from '../util/enum';
 import { convertQaToCommaStr, convertQaToZilFull } from '../util/utils';
 
 import { DelegStakingPortfolioStats } from '../util/interface';
-import Spinner from './spinner';
 import DelegatorDropdown from './delegator-dropdown';
+import { useAppSelector } from '../store/hooks';
+import SpinnerNormal from './spinner-normal';
 
 
 function Table({ columns, data }: any) {
@@ -61,15 +62,9 @@ function Table({ columns, data }: any) {
 
 function StakingPortfolio(props: any) {
     // const networkURL = props.network;
-    const data: DelegStakingPortfolioStats[] = props.data;
-
-    // from dashboard
-    // to be passed to delegator dropdown
-    const { 
-        setClaimedRewardModalData,
-        setTransferStakeModalData,
-        setWithdrawStakeModalData
-     } = props;
+    // const data: DelegStakingPortfolioStats[] = props.data;
+    const data: DelegStakingPortfolioStats[] = useAppSelector(state => state.user.deleg_staking_portfolio_list);
+    const loading: OperationStatus = useAppSelector(state => state.user.is_deleg_stats_loading);
 
     const columns = useMemo(
         () => [
@@ -97,23 +92,28 @@ function StakingPortfolio(props: any) {
                 Cell: ({ row }: any) =>
                     <>
                     <DelegatorDropdown
-                        setClaimedRewardModalData={setClaimedRewardModalData}
-                        setTransferStakeModalData={setTransferStakeModalData}
-                        setWithdrawStakeModalData={setWithdrawStakeModalData}
                         ssnName={row.original.ssnName}
                         ssnAddress={row.original.ssnAddress}
                         delegAmt={row.original.delegAmt}
                         rewards={row.original.rewards} />
                     </>
             }
-        ], [setClaimedRewardModalData, setTransferStakeModalData, setWithdrawStakeModalData]
+        ], []
     );
 
     return (
         <>
-        <Spinner class="spinner-border dashboard-spinner mb-4" area={PromiseArea.PROMISE_GET_DELEG_STATS} />
-        { data.length === 0 && <div className="d-block px-4 pb-3 text-left"><em>You have not deposited in any nodes yet.</em></div> }
-        { data.length > 0 && <Table columns={columns} data={data} /> }
+        {
+            loading === OperationStatus.PENDING &&
+            <SpinnerNormal class="spinner-border dashboard-spinner mb-4" />
+        }
+        {
+            loading === OperationStatus.COMPLETE &&
+            <>
+             { (data.length === 0) && <div className="d-block px-4 pb-3 text-left"><em>You have not deposited in any nodes yet.</em></div> }
+             { (data.length > 0) && <Table columns={columns} data={data} /> }
+            </>
+        }
         </>
     );
 }

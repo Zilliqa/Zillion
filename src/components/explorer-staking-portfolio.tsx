@@ -5,6 +5,7 @@ import { getAddressLink, convertQaToCommaStr, convertQaToZilFull } from '../util
 import ReactTooltip from 'react-tooltip';
 import Spinner from './spinner';
 import { PromiseArea } from '../util/enum';
+import { useAppSelector } from '../store/hooks';
 
 
 function Table({ columns, data }: any) {
@@ -58,7 +59,7 @@ function Table({ columns, data }: any) {
 
 function ExplorerStakingPortfolio(props: any) {
     const data: DelegStakingPortfolioStats[] = props.data;
-    const networkURL = props.network;
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
 
     const columns = useMemo(
         () => [

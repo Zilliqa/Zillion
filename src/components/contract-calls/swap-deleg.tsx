@@ -1,11 +1,9 @@
-import React, { useState, useContext, useEffect } from 'react';
-import * as ZilliqaAccount from '../../account';
+import React, { useState, useEffect } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
-import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
-import { bech32ToChecksum, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, showWalletsPrompt } from '../../util/utils';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, computeGasFees, convertBase16ToBech32, getTruncatedAddress, getZillionExplorerLink, isDigits, isRespOk, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
-import AppContext from '../../contexts/appContext';
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 
@@ -16,7 +14,7 @@ import IconEditBox from '../icons/edit-box-line';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import ReactTooltip from 'react-tooltip';
-import { computeDelegRewardsRetriable } from '../../util/reward-calculator';
+import { computeDelegRewards } from '../../util/reward-calculator';
 
 import SwapImg from "../../static/swap_img0.png";
 import SwapImg1 from "../../static/swap_img1.png";
@@ -25,15 +23,28 @@ import SwapImg3 from "../../static/swap_img3.png";
 import SwapImg4 from "../../static/swap_img4.png";
 import SwapImg5 from "../../static/swap_img5.png";
 import { isStorageAvailable } from '../../util/use-local-storage';
+import { useAppSelector } from '../../store/hooks';
+import { SwapDelegModalData } from '../../util/interface';
+import { ZilSigner } from '../../zilliqa-signer';
+import { ZilSdk } from '../../zilliqa-api';
+import { units } from '@zilliqa-js/zilliqa';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
 
 
 const { BN, validation } = require('@zilliqa-js/util');
 
 function SwapDelegModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-    
-    const {proxy, impl, ledgerIndex, networkURL, ssnstatsList, swapDelegModalData, userAddress, updateData, updateRecentTransactions} = props;
+    const {updateData, updateRecentTransactions} = props;
+    const swapDelegModalData: SwapDelegModalData = useAppSelector(state => state.user.swap_deleg_modal_data);
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
+    const accountType = useAppSelector(state => state.user.account_type);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const userAddress = useAppSelector(state => state.user.address_bech32);
+    const ssnstatsList = useAppSelector(state => state.staking.ssn_list);
     const proxyChecksum = bech32ToChecksum(proxy);
 
     // transfer all stakes to this new deleg
@@ -53,6 +64,12 @@ function SwapDelegModal(props: any) {
 
     const [tutorialStep, setTutorialStep] = useState(0); // for the help guide
 
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
+
     const cleanUp = () => {
         setNewDelegAddr('');
         setSelectedDelegAddr('');
@@ -67,6 +84,9 @@ function SwapDelegModal(props: any) {
         setShowConfirmSwapBox(false);
         setShowConfirmRejectBox(false);
         setTutorialStep(0);
+        setGasOption(false);
+        setGasPrice(defaultGasPrice);
+        setGasLimit(defaultGasLimit);
     }
 
     const validateAddress = (address: string) => {
@@ -176,22 +196,31 @@ function SwapDelegModal(props: any) {
     }
 
     const sendTxn = (txnType: TransactionType, txParams: any) => {
+        if (!validateBalance(balance)) {
+            const gasFees = computeGasFees(gasPrice, gasLimit);
+            Alert('error', "Insufficient Balance", "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            setIsPending('');
+            return null;
+        }
+
         // set txn type to store in cookie
         setTxnType(txnType.toString());
         setIsPending(OperationStatus.PENDING);
 
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
-        .then((result) => {
-            if (result === OperationStatus.ERROR) {
-                Alert('error', "Transaction Error", "Please try again.");
-            } else {
-                setTxnId(result);
-            }
-        }).finally(() => {
-            setIsPending('');
-        }));
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
+            .then((result) => {
+                if (result === OperationStatus.ERROR) {
+                    Alert('error', "Transaction Error", "Please try again.");
+                } else {
+                    setTxnId(result)
+                }
+            }).finally(() => {
+                setIsPending('');
+            })
+        );
     }
 
     const confirmDelegSwap = async (requestorAddr: string) => {
@@ -225,7 +254,9 @@ function SwapDelegModal(props: any) {
                         value: `${requestorAddr}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.CONFIRM_DELEG_SWAP, txParams);
@@ -246,7 +277,9 @@ function SwapDelegModal(props: any) {
                         value: `${requestorAddr}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.REJECT_DELEG_SWAP, txParams);
@@ -283,20 +316,20 @@ function SwapDelegModal(props: any) {
         let displayAddr = getTruncatedAddress(address);
         let targetName = address === userAddress ? "Your wallet" : invokerMethod === "RequestSwap" ? "The recipient" : "The requestor"
 
-        const lrc = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "lastrewardcycle");
-        const lbdc = await  ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "last_buf_deposit_cycle_deleg", [wallet]);
-        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
-        const buff_deposit_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "buff_deposit_deleg", [wallet]);
+        const lrc = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
+        const lbdc = await  ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [wallet]);
+        const deposit_amt_deleg_map = await ZilSdk.getSmartContractSubState(impl, "deposit_amt_deleg", [wallet]);
+        const buff_deposit_deleg_map = await ZilSdk.getSmartContractSubState(impl, "buff_deposit_deleg", [wallet]);
         
-        if (lrc === undefined || lrc === "error") {
+        if (!isRespOk(lrc)) {
             return false;
         }
 
-        if (lbdc === undefined || lbdc === "error") {
+        if (!isRespOk(lbdc)) {
             return false;
         }
 
-        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null) {
+        if (!isRespOk(deposit_amt_deleg_map)) {
             // delegator has not delegate with any ssn
             // no need to perform further checks
             return false;
@@ -306,7 +339,7 @@ function SwapDelegModal(props: any) {
 
         for (let ssnAddress in ssnlist) {
             // check rewards
-            const rewards = new BN(await computeDelegRewardsRetriable(impl, networkURL, ssnAddress, wallet));
+            const rewards = new BN(await computeDelegRewards(impl, ssnAddress, wallet));
 
             if (rewards.gt(new BN(0))) {
                 let msg = `${targetName} ${displayAddr} has unwithdrawn rewards. Please withdraw or wait until the user has withdrawn the rewards before continuing.`
@@ -329,9 +362,7 @@ function SwapDelegModal(props: any) {
             // check buffered deposits (lrc-1)
             let lrc_o_minus = lrc_o - 1
             if (lrc_o_minus >= 0) {
-                if (buff_deposit_deleg_map !== undefined && 
-                    buff_deposit_deleg_map !== 'error' && 
-                    buff_deposit_deleg_map !== null &&  
+                if (isRespOk(buff_deposit_deleg_map) &&  
                     buff_deposit_deleg_map["buff_deposit_deleg"][wallet].hasOwnProperty(ssnAddress)) {
                     if (buff_deposit_deleg_map["buff_deposit_deleg"][wallet][ssnAddress].hasOwnProperty(lrc_o_minus)) {
                         let msg = `${targetName} ${displayAddr} has buffered deposits. Please wait for the next cycle before continuing.`
@@ -350,9 +381,9 @@ function SwapDelegModal(props: any) {
     const hasStaked = async (address: string) => {
         let wallet = fromBech32Address(address).toLowerCase();
 
-        const deposit_amt_deleg_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "deposit_amt_deleg", [wallet]);
+        const deposit_amt_deleg_map = await ZilSdk.getSmartContractSubState(impl, "deposit_amt_deleg", [wallet]);
 
-        if (deposit_amt_deleg_map === undefined || deposit_amt_deleg_map === "error" || deposit_amt_deleg_map === null || deposit_amt_deleg_map.length === 0) {
+        if (!isRespOk(deposit_amt_deleg_map)) {
             return false;
         }
 
@@ -364,9 +395,9 @@ function SwapDelegModal(props: any) {
     const hasPendingWithdrawal = async (address: string) => {
         let wallet = fromBech32Address(address).toLowerCase();
 
-        const pending_withdrawal_map = await ZilliqaAccount.getImplStateExplorerRetriable(impl, networkURL, "withdrawal_pending", [wallet]);
+        const pending_withdrawal_map = await ZilSdk.getSmartContractSubState(impl, "withdrawal_pending", [wallet]);
 
-        if (pending_withdrawal_map === undefined || pending_withdrawal_map === "error" || pending_withdrawal_map === null || pending_withdrawal_map.length === 0) {
+        if (!isRespOk(pending_withdrawal_map)) {
             return false;
         }
 
@@ -421,7 +452,9 @@ function SwapDelegModal(props: any) {
                         value: `${fromBech32Address(newDelegAddr)}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.REQUEST_DELEG_SWAP, txParams);
@@ -436,10 +469,47 @@ function SwapDelegModal(props: any) {
             data: JSON.stringify({
                 _tag: ProxyCalls.REVOKE_DELEG_SWAP,
                 params: []
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         sendTxn(TransactionType.REVOKE_DELEG_SWAP, txParams);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
+    }
+
+    const onSelectTabs = (index: number) => {
+        // reset the advanced gas settings display on change tabs
+        setTabIndex(index);
+        setGasOption(false);
+        setGasPrice(defaultGasPrice);
+        setGasLimit(defaultGasLimit);
     }
 
     useEffect(() => {
@@ -456,7 +526,7 @@ function SwapDelegModal(props: any) {
 
     return (
         <div id="swap-deleg-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="swapDelegModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-dialog-scrollable modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -618,6 +688,16 @@ function SwapDelegModal(props: any) {
                                     <span>{newDelegAddr}</span>
                                 </div>
                             </div>
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
@@ -652,6 +732,18 @@ function SwapDelegModal(props: any) {
                                     <span>{convertBase16ToBech32(swapDelegModalData.swapRecipientAddress)}</span>
                                 </div>
                             </div>
+                            <div className="mx-1">
+                                <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
+                            </div>
                             <div className="d-flex mt-4">
                                 <div className="mx-auto">
                                     <button type="button" className="btn btn-user-action-cancel mx-2 shadow-none" onClick={() => setShowConfirmRevokeBox(false)}>
@@ -681,6 +773,19 @@ function SwapDelegModal(props: any) {
                                         <span>View Wallet on Zillion Explorer</span>
                                     </ReactTooltip>
                                 </div>
+                            </div>
+
+                            <div className="mx-1">
+                                <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
                             </div>
 
                             <div className="mb-4">
@@ -721,6 +826,19 @@ function SwapDelegModal(props: any) {
                                 </div>
                             </div>
 
+                            <div className="mx-1">
+                                <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
+                            </div>
+
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>
@@ -755,7 +873,7 @@ function SwapDelegModal(props: any) {
                                 <strong>Help</strong>
                             </ReactTooltip>
                         </div>
-                        <Tabs selectedIndex={tabIndex} onSelect={index => setTabIndex(index)}>
+                        <Tabs selectedIndex={tabIndex} onSelect={(index) => onSelectTabs(index)}>
                             <TabList>
                                 <Tab>Change Stake Ownership { swapDelegModalData.swapRecipientAddress ? <span>(1)</span> : null }</Tab>
                                 <Tab>

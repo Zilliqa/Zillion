@@ -1,11 +1,13 @@
 import { toBech32Address, fromBech32Address } from '@zilliqa-js/crypto';
-import { Explorer, NetworkURL, Network, TransactionType, AccessMethod, Constants } from './enum';
+import { Explorer, NetworkURL, Network, TransactionType, AccountType, Constants, OperationStatus } from './enum';
 import Alert from '../components/alert';
+import { ZilSigner } from '../zilliqa-signer';
+import { getBlockchainExplorer } from './config-json-helper';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
 // config.js from public folder
-const { blockchain_explorer_config } = (window as { [key: string]: any })['config'];
+const blockchain_explorer_config = getBlockchainExplorer();
 
 export const bech32ToChecksum = (address: string) => {
     if (validation.isAddress(address)) {
@@ -52,6 +54,16 @@ export const computeStakeAmtPercent = (inputStake: string, totalStake: string) =
     return stakePercentage;
 }
 
+// checks if input contains only postive numbers
+// returns true if so, otherwise returns false
+export const isDigits = (input: string) => {
+    return /^\d+$/.test(input);
+}
+
+export const computeGasFees = (gasPrice: string, gasLimit: string) => {
+    return new BN(gasPrice).mul(gasLimit);
+}
+
 // convert commission rate from percentage to contract comm rate
 // userInputRate is a float
 // returns a big number
@@ -89,8 +101,7 @@ export const convertQaToZilFull = (amount: string) => {
 
 // convert gzil amount in 15 decimal places to a comma represented string
 export const convertGzilToCommaStr = (inputVal: string) => {
-    const decimalPlaces = new BigNumber(10**15);
-    const gzil = new BigNumber(inputVal).dividedBy(decimalPlaces).toFixed(3);
+    const gzil = new BigNumber(inputVal).shiftedBy(-15).toFixed(3);
     const splitAmt = gzil.split('.');
 
     // add comma separator to front part
@@ -199,16 +210,28 @@ export const getTransactionText = (txnType: TransactionType) => {
 // show information to prompt users
 // for used during contract calls
 export const showWalletsPrompt = (accountType: string) => {
-    if (accountType === AccessMethod.LEDGER) {
+    if (accountType === AccountType.LEDGER) {
         Alert('info', "Info", "Accessing the ledger device for keys.");
         Alert('info', "Info", "Please follow the instructions on the device.");
         return;
     }
 
-    if (accountType === AccessMethod.ZILPAY) {
+    if (accountType === AccountType.ZILPAY) {
         Alert('info', "Info", "Please follow the instructions on ZilPay.");
         return;
     }
+}
+
+// check if wallet has sufficient balance to pay for gas fees
+// for used during contract calls
+// @param balance wallet balance in Qa
+// returns true if balance is greater than or equal to gas fees; otherwise returns false
+export const validateBalance = (balance: string) => {
+    const gasFees = ZilSigner.getGasFees();
+    if (new BN(balance).gte(new BN(gasFees))) {
+        return true;
+    }
+    return false;
 }
 
 export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkURL: string) => {
@@ -228,4 +251,20 @@ export const calculateBlockRewardCountdown = (blockNum: number, currentNetworkUR
     const blockCountdown = rewardBlockCount - blockTraverse;
     
     return blockCountdown;
+}
+
+/**
+ * used by saga to check if response from fetching a contract state has any errors
+ * @param obj the contract result
+ * @returns true if response has no errors, false otherwise
+ */
+ export const isRespOk = (obj: any): boolean => {
+    if (
+        obj !== undefined &&
+        obj !== null &&
+        obj !== OperationStatus.ERROR
+    ) {
+        return true;
+    }
+    return false;
 }

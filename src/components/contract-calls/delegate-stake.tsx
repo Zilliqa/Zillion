@@ -1,38 +1,46 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
-import * as ZilliqaAccount from '../../account';
-import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr } from '../../util/utils';
-import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr, isDigits } from '../../util/utils';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
+import { StakeModalData } from '../../util/interface';
+import { ZilSigner } from '../../zilliqa-signer';
+import GasSettings from './gas-settings';
 
 const BigNumber = require('bignumber.js');
 const { BN, units } = require('@zilliqa-js/util');
 
 
 function DelegateStakeModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-
-    const proxy = props.proxy;
-    const ledgerIndex = props.ledgerIndex;
-    const networkURL = props.networkURL;
-    const minDelegStake = props.minDelegStake; // Qa
-    const balance = props.balance; // Qa
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
+    const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
+    const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
+    
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
 
-    const { delegStakeModalData, updateData, updateRecentTransactions } = props;
+    const { updateData, updateRecentTransactions } = props;
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
 
-    const ssnAddress = delegStakeModalData.ssnAddress; // bech32
+    const ssnAddress = stakeModalData.ssnAddress; // bech32
 
     const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+
 
     const delegateStake = async () => {
         if (!ssnAddress) {
@@ -56,11 +64,11 @@ function DelegateStakeModal(props: any) {
                     return null;
                 }
 
-                const gasFeesQa = ZilliqaAccount.getGasFees();
+                const gasFeesQa = new BigNumber(gasPrice).multipliedBy(gasLimit);
                 const combinedFees = new BigNumber(delegAmtQa).plus(gasFeesQa);
                 const combinedFeesZil = units.fromQa(new BN(combinedFees.toString()), units.Units.Zil);
                 const remaningBalance = new BigNumber(balance).minus(delegAmtQa);
-                const isBalanceSufficient = remaningBalance.isGreaterThan(new BigNumber(gasFeesQa));
+                const isBalanceSufficient = remaningBalance.isGreaterThan(gasFeesQa);
 
                 if (!isBalanceSufficient) {
                     Alert('error', 
@@ -80,11 +88,6 @@ function DelegateStakeModal(props: any) {
 
         // create tx params
 
-        // toAddr: proxy address
-        // amount: amount in Qa to stake
-        console.log("ssn address: %o", ssnAddress);
-        console.log("proxy: %o", proxy);
-
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 
@@ -102,15 +105,16 @@ function DelegateStakeModal(props: any) {
                         value: `${ssnChecksumAddress}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         setIsPending(OperationStatus.PENDING);
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
@@ -118,7 +122,8 @@ function DelegateStakeModal(props: any) {
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     const setDefaultStakeAmt = useCallback(() => {
@@ -144,11 +149,41 @@ function DelegateStakeModal(props: any) {
         setTimeout(() => {
             setDefaultStakeAmt();
             setTxnId('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
     }
 
     const handleDelegAmt = (e: any) => {
         setDelegAmt(e.target.value);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     useEffect(() => {
@@ -157,7 +192,7 @@ function DelegateStakeModal(props: any) {
 
     return (
         <div id="delegate-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="delegateStakeModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-lg" role="document">
                  <div className="modal-content">
                      {
                          isPending ?
@@ -182,23 +217,35 @@ function DelegateStakeModal(props: any) {
                         <div className="modal-body">
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel mr-4">
-                                    <h3>{delegStakeModalData.ssnName}</h3>
-                                    <span>{delegStakeModalData.ssnAddress}</span>
+                                    <h3>{stakeModalData.ssnName}</h3>
+                                    <span>{stakeModalData.ssnAddress}</span>
                                 </div>
                                 <div className="col node-details-panel">
                                     <h3>Commission Rate</h3>
-                                    <span>{convertToProperCommRate(delegStakeModalData.commRate).toFixed(2)}%</span>
+                                    <span>{convertToProperCommRate(stakeModalData.commRate).toFixed(2)}%</span>
                                 </div>
                             </div>
 
-                            <div className="modal-label mb-2">Enter stake amount</div>
+                            <div className="modal-label mb-2"><strong>Enter stake amount</strong></div>
                             <div className="input-group mb-2">
                                 <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
                             </div>
-                            <p><small>Wallet balance: <strong>{convertQaToCommaStr(balance)}</strong> ZIL</small></p>
+                            <p><small><strong>Available</strong>: <strong>{convertQaToCommaStr(balance.toString())}</strong> ZIL</small></p>
+
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
+
                             <div className="mb-4">
                                 <small><strong>Notes</strong></small>
                                 <ul>

@@ -1,15 +1,11 @@
-import React, { useState, useContext} from 'react';
-import AppContext from '../contexts/appContext';
+/**
+ * @deprecated
+ */
+import React, { useState } from 'react';
 import Alert from './alert';
-import * as Account from '../account';
-import { AccessMethod } from '../util/enum';
 
 
 function WalletPrivatekey(props: any) {
-
-    const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateRole } = appContext;
-    
     const role = props.role;
     const [privateKey, setPrivatekey] = useState('');
 
@@ -24,23 +20,18 @@ function WalletPrivatekey(props: any) {
     const unlockWallet = async () => {
         console.log("unlock by privatekey");
         if (privateKey !== "") {
-            const walletAddress = await Account.addWalletByPrivatekey(privateKey);
+            // const walletAddress = await Account.addWalletByPrivatekey(privateKey);
 
-            if (walletAddress !== "error") {
-                console.log("wallet add success: %o", walletAddress);
-                // show loading state
-                props.onWalletLoadingCallback();
+            // if (walletAddress !== "error") {
+            //     console.log("wallet add success: %o", walletAddress);
+            //     // show loading state
+            //     props.onWalletLoadingCallback();
 
-                // update context
-                initParams(walletAddress, AccessMethod.PRIVATEKEY);
-                await updateRole(walletAddress, role);
-                updateAuth();
-
-                // redirect to dashboard
-                props.onSuccessCallback();
-            } else {
-                handleError();
-            }
+            //     // redirect to dashboard
+            //     props.onSuccessCallback();
+            // } else {
+            //     handleError();
+            // }
         }
     }
 
