@@ -1,36 +1,46 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
-import * as ZilliqaAccount from '../../account';
-import AppContext from '../../contexts/appContext';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull } from '../../util/utils';
-import { OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits, computeGasFees, isRespOk } from '../../util/utils';
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
-import { fromBech32Address } from '@zilliqa-js/crypto';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
+import { StakeModalData } from '../../util/interface';
+import { ZilSdk } from '../../zilliqa-api';
+import { ZilSigner } from '../../zilliqa-signer';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
+import { logger } from '../../util/logger';
 
 
 const { BN, units } = require('@zilliqa-js/util');
 
 
 function WithdrawStakeModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-
-    const proxy = props.proxy;
-    const impl = props.impl;
-    const networkURL = props.networkURL;
-    const ledgerIndex = props.ledgerIndex;
-    const minDelegStake = props.minDelegStake; // Qa
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
+    const userBase16Address = useAppSelector(state => state.user.address_base16);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
+    const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
-    const { withdrawStakeModalData, updateData, updateRecentTransactions } = props;
-    const userBase16Address = props.userAddress ? fromBech32Address(props.userAddress).toLowerCase() : '';
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
+    const { updateData, updateRecentTransactions } = props;
 
-    const ssnAddress = withdrawStakeModalData.ssnAddress; // bech32
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
+
+    const ssnAddress = stakeModalData.ssnAddress; // bech32
     const [withdrawAmt, setWithdrawAmt] = useState('0'); // in ZIL
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
@@ -40,22 +50,22 @@ function WithdrawStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         
-        const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "lastrewardcycle");
-        const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "last_buf_deposit_cycle_deleg", [userBase16Address]);
+        const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
+        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
-        if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
+        if (!isRespOk(last_reward_cycle_json)) {
             return false;
         }
 
-        if (last_buf_deposit_cycle_deleg_json === undefined || last_buf_deposit_cycle_deleg_json === 'error' || last_buf_deposit_cycle_deleg_json === null) {
+        if (!isRespOk(last_buf_deposit_cycle_deleg_json)) {
             return false;
         }
 
         // compute rewards
-        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
+        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address));
 
-        if (delegRewards !== "0") {
-            console.log("you have delegated rewards: %o", delegRewards);
+        if (delegRewards.gt(new BN(0))) {
+            logger("you have delegated rewards: %o", delegRewards);
             Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before withdrawing the staked amount.");
             return true;
         }
@@ -114,6 +124,15 @@ function WithdrawStakeModal(props: any) {
             }
         }
 
+        if (!validateBalance(balance)) {
+            const gasFees = computeGasFees(gasPrice, gasLimit);
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
+        }
+
         setIsPending(OperationStatus.PENDING);
 
         // check if deleg has unwithdrawn rewards or buffered deposits for this ssn address
@@ -128,7 +147,7 @@ function WithdrawStakeModal(props: any) {
         // toAddr: proxy address
         const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
-        const delegAmtQa = withdrawStakeModalData.delegAmt;
+        const delegAmtQa = stakeModalData.delegAmt;
         const leftOverQa = new BN(delegAmtQa).sub(new BN(withdrawAmtQa));
 
         // check if withdraw more than delegated
@@ -163,14 +182,15 @@ function WithdrawStakeModal(props: any) {
                         value: `${withdrawAmtQa}`,
                     },
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
         
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
@@ -178,18 +198,19 @@ function WithdrawStakeModal(props: any) {
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     // set default withdraw amount to current deleg amt
     const setDefaultWithdrawAmt = useCallback(() => {
-        if (withdrawStakeModalData.delegAmt) {
-            const tempDelegAmt = convertQaToZilFull(withdrawStakeModalData.delegAmt);
+        if (stakeModalData.delegAmt) {
+            const tempDelegAmt = convertQaToZilFull(stakeModalData.delegAmt);
             setWithdrawAmt(tempDelegAmt);
         } else {
             setWithdrawAmt('0');
         }
-    }, [withdrawStakeModalData.delegAmt]);
+    }, [stakeModalData.delegAmt]);
 
     const handleClose = () => {
         // txn success
@@ -206,11 +227,41 @@ function WithdrawStakeModal(props: any) {
         setTimeout(() => {
             setDefaultWithdrawAmt();
             setTxnId('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
     }
 
     const handleWithdrawAmt = (e: any) => {
         setWithdrawAmt(e.target.value);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     useEffect(() => {
@@ -219,7 +270,7 @@ function WithdrawStakeModal(props: any) {
 
     return (
         <div id="withdraw-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="withdrawStakeModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -244,22 +295,32 @@ function WithdrawStakeModal(props: any) {
                         <div className="modal-body">
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel mr-4">
-                                    <h3>{withdrawStakeModalData.ssnName}</h3>
-                                    <span>{withdrawStakeModalData.ssnAddress}</span>
+                                    <h3>{stakeModalData.ssnName}</h3>
+                                    <span>{stakeModalData.ssnAddress}</span>
                                 </div>
                                 <div className="col node-details-panel">
                                     <h3>Deposit</h3>
-                                    <span>{convertQaToCommaStr(withdrawStakeModalData.delegAmt)} ZIL</span>
+                                    <span>{convertQaToCommaStr(stakeModalData.delegAmt)} ZIL</span>
                                 </div>
                             </div>
 
-                            <div className="modal-label mb-2">Enter withdrawal amount</div>
+                            <div className="modal-label mb-2"><strong>Enter withdrawal amount</strong></div>
                             <div className="input-group mb-4">
                                 <input type="text" className="form-control shadow-none" value={withdrawAmt} onChange={handleWithdrawAmt} />
                                 <div className="input-group-append">
                                     <span className="input-group-text pl-4 pr-3">ZIL</span>
                                 </div>
                             </div>
+                            <GasSettings
+                                    gasOption={gasOption}
+                                    gasPrice={gasPrice}
+                                    gasLimit={gasLimit}
+                                    setGasOption={setGasOption}
+                                    onBlurGasPrice={onBlurGasPrice}
+                                    onBlurGasLimit={onBlurGasLimit}
+                                    onGasPriceChange={onGasPriceChange}
+                                    onGasLimitChange={onGasLimitChange}
+                                />
                             <div className="d-flex">
                                 <button type="button" className="btn btn-user-action mx-auto mt-2 shadow-none" onClick={withdrawStake}>Initiate</button>
                             </div>

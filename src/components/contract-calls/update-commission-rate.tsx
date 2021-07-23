@@ -1,27 +1,40 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import AppContext from '../../contexts/appContext';
-import { OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
-import { bech32ToChecksum, convertToProperCommRate, percentToContractCommRate, showWalletsPrompt } from '../../util/utils';
-import * as ZilliqaAccount from "../../account";
+import { AccountType, OperationStatus, ProxyCalls, TransactionType } from "../../util/enum";
+import { bech32ToChecksum, computeGasFees, convertToProperCommRate, isDigits, percentToContractCommRate, showWalletsPrompt, validateBalance } from '../../util/utils';
 import Alert from '../alert';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
+import { useAppSelector } from '../../store/hooks';
+import { ZilSigner } from '../../zilliqa-signer';
+import { units } from '@zilliqa-js/zilliqa';
+import BigNumber from 'bignumber.js';
+import GasSettings from './gas-settings';
+import { logger } from '../../util/logger';
 
 const { BN } = require('@zilliqa-js/util');
 
 function UpdateCommRateModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
+    const commRate = useAppSelector(state => state.user.operator_stats.commRate);
 
-    const { proxy, networkURL, currentRate, ledgerIndex, updateData, updateRecentTransactions } = props;
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
+
+    const { updateData, updateRecentTransactions } = props;
     const [newRate, setNewRate] = useState('');
     const [txnId, setTxnId] = useState('')
     const [isPending, setIsPending] = useState('');
-
 
     const updateCommRate = async () => {
         if (!newRate || !newRate.match(/\d/)) {
@@ -34,6 +47,14 @@ function UpdateCommRateModal(props: any) {
             return null;
         }
 
+        if (!validateBalance(balance)) {
+            const gasFees = computeGasFees(gasPrice, gasLimit);
+            Alert('error', 
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
+        }
 
         // create tx params
 
@@ -41,7 +62,7 @@ function UpdateCommRateModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const contractCommRate = percentToContractCommRate(newRate);
 
-        console.log("my new rate: %o", contractCommRate);
+        logger("new rate: %o", contractCommRate);
 
         // gas price, gas limit declared in account.ts
         let txParams = {
@@ -57,24 +78,26 @@ function UpdateCommRateModal(props: any) {
                         value: `${contractCommRate}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         setIsPending(OperationStatus.PENDING);
 
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
-                    setTxnId(result);
+                    setTxnId(result)
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     const handleClose = () => {
@@ -93,12 +116,42 @@ function UpdateCommRateModal(props: any) {
             setNewRate('');
             setTxnId('');
             setIsPending('');
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
+    }
+
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
     }
 
     return (
         <div id="update-comm-rate-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="updateCommRateModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -124,7 +177,7 @@ function UpdateCommRateModal(props: any) {
                             <div className="row node-details-wrapper mb-4">
                                 <div className="col node-details-panel">
                                     <h3>Current Commission Rate</h3>
-                                    <span>{currentRate ? convertToProperCommRate(currentRate).toFixed(2) : '0.00'}&#37;</span>
+                                    <span>{commRate ? convertToProperCommRate(commRate).toFixed(2) : '0.00'}&#37;</span>
                                 </div>
                             </div>
                             <div className="input-group mb-4">
@@ -133,6 +186,16 @@ function UpdateCommRateModal(props: any) {
                                     <span className="input-group-text pl-4 pr-3">%</span>
                                 </div>
                             </div>
+                            <GasSettings
+                                gasOption={gasOption}
+                                gasPrice={gasPrice}
+                                gasLimit={gasLimit}
+                                setGasOption={setGasOption}
+                                onBlurGasPrice={onBlurGasPrice}
+                                onBlurGasLimit={onBlurGasLimit}
+                                onGasPriceChange={onGasPriceChange}
+                                onGasLimitChange={onGasLimitChange}
+                            />
                             <div className="d-flex mt-2">
                                 <button type="button" className="btn btn-user-action mx-auto shadow-none" onClick={updateCommRate}>Update</button>
                             </div>

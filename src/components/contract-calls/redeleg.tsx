@@ -1,19 +1,23 @@
-import React, { useState, useContext, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTable, useSortBy } from 'react-table';
 import ReactTooltip from 'react-tooltip';
 import { toast } from 'react-toastify';
 import { trackPromise } from 'react-promise-tracker';
 
-import * as ZilliqaAccount from '../../account';
-import AppContext from '../../contexts/appContext';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull } from '../../util/utils';
-import { ProxyCalls, OperationStatus, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees, isRespOk } from '../../util/utils';
+import { ProxyCalls, OperationStatus, TransactionType, AccountType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
-import { fromBech32Address } from '@zilliqa-js/crypto';
+import { useAppSelector } from '../../store/hooks';
+import { StakeModalData } from '../../util/interface';
+import { ZilSdk } from '../../zilliqa-api';
+import { ZilSigner } from '../../zilliqa-signer';
+import GasSettings from './gas-settings';
+import BigNumber from 'bignumber.js';
+import { logger } from '../../util/logger';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -76,24 +80,20 @@ function Table({ columns, data, tableId, senderAddress, handleNodeSelect, hidden
 
 
 function ReDelegateStakeModal(props: any) {
-    const appContext = useContext(AppContext);
-    const { accountType } = appContext;
-    
-    const { 
-        proxy,
-        impl,
-        ledgerIndex,
-        networkURL,
-        minDelegStake,
-        nodeSelectorOptions, 
-        transferStakeModalData,
-        updateData,
-        updateRecentTransactions } = props;
+    const { updateData, updateRecentTransactions } = props;
+    const proxy = useAppSelector(state => state.blockchain.proxy);
+    const impl = useAppSelector(state => state.blockchain.impl);
+    const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const balance = useAppSelector(state => state.user.balance);
+    const userBase16Address = useAppSelector(state => state.user.address_base16);
+    const ledgerIndex = useAppSelector(state => state.user.ledger_index);
+    const accountType = useAppSelector(state => state.user.account_type);
+    const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
+    const nodeSelectorOptions = useAppSelector(state => state.staking.ssn_dropdown_list);
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
 
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
-    const userBase16Address = props.userAddress? fromBech32Address(props.userAddress).toLowerCase() : '';
-
-    const fromSsn = transferStakeModalData.ssnAddress; // bech32
+    const fromSsn = stakeModalData.ssnAddress; // bech32
     const [toSsn, setToSsn] = useState('');
     const [toSsnName, setToSsnName] = useState('');
     const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
@@ -102,26 +102,32 @@ function ReDelegateStakeModal(props: any) {
     const [isPending, setIsPending] = useState('');
     const [showNodeSelector, setShowNodeSelector] = useState(false);
 
+    const defaultGasPrice = ZilSigner.getDefaultGasPrice();
+    const defaultGasLimit = ZilSigner.getDefaultGasLimit();
+    const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
+    const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
+    const [gasOption, setGasOption] = useState(false);
+
     
     // checks if there are any unwithdrawn rewards or buffered deposit
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         
-        const last_reward_cycle_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "lastrewardcycle");
-        const last_buf_deposit_cycle_deleg_json = await ZilliqaAccount.getImplStateExplorer(impl, networkURL, "last_buf_deposit_cycle_deleg", [userBase16Address]);
+        const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
+        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
 
-        if (last_reward_cycle_json === undefined || last_reward_cycle_json === 'error' || last_reward_cycle_json === null) {
+        if (!isRespOk(last_reward_cycle_json)) {
             return false;
         }
 
-        if (last_buf_deposit_cycle_deleg_json === undefined || last_buf_deposit_cycle_deleg_json === 'error' || last_buf_deposit_cycle_deleg_json === null) {
+        if (!isRespOk(last_buf_deposit_cycle_deleg_json)) {
             return false;
         }
 
         // compute rewards
-        const delegRewards = new BN(await computeDelegRewards(impl, networkURL, ssnChecksumAddress, userBase16Address)).toString();
+        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address));
 
-        if (delegRewards !== "0") {
+        if (delegRewards.gt(new BN(0))) {
             Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before transferring.");
             return true;
         }
@@ -182,6 +188,18 @@ function ReDelegateStakeModal(props: any) {
             }
         }
 
+        const gasFees = computeGasFees(gasPrice, gasLimit);
+        const combinedFees = new BN(delegAmtQa).plus(gasFees);
+        const isBalanceSufficient = new BN(balance).gte(combinedFees);
+
+        if (!isBalanceSufficient) {
+            Alert('error', 
+                "Insufficient Balance", 
+                "Your wallet balance is insufficient to pay for the staked amount and gas fees combined. Total amount required is " + units.fromQa(combinedFees, units.Units.Zil) + " ZIL.");
+            Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
+            return null;
+        }
+
         setIsPending(OperationStatus.PENDING);
 
         // check if deleg has unwithdrawn rewards or buffered deposits for the from ssn address
@@ -198,7 +216,7 @@ function ReDelegateStakeModal(props: any) {
         const proxyChecksum = bech32ToChecksum(proxy);
         const fromSsnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         const toSsnChecksumAddress = bech32ToChecksum(toSsn).toLowerCase();
-        const currentAmtQa = transferStakeModalData.delegAmt;
+        const currentAmtQa = stakeModalData.delegAmt;
         const leftOverQa = new BN(currentAmtQa).sub(new BN(delegAmtQa));
 
         // check if redeleg more than current deleg amount
@@ -238,14 +256,15 @@ function ReDelegateStakeModal(props: any) {
                         value: `${delegAmtQa}`,
                     }
                 ]
-            })
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
         };
 
         showWalletsPrompt(accountType);
 
-        trackPromise(ZilliqaAccount.handleSign(accountType, networkURL, txParams, ledgerIndex)
+        trackPromise(ZilSigner.sign(accountType as AccountType, txParams, ledgerIndex)
             .then((result) => {
-                console.log(result);
                 if (result === OperationStatus.ERROR) {
                     Alert('error', "Transaction Error", "Please try again.");
                 } else {
@@ -253,18 +272,19 @@ function ReDelegateStakeModal(props: any) {
                 }
             }).finally(() => {
                 setIsPending('');
-            }));
+            })
+        );
     }
 
     // set default transfer amt to current stake amt
     const setDefaultDelegAmt = useCallback(() => {
-        if (transferStakeModalData.delegAmt) {
-            const tempDelegAmt = convertQaToZilFull(transferStakeModalData.delegAmt);
+        if (stakeModalData.delegAmt) {
+            const tempDelegAmt = convertQaToZilFull(stakeModalData.delegAmt);
             setDelegAmt(tempDelegAmt);
         } else {
             setDelegAmt('0');
         }
-    }, [transferStakeModalData.delegAmt]);
+    }, [stakeModalData.delegAmt]);
 
     const handleClose = () => {
         // txn success
@@ -284,6 +304,9 @@ function ReDelegateStakeModal(props: any) {
             setTxnId('');
             setDefaultDelegAmt();
             setShowNodeSelector(false);
+            setGasOption(false);
+            setGasPrice(defaultGasPrice);
+            setGasLimit(defaultGasLimit);
         }, 150);
     }
 
@@ -299,8 +322,35 @@ function ReDelegateStakeModal(props: any) {
         setDelegAmt(e.target.value);
     }
 
+    const onBlurGasPrice = () => {
+        if (gasPrice === '' || new BigNumber(gasPrice).lt(new BigNumber(defaultGasPrice))) {
+            setGasPrice(defaultGasPrice);
+            Alert("Info", "Minimum Gas Price Required", "Gas price should not be lowered than default blockchain requirement.");
+        }
+    }
+
+    const onGasPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasPrice(input);
+        }
+    }
+
+    const onBlurGasLimit = () => {
+        if (gasLimit === '' || new BigNumber(gasLimit).lt(50)) {
+            setGasLimit(defaultGasLimit);
+        }
+    }
+
+    const onGasLimitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let input = e.target.value;
+        if (input === '' || isDigits(input)) {
+            setGasLimit(input);
+        }
+    }
+
     const toggleNodeSelector = () => {
-        console.log("toggle node selector: %o", showNodeSelector);
+        logger("toggle node selector: %o", showNodeSelector);
         setShowNodeSelector(!showNodeSelector);
     }
 
@@ -354,7 +404,7 @@ function ReDelegateStakeModal(props: any) {
 
     return (
         <div id="redeleg-stake-modal" className="modal fade" tabIndex={-1} role="dialog" aria-labelledby="redelegModalLabel" aria-hidden="true">
-            <div className="contract-calls-modal modal-dialog modal-lg" role="document">
+            <div className="contract-calls-modal modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div className="modal-content">
                     {
                         isPending ?
@@ -384,12 +434,12 @@ function ReDelegateStakeModal(props: any) {
                                     <small><strong>From</strong></small>
                                     <div className="row node-details-wrapper mb-4">
                                         <div className="col node-details-panel mr-4">
-                                            <h3>{transferStakeModalData.ssnName}</h3>
-                                            <span>{transferStakeModalData.ssnAddress}</span>
+                                            <h3>{stakeModalData.ssnName}</h3>
+                                            <span>{stakeModalData.ssnAddress}</span>
                                         </div>
                                         <div className="col node-details-panel">
                                             <h3>Current Deposit</h3>
-                                            <span>{convertQaToCommaStr(transferStakeModalData.delegAmt)} ZIL</span>
+                                            <span>{convertQaToCommaStr(stakeModalData.delegAmt)} ZIL</span>
                                         </div>
                                     </div>
 
@@ -410,7 +460,7 @@ function ReDelegateStakeModal(props: any) {
                                             </div>
                                         </div>
 
-                                        <div className="modal-label mb-2">Enter transfer amount</div>
+                                        <div className="modal-label mb-2"><strong>Enter transfer amount</strong></div>
                                         <div className="input-group mb-4">
                                             <input type="text" className="form-control shadow-none" value={delegAmt} onChange={handleDelegAmt} />
                                             <div className="input-group-append">
@@ -419,6 +469,17 @@ function ReDelegateStakeModal(props: any) {
                                         </div>
                                         </>
                                     }
+
+                                    <GasSettings
+                                        gasOption={gasOption}
+                                        gasPrice={gasPrice}
+                                        gasLimit={gasLimit}
+                                        setGasOption={setGasOption}
+                                        onBlurGasPrice={onBlurGasPrice}
+                                        onBlurGasLimit={onBlurGasLimit}
+                                        onGasPriceChange={onGasPriceChange}
+                                        onGasLimitChange={onGasLimitChange}
+                                    />
 
                                     <div className="d-flex">
                                         <button type="button" className="btn btn-user-action mt-2 mx-auto shadow-none" onClick={redeleg}>Transfer Stake</button>
@@ -435,7 +496,7 @@ function ReDelegateStakeModal(props: any) {
                                         <Table 
                                             columns={columns} 
                                             data={nodeSelectorOptions} 
-                                            senderAddress={transferStakeModalData.ssnAddress} 
+                                            senderAddress={stakeModalData.ssnAddress} 
                                             handleNodeSelect={handleNodeSelect}
                                             hiddenColumns={getHiddenColumns()} />
                                     </div>

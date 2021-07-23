@@ -217,6 +217,24 @@ input:focus {
   }
 }
 
+.advanced-btn {
+  font-size: 0.85em;
+  font-weight: 500;
+  padding: 0;
+  margin: 0;
+  color: var(--primary-color);
+}
+
+.advanced-btn-div {
+  color: var(--primary-color);
+  fill: var(--primary-color);
+}
+
+.advanced-btn-div:hover {
+  color: var(--primary-dark-color);
+  fill: var(--primary-dark-color);
+}
+
 .btn-notify-dropdown {
   width: 34px;
   height: 34px;
@@ -642,6 +660,15 @@ input:focus {
   transition: 0.8s ease;
 }
 
+.fee-head {
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.fee {
+  letter-spacing: 0.02em;
+}
+
 .logo {
   width: 24px;
   height: auto;
@@ -689,7 +716,7 @@ input:focus {
 }
 
 .modal .contract-calls-modal {
-    padding-top: 10%;
+    /* padding-top: 10%; */
 }
 
 .modal .contract-calls-modal .modal-body {
@@ -1393,6 +1420,32 @@ input:focus {
   transition: color 0.5s ease;
 }
 
+/* creates a line between text */
+#fee-section-heading {
+  display: flex;
+  flex-direction: row;
+}
+#fee-section-heading:before, #fee-section-heading:after{
+  content: "";
+  flex: 1 1;
+  border-bottom: 1px solid var(--placeholder-text-color);
+  margin: auto;
+}
+#fee-section-heading:before {
+  margin-right: 20px
+}
+#fee-section-heading:after {
+  margin-left: 20px
+}
+
+#fee-section-heading {
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primary-color);
+}
+
 #home-mini-navbar {
   position: absolute;
   right: 0;
@@ -1790,7 +1843,7 @@ input:focus {
   color: var(--primary-color);
 }
 
-#swap-deleg-modal .btn-change-node, #redeleg-stake-modal .btn-change-node:hover {
+#swap-deleg-modal .btn-change-node:hover, #redeleg-stake-modal .btn-change-node:hover {
   color: var(--primary-dark-color);
 }
 
@@ -1806,10 +1859,6 @@ input:focus {
 
 #swap-deleg-modal .modal-content {
   max-height: calc(100vh - 10rem);
-}
-
-#swap-deleg-modal .contract-calls-modal {
-  padding-top: 4%;
 }
 
 #ssn-table-header-tip {

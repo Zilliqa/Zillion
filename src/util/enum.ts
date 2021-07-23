@@ -1,10 +1,11 @@
-export enum AccessMethod {
+export enum AccountType {
     PRIVATEKEY = "PRIVATEKEY",
     KEYSTORE = "KEYSTORE",
     MNEMONIC = "MNEMONIC",
     ZILPAY = "ZILPAY",
     MOONLET = "MOONLET",
-    LEDGER = "LEDGER"
+    LEDGER = "LEDGER",
+    NONE = ""
 }
 
 
@@ -55,8 +56,9 @@ export enum NetworkURL {
 
 export enum OperationStatus {
     ERROR = "ERROR",
-    SUCCESS = "SUCCESS",
+    COMPLETE = "COMPLETE",
     PENDING = "PENDING",
+    IDLE = "IDLE",
 }
 
 export enum PromiseArea {

@@ -1,16 +1,16 @@
 import React from 'react';
-import { TransferStakeModalData, WithdrawStakeModalData, ClaimedRewardModalData } from '../util/interface';
+import { StakeModalData } from '../util/interface';
 import { ButtonText, ContractState } from '../util/enum';
+import { useAppDispatch } from '../store/hooks';
+import { UPDATE_STAKE_MODAL_DATA } from '../store/userSlice';
 
 
 function DelegatorDropdown(props: any) {
+    const dispatch = useAppDispatch();
     // from staking-portfolio
     // modal data is a state variable on dashboard
     // delegAmt, rewards in Qa
     const { 
-        setClaimedRewardModalData,
-        setTransferStakeModalData, 
-        setWithdrawStakeModalData,
         ssnName,
         ssnAddress,
         delegAmt,
@@ -18,29 +18,32 @@ function DelegatorDropdown(props: any) {
     } = props;
 
     const handleClaimRewards = () => {
-        setClaimedRewardModalData((prevData: ClaimedRewardModalData) => ({
-            ...prevData,
-            ssnName: ssnName,
-            ssnAddress: ssnAddress,
-            rewards: rewards,
+        dispatch(UPDATE_STAKE_MODAL_DATA({
+            stake_modal: {
+                ssnName: ssnName,
+                ssnAddress: ssnAddress,
+                rewards: rewards,
+            } as StakeModalData
         }));
     };
 
     const handleTransferStake = () => {
-        setTransferStakeModalData((prevData: TransferStakeModalData) => ({
-            ...prevData,
-            ssnName: ssnName,
-            ssnAddress: ssnAddress,
-            delegAmt: delegAmt,
+        dispatch(UPDATE_STAKE_MODAL_DATA({
+            stake_modal: {
+                ssnName: ssnName,
+                ssnAddress: ssnAddress,
+                delegAmt: delegAmt,
+            } as StakeModalData
         }));
     };
 
     const handleWithdrawStake = () => {
-        setWithdrawStakeModalData((prevData: WithdrawStakeModalData) => ({
-            ...prevData,
-            ssnName: ssnName,
-            ssnAddress: ssnAddress,
-            delegAmt: delegAmt,
+        dispatch(UPDATE_STAKE_MODAL_DATA({
+            stake_modal: {
+                ssnName: ssnName,
+                ssnAddress: ssnAddress,
+                delegAmt: delegAmt,
+            } as StakeModalData
         }));
     };
 

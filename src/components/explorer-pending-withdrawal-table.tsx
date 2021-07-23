@@ -58,7 +58,7 @@ function Table({ columns, data, tableId }: any) {
 
 function ExplorerPendingWithdrawalTable(props: any) {
     const data = props.data;
-    const totalClaimableAmt = props.totalClaimableAmt;
+    const totalWithdrawAmt = props.totalWithdrawAmt;
 
     const columns = useMemo(
         () => [
@@ -93,7 +93,7 @@ function ExplorerPendingWithdrawalTable(props: any) {
                     </div>
                     <div className="card-header d-flex justify-content-between" id="complete-withdraw-accordion-header">
                         <div>
-                            <span>You can now withdraw <strong>{convertQaToCommaStr(totalClaimableAmt)}</strong> ZIL</span>
+                            <span>You can now withdraw <strong>{convertQaToCommaStr(totalWithdrawAmt)}</strong> ZIL</span>
                         </div>
                     </div>
 

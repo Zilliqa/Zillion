@@ -1,19 +1,14 @@
-import React, { useContext } from 'react';
-
-import AppContext from '../contexts/appContext';
-import { AccessMethod, Environment } from '../util/enum';
+import React from 'react';
+import { AccountType, Environment } from '../util/enum';
 import Alert from './alert';
+
+import { toBech32Address } from '@zilliqa-js/crypto';
+import { getEnvironment } from '../util/config-json-helper';
 
 
 function WalletZilPay(props: any) {
-
-    const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateNetwork, updateRole } = appContext;
-
-    const role = props.role;
-
     // config.js from public folder
-    const { environment_config } = (window as { [key: string]: any })['config'];
+    const env = getEnvironment();
 
     const unlockWallet = async () => {
 
@@ -41,20 +36,13 @@ function WalletZilPay(props: any) {
             }
 
             const { base16 } = zilPay.wallet.defaultAccount;
+            const bech32Address = toBech32Address(base16);
 
-            // request parent to show spinner while updating context
+            // request parent to show spinner while updating
             props.onWalletLoadingCallback();
-
-            // update context
-            // need await for update role for it to complete, otherwise context is empty
-            // update with zilpay selected network
-            initParams(base16, AccessMethod.ZILPAY);
-            updateNetwork(zilPay.wallet.net);
-            await updateRole(base16, role);
-            updateAuth();
-
+            
             // request parent to redirect to dashboard
-            props.onSuccessCallback();
+            props.onSuccessCallback(base16, bech32Address, AccountType.ZILPAY);
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
             Alert('error', 'Unable to access ZilPay', 'Please check if there is a new ZilPay version or clear your browser cache.');
@@ -66,7 +54,7 @@ function WalletZilPay(props: any) {
         <div className="wallet-access">
             <h2>Access wallet using ZilPay</h2>
             
-            { environment_config === Environment.PROD ? 
+            { env === Environment.PROD ? 
                 <p className="my-4"><strong>Note:</strong> We remind all users to set your ZilPay network to <strong>Mainnet</strong></p> :
                 <p className="my-4"><strong>Note:</strong> We remind all users to set your ZilPay network to <strong>Testnet</strong></p>
             }

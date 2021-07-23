@@ -1,13 +1,13 @@
-import React, { useContext, useState } from 'react';
-import AppContext from '../contexts/appContext';
+import React, { useState } from 'react';
 import Alert from './alert';
-import { AccessMethod } from '../util/enum';
-import { convertQaToCommaStr } from '../util/utils';
-import * as ZilliqaAccount from "../account";
+import { AccountType } from '../util/enum';
+import { bech32ToChecksum, convertQaToCommaStr } from '../util/utils';
 
 import { LedgerZilliqa } from '../ledger-zilliqa';
 
 import $ from "jquery";
+import { logger } from '../util/logger';
+import { ZilSdk } from '../zilliqa-api';
 
 
 interface LedgerAccount {
@@ -17,15 +17,9 @@ interface LedgerAccount {
 }
 
 function LedgerWallet(props: any) {
-
-    const appContext = useContext(AppContext);
-    const { initParams, updateAuth, updateLedgerIndex, updateRole } = appContext;
-
     const defaultLedgerIndex = 0;
     const [ledgerIndex, setLedgerIndex] = useState(0);
     const [ledgerAccounts, setLedgerAccounts] = useState([] as LedgerAccount[]);
-
-    const role = props.role;
 
     const handleClose = () => {
         setLedgerIndex(defaultLedgerIndex);
@@ -41,7 +35,7 @@ function LedgerWallet(props: any) {
 
             const result = await ledger!.getPublicAddress(currentLedgerIndex);
             const currAddress = result.pubAddr;
-            const balance = await ZilliqaAccount.getBalance(currAddress);
+            const balance = await ZilSdk.getBalance(currAddress);
 
             const currLedgerAccount: LedgerAccount = {
                 hwIndex: currentLedgerIndex,
@@ -62,7 +56,7 @@ function LedgerWallet(props: any) {
     }
 
     const unlockWallet = async (hwIndex: number) => {
-        console.log("unlock by hardware ledger");
+        logger("unlock by hardware ledger");
 
         if (typeof ledgerAccounts[hwIndex] === undefined) {
             console.error("no such ledger wallet index: %o", hwIndex);
@@ -78,18 +72,14 @@ function LedgerWallet(props: any) {
             // show loading state
             props.onWalletLoadingCallback();
 
-            console.log("ledger wallet address: %o", selectedLedgerAddress);
-            console.log("ledger wallet index: %o", hwIndex);
+            logger("ledger wallet address: %o", selectedLedgerAddress);
+            logger("ledger wallet index: %o", hwIndex);
 
-            // update context
-            initParams(selectedLedgerAddress, AccessMethod.LEDGER);
-            await updateRole(selectedLedgerAddress, role);
-            updateLedgerIndex(hwIndex);
-            updateAuth()
+            const base16Address = bech32ToChecksum(selectedLedgerAddress).toLowerCase();
 
             // no error
             // call parent function to redirect to dashboard
-            props.onSuccessCallback();
+            props.onSuccessCallback(base16Address, selectedLedgerAddress, AccountType.LEDGER, hwIndex);
         } catch (err) {
             console.error("error unlocking ledger...:%o", err);
             Alert('error', 'Unable to access ledger', 'Have you unlock the PIN code?');

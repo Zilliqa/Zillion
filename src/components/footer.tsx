@@ -2,11 +2,6 @@ import React from 'react';
 
 
 function Footer(props:any) {
-    // const networkLabel = props.networkLabel;
-
-    // config.js from public folder
-    // const { networks_config } = (window as { [key: string]: any })['config'];
-    
     return (
         <footer id="disclaimer" className="align-items-start">
             <div className="p-2 d-block">
