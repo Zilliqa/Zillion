@@ -145,8 +145,8 @@ export class ZilSigner {
                 amount: `${txParams.amount}`,
                 code: txParams.code,
                 data: txParams.data,
-                gasPrice: `${txParams.gasPrice || gasPrice}`,
-                gasLimit: `${txParams.gasLimit || gasLimit}`,
+                gasPrice: new BN(txParams.gasPrice || gasPrice),
+                gasLimit: Long.fromNumber(Number(txParams.gasLimit || gasLimit)),
                 nonce: nonce,
                 pubKey: pubKey,
                 signature: "",
@@ -156,8 +156,8 @@ export class ZilSigner {
             const signedTx = {
                 ...txnParams,
                 amount: `${txParams.amount}`,
-                gasPrice: `${gasPrice}`,
-                gasLimit: `${gasLimit}`,
+                gasPrice: `${txParams.gasPrice || gasPrice}`,
+                gasLimit: `${txParams.gasLimit || gasLimit}`,
                 signature
             }
             console.log("signed tx: ", signedTx);
