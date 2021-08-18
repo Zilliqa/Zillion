@@ -42,6 +42,13 @@ function WalletZeeves(props: any) {
             <div className="wallet-access">
                 <h2>Access wallet using Zeeves</h2>
                 
+                <p className="my-4">The first Zilliqa telegram-based wallet. Learn more here - <a 
+                    id="zeeves-link" 
+                    className="info-link" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={"https://zeeves.io"}>https://zeeves.io</a>.</p>
+
                 <button type="button" className="btn btn-user-action mx-2" onClick={unlockWallet}>Connect Wallet</button>
                 <button type="button" className="btn btn-user-action-cancel mx-2" onClick={props.onReturnCallback}>Back</button>
             </div>
