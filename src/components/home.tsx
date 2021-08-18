@@ -33,6 +33,8 @@ import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 import { logger } from '../util/logger';
 import { INIT_USER, QUERY_AND_UPDATE_USER_STATS, UPDATE_LEDGER_INDEX } from '../store/userSlice';
 import { ZilSigner } from '../zilliqa-signer';
+import WalletZeeves from './wallet-zeeves';
+import IconZeeves from './icons/zeeves-icon';
 
 
 function Home(props: any) {
@@ -125,6 +127,12 @@ function Home(props: any) {
                   onWalletLoadingCallback={toggleDirectToDashboard} 
                   onSuccessCallback={redirectToDashboard} 
                   role={role} />;
+      case AccountType.ZEEVES:
+        return <WalletZeeves 
+          onReturnCallback={resetWalletsClicked}
+          onWalletLoadingCallback={toggleDirectToDashboard} 
+          onSuccessCallback={redirectToDashboard} 
+          role={role} />
       default:
         return null;
     }
@@ -295,6 +303,13 @@ function Home(props: any) {
                     onClick={() => handleAccessMethod(AccountType.ZILPAY)} 
                     data-tip={ env === Environment.PROD ? "Ensure your ZilPay is on Mainnet network" : "Ensure your ZilPay is on Testnet network" }>
                       <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
+                  </div>
+
+                  <div 
+                    className="btn-wallet-access d-block" 
+                    onClick={() => handleAccessMethod(AccountType.ZEEVES)} 
+                    data-tip={"Sign-in with telegram-based wallet - Zeeves"}>
+                      <IconZeeves className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">Zeeves</span>
                   </div>
                   
                   <ReactTooltip place="bottom" type="light" effect="float" />

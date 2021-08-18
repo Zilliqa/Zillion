@@ -5,6 +5,7 @@ export enum AccountType {
     ZILPAY = "ZILPAY",
     MOONLET = "MOONLET",
     LEDGER = "LEDGER",
+    ZEEVES = "ZEEVES",
     NONE = ""
 }
 
