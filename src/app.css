@@ -678,7 +678,9 @@ input:focus {
   fill: var(--primary-color);
 }
 
-.icon-ledger-line .cls-1, .icon-zilpay-line .cls-1 {
+.icon-ledger-line .cls-1, 
+.icon-zilpay-line .cls-1,
+.icon-zeeves-line .cls-1 {
   fill: none;
   stroke: var(--primary-color);
   stroke-miterlimit: 10;

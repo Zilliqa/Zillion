@@ -309,7 +309,7 @@ function Home(props: any) {
                     className="btn-wallet-access d-block" 
                     onClick={() => handleAccessMethod(AccountType.ZEEVES)} 
                     data-tip={"Sign-in with telegram-based wallet - Zeeves"}>
-                      <IconZeeves className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">Zeeves</span>
+                      <IconZeeves className="home-icon icon-zeeves-line my-4" /><span className="d-block mt-0.5">Zeeves</span>
                   </div>
                   
                   <ReactTooltip place="bottom" type="light" effect="float" />
