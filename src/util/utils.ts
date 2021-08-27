@@ -3,8 +3,10 @@ import { Explorer, NetworkURL, Network, TransactionType, AccountType, Constants,
 import Alert from '../components/alert';
 import { ZilSigner } from '../zilliqa-signer';
 import { getBlockchainExplorer } from './config-json-helper';
+import { SsnStats } from './interface';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
+
 
 // config.js from public folder
 const blockchain_explorer_config = getBlockchainExplorer();
@@ -41,6 +43,17 @@ export const convertToProperCommRate = (rate: string) => {
     let commRate = new BigNumber(rate).dividedBy(10**7);
     return commRate;
 };
+
+// compute the total stake amount using the list of ssnlist stake
+// used for ssn-table because if we depend on the totalstakeamount fetch from the saga
+// the update would delay, causing a issue where totalstakeamount is 0
+export const computeTotalStakeAmt = (ssnlist: SsnStats[]) => {
+    let totalStakeAmt = new BigNumber(0);
+    for (const ssnstats of ssnlist) {
+        totalStakeAmt = totalStakeAmt.plus(new BigNumber(ssnstats.stakeAmt));
+    }
+    return totalStakeAmt;
+}
 
 // compute the stake amount as a percentage of total stake amount
 // returns a BigNumber
