@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
 
 import { SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
-import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress } from '../util/utils';
+import { convertToProperCommRate, convertQaToCommaStr, computeStakeAmtPercent, getTruncatedAddress, computeTotalStakeAmt } from '../util/utils';
 import { SsnStats, StakeModalData } from '../util/interface';
 import ReactTooltip from 'react-tooltip';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -97,10 +97,10 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
 function SsnTable(props: any) {
     const dispatch = useAppDispatch();
     const role = useAppSelector(state => state.user.role);
-    const totalStakeAmt = useAppSelector(state => state.staking.total_stake_amount);
     const loading: OperationStatus = useAppSelector(state => state.staking.is_ssn_stats_loading);
     const ssnList: SsnStats[] = useAppSelector(state => state.staking.ssn_list);
     const showStakeBtn = props.showStakeBtn ? props.showStakeBtn : false; // for deleg
+    const totalStakeAmt = computeTotalStakeAmt(ssnList);
 
     const handleStake = (name: string, address: string, commRate: string) => {
         // set dashboard state variable
