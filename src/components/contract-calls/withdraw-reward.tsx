@@ -21,7 +21,7 @@ const { BN } = require('@zilliqa-js/util');
 function WithdrawRewardModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
-    const balance = useAppSelector(state => state.user.balance);
+    const wallet = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const { updateData, updateRecentTransactions } = props;
@@ -44,7 +44,7 @@ function WithdrawRewardModal(props: any) {
             return null;
         }
 
-        if (!validateBalance(balance)) {
+        if (await validateBalance(wallet) === false) {
             const gasFees = computeGasFees(gasPrice, gasLimit);
             Alert('error', 
             "Insufficient Balance", 

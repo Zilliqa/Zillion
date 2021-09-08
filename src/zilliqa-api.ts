@@ -67,7 +67,7 @@ export class ZilSdk {
      * query the wallet balance
      * 
      * @param address wallet address in base16 or bech32 format
-     * @returns amount in zils, returns '0' if the balance cannot be found
+     * @returns amount in zils, returns '0' if the balance cannot be found after max attempt
      */
     static getBalance = async (address: string): Promise<string> => {
         let result;
@@ -76,6 +76,10 @@ export class ZilSdk {
             if (result !== OperationStatus.ERROR) {
                 break;
             }
+        }
+        if (result === OperationStatus.ERROR) {
+            // still fail after max attempt
+            return "0";
         }
         return result;
     }
