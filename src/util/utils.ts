@@ -75,8 +75,8 @@ export const isDigits = (input: string) => {
 }
 
 export const computeGasFees = (gasPrice: string, gasLimit: string) => {
-    console.log("compute gas fees util: ", gasPrice);
-    console.log("compute gas limit util: ", gasLimit);
+    // console.log("compute gas fees util: ", gasPrice);
+    // console.log("compute gas limit util: ", gasLimit);
     return new BN(gasPrice.toString()).mul(new BN(gasLimit.toString()));
 }
 
@@ -246,8 +246,8 @@ export const validateBalance = async (address: string) => {
     // fetch a new balance in case, user's balance is not updated on frontend
     const balance = await ZilSdk.getBalance(address);
     const gasFees = ZilSigner.getGasFees();
-    console.log("user bal: ", balance);
-    console.log("gasFees: ", gasFees.toString());
+    // console.log("user bal: ", balance);
+    // console.log("gasFees: ", gasFees.toString());
     if (new BN(balance.toString()).gte(new BN(gasFees.toString()))) {
         return true;
     }
