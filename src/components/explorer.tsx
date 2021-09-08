@@ -9,7 +9,6 @@ import { DelegStats, DelegStakingPortfolioStats, initialDelegStats, PendingWithd
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { validation } from "@zilliqa-js/util";
 import { computeDelegRewards } from '../util/reward-calculator';
-import BN from 'bn.js';
 import { convertQaToCommaStr, convertGzilToCommaStr, isRespOk } from '../util/utils';
 import Spinner from './spinner';
 import useDarkMode from '../util/use-dark-mode';
@@ -103,7 +102,7 @@ function Explorer(props: any) {
                     totalDeposits = totalDeposits.plus(delegAmtQaBN);
 
                     // compute zil rewards
-                    const delegRewards = new BN(await computeDelegRewards(impl, ssnAddress, wallet)).toString();
+                    const delegRewards = new BigNumber(await computeDelegRewards(impl, ssnAddress, wallet)).toString();
                     totalRewards = totalRewards.plus(delegRewards);
 
                     // append data to list of staked nodes

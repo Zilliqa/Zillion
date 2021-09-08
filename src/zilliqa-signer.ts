@@ -11,8 +11,8 @@ const { bytes } = require('@zilliqa-js/util');
 let zilliqa: Zilliqa = new Zilliqa("https://dev-api.zilliqa.com"); // defaults to testnet, would be updated during login
 let chainId = 333;
 let msgVersion = 1;
-let gasPrice = `${Constants.DEFAULT_GAS_PRICE}`;
-let gasLimit = `${Constants.DEFAULT_GAS_LIMIT}`;
+let gasPrice = `${Constants.DEFAULT_GAS_PRICE}` || '2000000000';
+let gasLimit = `${Constants.DEFAULT_GAS_LIMIT}` || '30000';
 
 
 export class ZilSigner {
@@ -101,7 +101,7 @@ export class ZilSigner {
      * returns the gas fee in Qa
      */
     static getGasFees = (): BN => {
-        return new BN(gasLimit).mul(new BN(gasPrice));
+        return new BN(gasLimit.toString()).mul(new BN(gasPrice.toString()));
     }
 
     static getDefaultGasPrice = (): string => {

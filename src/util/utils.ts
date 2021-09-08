@@ -4,6 +4,7 @@ import Alert from '../components/alert';
 import { ZilSigner } from '../zilliqa-signer';
 import { getBlockchainExplorer } from './config-json-helper';
 import { SsnStats } from './interface';
+import { ZilSdk } from '../zilliqa-api';
 const { BN, validation, units } = require('@zilliqa-js/util');
 const BigNumber = require('bignumber.js');
 
@@ -74,7 +75,9 @@ export const isDigits = (input: string) => {
 }
 
 export const computeGasFees = (gasPrice: string, gasLimit: string) => {
-    return new BN(gasPrice).mul(gasLimit);
+    // console.log("compute gas fees util: ", gasPrice);
+    // console.log("compute gas limit util: ", gasLimit);
+    return new BN(gasPrice.toString()).mul(new BN(gasLimit.toString()));
 }
 
 // convert commission rate from percentage to contract comm rate
@@ -237,11 +240,15 @@ export const showWalletsPrompt = (accountType: string) => {
 
 // check if wallet has sufficient balance to pay for gas fees
 // for used during contract calls
-// @param balance wallet balance in Qa
+// @param address wallet address in base16
 // returns true if balance is greater than or equal to gas fees; otherwise returns false
-export const validateBalance = (balance: string) => {
+export const validateBalance = async (address: string) => {
+    // fetch a new balance in case, user's balance is not updated on frontend
+    const balance = await ZilSdk.getBalance(address);
     const gasFees = ZilSigner.getGasFees();
-    if (new BN(balance).gte(new BN(gasFees))) {
+    // console.log("user bal: ", balance);
+    // console.log("gasFees: ", gasFees.toString());
+    if (new BN(balance.toString()).gte(new BN(gasFees.toString()))) {
         return true;
     }
     return false;

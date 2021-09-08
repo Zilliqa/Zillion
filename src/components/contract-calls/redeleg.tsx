@@ -189,7 +189,7 @@ function ReDelegateStakeModal(props: any) {
         }
 
         const gasFees = computeGasFees(gasPrice, gasLimit);
-        const combinedFees = new BN(delegAmtQa).plus(gasFees);
+        const combinedFees = new BN(delegAmtQa.toString()).add(gasFees);
         const isBalanceSufficient = new BN(balance).gte(combinedFees);
 
         if (!isBalanceSufficient) {

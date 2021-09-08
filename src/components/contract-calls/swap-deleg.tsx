@@ -40,7 +40,7 @@ function SwapDelegModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
-    const balance = useAppSelector(state => state.user.balance);
+    const wallet = useAppSelector(state => state.user.address_base16);
     const accountType = useAppSelector(state => state.user.account_type);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const userAddress = useAppSelector(state => state.user.address_bech32);
@@ -195,8 +195,8 @@ function SwapDelegModal(props: any) {
         setTutorialStep(0);
     }
 
-    const sendTxn = (txnType: TransactionType, txParams: any) => {
-        if (!validateBalance(balance)) {
+    const sendTxn = async (txnType: TransactionType, txParams: any) => {
+        if (await validateBalance(wallet) === false) {
             const gasFees = computeGasFees(gasPrice, gasLimit);
             Alert('error', "Insufficient Balance", "Insufficient balance in wallet to pay for the gas fee.");
             Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
@@ -259,7 +259,7 @@ function SwapDelegModal(props: any) {
             gasLimit: gasLimit,
         };
 
-        sendTxn(TransactionType.CONFIRM_DELEG_SWAP, txParams);
+        await sendTxn(TransactionType.CONFIRM_DELEG_SWAP, txParams);
     }
 
     const rejectDelegSwap = async (requestorAddr: string) => {
@@ -282,7 +282,7 @@ function SwapDelegModal(props: any) {
             gasLimit: gasLimit,
         };
 
-        sendTxn(TransactionType.REJECT_DELEG_SWAP, txParams);
+        await sendTxn(TransactionType.REJECT_DELEG_SWAP, txParams);
     }
 
     // returns true if address is ok
@@ -457,7 +457,7 @@ function SwapDelegModal(props: any) {
             gasLimit: gasLimit,
         };
 
-        sendTxn(TransactionType.REQUEST_DELEG_SWAP, txParams);
+        await sendTxn(TransactionType.REQUEST_DELEG_SWAP, txParams);
     }
 
     const revokeDelegSwap = async () => {
@@ -474,7 +474,7 @@ function SwapDelegModal(props: any) {
             gasLimit: gasLimit,
         };
 
-        sendTxn(TransactionType.REVOKE_DELEG_SWAP, txParams);
+        await sendTxn(TransactionType.REVOKE_DELEG_SWAP, txParams);
     }
 
     const onBlurGasPrice = () => {
