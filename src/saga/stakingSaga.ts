@@ -124,7 +124,11 @@ function* pollStakingData() {
         for (const ssnAddress in ssnlist) {
             const ssnArgs = ssnlist[ssnAddress]['arguments'];
             const status = (ssnArgs[0]['constructor'] === 'True') ? SsnStatus.ACTIVE : SsnStatus.INACTIVE;
-            const delegNum = Object.keys(ssn_deleg_amt[ssnAddress]).length.toString()
+            let delegNum = '0';
+
+            if (ssn_deleg_amt.hasOwnProperty(ssnAddress)) {
+                delegNum = Object.keys(ssn_deleg_amt[ssnAddress]).length.toString();
+            }
 
             // for ssn table
             const ssnStats: SsnStats = {
