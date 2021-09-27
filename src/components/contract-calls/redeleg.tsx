@@ -84,7 +84,6 @@ function ReDelegateStakeModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
-    const balance = useAppSelector(state => state.user.balance);
     const userBase16Address = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
