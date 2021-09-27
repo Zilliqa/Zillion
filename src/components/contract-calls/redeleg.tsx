@@ -7,7 +7,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees, isRespOk } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees, isRespOk, validateBalance } from '../../util/utils';
 import { ProxyCalls, OperationStatus, TransactionType, AccountType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -84,7 +84,6 @@ function ReDelegateStakeModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
-    const balance = useAppSelector(state => state.user.balance);
     const userBase16Address = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
@@ -188,14 +187,11 @@ function ReDelegateStakeModal(props: any) {
             }
         }
 
-        const gasFees = computeGasFees(gasPrice, gasLimit);
-        const combinedFees = new BN(delegAmtQa.toString()).add(gasFees);
-        const isBalanceSufficient = new BN(balance).gte(combinedFees);
-
-        if (!isBalanceSufficient) {
+        if (await validateBalance(userBase16Address) === false) {
+            const gasFees = computeGasFees(gasPrice, gasLimit);
             Alert('error', 
-                "Insufficient Balance", 
-                "Your wallet balance is insufficient to pay for the staked amount and gas fees combined. Total amount required is " + units.fromQa(combinedFees, units.Units.Zil) + " ZIL.");
+            "Insufficient Balance", 
+            "Insufficient balance in wallet to pay for the gas fee.");
             Alert('error', "Gas Fee Estimation", "Current gas fee is around " + units.fromQa(gasFees, units.Units.Zil) + " ZIL.");
             return null;
         }
