@@ -2036,3 +2036,7 @@ input:focus {
   color: var(--hyperlink-color);
 }
 
+.final-gzil-mint-block {
+  color: var(--primary-color);
+  font-weight: 600;
+}
