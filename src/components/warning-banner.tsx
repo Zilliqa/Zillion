@@ -1,6 +1,6 @@
 import React from 'react';
 import { getEnvironment } from '../util/config-json-helper';
-import { Environment, ContractState, Constants } from '../util/enum';
+import { Environment, ContractState } from '../util/enum';
 
 
 function WarningBanner(props: any) {
@@ -15,7 +15,7 @@ function WarningBanner(props: any) {
                 <div className="px-3 py-3">
                     <strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.
                     <br/>
-                    <div className="mt-3"><strong>Important</strong>: GZIL minting will end at <span className="px-2 final-gzil-mint-block">Block {Constants.FINAL_GZIL_REWARD_BLOCK_MAINNET}.</span> Please claim your GZIL rewards before the block.</div>
+                    <div className="mt-3"><strong>Important</strong>: Please note that gZIL minting has concluded as of <span className="final-gzil-mint-block ml-2">Block 1483713</span>. <span className="mx-2">No further gZIL will be minted.</span> The Zilliqa staking program will still continue to distribute ZIL for staking rewards.</div>
                 </div>
                 {
                     ContractState.IS_PAUSED.toString() === 'true' && 

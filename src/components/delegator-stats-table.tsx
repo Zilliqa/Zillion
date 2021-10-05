@@ -49,8 +49,6 @@ function DelegatorStatsTable(props: any) {
                     <span>{convertQaToCommaStr(data.zilRewards)}</span>
                 </div>
                 <div className="d-block deleg-stats-card">
-                    <h3>Unclaimed GZIL Rewards</h3>
-                    <span>{convertGzilToCommaStr(data.gzilRewards)}</span>
                 </div>
             </div>
         }
