@@ -13,7 +13,7 @@ function WarningDashboardBanner(props: any) {
                 env === Environment.PROD ? 
                 <>
                 <div className="px-3 py-3">
-                    <div><strong>Important</strong>: GZIL minting will end at <span className="px-2 final-gzil-mint-block">Block {Constants.FINAL_GZIL_REWARD_BLOCK_MAINNET}.</span> Please claim your GZIL rewards before the block.</div>
+                <div><strong>Important</strong>: All {Constants.MAX_GZIL_SUPPLY} GZILs have been distributed.<br/>GZILs will not be rewarded anymore.<br/>Native ZILs would still be rewarded as per normal.</div>
                 </div>
                 {
                     ContractState.IS_PAUSED.toString() === 'true' && 
