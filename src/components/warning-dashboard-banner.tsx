@@ -13,7 +13,7 @@ function WarningDashboardBanner(props: any) {
                 env === Environment.PROD ? 
                 <>
                 <div className="px-3 py-3">
-                    <div><strong>Important</strong>: All 722,700 GZILs have been distributed. <span className="mx-2">GZILs will not be rewarded anymore.</span> Native ZILs would still be rewarded as per normal.</div>
+                    <div><strong>Important</strong>: Please note that gZIL minting has concluded as of <span className="final-gzil-mint-block ml-2">Block 1483713</span>. <span className="mx-2">No further gZIL will be minted.</span> The Zilliqa staking program will still continue to distribute ZIL for staking rewards.</div>
                 </div>
                 {
                     ContractState.IS_PAUSED.toString() === 'true' && 

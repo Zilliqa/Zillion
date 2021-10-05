@@ -15,7 +15,7 @@ function WarningBanner(props: any) {
                 <div className="px-3 py-3">
                     <strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.
                     <br/>
-                    <div className="mt-3"><strong>Important</strong>: All 722,700 GZILs have been distributed. <span className="mx-2">GZILs will not be rewarded anymore.</span> Native ZILs would still be rewarded as per normal.</div>
+                    <div className="mt-3"><strong>Important</strong>: Please note that gZIL minting has concluded as of <span className="final-gzil-mint-block ml-2">Block 1483713</span>. <span className="mx-2">No further gZIL will be minted.</span> The Zilliqa staking program will still continue to distribute ZIL for staking rewards.</div>
                 </div>
                 {
                     ContractState.IS_PAUSED.toString() === 'true' && 
