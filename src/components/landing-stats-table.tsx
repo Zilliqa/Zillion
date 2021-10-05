@@ -33,16 +33,12 @@ function LandingStatsTable(props: any) {
                         <span>{landingStats.circulatingSupplyStake}%</span>
                     </div>
                     <div className="d-block landing-stats-card">
-                        <h3>Remaining GZIL Available</h3>
-                        <span>{landingStats.remainingGzil}%</span>
+                        <h3>Delegators / Staked Seed Nodes</h3>
+                        <span>{landingStats.delegNum} / {landingStats.nodesNum}</span>
                     </div>
 
                     <div className="w-100"></div>
                     
-                    <div className="d-block landing-stats-card">
-                        <h3>Delegators / Staked Seed Nodes</h3>
-                        <span>{landingStats.delegNum} / {landingStats.nodesNum}</span>
-                    </div>
                     <div className="d-block landing-stats-card">
                         <h3>Stake Amount</h3>
                         <span>{convertQaToCommaStr(landingStats.totalDeposits)}</span>
@@ -51,6 +47,9 @@ function LandingStatsTable(props: any) {
                     <div className="d-block landing-stats-card">
                         <h3>Total GZIL minted</h3>
                         <span>{convertGzilToCommaStr(landingStats.gzil)}</span>
+                    </div>
+
+                    <div className="d-block landing-stats-card">
                     </div>
                 </div>
                 </>

@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr, validateBalance, isDigits, computeGasFees } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, validateBalance, isDigits, computeGasFees } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -175,7 +175,6 @@ function WithdrawRewardModal(props: any) {
                                 <div className="col node-details-panel">
                                     <h3>Rewards</h3>
                                     <span>{ new BigNumber(stakeModalData.rewards).isGreaterThanOrEqualTo(10**9) ? convertQaToCommaStr(stakeModalData.rewards) : convertQaToZilFull(stakeModalData.rewards)} ZIL</span>
-                                    <span className="gzil-rewards">({convertGzilToCommaStr(stakeModalData.rewards)} GZIL)</span>
                                 </div>
                             </div>
                             <div className="mx-1">

@@ -270,6 +270,13 @@ function Dashboard(props: any) {
         }
     }, []);
 
+    useEffect(() => {
+        if (userState.selected_role === Role.OPERATOR && 
+            userState.role === Role.DELEGATOR) {
+            Alert("warn", "Warning", "You have been redirected to the delegator dashboard.");
+        }
+    }, [userState.selected_role, userState.role]);
+
 
     // eslint-disable-next-line
     return (

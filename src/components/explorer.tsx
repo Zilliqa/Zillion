@@ -9,7 +9,7 @@ import { DelegStats, DelegStakingPortfolioStats, initialDelegStats, PendingWithd
 import { fromBech32Address, toBech32Address } from '@zilliqa-js/crypto';
 import { validation } from "@zilliqa-js/util";
 import { computeDelegRewards } from '../util/reward-calculator';
-import { convertQaToCommaStr, convertGzilToCommaStr, isRespOk } from '../util/utils';
+import { convertQaToCommaStr, isRespOk } from '../util/utils';
 import Spinner from './spinner';
 import useDarkMode from '../util/use-dark-mode';
 
@@ -319,8 +319,6 @@ function Explorer(props: any) {
                                                 <span>{convertQaToCommaStr(delegStats.zilRewards)}</span>
                                             </div>
                                             <div className="d-block deleg-stats-card">
-                                                <h3>Unclaimed GZIL Rewards</h3>
-                                                <span>{convertGzilToCommaStr(delegStats.gzilRewards)}</span>
                                             </div>
                                         </div>
                                     </div>
