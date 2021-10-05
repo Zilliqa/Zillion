@@ -3,7 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, convertGzilToCommaStr, validateBalance, isDigits, computeGasFees } from '../../util/utils';
+import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, validateBalance, isDigits, computeGasFees } from '../../util/utils';
 import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
