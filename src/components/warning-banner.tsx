@@ -1,6 +1,6 @@
 import React from 'react';
 import { getEnvironment } from '../util/config-json-helper';
-import { Environment, ContractState, Constants } from '../util/enum';
+import { Environment, ContractState } from '../util/enum';
 
 
 function WarningBanner(props: any) {
@@ -15,7 +15,7 @@ function WarningBanner(props: any) {
                 <div className="px-3 py-3">
                     <strong>Warning</strong>: Zillion is in beta phase. Use this dApp at your own risk.
                     <br/>
-                    <div className="mt-3"><strong>Important</strong>: All {Constants.MAX_GZIL_SUPPLY} GZILs have been distributed. <br/>GZILs will not be rewarded anymore.<br/>Native ZILs would still be rewarded as per normal.</div>
+                    <div className="mt-3"><strong>Important</strong>: All 722,700 GZILs have been distributed. <span className="mx-2">GZILs will not be rewarded anymore.</span> Native ZILs would still be rewarded as per normal.</div>
                 </div>
                 {
                     ContractState.IS_PAUSED.toString() === 'true' && 
