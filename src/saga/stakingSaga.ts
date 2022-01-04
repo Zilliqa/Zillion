@@ -12,7 +12,7 @@ import BigNumber from 'bignumber.js';
 import { getRefreshRate } from '../util/config-json-helper';
 
 const MAX_GZIL_SUPPLY = Constants.MAX_GZIL_SUPPLY.toString();
-const TOTAL_REWARD_SEED_NODES = Constants.TOTAL_REWARD_SEED_NODES.toString(); // 110000 * 17
+const REWARD_ZIL_PER_DAY = Constants.REWARD_ZIL_PER_DAY.toString();
 const REFRESH_INTERVAL = getRefreshRate();
 
 /**
@@ -70,7 +70,8 @@ function* watchInitOnce() {
             
             // compute est. APY
             const temp = new BigNumber(totalstakeamount);
-            const estAPY = new BigNumber(convertZilToQa(TOTAL_REWARD_SEED_NODES)).dividedBy(temp).times(36500).toFixed(2);
+            const rewardZilPerDay = new BigNumber(convertZilToQa(REWARD_ZIL_PER_DAY));
+            const estAPY = rewardZilPerDay.dividedBy(temp).times(36500).toFixed(2);
 
             const landingStats: LandingStats = {
                 circulatingSupplyStake: circulatingSupplyStake,
