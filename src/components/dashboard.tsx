@@ -195,16 +195,13 @@ function Dashboard(props: any) {
                 // switch to the zilpay network on load
                 networkChanger(zilPay.wallet.net);
 
-                const accountStreamChanged = zilPay.wallet.observableAccount();
-                const networkStreamChanged = zilPay.wallet.observableNetwork();
-
-                networkStreamChanged.subscribe((net: string) => networkChanger(net));
-                
-                accountStreamChanged.subscribe((account: any) => {
+                const accountStreamChanged = zilPay.wallet.observableAccount().subscribe((account: any) => {
                     console.log("zil pay account changing...");
                     const bech32 = toBech32Address(account.base16);
                     dispatch(UPDATE_ADDRESS({ address_base16: account.base16, address_bech32: bech32 }));
                 });
+
+                const networkStreamChanged = zilPay.wallet.observableNetwork().subscribe((net: string) => networkChanger(net));
 
                 return () => {
                     accountStreamChanged.unsubscribe();
