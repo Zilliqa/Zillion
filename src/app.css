@@ -1805,6 +1805,40 @@ input:focus {
   color: var(--hyperlink-hover-color);
 }
 
+#staking-mode-selection .item {
+  border: 2px solid var(--wallet-access-shadow-color);
+  border-radius: 8px;
+  background-color: #070E22;
+  transition: 0.3s;
+  padding: 2.4em 0;
+}
+
+#staking-mode-selection .item h2 {
+  font-size: 1.1em;
+  font-weight: 500;
+  margin-bottom: 1.5em;
+}
+
+#staking-mode-selection .item .mode {
+  font-family: 'Goldman', cursive;
+  font-size: 2.2em;
+  color: var(--primary-color);
+  margin-bottom: 1em;
+}
+
+#staking-mode-selection .item .description {
+  font-size: 1em;
+  color: var(--notification-heading-color)
+}
+
+#staking-mode-selection .item + .item {
+  margin-left: 5%;
+}
+
+#staking-mode-selection .staking-text {
+  margin: 4.4em 0em
+}
+
 #staking-portfolio-details .inner-section-heading {
   color: var(--primary-table-inner-heading-color);
   font-size: 0.8em;

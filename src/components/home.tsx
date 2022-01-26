@@ -33,6 +33,7 @@ import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 import { logger } from '../util/logger';
 import { INIT_USER, QUERY_AND_UPDATE_USER_STATS, UPDATE_LEDGER_INDEX } from '../store/userSlice';
 import { ZilSigner } from '../zilliqa-signer';
+import StakingModeSelection from './staking-mode-selection';
 
 
 function Home(props: any) {
@@ -47,7 +48,7 @@ function Home(props: any) {
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
   
-  const screenFlow = ['home', 'wallet-select', 'wallet-load', 'stake-mode-select'];
+  const screenFlow = ['home', 'wallet-select', 'wallet-unlock', 'stake-mode-select'];
   const [activeScreen, setActiveScreen] = useState(screenFlow[0]); // home, wallet-select, stake-mode-select
 
   const [selectedNetwork, setSelectedNetwork] = useState(() => {
@@ -61,14 +62,12 @@ function Home(props: any) {
 
   const darkMode = useDarkMode(true);
 
-  // trigger show wallets to choose
-  const resetWalletsClicked = () => {
-    setAccessMethod('');
-    setIsDirectDashboard(false);
-  }
-
   const timeout = (delay: number) => {
     return new Promise(res => setTimeout(res, delay));
+  }
+
+  const showStakeModeSelection = () => {
+    setActiveScreen('stake-mode-select');
   }
 
   const redirectToDashboard = async (addressBase16: string, addressBech32: string, accountType: AccountType, ledgerIndex?: number) => {
@@ -92,9 +91,10 @@ function Home(props: any) {
   const prevScreen = () => {
     const currScreenIndex = screenFlow.findIndex((screen) => {return screen === activeScreen});
     if (currScreenIndex === 0) {
-      return currScreenIndex;
+      return;
     } else {
-      return currScreenIndex - 1;
+      const newScreenIndex = currScreenIndex - 1;
+      setActiveScreen(screenFlow[newScreenIndex]);
     }
   }
 
@@ -102,15 +102,16 @@ function Home(props: any) {
     const currScreenIndex = screenFlow.findIndex((screen) => {return screen === activeScreen});
     if (currScreenIndex === (screenFlow.length - 1)) {
       // 0-based index comparison
-      return currScreenIndex;
+      return;
     } else {
-      return currScreenIndex + 1;
+      const newScreenIndex = currScreenIndex + 1;
+      setActiveScreen(screenFlow[newScreenIndex]);
     }
   }
 
-  const handleAccessMethod = (access: string) => {
+  const onSetAccessMethod = (access: string) => {
     setAccessMethod(access);
-    setActiveScreen('wallet-load');
+    setActiveScreen('wallet-unlock');
   }
 
   const onClickSignIn = (selectedRole: string) => {
@@ -127,6 +128,13 @@ function Home(props: any) {
     setAccessMethod('');
     setActiveScreen('home');
   }
+
+  // trigger show wallets to choose
+  const resetWalletsClicked = () => {
+    setAccessMethod('');
+    setIsDirectDashboard(false);
+    prevScreen();
+  }
     
   const DisplayWalletSelection = () => {
     switch (accessMethod) {
@@ -140,7 +148,7 @@ function Home(props: any) {
         return <WalletZilPay 
                   onReturnCallback={resetWalletsClicked} 
                   onWalletLoadingCallback={toggleDirectToDashboard}
-                  onSuccessCallback={redirectToDashboard}
+                  onSuccessCallback={showStakeModeSelection}
                   role={role} />;
       case AccountType.LEDGER:
         return <WalletLedger 
@@ -299,19 +307,19 @@ function Home(props: any) {
 
                   <div 
                     className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccountType.KEYSTORE)}>
+                    onClick={() => onSetAccessMethod(AccountType.KEYSTORE)}>
                       <IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span>
                   </div>
 
                   <div 
                     className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccountType.LEDGER)}>
+                    onClick={() => onSetAccessMethod(AccountType.LEDGER)}>
                       <IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span>
                   </div>
 
                   <div 
                     className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccountType.ZILPAY)} 
+                    onClick={() => onSetAccessMethod(AccountType.ZILPAY)} 
                     data-tip={ env === Environment.PROD ? "Ensure your ZilPay is on Mainnet network" : "Ensure your ZilPay is on Testnet network" }>
                       <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
                   </div>
@@ -323,13 +331,19 @@ function Home(props: any) {
             }
 
             {
-              activeScreen === 'wallet-load' &&
+              activeScreen === 'wallet-unlock' &&
               <>
               {
                 isDirectDashboard ? <>{DisplayLoader()}</> : <>{DisplayWalletSelection()}</>
               }
               </>
             }
+
+            {
+              activeScreen === 'stake-mode-select' &&
+              <StakingModeSelection />
+            }
+
           </div>
           <ToastContainer hideProgressBar={true} />
           <Footer networkLabel={selectedNetwork} />
