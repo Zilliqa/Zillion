@@ -43,10 +43,13 @@ function Home(props: any) {
   const env = getEnvironment();
 
   const [isDirectDashboard, setIsDirectDashboard] = useState(false);
-  const [isShowAccessMethod, setShowAccessMethod] = useState(false);
   const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
+  
+  const screenFlow = ['home', 'wallet-select', 'wallet-load', 'stake-mode-select'];
+  const [activeScreen, setActiveScreen] = useState(screenFlow[0]); // home, wallet-select, stake-mode-select
+
   const [selectedNetwork, setSelectedNetwork] = useState(() => {
     if (env === Environment.PROD) {
       return Network.MAINNET;
@@ -86,13 +89,33 @@ function Home(props: any) {
     props.history.push("/dashboard");
   }
 
-  const handleAccessMethod = (access: string) => {
-    setAccessMethod(access);
+  const prevScreen = () => {
+    const currScreenIndex = screenFlow.findIndex((screen) => {return screen === activeScreen});
+    if (currScreenIndex === 0) {
+      return currScreenIndex;
+    } else {
+      return currScreenIndex - 1;
+    }
   }
 
-  const handleShowAccessMethod = (selectedRole: string) => {
+  const nextScreen = () => {
+    const currScreenIndex = screenFlow.findIndex((screen) => {return screen === activeScreen});
+    if (currScreenIndex === (screenFlow.length - 1)) {
+      // 0-based index comparison
+      return currScreenIndex;
+    } else {
+      return currScreenIndex + 1;
+    }
+  }
+
+  const handleAccessMethod = (access: string) => {
+    setAccessMethod(access);
+    setActiveScreen('wallet-load');
+  }
+
+  const onClickSignIn = (selectedRole: string) => {
     setRole(selectedRole);
-    setShowAccessMethod(true);
+    setActiveScreen('wallet-select');
   }
 
   const toggleDirectToDashboard = () => {
@@ -101,11 +124,11 @@ function Home(props: any) {
 
   const resetView = () => {
     setRole('');
-    setShowAccessMethod(false);
     setAccessMethod('');
+    setActiveScreen('home');
   }
     
-  const DisplayAccessMethod = () => {
+  const DisplayWalletSelection = () => {
     switch (accessMethod) {
       case AccountType.KEYSTORE: 
         return <WalletKeystore 
@@ -227,13 +250,11 @@ function Home(props: any) {
             </div>
 
             {
-              !isShowAccessMethod ?
-
-              
+              activeScreen === 'home' &&
               <div className="initial-load">
                 { /* sign in and seed node table */ }
-                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
-                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
+                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => onClickSignIn(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
+                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => onClickSignIn(Role.OPERATOR.toString())}>Sign in for Operators</div>
 
                 <div className="d-flex justify-content-center h-100">
                   <div className="explorer-search">
@@ -268,13 +289,11 @@ function Home(props: any) {
                   </div>
                 </div>
               </div>
+            }
 
-              :
-
-              !accessMethod ?
-
+            {
+              activeScreen === 'wallet-select' &&
               <>
-                { /* no wallets selected - show wallets to connect */ }
                 <p className="wallet-connect-text animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
                 <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
 
@@ -301,19 +320,14 @@ function Home(props: any) {
                 </div>
                 <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
               </>
+            }
 
-              :
-
+            {
+              activeScreen === 'wallet-load' &&
               <>
-              {/* wallet selected - show chosen wallet component */}
-              { isDirectDashboard ? 
-              
-              <>{DisplayLoader()}</> 
-              
-              :
-              
-              <>{DisplayAccessMethod()}</> }
-              
+              {
+                isDirectDashboard ? <>{DisplayLoader()}</> : <>{DisplayWalletSelection()}</>
+              }
               </>
             }
           </div>
