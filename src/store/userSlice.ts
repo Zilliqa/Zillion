@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { AccountType, LedgerIndex, OperationStatus, Role } from '../util/enum'
+import { AccountType, LedgerIndex, OperationStatus, Role, StakingMode } from '../util/enum'
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData } from '../util/interface';
 
 interface UserState {
@@ -13,6 +13,7 @@ interface UserState {
     ledger_index: number,
     role: Role,                                         // actual role
     selected_role: Role,                                // role that the user selects when signing in
+    staking_mode: StakingMode,                          // staking option that the user selects during sign in process
     deleg_stats: DelegStats,                            // track the delegator stats, i fuser is a delegator
     deleg_staking_portfolio_list: DelegStakingPortfolioStats[],     // list of ssn info that a delegator has staked with
     operator_stats: OperatorStats                       // track the operator stats, if user is an operator
@@ -35,6 +36,7 @@ const initialState: UserState = {
     role: Role.NONE,
     operator_stats: initialOperatorStats,
     selected_role: Role.NONE,
+    staking_mode: StakingMode.NONE,
     deleg_stats: initialDelegStats,
     deleg_staking_portfolio_list: [],
     pending_withdraw_list: [],
@@ -105,6 +107,10 @@ const userSlice = createSlice({
             const { stake_modal } = action.payload
             state.stake_modal_data = {...stake_modal}
         },
+        UPDATE_STAKING_MODE(state, action) {
+            const { staking_mode } = action.payload
+            state.staking_mode = staking_mode
+        },
         UPDATE_SWAP_DELEG_MODAL(state, action) {
             const { swap_deleg_modal } = action.payload
             state.swap_deleg_modal_data = swap_deleg_modal
@@ -125,6 +131,7 @@ const userSlice = createSlice({
             state.complete_withdrawal_amt = initialState.complete_withdrawal_amt
             state.ledger_index = initialState.ledger_index
             state.role = initialState.role
+            state.staking_mode = initialState.staking_mode
             state.deleg_stats = initialState.deleg_stats
             state.deleg_staking_portfolio_list = initialState.deleg_staking_portfolio_list
             state.operator_stats = initialState.operator_stats
@@ -166,6 +173,7 @@ export const {
     UPDATE_PENDING_WITHDRAWAL_LIST,
     UPDATE_ROLE,
     UPDATE_STAKE_MODAL_DATA,
+    UPDATE_STAKING_MODE,
     UPDATE_SWAP_DELEG_MODAL,
     UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,

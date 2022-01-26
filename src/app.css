@@ -1806,11 +1806,18 @@ input:focus {
 }
 
 #staking-mode-selection .item {
-  border: 2px solid var(--wallet-access-shadow-color);
+  position: relative;
   border-radius: 8px;
-  background-color: #070E22;
   transition: 0.3s;
   padding: 2.4em 0;
+
+  border: 2px solid transparent;
+  background: var(--primary-section-bg-color);
+  background-image: 
+    linear-gradient(var(--primary-section-bg-color), var(--primary-section-bg-color)), 
+    linear-gradient(180deg, rgba(0,153,135,1) 0%, rgba(15,80,172,1) 100%);;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
 }
 
 #staking-mode-selection .item h2 {
@@ -1828,7 +1835,7 @@ input:focus {
 
 #staking-mode-selection .item .description {
   font-size: 1em;
-  color: var(--notification-heading-color)
+  color: var(--notification-heading-color);
 }
 
 #staking-mode-selection .item + .item {

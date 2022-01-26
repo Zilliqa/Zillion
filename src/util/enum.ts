@@ -83,6 +83,12 @@ export enum Role {
     NONE = "",
 }
 
+export enum StakingMode {
+    ZIL = "ZIL_STAKING",
+    BZIL = "BZIL_STAKING",
+    NONE = "",
+}
+
 export enum SsnStatus {
     ACTIVE = "Active",
     INACTIVE = "Below Min. Stake"

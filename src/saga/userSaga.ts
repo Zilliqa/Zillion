@@ -22,6 +22,8 @@ function* queryAndUpdateBalance() {
     try {
         const { address_base16 } = yield select(getUserState);
         const balance: string = yield call(ZilSdk.getBalance, address_base16);
+        
+        logger("wallet: ", address_base16);
         logger("user balance: ", balance);
         yield put(UPDATE_BALANCE({ balance: balance }));
     } catch (e) {

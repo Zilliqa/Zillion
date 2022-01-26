@@ -38,11 +38,12 @@ function WalletZilPay(props: any) {
             const { base16 } = zilPay.wallet.defaultAccount;
             const bech32Address = toBech32Address(base16);
 
-            // request parent to show spinner while updating
-            props.onWalletLoadingCallback();
+            // invoke redux saga to fetch user info
+            props.onUpdateUserInfo(base16, bech32Address, AccountType.ZILPAY);
+
+            // request parent to show stake mode selection screen
+            props.onShowStakeSelection();
             
-            // request parent to redirect to dashboard
-            props.onSuccessCallback(base16, bech32Address, AccountType.ZILPAY);
         } catch (err) {
             console.error("error unlocking via zilpay...: %o", err);
             Alert('error', 'Unable to access ZilPay', 'Please check if there is a new ZilPay version or clear your browser cache.');

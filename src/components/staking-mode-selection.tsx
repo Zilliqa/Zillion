@@ -1,6 +1,18 @@
 import React from 'react';
+import { withRouter } from "react-router-dom";
+import { useAppDispatch } from '../store/hooks';
+import { UPDATE_STAKING_MODE } from '../store/userSlice';
+import { StakingMode } from '../util/enum';
 
 function StakingModeSelection(props: any) {
+    const dispatch = useAppDispatch();
+
+    const onSelectStakingMode = (stakingMode: StakingMode) => {
+        // set the staking mode in the store
+        dispatch(UPDATE_STAKING_MODE({ staking_mode: stakingMode }));
+        props.history.push("/dashboard");
+    }
+
     return (
         <div id='staking-mode-selection' className="container animate__animated animate__fadeIn">
             <div className="staking-text">
@@ -13,7 +25,9 @@ function StakingModeSelection(props: any) {
                         <p className="description">
                             Our best performing staking option!<br/>Stake to earn ZILs!
                         </p>
-                        <div><button type="button" className="btn btn-user-action">Pick Me</button></div>
+                        <div>
+                            <button type="button" className="btn btn-user-action" onClick={() => onSelectStakingMode(StakingMode.ZIL)}>Select</button>
+                        </div>
                     </div>
                     <div className="item d-block col-4">
                         <h2 className="mt-4">BZIL Staking</h2>
@@ -23,11 +37,13 @@ function StakingModeSelection(props: any) {
                             Invest your BZILs to earn more!<br/>
                             Return BZIL when you withdraw!
                         </p>
-                        <div><button type="button" className="btn btn-user-action">Pick Me</button></div>
+                        <div>
+                            <button type="button" className="btn btn-user-action" onClick={() => onSelectStakingMode(StakingMode.BZIL)}>Select</button>
+                        </div>
                     </div>
             </div>
         </div>
     )
 }
 
-export default StakingModeSelection;
+export default withRouter(StakingModeSelection);
