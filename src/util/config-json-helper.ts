@@ -19,6 +19,8 @@ export interface NetworkConfig {
     blockchain: string
     node_status: string
     api_list: []
+    staking_registry: string
+    staking_data: string
 }
 
 export interface Networks {

@@ -23,6 +23,8 @@ store.dispatch(UPDATE_CHAIN_INFO({
   blockchain: network_config.blockchain,
   staking_viewer: network_config.node_status,
   api_list: network_config.api_list,
+  staking_registry: network_config.staking_registry,
+  staking_data: network_config.staking_data,
 }));
 
 store.dispatch(UPDATE_REFRESH_RATE({ refresh_rate: getRefreshRate() }));

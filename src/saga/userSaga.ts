@@ -2,7 +2,23 @@ import { toBech32Address } from '@zilliqa-js/zilliqa';
 import { BigNumber } from 'bignumber.js';
 import { all, call, delay, fork, put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { PRELOAD_INFO_READY, UPDATE_REWARD_BLK_COUNTDOWN } from '../store/stakingSlice';
-import { INIT_USER, UPDATE_ROLE, UPDATE_BALANCE, UPDATE_GZIL_BALANCE, UPDATE_SWAP_DELEG_MODAL, UPDATE_PENDING_WITHDRAWAL_LIST, UPDATE_COMPLETE_WITHDRAWAL_AMT, UPDATE_OPERATOR_STATS, UPDATE_FETCH_OPERATOR_STATS_STATUS, POLL_USER_DATA_START, POLL_USER_DATA_STOP, QUERY_AND_UPDATE_USER_STATS, UPDATE_DELEG_STATS, UPDATE_DELEG_PORTFOLIO, UPDATE_FETCH_DELEG_STATS_STATUS } from '../store/userSlice';
+import { 
+    INIT_USER, 
+    UPDATE_ROLE, 
+    UPDATE_BALANCE, 
+    UPDATE_GZIL_BALANCE, 
+    UPDATE_SWAP_DELEG_MODAL, 
+    UPDATE_PENDING_WITHDRAWAL_LIST, 
+    UPDATE_COMPLETE_WITHDRAWAL_AMT, 
+    UPDATE_OPERATOR_STATS, 
+    UPDATE_FETCH_OPERATOR_STATS_STATUS, 
+    POLL_USER_DATA_START, 
+    POLL_USER_DATA_STOP, 
+    QUERY_AND_UPDATE_USER_STATS, 
+    UPDATE_DELEG_STATS, 
+    UPDATE_DELEG_PORTFOLIO, 
+    UPDATE_FETCH_DELEG_STATS_STATUS,
+    UPDATE_VAULTS } from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
@@ -279,11 +295,81 @@ function* populateRewardBlkCountdown() {
     }
 }
 
+/**
+ * populate users' vault addresses
+ */
+function* populateVaultStakingStats() {
+    try {
+        const { address_base16 } = yield select(getUserState);
+        const { impl, staking_data } = yield select(getBlockchain);
+        const { ssn_list } = yield select(getStakingState);
+
+        const response:Object = yield call(ZilSdk.getSmartContractSubState, staking_data, 'allocated_user_vault', [address_base16]);
+
+        if (!isRespOk(response)) {
+            throw new Error("no vaults");
+        }
+
+        /**
+         * [
+         *   {
+         *     vault_address: [
+         *       {ssn_name, ssn_address, deleg_amt, rewards},
+         *       {ssn_name, ssn_address, deleg_amt, rewards},
+         *     ]
+         *   }
+         * ]
+         */
+        let vaults = [] as any;
+        let vaultsAddressList = [];
+        const vaultAddress = (response as any)['allocated_user_vault'][address_base16];
+        vaultsAddressList.push(String(vaultAddress));
+
+        for (const vault_address of vaultsAddressList) {
+            console.log("vault address: ", vault_address);
+            const resp: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [vault_address]);
+            const depositAmtDeleg = (isRespOk(resp) === true) ? (resp as any)['deposit_amt_deleg'][vault_address] : null;
+            
+            let vaultInfo = {} as any;
+            let stakingList = [];
+
+            for (const ssnAddress in depositAmtDeleg) {
+                // compute deposits
+                const deposit = new BigNumber(depositAmtDeleg[ssnAddress]);
+
+                // compute zil rewards
+                const delegRewards: string = yield call(computeDelegRewards, impl, ssnAddress, vault_address);
+                const rewards = new BigNumber(delegRewards);
+                const ssnAddressBech32 = toBech32Address(ssnAddress);
+                const stakingStats = {
+                    ssnName: (ssn_list as SsnStats[]).find(ssn => ssn.address === ssnAddressBech32)?.name || '',
+                    ssnAddress: ssnAddressBech32,
+                    delegAmt: `${deposit}`,
+                    rewards: `${rewards}`,
+                }
+                stakingList.push(stakingStats);
+                console.log("staking stats: ", stakingList);
+            }
+
+            vaultInfo[vault_address] = stakingList;
+            vaults.push(vaultInfo);
+        }
+
+        console.log("my vault: ", vaults);
+
+        yield put(UPDATE_VAULTS(vaults));
+    } catch (e) {
+        console.warn("populate vaults failed");
+        yield put(UPDATE_VAULTS([]));
+    }
+}
+
 function* pollDelegatorData() {
     yield fork(populateStakingPortfolio)
     yield fork(populateSwapRequests)
     yield fork(populatePendingWithdrawal)
     yield fork(populateRewardBlkCountdown)
+    yield fork(populateVaultStakingStats)
 }
 
 function* populateOperatorStats() {

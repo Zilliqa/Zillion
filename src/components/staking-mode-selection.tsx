@@ -19,23 +19,21 @@ function StakingModeSelection(props: any) {
                 <p><strong>Select a staking option</strong></p>
             </div>
             <div className="row align-item-center justify-content-center mx-1 mb-4">
-                    <div className="item d-block col-4">
+                    <div className="item d-block col-4 px-4">
                         <h2 className="mt-4">Normal Staking</h2>
                         <p className="mode">ZIL</p>
                         <p className="description">
-                            Our best performing staking option!<br/>Stake to earn ZILs!
+                            Generate ZILs by locking ZILs to any nodes.<br/>Our best performing staking option.
                         </p>
                         <div>
                             <button type="button" className="btn btn-user-action" onClick={() => onSelectStakingMode(StakingMode.ZIL)}>Select</button>
                         </div>
                     </div>
-                    <div className="item d-block col-4">
+                    <div className="item d-block col-4 px-4">
                         <h2 className="mt-4">BZIL Staking</h2>
                         <p className="mode">BZIL &amp; ZIL</p>
                         <p className="description">
-                            Stake to earn BZILs &amp; ZILs!<br/>
-                            Invest your BZILs to earn more!<br/>
-                            Return BZIL when you withdraw!
+                            Generate ZILs &amp; BZILs by locking to any nodes.
                         </p>
                         <div>
                             <button type="button" className="btn btn-user-action" onClick={() => onSelectStakingMode(StakingMode.BZIL)}>Select</button>

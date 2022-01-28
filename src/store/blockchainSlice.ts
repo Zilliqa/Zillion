@@ -10,6 +10,8 @@ export interface BlockchainState {
     blockchain_explorer: string,
     refresh_rate: number,
     api_max_retry_attempt: number,
+    staking_registry: string,
+    staking_data: string,
 }
 
 const initialState: BlockchainState = {
@@ -21,6 +23,8 @@ const initialState: BlockchainState = {
     blockchain_explorer: '',
     refresh_rate: 300000,
     api_max_retry_attempt: 10,
+    staking_registry: '',
+    staking_data: '',
 }
 
 const blockchainSlice = createSlice({
@@ -28,12 +32,14 @@ const blockchainSlice = createSlice({
     initialState: initialState,
     reducers: {
         UPDATE_CHAIN_INFO(state, action) {
-            const { proxy, impl, blockchain, staking_viewer, api_list } = action.payload
+            const { proxy, impl, blockchain, staking_viewer, api_list, staking_registry, staking_data } = action.payload
             state.proxy = proxy
             state.impl = impl
             state.blockchain = blockchain
             state.staking_viewer = staking_viewer
             state.api_list = api_list
+            state.staking_registry = staking_registry
+            state.staking_data = staking_data
         },
         UPDATE_BLOCKCHAIN_EXPLORER(state, action) {
             const { blockchain_explorer } = action.payload
@@ -55,6 +61,8 @@ const blockchainSlice = createSlice({
             state.blockchain = networkConfig.blockchain
             state.staking_viewer = networkConfig.node_status
             state.api_list = networkConfig.api_list
+            state.staking_registry = networkConfig.staking_registry
+            state.staking_data = networkConfig.staking_data
         },
         CONFIG_LOADED() {},
     },

@@ -109,6 +109,11 @@ export enum ProxyCalls {
     WITHDRAW_STAKE_REWARDS = "WithdrawStakeRewards",
 }
 
+// BZIL Staking
+export enum StakingRegistryCalls {
+    DELEGATE_STAKE = "Delegate",
+}
+
 export enum TransactionType {
     CLAIM_REWARDS = 1,
     COMPLETE_STAKE_WITHDRAW = 2,

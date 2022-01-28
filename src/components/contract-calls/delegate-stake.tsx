@@ -11,6 +11,7 @@ import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
 import { StakeModalData } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
+import { ZilTxParser } from '../../zilliqa-txparser';
 import GasSettings from './gas-settings';
 
 const BigNumber = require('bignumber.js');
@@ -22,6 +23,7 @@ function DelegateStakeModal(props: any) {
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
+    const mode = useAppSelector(state => state.user.staking_mode);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
@@ -92,23 +94,7 @@ function DelegateStakeModal(props: any) {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
-        let txParams = {
-            toAddr: proxyChecksum,
-            amount: new BN(`${delegAmtQa}`),
-            code: "",
-            data: JSON.stringify({
-                _tag: ProxyCalls.DELEGATE_STAKE,
-                params: [
-                    {
-                        vname: 'ssnaddr',
-                        type: 'ByStr20',
-                        value: `${ssnChecksumAddress}`,
-                    }
-                ]
-            }),
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-        };
+        let txParams = ZilTxParser.parseDelegate(ssnChecksumAddress, delegAmtQa, gasPrice, gasLimit);
 
         setIsPending(OperationStatus.PENDING);
         showWalletsPrompt(accountType);

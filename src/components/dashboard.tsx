@@ -181,6 +181,8 @@ function Dashboard(props: any) {
             blockchain: networkConfig.blockchain || '',
             staking_viewer: networkConfig.node_status || '',
             api_list: networkConfig.api_list || [],
+            staking_registry: networkConfig.staking_registry || '',
+            staking_data: networkConfig.staking_data || '',
         }));
     }
 
@@ -402,6 +404,37 @@ function Dashboard(props: any) {
                                     <ReactTooltip id="refresh-tip" place="bottom" type="dark" effect="solid">
                                         <span>Refresh</span>
                                     </ReactTooltip>
+                                </div>
+
+                                <div className="p-4 mt-4 dashboard-card">
+                                    <p>Staking Mode: {userState.staking_mode}</p>
+                                    {
+                                        userState.vaults && userState.vaults.map((vaultInfo) => {
+                                            return (
+                                                Object.entries(vaultInfo).map(([vaultAddress, stakingLists]) => {
+                                                    
+                                                    const renderVaultStake = () => {
+                                                        return (
+                                                            (stakingLists as any).map((details: any) => {
+                                                                return (
+                                                                    <>
+                                                                    <p>{details.ssnName} - {details.ssnAddress} - {convertQaToCommaStr(details.delegAmt)} - {details.rewards}</p>
+                                                                    </>
+                                                                )
+                                                            })
+                                                        )
+                                                    }
+                                                    
+                                                    return (
+                                                        <div>
+                                                            <p>Vault: {vaultAddress}</p>
+                                                            <>{renderVaultStake()}</>
+                                                        </div>
+                                                    )
+                                                })
+                                            )
+                                        })
+                                    }
                                 </div>
 
                                 

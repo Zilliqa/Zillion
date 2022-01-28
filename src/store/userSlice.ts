@@ -14,14 +14,15 @@ interface UserState {
     role: Role,                                         // actual role
     selected_role: Role,                                // role that the user selects when signing in
     staking_mode: StakingMode,                          // staking option that the user selects during sign in process
-    deleg_stats: DelegStats,                            // track the delegator stats, i fuser is a delegator
+    deleg_stats: DelegStats,                            // track the delegator stats, if user is a delegator
     deleg_staking_portfolio_list: DelegStakingPortfolioStats[],     // list of ssn info that a delegator has staked with
-    operator_stats: OperatorStats                       // track the operator stats, if user is an operator
-    pending_withdraw_list: PendingWithdrawStats[]       // track pending withdrawals
-    stake_modal_data: StakeModalData                    // hold info about a selected ssn; for dropdown selection use when choosing whether to stake, transfer, claim etc 
+    operator_stats: OperatorStats,                      // track the operator stats, if user is an operator
+    pending_withdraw_list: PendingWithdrawStats[],      // track pending withdrawals
+    stake_modal_data: StakeModalData,                   // hold info about a selected ssn; for dropdown selection use when choosing whether to stake, transfer, claim etc 
     swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
     is_deleg_stats_loading: OperationStatus,            // delegator stats and staking portfolio status indicator
-    is_operator_stats_loading: OperationStatus          // status indicator for loading operator stats
+    is_operator_stats_loading: OperationStatus,         // status indicator for loading operator stats
+    vaults: any [],                                     // list of vault addresses
 }
 
 const initialState: UserState = {
@@ -36,7 +37,7 @@ const initialState: UserState = {
     role: Role.NONE,
     operator_stats: initialOperatorStats,
     selected_role: Role.NONE,
-    staking_mode: StakingMode.NONE,
+    staking_mode: StakingMode.ZIL,                      // has to default to ZIL in case user wrongly logins as operator
     deleg_stats: initialDelegStats,
     deleg_staking_portfolio_list: [],
     pending_withdraw_list: [],
@@ -44,6 +45,7 @@ const initialState: UserState = {
     swap_deleg_modal_data: initialSwapDelegModalData,
     is_deleg_stats_loading: OperationStatus.IDLE,
     is_operator_stats_loading: OperationStatus.IDLE,
+    vaults: [],
 }
 
 
@@ -121,6 +123,9 @@ const userSlice = createSlice({
         UPDATE_FETCH_OPERATOR_STATS_STATUS(state, action) {
             state.is_operator_stats_loading = action.payload
         },
+        UPDATE_VAULTS(state, action) {
+            state.vaults = action.payload
+        },
         RESET_USER_STATE(state) {
             state.address_bech32 = initialState.address_bech32
             state.address_base16 = initialState.address_base16
@@ -140,6 +145,7 @@ const userSlice = createSlice({
             state.swap_deleg_modal_data = initialState.swap_deleg_modal_data
             state.is_deleg_stats_loading = initialState.is_deleg_stats_loading
             state.is_operator_stats_loading = initialState.is_operator_stats_loading
+            state.vaults = initialState.vaults
         },
         QUERY_AND_UPDATE_BALANCE() {},
         QUERY_AND_UPDATE_GZIL_BALANCE() {},
@@ -177,6 +183,7 @@ export const {
     UPDATE_SWAP_DELEG_MODAL,
     UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
+    UPDATE_VAULTS,
     RESET_USER_STATE,
 } = userSlice.actions
 
