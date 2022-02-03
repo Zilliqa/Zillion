@@ -75,6 +75,11 @@ interface SwapDelegModalData {
     requestorList: string[],
 }
 
+interface VaultData {
+    bzilBalance: string,
+    zilBalance: string,
+}
+
 export const initialDelegStats: DelegStats = {
     globalAPY: '0',
     zilRewards: '0',
@@ -116,6 +121,11 @@ export const initialStakeModalData: StakeModalData = {
     delegAmt: '0',
 }
 
+export const initVaultData: VaultData = {
+    bzilBalance: '0',
+    zilBalance: '0',
+}
+
 export type {
     DelegStats,
     DelegStakingPortfolioStats,
@@ -126,4 +136,5 @@ export type {
     SsnStats,
     StakeModalData,
     SwapDelegModalData,
+    VaultData,
 }

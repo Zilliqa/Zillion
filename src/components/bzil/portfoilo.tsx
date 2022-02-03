@@ -59,7 +59,7 @@ function Table({ columns, data }: any) {
 
 function BzilPortfolio(props: any) {
     const vaults = useAppSelector(state => state.user.vaults);
-    const vaultsBalances = useAppSelector(state => state.user.vaults_balances);
+    const vaultsBalances = useAppSelector(state => state.user.vaults_balances);  // vault_address -> { zilBalance, bzilBalance }
     const loading: OperationStatus = useAppSelector(state => state.user.is_deleg_stats_loading);
 
 
@@ -117,8 +117,9 @@ function BzilPortfolio(props: any) {
                     Object.entries(vaultInfo).map(([vaultAddress, stakingLists]) => {
                         return (
                             <div key={index}>
-                                <div className="d-block px-4 pb-3 text-left">VAULT: {vaultAddress}</div>
-                                <div className="d-block px-4 pb-3 text-left">BZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultAddress])} BZIL</div>
+                                <div className="d-block px-4 pb-3 text-left">Vault: {vaultAddress}</div>
+                                <div className="d-block px-4 pb-3 text-left">Vault ZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultAddress]['zilBalance'])} ZIL</div>
+                                <div className="d-block px-4 pb-3 text-left">Vault BZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultAddress]['bzilBalance'])} BZIL</div>
                                 <Table columns={columns} data={stakingLists} />
                             </div>
                         )

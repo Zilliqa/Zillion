@@ -22,7 +22,7 @@ import {
     UPDATE_VAULTS_BALANCE} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
@@ -324,6 +324,7 @@ function* populateVaultStakingStats() {
         let vaults = [] as any;
         let vaultsAddressList = [];
         let vaultsBalances: any = {};
+
         const vaultAddress = (response as any)['allocated_user_vault'][address_base16];
         vaultsAddressList.push(String(vaultAddress));
 
@@ -354,16 +355,23 @@ function* populateVaultStakingStats() {
                 console.log("staking stats: ", stakingList);
             }
 
-            // fetch bzil balance
-            let bzilBal: string = '0.00';
+            // fetch zil and bzil balance of the vault
+            let vaultTokenBalances = initVaultData;
             const resp2: Object = yield call(ZilSdk.getSmartContractSubState, vault_address, 'bzil_balance');
+            const resp3: Object = yield call(ZilSdk.getBalance, vault_address);
+
+            console.log("resp3: ", resp3);
 
             if (isRespOk(resp2)) {
-                bzilBal = String((resp2 as any)['bzil_balance'])
+                vaultTokenBalances.bzilBalance = String((resp2 as any)['bzil_balance'])
+            }
+
+            if (isRespOk(resp3)) {
+                vaultTokenBalances.zilBalance = String((resp3 as any));
             }
 
             vaultInfo[vault_address] = stakingList;
-            vaultsBalances[vault_address] = bzilBal;
+            vaultsBalances[vault_address] = vaultTokenBalances;
             vaults.push(vaultInfo);
         }
 

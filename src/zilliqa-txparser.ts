@@ -28,24 +28,16 @@ export class ZilTxParser {
         console.log("toaddr: ", toAddr);
         console.log("tag: ", tag);
         console.log("amount: ", amount.toString());
-        
-        return {
-            toAddr: toAddr,
-            amount: new BN(`${amount}`),
-            code: "",
-            data: JSON.stringify({
-                _tag: tag,
-                params: [
-                    {
-                        vname: 'ssnaddr',
-                        type: 'ByStr20',
-                        value: `${ssnaddr}`,
-                    }
-                ]
-            }),
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-        }
+
+        const params = [
+            {
+                vname: 'ssnaddr',
+                type: 'ByStr20',
+                value: `${ssnaddr}`,
+            }
+        ];
+
+        return ZilTxParser.createTxParams(toAddr, amount, tag, params, gasPrice, gasLimit);
     }
 
     /**
