@@ -22,7 +22,7 @@ import {
     UPDATE_VAULTS_BALANCE} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
@@ -356,7 +356,10 @@ function* populateVaultStakingStats() {
             }
 
             // fetch zil and bzil balance of the vault
-            let vaultTokenBalances = initVaultData;
+            let vaultTokenBalances = {
+                bzilBalance: initVaultData.bzilBalance,
+                zilBalance: initVaultData.zilBalance,
+            } as VaultData;
             const resp2: Object = yield call(ZilSdk.getSmartContractSubState, vault_address, 'bzil_balance');
             const resp3: Object = yield call(ZilSdk.getBalance, vault_address);
 
