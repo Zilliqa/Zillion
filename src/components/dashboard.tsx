@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import ReactTooltip from 'react-tooltip';
 
-import { Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, Constants, TransactionType, ButtonText, ContractState, OperationStatus } from '../util/enum';
+import { Role, NetworkURL, Network as NetworkLabel, AccountType, Environment, Constants, TransactionType, ButtonText, ContractState, OperationStatus, StakingMode } from '../util/enum';
 import { convertQaToCommaStr, getAddressLink } from '../util/utils';
 import StakingPortfolio from './staking-portfolio';
 import SsnTable from './ssn-table';
@@ -37,6 +37,8 @@ import IconMoon from './icons/moon';
 
 import useDarkMode from '../util/use-dark-mode';
 import { getLocalItem, storeLocalItem } from '../util/use-local-storage';
+
+import BzilPortfolio from './bzil/portfoilo';
 
 import Footer from './footer';
 import RecentTxnDropdown from './recent-txn';
@@ -519,7 +521,18 @@ function Dashboard(props: any) {
                                             <div className="col-12 mt-2 px-4 text-center">
                                                 <div className="inner-section">
                                                     <h6 className="inner-section-heading px-4 pt-4 pb-3">Deposits <span data-tip data-for="deposit-question"><IconQuestionCircle width="16" height="16" className="section-icon" /></span></h6>
-                                                    <StakingPortfolio />
+                                                    {
+                                                        userState.staking_mode === StakingMode.BZIL 
+                                                        
+                                                        ?
+
+                                                        <BzilPortfolio />
+
+                                                        :
+
+                                                        <StakingPortfolio />
+
+                                                    }
                                                 </div>
                                             </div>
                                             <ReactTooltip id="deposit-question" place="bottom" type="dark" effect="solid">
