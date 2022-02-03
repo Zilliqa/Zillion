@@ -17,14 +17,10 @@ export class ZilTxParser {
      * @returns tx params JSON obj
      */
     static parseDelegate = (ssnaddr: String, amount: String, gasPrice: String, gasLimit: String) => {
-        const { staking_mode } = store.getState().user;
-        const { proxy, staking_registry } = store.getState().blockchain;
+        const { toAddr, mode } = ZilTxParser.getToAddr();
+        let tag = (mode === StakingMode.BZIL) ? "Delegate" : "DelegateStake";
 
-        let toAddr = (staking_mode === StakingMode.BZIL) ? staking_registry : proxy;
-        toAddr = bech32ToChecksum(toAddr);
-        let tag = (staking_mode === StakingMode.BZIL) ? "Delegate" : "DelegateStake";
-
-        console.log("delegate mode: ", staking_mode);
+        console.log("delegate mode: ", mode);
         console.log("toaddr: ", toAddr);
         console.log("tag: ", tag);
         console.log("amount: ", amount.toString());
@@ -48,12 +44,7 @@ export class ZilTxParser {
      * @returns tx params JSON obj
      */
     static parseWithdrawStakeRewards = (ssnaddr: String, gasPrice: String, gasLimit: String) => {
-        const { staking_mode } = store.getState().user;
-        const { proxy, staking_registry } = store.getState().blockchain;
-
-        let toAddr = (staking_mode === StakingMode.BZIL) ? staking_registry : proxy;
-        toAddr = bech32ToChecksum(toAddr);
-
+        const { toAddr } = ZilTxParser.getToAddr();
         let tag = "WithdrawStakeRewards";
 
         const params = [
@@ -65,6 +56,40 @@ export class ZilTxParser {
         ]
 
         return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
+     * create tx params for redelegate
+     * @param fromSsnAddr ByStr20 from which ssn address to transfer from
+     * @param toSsnAddr ByStr20 to which ssn address to transfer to
+     * @param amount amount in Qa to redelegate
+     * @param gasPrice 
+     * @param gasLimit 
+     * @returns 
+     */
+    static parseRedelegate = (fromSsnAddr: String, toSsnAddr: String, amount: String, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "ReDelegateStake";
+
+        const params = [
+            {
+                vname: 'ssnaddr',
+                type: 'ByStr20',
+                value: `${fromSsnAddr}`,
+            },
+            {
+                vname: 'to_ssn',
+                type: 'ByStr20',
+                value: `${toSsnAddr}`,
+            },
+            {
+                vname: 'amount',
+                type: 'Uint128',
+                value: `${amount}`,
+            }
+        ];
+
+        return ZilTxParser.createTxParams(toAddr, amount, tag, params, gasPrice, gasLimit);
     }
 
     private static createTxParams = (toAddr: String, amount: String, tag: String, params: any, gasPrice: String, gasLimit: String) => {
@@ -79,6 +104,23 @@ export class ZilTxParser {
             gasPrice: gasPrice,
             gasLimit: gasLimit,
         }
+    }
+
+    /**
+     * Determine the contract toAddr from the staking mode
+     * @returns toAddr and mode
+     */
+    private static getToAddr = () => {
+        const { staking_mode } = store.getState().user;
+        const { proxy, staking_registry } = store.getState().blockchain;
+
+        let toAddr = (staking_mode === StakingMode.BZIL) ? staking_registry : proxy;
+        toAddr = bech32ToChecksum(toAddr);
+        
+        return {
+            toAddr: toAddr,
+            mode: staking_mode
+        };
     }
 
 }
