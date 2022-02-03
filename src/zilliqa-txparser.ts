@@ -47,4 +47,46 @@ export class ZilTxParser {
             gasLimit: gasLimit,
         }
     }
+
+    /**
+     * create tx params for withdraw rewards
+     * @param ssnaddr ByStr20 ssn address
+     * @param gasPrice gas price in Qa
+     * @param gasLimit 
+     * @returns tx params JSON obj
+     */
+    static parseWithdrawStakeRewards = (ssnaddr: String, gasPrice: String, gasLimit: String) => {
+        const { staking_mode } = store.getState().user;
+        const { proxy, staking_registry } = store.getState().blockchain;
+
+        let toAddr = (staking_mode === StakingMode.BZIL) ? staking_registry : proxy;
+        toAddr = bech32ToChecksum(toAddr);
+
+        let tag = "WithdrawStakeRewards";
+
+        const params = [
+            {
+                vname: 'ssnaddr',
+                type: 'ByStr20',
+                value: `${ssnaddr}`,
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    private static createTxParams = (toAddr: String, amount: String, tag: String, params: any, gasPrice: String, gasLimit: String) => {
+        return {
+            toAddr: toAddr,
+            amount: new BN(`${amount}`),
+            code: "",
+            data: JSON.stringify({
+                _tag: tag,
+                params: [...params],
+            }),
+            gasPrice: gasPrice,
+            gasLimit: gasLimit,
+        }
+    }
+
 }

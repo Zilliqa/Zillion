@@ -13,6 +13,7 @@ import { useAppSelector } from '../../store/hooks';
 import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
 import GasSettings from './gas-settings';
+import { ZilTxParser } from '../../zilliqa-txparser';
 
 const BigNumber = require('bignumber.js');
 const { BN } = require('@zilliqa-js/util');
@@ -60,23 +61,7 @@ function WithdrawRewardModal(props: any) {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
-        let txParams = {
-            toAddr: proxyChecksum,
-            amount: new BN(0),
-            code: "",
-            data: JSON.stringify({
-                _tag: ProxyCalls.WITHDRAW_STAKE_REWARDS,
-                params: [
-                    {
-                        vname: 'ssnaddr',
-                        type: 'ByStr20',
-                        value: `${ssnChecksumAddress}`,
-                    }
-                ]
-            }),
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-        };
+        let txParams = ZilTxParser.parseWithdrawStakeRewards(ssnChecksumAddress, gasPrice, gasLimit);
 
         setIsPending(OperationStatus.PENDING);
         
