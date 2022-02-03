@@ -18,6 +18,7 @@ import { ZilSigner } from '../../zilliqa-signer';
 import GasSettings from './gas-settings';
 import BigNumber from 'bignumber.js';
 import { logger } from '../../util/logger';
+import { ZilTxParser } from '../../zilliqa-txparser';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -229,33 +230,7 @@ function ReDelegateStakeModal(props: any) {
         }
 
         // gas price, gas limit declared in account.ts
-        let txParams = {
-            toAddr: proxyChecksum,
-            amount: new BN(0),
-            code: "",
-            data: JSON.stringify({
-                _tag: ProxyCalls.REDELEGATE_STAKE,
-                params: [
-                    {
-                        vname: 'ssnaddr',
-                        type: 'ByStr20',
-                        value: `${fromSsnChecksumAddress}`,
-                    },
-                    {
-                        vname: 'to_ssn',
-                        type: 'ByStr20',
-                        value: `${toSsnChecksumAddress}`,
-                    },
-                    {
-                        vname: 'amount',
-                        type: 'Uint128',
-                        value: `${delegAmtQa}`,
-                    }
-                ]
-            }),
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-        };
+        let txParams = ZilTxParser.parseRedelegate(fromSsnChecksumAddress, toSsnChecksumAddress, delegAmtQa, gasPrice, gasLimit);
 
         showWalletsPrompt(accountType);
 
