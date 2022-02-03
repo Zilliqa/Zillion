@@ -5,6 +5,7 @@ import { useAppSelector } from '../../store/hooks';
 import { OperationStatus } from '../../util/enum';
 import { convertQaToCommaStr, convertQaToZilFull } from '../../util/utils';
 import DelegatorDropdown from '../delegator-dropdown';
+import SpinnerNormal from '../spinner-normal';
 
 
 function Table({ columns, data }: any) {
@@ -58,6 +59,9 @@ function Table({ columns, data }: any) {
 
 function BzilPortfolio(props: any) {
     const vaults = useAppSelector(state => state.user.vaults);
+    const vaultsBalances = useAppSelector(state => state.user.vaults_balances);
+    const loading: OperationStatus = useAppSelector(state => state.user.is_deleg_stats_loading);
+
 
     const columns = useMemo(
         () => [
@@ -97,20 +101,26 @@ function BzilPortfolio(props: any) {
     return (
         <>
         {
+            loading === OperationStatus.PENDING &&
+            <SpinnerNormal class="spinner-border dashboard-spinner mb-4" />
+        }
+        {
+            loading === OperationStatus.COMPLETE &&
             Object.keys(vaults).length === 0 &&
             <div className="d-block px-4 pb-3 text-left"><em>You have not deposited in any nodes yet.</em></div>
         }
         {
+            loading === OperationStatus.COMPLETE &&
             Object.keys(vaults).length > 0 &&
-            vaults.map((vaultInfo) => {
+            vaults.map((vaultInfo, index) => {
                 return (
                     Object.entries(vaultInfo).map(([vaultAddress, stakingLists]) => {
-
                         return (
-                            <>
-                                <div className="d-block px-4 pb-3 text-left">Vault: {vaultAddress}</div>
+                            <div key={index}>
+                                <div className="d-block px-4 pb-3 text-left">VAULT: {vaultAddress}</div>
+                                <div className="d-block px-4 pb-3 text-left">BZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultAddress])} BZIL</div>
                                 <Table columns={columns} data={stakingLists} />
-                            </>
+                            </div>
                         )
                     })
                 )

@@ -23,6 +23,7 @@ interface UserState {
     is_deleg_stats_loading: OperationStatus,            // delegator stats and staking portfolio status indicator
     is_operator_stats_loading: OperationStatus,         // status indicator for loading operator stats
     vaults: any [],                                     // list of vault addresses
+    vaults_balances: any,                               // JSON map; vault address -> bzil balance
 }
 
 const initialState: UserState = {
@@ -46,6 +47,7 @@ const initialState: UserState = {
     is_deleg_stats_loading: OperationStatus.IDLE,
     is_operator_stats_loading: OperationStatus.IDLE,
     vaults: [],
+    vaults_balances: {},
 }
 
 
@@ -126,6 +128,9 @@ const userSlice = createSlice({
         UPDATE_VAULTS(state, action) {
             state.vaults = action.payload
         },
+        UPDATE_VAULTS_BALANCE(state, action) {
+            state.vaults_balances = action.payload
+        },
         RESET_USER_STATE(state) {
             state.address_bech32 = initialState.address_bech32
             state.address_base16 = initialState.address_base16
@@ -184,6 +189,7 @@ export const {
     UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
     UPDATE_VAULTS,
+    UPDATE_VAULTS_BALANCE,
     RESET_USER_STATE,
 } = userSlice.actions
 

@@ -18,7 +18,8 @@ import {
     UPDATE_DELEG_STATS, 
     UPDATE_DELEG_PORTFOLIO, 
     UPDATE_FETCH_DELEG_STATS_STATUS,
-    UPDATE_VAULTS } from '../store/userSlice';
+    UPDATE_VAULTS, 
+    UPDATE_VAULTS_BALANCE} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData } from '../util/interface';
@@ -322,9 +323,11 @@ function* populateVaultStakingStats() {
          */
         let vaults = [] as any;
         let vaultsAddressList = [];
+        let vaultsBalances: any = {};
         const vaultAddress = (response as any)['allocated_user_vault'][address_base16];
         vaultsAddressList.push(String(vaultAddress));
 
+        // fetch each ssn that the vault has staked
         for (const vault_address of vaultsAddressList) {
             console.log("vault address: ", vault_address);
             const resp: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [vault_address]);
@@ -351,13 +354,24 @@ function* populateVaultStakingStats() {
                 console.log("staking stats: ", stakingList);
             }
 
+            // fetch bzil balance
+            let bzilBal: string = '0.00';
+            const resp2: Object = yield call(ZilSdk.getSmartContractSubState, vault_address, 'bzil_balance');
+
+            if (isRespOk(resp2)) {
+                bzilBal = String((resp2 as any)['bzil_balance'])
+            }
+
             vaultInfo[vault_address] = stakingList;
+            vaultsBalances[vault_address] = bzilBal;
             vaults.push(vaultInfo);
         }
 
         console.log("my vault: ", vaults);
 
         yield put(UPDATE_VAULTS(vaults));
+        yield put(UPDATE_VAULTS_BALANCE(vaultsBalances));
+        
     } catch (e) {
         console.warn("populate vaults failed");
         yield put(UPDATE_VAULTS([]));
