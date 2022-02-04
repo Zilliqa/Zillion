@@ -92,7 +92,8 @@ function BzilPortfolio(props: any) {
                         ssnName={row.original.ssnName}
                         ssnAddress={row.original.ssnAddress}
                         delegAmt={row.original.delegAmt}
-                        rewards={row.original.rewards} />
+                        rewards={row.original.rewards}
+                        vault={row.original.vault} />
                     </>
             }
         ], []

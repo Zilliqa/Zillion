@@ -143,6 +143,7 @@ function* populateStakingPortfolio() {
                 ssnAddress: ssnAddressBech32,
                 delegAmt: `${deposit}`,
                 rewards: `${rewards}`,
+                vault: '0x0000000000000000000000000000000000000000',
             }
             staking_portfolio_list.push(stakingStats);
         }
@@ -350,6 +351,7 @@ function* populateVaultStakingStats() {
                     ssnAddress: ssnAddressBech32,
                     delegAmt: `${deposit}`,
                     rewards: `${rewards}`,
+                    vault: vault_address,
                 }
                 stakingList.push(stakingStats);
                 console.log("staking stats: ", stakingList);

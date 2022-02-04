@@ -68,6 +68,12 @@ export const computeStakeAmtPercent = (inputStake: string, totalStake: string) =
     return stakePercentage;
 }
 
+// returns true if vaultAddress is zero address
+// false otherwise
+export const isNotZeroAddressVault = (vaultAddress: string) => {
+    return (vaultAddress !== '0x0000000000000000000000000000000000000000')
+}
+
 // checks if input contains only postive numbers
 // returns true if so, otherwise returns false
 export const isDigits = (input: string) => {

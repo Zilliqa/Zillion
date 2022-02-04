@@ -110,7 +110,8 @@ function Explorer(props: any) {
                         ssnName: ssnContractState["ssnlist"][ssnAddress]["arguments"][3],
                         ssnAddress: toBech32Address(ssnAddress),
                         delegAmt: `${delegAmtQaBN}`,
-                        rewards: `${delegRewards}`
+                        rewards: `${delegRewards}`,
+                        vault: `0x0000000000000000000000000000000000000000`
                     }
                     stakedNodesList.push(data);
                 }

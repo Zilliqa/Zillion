@@ -3,8 +3,8 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits, computeGasFees, isRespOk } from '../../util/utils';
-import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, showWalletsPrompt, convertQaToZilFull, validateBalance, isDigits, computeGasFees, isRespOk, isNotZeroAddressVault } from '../../util/utils';
+import { AccountType, OperationStatus, ProxyCalls, StakingMode, TransactionType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
@@ -16,6 +16,7 @@ import { ZilSigner } from '../../zilliqa-signer';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
 import { logger } from '../../util/logger';
+import { ZilTxParser } from '../../zilliqa-txparser';
 
 
 const { BN, units } = require('@zilliqa-js/util');
@@ -25,10 +26,12 @@ function WithdrawStakeModal(props: any) {
     const proxy = useAppSelector(state => state.blockchain.proxy);
     const impl = useAppSelector(state => state.blockchain.impl);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
+    const stakingDataContract = useAppSelector(state => state.blockchain.staking_data);
     const wallet = useAppSelector(state => state.user.address_base16);
     const userBase16Address = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
+    const mode = useAppSelector(state => state.user.staking_mode);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil);
     const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
@@ -50,8 +53,12 @@ function WithdrawStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         
+        // get the right staked address
+        // check whether to use user's wallet or vault address
+        const stakedAddress = isNotZeroAddressVault(stakeModalData.vault) ? stakeModalData.vault : userBase16Address;
+
         const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
-        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
+        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [stakedAddress]);
 
         if (!isRespOk(last_reward_cycle_json)) {
             return false;
@@ -62,7 +69,7 @@ function WithdrawStakeModal(props: any) {
         }
 
         // compute rewards
-        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address));
+        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, stakedAddress));
 
         if (delegRewards.gt(new BN(0))) {
             logger("you have delegated rewards: %o", delegRewards);
@@ -71,8 +78,8 @@ function WithdrawStakeModal(props: any) {
         }
 
         // check if user has buffered deposits
-        if (last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
-                const lastDepositCycleDeleg = parseInt(last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
+        if (last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[stakedAddress].hasOwnProperty(ssnChecksumAddress)) {
+                const lastDepositCycleDeleg = parseInt(last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[stakedAddress][ssnChecksumAddress]);
                 const lastRewardCycle = parseInt(last_reward_cycle_json.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
                     Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before withdrawing the staked amount.");
@@ -149,43 +156,50 @@ function WithdrawStakeModal(props: any) {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         const delegAmtQa = stakeModalData.delegAmt;
         const leftOverQa = new BN(delegAmtQa).sub(new BN(withdrawAmtQa));
+        const vaultAddress = stakeModalData.vault;
+
+        let isValidWithdraw = true;
+        let alertDialog = {
+            type: 'info',
+            title: 'Invalid Withdraw Amount',
+            msg: '',
+        }
 
         // check if withdraw more than delegated
         if (new BN(withdrawAmtQa).gt(new BN(delegAmtQa))) {
-            Alert('info', "Invalid Withdraw Amount", "You only have " + convertQaToCommaStr(delegAmtQa) + " ZIL to withdraw." );
-            setIsPending('');
-            return null;
-        } else if (!leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
+            isValidWithdraw = false;
+            alertDialog["msg"] = `You only have ${convertQaToCommaStr(delegAmtQa)} ZIL to withdraw`;
+
+        } else if (isValidWithdraw && !leftOverQa.isZero() && leftOverQa.lt(new BN(minDelegStake))) {
             // check leftover amount
             // if less than min stake amount
-            Alert('info', "Invalid Withdraw Amount", "Please leave at least " +  minDelegStakeDisplay + " ZIL (min. stake amount) or withdraw ALL.");
+            isValidWithdraw = false;
+            alertDialog["msg"] = `Please leave at least ${minDelegStakeDisplay} ZIL (min. stake amount) or withdraw ALL.`;
+            
+        } else if (isValidWithdraw && mode === StakingMode.BZIL) {
+            const bzilAddress = await ZilSdk.getSmartContractSubState(stakingDataContract, "bzil_address");
+            
+            const userBzilBalance = await ZilSdk.getSmartContractSubState(bzilAddress["bzil_address"], "balances", [userBase16Address]);
+            
+            console.log("my bzil: ", userBzilBalance);
+            
+            if (isRespOk(userBzilBalance) && new BN(withdrawAmtQa).lte(new BN(userBzilBalance["balances"][userBase16Address]))) {
+                // do nothing
+            } else {
+                // check if user has sufficient bzil to repay
+                isValidWithdraw = false;
+                alertDialog["msg"] = `Please ensure you have at least ${convertQaToCommaStr(withdrawAmtQa)} BZIL to repay back to withdraw the staked amount`;
+            }
+        }
+
+        if (!isValidWithdraw) {
+            Alert(alertDialog["type"], alertDialog["title"], alertDialog["msg"]);
             setIsPending('');
             return null;
         }
 
         // gas price, gas limit declared in account.ts
-        let txParams = {
-            toAddr: proxyChecksum,
-            amount: new BN(0),
-            code: "",
-            data: JSON.stringify({
-                _tag: ProxyCalls.WITHDRAW_STAKE_AMT,
-                params: [
-                    {
-                        vname: 'ssnaddr',
-                        type: 'ByStr20',
-                        value: `${ssnChecksumAddress}`,
-                    },
-                    {
-                        vname: 'amt',
-                        type: 'Uint128',
-                        value: `${withdrawAmtQa}`,
-                    },
-                ]
-            }),
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-        };
+        let txParams = ZilTxParser.parseWithdrawStakeAmount(ssnChecksumAddress, withdrawAmtQa, gasPrice, gasLimit);
         
         showWalletsPrompt(accountType);
 

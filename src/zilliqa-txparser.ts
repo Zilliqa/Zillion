@@ -37,6 +37,34 @@ export class ZilTxParser {
     }
 
     /**
+     * create tx params for withdraw stake
+     * @param ssnaddr ByStr20 ssn address
+     * @param amount withdraw amount in Qa
+     * @param gasPrice gas price in Qa
+     * @param gasLimit 
+     * @returns tx params JSON obj
+     */
+    static parseWithdrawStakeAmount = (ssnaddr: String, amount: String, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "WithdrawStakeAmt";
+
+        const params = [
+            {
+                vname: 'ssnaddr',
+                type: 'ByStr20',
+                value: `${ssnaddr}`,
+            },
+            {
+                vname: 'amt',
+                type: 'Uint128',
+                value: `${amount}`,
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, amount, tag, params, gasPrice, gasLimit);
+    }
+
+    /**
      * create tx params for withdraw rewards
      * @param ssnaddr ByStr20 ssn address
      * @param gasPrice gas price in Qa

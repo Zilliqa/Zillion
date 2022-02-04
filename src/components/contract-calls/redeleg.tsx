@@ -7,7 +7,7 @@ import { trackPromise } from 'react-promise-tracker';
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import Alert from '../alert';
-import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees, isRespOk, validateBalance } from '../../util/utils';
+import { bech32ToChecksum, convertZilToQa, convertQaToCommaStr, convertToProperCommRate, getTruncatedAddress, showWalletsPrompt, convertQaToZilFull, isDigits, computeGasFees, isRespOk, validateBalance, isNotZeroAddressVault } from '../../util/utils';
 import { ProxyCalls, OperationStatus, TransactionType, AccountType } from '../../util/enum';
 import { computeDelegRewards } from '../../util/reward-calculator';
 
@@ -113,8 +113,12 @@ function ReDelegateStakeModal(props: any) {
     const hasRewardToWithdraw = async () => {
         const ssnChecksumAddress = bech32ToChecksum(fromSsn).toLowerCase();
         
+        // get the right staked address
+        // check whether to use user's wallet or vault address
+        const stakedAddress = isNotZeroAddressVault(stakeModalData.vault) ? stakeModalData.vault : userBase16Address;
+
         const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
-        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [userBase16Address]);
+        const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [stakedAddress]);
 
         if (!isRespOk(last_reward_cycle_json)) {
             return false;
@@ -125,7 +129,7 @@ function ReDelegateStakeModal(props: any) {
         }
 
         // compute rewards
-        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, userBase16Address));
+        const delegRewards = new BN(await computeDelegRewards(impl, ssnChecksumAddress, stakedAddress));
 
         if (delegRewards.gt(new BN(0))) {
             Alert('info', "Unwithdrawn Rewards Found", "Please withdraw the rewards before transferring.");
@@ -135,8 +139,8 @@ function ReDelegateStakeModal(props: any) {
         // secondary buffered deposits check
         // different map
         // check if user has buffered deposits
-        if (last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address].hasOwnProperty(ssnChecksumAddress)) {
-                const lastDepositCycleDeleg = parseInt(last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[userBase16Address][ssnChecksumAddress]);
+        if (last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[stakedAddress].hasOwnProperty(ssnChecksumAddress)) {
+                const lastDepositCycleDeleg = parseInt(last_buf_deposit_cycle_deleg_json.last_buf_deposit_cycle_deleg[stakedAddress][ssnChecksumAddress]);
                 const lastRewardCycle = parseInt(last_reward_cycle_json.lastrewardcycle);
                 if (lastRewardCycle <= lastDepositCycleDeleg) {
                     Alert('info', "Buffered Deposits Found", "Please wait for the next cycle before transferring.");

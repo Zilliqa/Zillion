@@ -7,7 +7,8 @@ import { UPDATE_STAKE_MODAL_DATA } from '../store/userSlice';
 
 function DelegatorDropdown(props: any) {
     const dispatch = useAppDispatch();
-    // from staking-portfolio
+
+    // passed from staking-portfolio / bzil/portfoilo
     // modal data is a state variable on dashboard
     // delegAmt, rewards in Qa
     const { 
@@ -15,6 +16,7 @@ function DelegatorDropdown(props: any) {
         ssnAddress,
         delegAmt,
         rewards,
+        vault = '0x0000000000000000000000000000000000000000',
     } = props;
 
     const handleClaimRewards = () => {
@@ -23,6 +25,7 @@ function DelegatorDropdown(props: any) {
                 ssnName: ssnName,
                 ssnAddress: ssnAddress,
                 rewards: rewards,
+                vault: vault
             } as StakeModalData
         }));
     };
@@ -33,6 +36,7 @@ function DelegatorDropdown(props: any) {
                 ssnName: ssnName,
                 ssnAddress: ssnAddress,
                 delegAmt: delegAmt,
+                vault: vault
             } as StakeModalData
         }));
     };
@@ -43,6 +47,7 @@ function DelegatorDropdown(props: any) {
                 ssnName: ssnName,
                 ssnAddress: ssnAddress,
                 delegAmt: delegAmt,
+                vault: vault
             } as StakeModalData
         }));
     };
