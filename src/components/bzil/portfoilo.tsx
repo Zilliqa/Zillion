@@ -120,7 +120,7 @@ function BzilPortfolio(props: any) {
                             <div key={index}>
                                 <div className="d-block px-4 pb-3 text-left">Vault: {vaultAddress}</div>
                                 <div className="d-block px-4 pb-3 text-left">Vault ZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultAddress]['zilBalance'])} ZIL</div>
-                                <div className="d-block px-4 pb-3 text-left">Vault BZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultAddress]['bzilBalance'])} BZIL</div>
+                                <div className="d-block px-4 pb-3 text-left">Vault BZIL Minted: {convertQaToCommaStr(vaultsBalances[vaultAddress]['bzilBalance'])} BZIL</div>
                                 <Table columns={columns} data={stakingLists} />
                             </div>
                         )

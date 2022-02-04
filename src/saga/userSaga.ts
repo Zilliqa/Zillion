@@ -21,7 +21,7 @@ import {
     UPDATE_VAULTS, 
     UPDATE_VAULTS_BALANCE} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
-import { OperationStatus, Role } from '../util/enum';
+import { OperationStatus, Role, StakingMode } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
@@ -391,12 +391,108 @@ function* populateVaultStakingStats() {
     }
 }
 
+/**
+ * populate vaults' pending withdrawal
+ * @TODO combine or refactor with populateVaultStakingStats to reduce repeated codes
+ */
+function* populateVaultsPendingWithdrawal() {
+    try {
+        const { address_base16 } = yield select(getUserState);
+        const { impl, staking_data } = yield select(getBlockchain);
+        const { ssn_list } = yield select(getStakingState);
+
+        const response:Object = yield call(ZilSdk.getSmartContractSubState, staking_data, 'allocated_user_vault', [address_base16]);
+
+        if (!isRespOk(response)) {
+            throw new Error("no vaults");
+        }
+
+        let vaultsAddressList = [];
+
+        const vaultAddress = (response as any)['allocated_user_vault'][address_base16];
+        vaultsAddressList.push(String(vaultAddress));
+
+        // compute pending withdrawal rewards
+        let pendingWithdrawList: PendingWithdrawStats[] = [];
+        let totalWithdrawAmt = new BigNumber(0);
+        const { min_bnum_req } = yield select(getStakingState);
+        const numTxBlk: string = yield call(ZilSdk.getNumTxBlocks);
+        const currBlkNum = isRespOk(numTxBlk) === true ? new BigNumber(numTxBlk).minus(1) : new BigNumber(0);
+
+        for (const vault_address of vaultsAddressList) {
+            const response: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'withdrawal_pending', [vault_address]);
+
+            logger("populateVaultsPendingWithdrawal - pending withdrawal: ", response);
+    
+            if (!isRespOk(response)) {
+                throw new Error("no pending withdrawal for address");
+            }
+    
+            let progress = '0';
+            const pendingWithdrawal = (response as any)['withdrawal_pending'][vault_address];
+    
+            for (const blkNum in pendingWithdrawal) {
+                // compute each pending stake withdrawal progress
+                let pendingAmt = new BigNumber(pendingWithdrawal[blkNum]);
+                let blkNumCheck = new BigNumber(blkNum).plus(min_bnum_req);
+                let blkNumCountdown = blkNumCheck.minus(currBlkNum); // may be negative
+                let completed = new BigNumber(0);
+    
+                // compute progress using blk num countdown ratio
+                if (blkNumCountdown.isLessThanOrEqualTo(0)) {
+                    // can withdraw
+                    totalWithdrawAmt = totalWithdrawAmt.plus(pendingAmt)
+                    blkNumCountdown = new BigNumber(0);
+                    completed = new BigNumber(1);
+                } else {
+                    // still have pending blks
+                    // 1 - (countdown/blk_req)
+                    const processed = blkNumCountdown.dividedBy(min_bnum_req);
+                    completed = new BigNumber(1).minus(processed);
+                }
+    
+                // convert progress to percentage
+                progress = completed.times(100).toFixed(2);
+    
+                pendingWithdrawList.push({
+                    amount: `${pendingAmt}`,
+                    blkNumCountdown: `${blkNumCountdown}`,
+                    blkNumCheck: `${blkNumCheck}`,
+                    progress: `${progress}`
+                } as PendingWithdrawStats)
+            }
+            console.log("vaults pending withdrawal: ", pendingWithdrawList);
+        }
+
+        yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: pendingWithdrawList }));
+        yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: `${totalWithdrawAmt}` }));
+    } catch (e) {
+        console.warn("populate vaults pending withdrawal failed: ", e);
+        yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: [] }));
+        yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: "0" }));
+    }
+}
+
 function* pollDelegatorData() {
-    yield fork(populateStakingPortfolio)
-    yield fork(populateSwapRequests)
-    yield fork(populatePendingWithdrawal)
+    const { staking_mode } = yield select(getUserState);
+
+    console.log("staking modeeee: ", staking_mode);
+
+    // always run
     yield fork(populateRewardBlkCountdown)
-    yield fork(populateVaultStakingStats)
+
+    // run via certain staking modes
+    switch (staking_mode) {
+        case StakingMode.BZIL:
+            yield fork(populateVaultStakingStats)
+            yield fork(populateVaultsPendingWithdrawal)
+            break;
+        case StakingMode.ZIL:
+        default:
+            yield fork(populateStakingPortfolio)
+            yield fork(populateSwapRequests)
+            yield fork(populatePendingWithdrawal)
+    }
 }
 
 function* populateOperatorStats() {

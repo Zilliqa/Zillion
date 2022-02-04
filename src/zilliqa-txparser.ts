@@ -87,6 +87,19 @@ export class ZilTxParser {
     }
 
     /**
+     * create tx params for complete withdrawal
+     * @param gasPrice gas price in Qa
+     * @param gasLimit 
+     * @returns tx params JSON obj
+     */
+    static parseCompleteWithdrawal = (gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "CompleteWithdrawal";
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, [], gasPrice, gasLimit);
+    }
+
+    /**
      * create tx params for redelegate
      * @param fromSsnAddr ByStr20 from which ssn address to transfer from
      * @param toSsnAddr ByStr20 to which ssn address to transfer to

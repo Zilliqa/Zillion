@@ -70,16 +70,16 @@ function Home(props: any) {
     // login success
     // update store and signer network
     dispatch(INIT_USER({ address_base16: addressBase16, address_bech32: addressBech32, account_type: accountType, authenticated: true, selected_role: role }));
-    dispatch(QUERY_AND_UPDATE_USER_STATS());
-    await ZilSigner.changeNetwork(chainInfo.blockchain);
+    // dispatch(QUERY_AND_UPDATE_USER_STATS());
+    // await ZilSigner.changeNetwork(chainInfo.blockchain);
 
-    if (accountType === AccountType.LEDGER && typeof(ledgerIndex) !== 'undefined') {
-      // update ledger index to store if using ledger
-      dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
-    }
+    // if (accountType === AccountType.LEDGER && typeof(ledgerIndex) !== 'undefined') {
+    //   // update ledger index to store if using ledger
+    //   dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
+    // }
 
     // add some delay
-    await timeout(1000);
+    // await timeout(1000);
   }
 
   const showStakeModeSelection = () => {

@@ -112,8 +112,7 @@ const userSlice = createSlice({
             state.stake_modal_data = {...stake_modal}
         },
         UPDATE_STAKING_MODE(state, action) {
-            const { staking_mode } = action.payload
-            state.staking_mode = staking_mode
+            state.staking_mode = action.payload
         },
         UPDATE_SWAP_DELEG_MODAL(state, action) {
             const { swap_deleg_modal } = action.payload
