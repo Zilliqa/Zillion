@@ -73,10 +73,10 @@ function Home(props: any) {
     // dispatch(QUERY_AND_UPDATE_USER_STATS());
     // await ZilSigner.changeNetwork(chainInfo.blockchain);
 
-    // if (accountType === AccountType.LEDGER && typeof(ledgerIndex) !== 'undefined') {
-    //   // update ledger index to store if using ledger
-    //   dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
-    // }
+    if (accountType === AccountType.LEDGER && typeof(ledgerIndex) !== 'undefined') {
+      // update ledger index to store if using ledger
+      dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
+    }
 
     // add some delay
     // await timeout(1000);
@@ -97,6 +97,16 @@ function Home(props: any) {
       // update ledger index to store if using ledger
       dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
     }
+
+    // add some delay
+    await timeout(1000);
+    logger("directing to dashboard");
+    props.history.push("/dashboard");
+  }
+
+  const goToDashboard = async () => {
+    dispatch(QUERY_AND_UPDATE_USER_STATS());
+    await ZilSigner.changeNetwork(chainInfo.blockchain);
 
     // add some delay
     await timeout(1000);
@@ -358,7 +368,7 @@ function Home(props: any) {
 
             {
               activeScreen === 'stake-mode-select' &&
-              <StakingModeSelection />
+              <StakingModeSelection goToDashboard={goToDashboard} />
             }
 
           </div>

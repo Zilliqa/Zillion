@@ -10,7 +10,7 @@ function StakingModeSelection(props: any) {
     const onSelectStakingMode = (stakingMode: StakingMode) => {
         // set the staking mode in the store
         dispatch(UPDATE_STAKING_MODE(stakingMode));
-        props.history.push("/dashboard");
+        props.goToDashboard();
     }
 
     return (
