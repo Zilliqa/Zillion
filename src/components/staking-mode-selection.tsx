@@ -10,7 +10,7 @@ function StakingModeSelection(props: any) {
     const onSelectStakingMode = (stakingMode: StakingMode) => {
         // set the staking mode in the store
         dispatch(UPDATE_STAKING_MODE(stakingMode));
-        props.goToDashboard();
+        // props.goToDashboard();
     }
 
     return (
@@ -26,7 +26,15 @@ function StakingModeSelection(props: any) {
                             Generate ZILs by locking ZILs to any nodes.<br/>Our best performing staking option.
                         </p>
                         <div>
-                            <button type="button" className="btn btn-user-action" onClick={() => onSelectStakingMode(StakingMode.ZIL)}>Select</button>
+                            <button 
+                                type="button" 
+                                className="btn btn-user-action" 
+                                onClick={() => onSelectStakingMode(StakingMode.ZIL)}
+                                data-toggle="modal" 
+                                data-target="#wallet-selection-modal" 
+                                data-keyboard="false">
+                                    Select
+                            </button>
                         </div>
                     </div>
                     <div className="item d-block col-4 px-4">

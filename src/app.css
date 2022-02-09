@@ -441,21 +441,11 @@ input:focus {
 }
 
 .btn-wallet-access {
-  border: 2px solid var(--secondary-color);
-  border-radius: 14px;
-  background-color: var(--secondary-color);
-  box-shadow: 5px 10px var(--primary-color);
+  border: 2px solid var(--primary-section-bg-color);
+  border-radius: 10px;
+  background-color: var(--primary-section-bg-color);
   transition: 0.3s;
-  width: 200px;
-
-  margin-left: 5%;
-  margin-right: 5%;
-
-  padding: 2.4em 0em;
-
-  -webkit-box-shadow: 1px -1px 21px 6px var(--wallet-access-shadow-color);
-  -moz-box-shadow: 1px -1px 21px 6px var(--wallet-access-shadow-color);
-  box-shadow: 1px -1px 21px 6px var(--wallet-access-shadow-color);
+  padding: 0.7em 1.2em;
 }
 
 .btn-wallet-access span {
@@ -465,14 +455,13 @@ input:focus {
 }
 
 .btn-wallet-access:hover {
-  cursor: pointer;
+  
   border: 2px solid var(--primary-color);
-  background-color: var(--secondary-color);
 }
 
 .btn-wallet-access .home-icon {
   fill: var(--primary-color);
-  width: 40px;
+  width: 30px;
 }
 
 .path path {
@@ -1096,6 +1085,10 @@ input:focus {
   cursor: pointer;
 }
 
+.spinner-grow-primary {
+  color: var(--notification-icon-color);
+}
+
 .swap-deleg-requestor-list {
   color: var(--text-color);
 }
@@ -1187,15 +1180,16 @@ input:focus {
 }
 
 .wallet-access {
-  margin-top: 5em;
   /* referring to animate.css */
   animation: fadeIn;
   animation-duration: 0.8s;
 }
 
 .wallet-access h2 {
-  margin-bottom: 2em;
-  font-size: 1.4em;
+  color: var(--primary-table-heading-color);
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: 1.5em;
 }
 
 .wallet-connect-text {
@@ -1605,6 +1599,7 @@ input:focus {
 
 #keystore .file-name {
   color: var(--primary-color);
+  font-size: 0.9em;
 }
 
 #keystore label {
@@ -1612,10 +1607,11 @@ input:focus {
   border: 2px solid var(--secondary-color);
   border-radius: 6px;
   color: var(--primary-color);
-  font-size: 1.1em;
+  font-size: 0.9em;
   margin: 1em 0;
   padding: 0.8em 0;
-  width: 500px;
+
+  width: 100%;
 
   -webkit-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
   -moz-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
@@ -1633,13 +1629,14 @@ input:focus {
 
 #keystore-passphrase {
   color: var(--placeholder-text-color);
-  font-size: 1.1em;
-  width: 500px;
+  font-size: 0.9em;
   background-color: var(--secondary-color);
   border: 2px solid var(--secondary-color);
   border-radius: 6px;
   margin: 1em 0;
   padding: 0.8em !important;
+
+  width: 100%;
 
   -webkit-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
   -moz-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);

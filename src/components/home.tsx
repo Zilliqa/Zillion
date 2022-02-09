@@ -34,6 +34,10 @@ import { logger } from '../util/logger';
 import { INIT_USER, QUERY_AND_UPDATE_USER_STATS, UPDATE_LEDGER_INDEX } from '../store/userSlice';
 import { ZilSigner } from '../zilliqa-signer';
 import StakingModeSelection from './staking-mode-selection';
+import WalletSelectionModal from './wallets/wallet-selection';
+
+import $ from "jquery";
+import WalletKeystoreModal from './wallets/wallet-keystore';
 
 
 function Home(props: any) {
@@ -47,8 +51,10 @@ function Home(props: any) {
   const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
+  const [isToggleWalletSelection, setIsWalletToggleSelection] = useState(false);
   
-  const screenFlow = ['home', 'wallet-select', 'wallet-unlock', 'stake-mode-select'];
+  // const screenFlow = ['home', 'wallet-select', 'wallet-unlock', 'stake-mode-select'];
+  const screenFlow = ['home', 'stake-mode-select'];
   const [activeScreen, setActiveScreen] = useState(screenFlow[0]); // home, wallet-select, stake-mode-select
 
   const [selectedNetwork, setSelectedNetwork] = useState(() => {
@@ -62,24 +68,25 @@ function Home(props: any) {
 
   const darkMode = useDarkMode(true);
 
+  // used to indicate to wallet-selection component
+  // to refresh state variables
+  const toggleWalletSelection = () => {
+    setIsWalletToggleSelection(!isToggleWalletSelection);
+  }
+
   const timeout = (delay: number) => {
     return new Promise(res => setTimeout(res, delay));
   }
 
   const updateUserInfo = async (addressBase16: string, addressBech32: string, accountType: AccountType, ledgerIndex?: number) => {
-    // login success
-    // update store and signer network
+    // wallet connect success
+    // update store
     dispatch(INIT_USER({ address_base16: addressBase16, address_bech32: addressBech32, account_type: accountType, authenticated: true, selected_role: role }));
-    // dispatch(QUERY_AND_UPDATE_USER_STATS());
-    // await ZilSigner.changeNetwork(chainInfo.blockchain);
 
     if (accountType === AccountType.LEDGER && typeof(ledgerIndex) !== 'undefined') {
       // update ledger index to store if using ledger
       dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
     }
-
-    // add some delay
-    // await timeout(1000);
   }
 
   const showStakeModeSelection = () => {
@@ -109,7 +116,11 @@ function Home(props: any) {
     await ZilSigner.changeNetwork(chainInfo.blockchain);
 
     // add some delay
+    // hide the wallet selection modal
     await timeout(1000);
+    $("#wallet-selection-modal").modal("hide");
+    $("#wallet-keystore-modal").modal("hide");
+
     logger("directing to dashboard");
     props.history.push("/dashboard");
   }
@@ -142,7 +153,7 @@ function Home(props: any) {
 
   const onClickSignIn = (selectedRole: string) => {
     setRole(selectedRole);
-    setActiveScreen('wallet-select');
+    setActiveScreen('stake-mode-select');
   }
 
   const toggleDirectToDashboard = () => {
@@ -375,6 +386,16 @@ function Home(props: any) {
           <ToastContainer hideProgressBar={true} />
           <Footer networkLabel={selectedNetwork} />
           <DisclaimerModal />
+          <WalletSelectionModal 
+            onUpdateUserInfo={updateUserInfo} 
+            goToDashboard={goToDashboard}
+            toggleWalletSelection={toggleWalletSelection}
+          />
+          <WalletKeystoreModal 
+            onUpdateUserInfo={updateUserInfo}
+            goToDashboard={goToDashboard}
+            isToggleWalletSelection={isToggleWalletSelection}
+          />
         </div>
       </div>
     </div>
