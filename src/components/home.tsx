@@ -38,6 +38,7 @@ import WalletSelectionModal from './wallets/wallet-selection';
 
 import $ from "jquery";
 import WalletKeystoreModal from './wallets/wallet-keystore';
+import WalletLedgerModal from './wallets/wallet-ledger';
 
 
 function Home(props: any) {
@@ -51,7 +52,7 @@ function Home(props: any) {
   const [explorerSearchAddress, setExplorerSearchAddress] = useState('');
   const [role, setRole] = useState('');
   const [accessMethod, setAccessMethod] = useState('');
-  const [isToggleWalletSelection, setIsWalletToggleSelection] = useState(false);
+  const [isToggleWalletSelection, setIsWalletToggleSelection] = useState('');
   
   // const screenFlow = ['home', 'wallet-select', 'wallet-unlock', 'stake-mode-select'];
   const screenFlow = ['home', 'stake-mode-select'];
@@ -70,8 +71,8 @@ function Home(props: any) {
 
   // used to indicate to wallet-selection component
   // to refresh state variables
-  const toggleWalletSelection = () => {
-    setIsWalletToggleSelection(!isToggleWalletSelection);
+  const toggleWalletSelection = (accountType: AccountType) => {
+    setIsWalletToggleSelection(accountType);
   }
 
   const timeout = (delay: number) => {
@@ -120,6 +121,7 @@ function Home(props: any) {
     await timeout(1000);
     $("#wallet-selection-modal").modal("hide");
     $("#wallet-keystore-modal").modal("hide");
+    $("#wallet-ledger-modal").modal("hide");
 
     logger("directing to dashboard");
     props.history.push("/dashboard");
@@ -395,6 +397,12 @@ function Home(props: any) {
             onUpdateUserInfo={updateUserInfo}
             goToDashboard={goToDashboard}
             isToggleWalletSelection={isToggleWalletSelection}
+          />
+          <WalletLedgerModal
+            onUpdateUserInfo={updateUserInfo}
+            goToDashboard={goToDashboard}
+            isToggleWalletSelection={isToggleWalletSelection}
+            toggleWalletSelection={toggleWalletSelection}
           />
         </div>
       </div>

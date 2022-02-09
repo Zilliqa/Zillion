@@ -455,7 +455,6 @@ input:focus {
 }
 
 .btn-wallet-access:hover {
-  
   border: 2px solid var(--primary-color);
 }
 
@@ -1607,7 +1606,8 @@ input:focus {
   border: 2px solid var(--secondary-color);
   border-radius: 6px;
   color: var(--primary-color);
-  font-size: 0.9em;
+  font-size: 1rem;
+  font-weight: 600;
   margin: 1em 0;
   padding: 0.8em 0;
 
@@ -1724,30 +1724,36 @@ input:focus {
   text-transform: uppercase;
 }
 
-#ledger-connect-modal th {
+#ledger-connect-modal th, #wallet-ledger-modal th {
   color: var(--primary-color);
-  font-size: 0.85em;
+  font-size: 0.75em;
   font-weight: 600;
   text-transform: uppercase;
 }
 
-#ledger-connect-modal table tbody {
+#ledger-connect-modal table tbody,
+#wallet-ledger-modal table tbody {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
 }
 
-#ledger-connect-modal .table td, #ledger-connect-modal .table th {
+#ledger-connect-modal .table td, 
+#ledger-connect-modal .table th,
+#wallet-ledger-modal .table td,
+#wallet-ledger-modal .table th {
   border: 0;
 }
 
-#ledger-connect-modal .account-row:hover {
+#ledger-connect-modal .account-row:hover,
+#wallet-ledger-modal  .account-row:hover {
   cursor: pointer;
   color: var(--secondary-color);
   background-color: var(--primary-color) !important;
 }
 
-#ledger-connect-modal table tbody tr:nth-child(odd) {
+#ledger-connect-modal table tbody tr:nth-child(odd),
+#wallet-ledger-modal  table tbody tr:nth-child(odd) {
   background-color: var(--primary-table-striped-color);
 }
 

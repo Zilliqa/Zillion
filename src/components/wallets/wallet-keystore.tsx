@@ -19,6 +19,13 @@ function WalletKeystoreModal(props: any) {
         setLoading(false);
     }, [props.isToggleWalletSelection]);
 
+    const handleClose = () => {
+        setFilename("");
+        setPassphrase("");
+        setKeystore(undefined);
+        setLoading(false);
+    }
+
     const handleFile = (e: any) => {
         let keystoreFile = e.target.files[0];
         if (!keystoreFile) {
@@ -83,7 +90,7 @@ function WalletKeystoreModal(props: any) {
                 <div className="modal-dialog modal-dialog-centered" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h5 className="modal-title" id="walletKeystoreModalLabel">Keystore</h5>
+                            <h5 className="modal-title" id="walletKeystoreModalLabel">Keystore Connect</h5>
                             {
                                 loading 
                                 
@@ -93,11 +100,10 @@ function WalletKeystoreModal(props: any) {
                                 
                                 :
 
-                                <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close">
+                                <button type="button" className="close btn shadow-none" data-dismiss="modal" aria-label="Close" onClick={handleClose}>
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             }
-
                         </div>
                         <div className="modal-body">
                             {

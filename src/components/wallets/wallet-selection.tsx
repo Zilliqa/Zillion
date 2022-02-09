@@ -81,7 +81,7 @@ function WalletSelectionModal(props: any) {
 
         setAccount(accountType);
         setStatus(OperationStatus.PENDING);
-        props.toggleWalletSelection();
+        props.toggleWalletSelection(accountType);
 
         let isSuccess = false;
 
@@ -90,6 +90,8 @@ function WalletSelectionModal(props: any) {
                 isSuccess = await unlockZilPay();
                 break;
             case AccountType.LEDGER:
+                toggleModal('hide', 'wallet-selection-modal');
+                toggleModal('show', 'wallet-ledger-modal');
                 break;
             case AccountType.KEYSTORE:
                 toggleModal('hide', 'wallet-selection-modal');
