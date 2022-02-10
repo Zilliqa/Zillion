@@ -130,7 +130,6 @@ function WalletSelectionModal(props: any) {
                                 onClick={async () => onSelectWallet(AccountType.ZILPAY)}
                                 disabled={account && account !== AccountType.ZILPAY}
                             >
-                                <p>{account}</p>
                                 <IconZilPayLine className="home-icon icon-zilpay-line" /><span className="mt-1 ml-4">ZilPay</span>
                                 { pulseIcon(AccountType.ZILPAY, status) }
                             </button>

@@ -111,7 +111,8 @@ function Explorer(props: any) {
                         ssnAddress: toBech32Address(ssnAddress),
                         delegAmt: `${delegAmtQaBN}`,
                         rewards: `${delegRewards}`,
-                        vault: `0x0000000000000000000000000000000000000000`
+                        vaultAddress: `0x0000000000000000000000000000000000000000`,
+                        vaultId: -1
                     }
                     stakedNodesList.push(data);
                 }

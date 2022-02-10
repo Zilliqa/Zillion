@@ -115,7 +115,7 @@ function ReDelegateStakeModal(props: any) {
         
         // get the right staked address
         // check whether to use user's wallet or vault address
-        const stakedAddress = isNotZeroAddressVault(stakeModalData.vault) ? stakeModalData.vault : userBase16Address;
+        const stakedAddress = isNotZeroAddressVault(stakeModalData.vaultAddress) ? stakeModalData.vaultAddress : userBase16Address;
 
         const last_reward_cycle_json = await ZilSdk.getSmartContractSubState(impl, "lastrewardcycle");
         const last_buf_deposit_cycle_deleg_json = await ZilSdk.getSmartContractSubState(impl, "last_buf_deposit_cycle_deleg", [stakedAddress]);

@@ -16,7 +16,8 @@ function DelegatorDropdown(props: any) {
         ssnAddress,
         delegAmt,
         rewards,
-        vault = '0x0000000000000000000000000000000000000000',
+        vaultAddress = '0x0000000000000000000000000000000000000000',
+        vaultId = -1
     } = props;
 
     const handleClaimRewards = () => {
@@ -25,7 +26,8 @@ function DelegatorDropdown(props: any) {
                 ssnName: ssnName,
                 ssnAddress: ssnAddress,
                 rewards: rewards,
-                vault: vault
+                vaultAddress: vaultAddress,
+                vaultId: vaultId
             } as StakeModalData
         }));
     };
@@ -36,7 +38,8 @@ function DelegatorDropdown(props: any) {
                 ssnName: ssnName,
                 ssnAddress: ssnAddress,
                 delegAmt: delegAmt,
-                vault: vault
+                vaultAddress: vaultAddress,
+                vaultId: vaultId
             } as StakeModalData
         }));
     };
@@ -47,7 +50,8 @@ function DelegatorDropdown(props: any) {
                 ssnName: ssnName,
                 ssnAddress: ssnAddress,
                 delegAmt: delegAmt,
-                vault: vault
+                vaultAddress: vaultAddress,
+                vaultId: vaultId
             } as StakeModalData
         }));
     };

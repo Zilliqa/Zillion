@@ -413,7 +413,7 @@ function Dashboard(props: any) {
                                     {
                                         userState.vaults && userState.vaults.map((vaultInfo) => {
                                             return (
-                                                Object.entries(vaultInfo).map(([vaultAddress, stakingLists]) => {
+                                                Object.entries(vaultInfo).map(([vaultId, stakingLists]) => {
                                                     
                                                     const renderVaultStake = () => {
                                                         return (
@@ -429,7 +429,7 @@ function Dashboard(props: any) {
                                                     
                                                     return (
                                                         <div>
-                                                            <p>Vault: {vaultAddress}</p>
+                                                            <p>Vault ID: {vaultId}, Vault Address: {userState.vaults_id_address_map[vaultId]}</p>
                                                             <>{renderVaultStake()}</>
                                                         </div>
                                                     )
@@ -526,7 +526,7 @@ function Dashboard(props: any) {
                                                         
                                                         ?
 
-                                                        <BzilPortfolio />
+                                                        null
 
                                                         :
 

@@ -9,7 +9,41 @@ import store from "./store/store";
 export class ZilTxParser {
 
     /**
-     * create tx params for delegate
+     * [bzil staking] create tx params for delegate
+     * @param ssnaddr 
+     * @param vaultId 
+     * @param amount 
+     * @param gasPrice 
+     * @param gasLimit 
+     * @returns 
+     */
+    static parseDelegateBZIL = (ssnaddr: String, vaultId: Number, amount: String, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "Delegate";
+
+        console.log("toaddr: ", toAddr);
+        console.log("tag: ", tag);
+        console.log("amount: ", amount.toString());
+
+        const params =
+        [
+            {
+                vname: 'ssnaddr',
+                type: 'ByStr20',
+                value: `${ssnaddr}`,
+            },
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`,
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, amount, tag, params, gasPrice, gasLimit)
+    }
+
+    /**
+     * [normal staking] create tx params for delegate
      * @param ssnaddr ByStr20 ssn address
      * @param amount delegate amount in Qa
      * @param gasPrice gas price in Qa
@@ -17,15 +51,15 @@ export class ZilTxParser {
      * @returns tx params JSON obj
      */
     static parseDelegate = (ssnaddr: String, amount: String, gasPrice: String, gasLimit: String) => {
-        const { toAddr, mode } = ZilTxParser.getToAddr();
-        let tag = (mode === StakingMode.BZIL) ? "Delegate" : "DelegateStake";
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "DelegateStake";
 
-        console.log("delegate mode: ", mode);
         console.log("toaddr: ", toAddr);
         console.log("tag: ", tag);
         console.log("amount: ", amount.toString());
 
-        const params = [
+        const params =
+        [
             {
                 vname: 'ssnaddr',
                 type: 'ByStr20',

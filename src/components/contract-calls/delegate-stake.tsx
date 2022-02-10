@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 import Alert from '../alert';
 import { bech32ToChecksum, convertZilToQa, convertToProperCommRate, showWalletsPrompt, convertQaToCommaStr, isDigits } from '../../util/utils';
-import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { AccountType, OperationStatus, ProxyCalls, StakingMode, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -24,6 +24,7 @@ function DelegateStakeModal(props: any) {
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const mode = useAppSelector(state => state.user.staking_mode);
+    const vaultIds = useAppSelector(state => state.user.vaults_id_address_map);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
@@ -40,8 +41,15 @@ function DelegateStakeModal(props: any) {
     const ssnAddress = stakeModalData.ssnAddress; // bech32
 
     const [delegAmt, setDelegAmt] = useState('0'); // in ZIL
+    const [selectedVault, setSelectedVault] = useState(-1);
     const [txnId, setTxnId] = useState('');
     const [isPending, setIsPending] = useState('');
+
+
+    const onSelectVault = (id: number) => {
+        console.log("selected vault: ", id);
+        setSelectedVault(id);
+    }
 
 
     const delegateStake = async () => {
@@ -94,7 +102,13 @@ function DelegateStakeModal(props: any) {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
-        let txParams = ZilTxParser.parseDelegate(ssnChecksumAddress, delegAmtQa, gasPrice, gasLimit);
+        let txParams = {};
+
+        if (mode === StakingMode.BZIL) {
+            txParams = ZilTxParser.parseDelegateBZIL(ssnChecksumAddress, selectedVault, delegAmtQa, gasPrice, gasLimit);
+        } else {
+            ZilTxParser.parseDelegate(ssnChecksumAddress, delegAmtQa, gasPrice, gasLimit);
+        }
 
         setIsPending(OperationStatus.PENDING);
         showWalletsPrompt(accountType);
@@ -220,6 +234,19 @@ function DelegateStakeModal(props: any) {
                                 </div>
                             </div>
                             <p><small><strong>Available</strong>: <strong>{convertQaToCommaStr(balance.toString())}</strong> ZIL</small></p>
+
+                            <div>
+                                <div className="modal-label mb-2"><strong>Vaults</strong></div>
+                                <select
+                                    className="form-select"
+                                    onChange={(e) => onSelectVault(Number(e.target.value))}>
+                                    {
+                                        Object.entries(vaultIds).map(([vaultId, vaultAddress]) => {
+                                            return (<option key={vaultId} value={vaultId}>Vault: {vaultId}, Vault Address: {vaultAddress}</option>)
+                                        })
+                                    }
+                                </select>
+                            </div>
 
                             <GasSettings
                                 gasOption={gasOption}

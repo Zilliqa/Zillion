@@ -19,7 +19,8 @@ import {
     UPDATE_DELEG_PORTFOLIO, 
     UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_VAULTS, 
-    UPDATE_VAULTS_BALANCE} from '../store/userSlice';
+    UPDATE_VAULTS_BALANCE,
+    UPDATE_VAULTS_ID_ADDRESS_MAP} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role, StakingMode } from '../util/enum';
 import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData } from '../util/interface';
@@ -143,7 +144,8 @@ function* populateStakingPortfolio() {
                 ssnAddress: ssnAddressBech32,
                 delegAmt: `${deposit}`,
                 rewards: `${rewards}`,
-                vault: '0x0000000000000000000000000000000000000000',
+                vaultAddress: '0x0000000000000000000000000000000000000000',
+                vaultId: -1
             }
             staking_portfolio_list.push(stakingStats);
         }
@@ -298,7 +300,7 @@ function* populateRewardBlkCountdown() {
 }
 
 /**
- * populate users' vault addresses
+ * populate users' vault ids and each vault's stake
  */
 function* populateVaultStakingStats() {
     try {
@@ -315,9 +317,9 @@ function* populateVaultStakingStats() {
         /**
          * [
          *   {
-         *     vault_address: [
-         *       {ssn_name, ssn_address, deleg_amt, rewards},
-         *       {ssn_name, ssn_address, deleg_amt, rewards},
+         *     vault_id: [
+         *       {ssn_name, ssn_address, deleg_amt, rewards, vault_id, vault_address},
+         *       {ssn_name, ssn_address, deleg_amt, rewards, vault_id, vault_address},
          *     ]
          *   }
          * ]
@@ -325,16 +327,21 @@ function* populateVaultStakingStats() {
         let vaults = [] as any;
         let vaultsAddressList = [];
         let vaultsBalances: any = {};
+        let vaultIdAddrMap: any = {};
 
-        const vaultAddress = (response as any)['allocated_user_vault'][address_base16];
-        vaultsAddressList.push(String(vaultAddress));
+        const vaultIdsList = (response as any)['allocated_user_vault'][address_base16];
 
-        // fetch each ssn that the vault has staked
-        for (const vault_address of vaultsAddressList) {
-            console.log("vault address: ", vault_address);
-            const resp: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [vault_address]);
-            const depositAmtDeleg = (isRespOk(resp) === true) ? (resp as any)['deposit_amt_deleg'][vault_address] : null;
-            
+        for (let [vault_id, vault_address] of Object.entries(vaultIdsList)) {
+            console.log(`vault_id: ${vault_id}, vault_address: ${vault_address}`);
+
+            const _vault_id: number = Number(vault_id);
+            const _vault_address: string = vault_address as any;
+
+            vaultIdAddrMap[_vault_id] = _vault_address;
+
+            const resp: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [_vault_address]);
+            const depositAmtDeleg = (isRespOk(resp) === true) ? (resp as any)['deposit_amt_deleg'][_vault_address] : null;
+
             let vaultInfo = {} as any;
             let stakingList = [];
 
@@ -343,7 +350,7 @@ function* populateVaultStakingStats() {
                 const deposit = new BigNumber(depositAmtDeleg[ssnAddress]);
 
                 // compute zil rewards
-                const delegRewards: string = yield call(computeDelegRewards, impl, ssnAddress, vault_address);
+                const delegRewards: string = yield call(computeDelegRewards, impl, ssnAddress, _vault_address);
                 const rewards = new BigNumber(delegRewards);
                 const ssnAddressBech32 = toBech32Address(ssnAddress);
                 const stakingStats = {
@@ -351,7 +358,8 @@ function* populateVaultStakingStats() {
                     ssnAddress: ssnAddressBech32,
                     delegAmt: `${deposit}`,
                     rewards: `${rewards}`,
-                    vault: vault_address,
+                    vault_address: _vault_address,
+                    vault_id: _vault_id
                 }
                 stakingList.push(stakingStats);
                 console.log("staking stats: ", stakingList);
@@ -362,8 +370,8 @@ function* populateVaultStakingStats() {
                 bzilBalance: initVaultData.bzilBalance,
                 zilBalance: initVaultData.zilBalance,
             } as VaultData;
-            const resp2: Object = yield call(ZilSdk.getSmartContractSubState, vault_address, 'bzil_balance');
-            const resp3: Object = yield call(ZilSdk.getBalance, vault_address);
+            const resp2: Object = yield call(ZilSdk.getSmartContractSubState, _vault_address, 'bzil_balance');
+            const resp3: Object = yield call(ZilSdk.getBalance, _vault_address);
 
             console.log("resp3: ", resp3);
 
@@ -375,14 +383,15 @@ function* populateVaultStakingStats() {
                 vaultTokenBalances.zilBalance = String((resp3 as any));
             }
 
-            vaultInfo[vault_address] = stakingList;
-            vaultsBalances[vault_address] = vaultTokenBalances;
+            vaultInfo[_vault_id] = stakingList;
+            vaultsBalances[_vault_address] = vaultTokenBalances;
             vaults.push(vaultInfo);
         }
 
         console.log("my vault: ", vaults);
 
         yield put(UPDATE_VAULTS(vaults));
+        yield put(UPDATE_VAULTS_ID_ADDRESS_MAP(vaultIdAddrMap));
         yield put(UPDATE_VAULTS_BALANCE(vaultsBalances));
         
     } catch (e) {

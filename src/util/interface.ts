@@ -11,7 +11,8 @@ interface DelegStakingPortfolioStats {
     ssnAddress: string,
     delegAmt: string,
     rewards: string,
-    vault: string,
+    vaultAddress: string,
+    vaultId: number,
 }
 
 interface OperatorStats {
@@ -69,7 +70,8 @@ interface StakeModalData {
     commRate: string,
     rewards: string,
     delegAmt: string,
-    vault: string,
+    vaultAddress: string,
+    vaultId: number,
 }
 
 interface SwapDelegModalData {
@@ -121,7 +123,8 @@ export const initialStakeModalData: StakeModalData = {
     commRate: '0',
     rewards: '0',
     delegAmt: '0',
-    vault: '0x0000000000000000000000000000000000000000'
+    vaultAddress: '0x0000000000000000000000000000000000000000',
+    vaultId: -1
 }
 
 export const initVaultData: VaultData = {

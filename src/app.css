@@ -1602,9 +1602,9 @@ input:focus {
 }
 
 #keystore label {
-  background-color: var(--secondary-color);
-  border: 2px solid var(--secondary-color);
-  border-radius: 6px;
+  background-color: var(--primary-section-bg-color);
+  border: 2px solid var(--primary-section-bg-color);
+  border-radius: 10px;
   color: var(--primary-color);
   font-size: 1rem;
   font-weight: 600;
@@ -1612,10 +1612,6 @@ input:focus {
   padding: 0.8em 0;
 
   width: 100%;
-
-  -webkit-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
-  -moz-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
-  box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
 }
 
 #keystore label:hover {
@@ -1630,17 +1626,12 @@ input:focus {
 #keystore-passphrase {
   color: var(--placeholder-text-color);
   font-size: 0.9em;
-  background-color: var(--secondary-color);
-  border: 2px solid var(--secondary-color);
-  border-radius: 6px;
+  background-color: var(--primary-section-bg-color);
+  border: 10px solid var(--primary-section-bg-color);
+  border-radius: 10px;
   margin: 1em 0;
-  padding: 0.8em !important;
 
   width: 100%;
-
-  -webkit-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
-  -moz-box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
-  box-shadow: 1px -1px 21px 6px var(--primary-shadow-color);
 }
 
 #landing-stats, 

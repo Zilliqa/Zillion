@@ -22,7 +22,8 @@ interface UserState {
     swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
     is_deleg_stats_loading: OperationStatus,            // delegator stats and staking portfolio status indicator
     is_operator_stats_loading: OperationStatus,         // status indicator for loading operator stats
-    vaults: any [],                                     // list of vault addresses
+    vaults: any [],                                     // JSON array vault_id -> staking data
+    vaults_id_address_map: any,                         // JSON map vault_id -> vault_address   
     vaults_balances: any,                               // JSON map; vault address -> Vault Data; stores vault's token balances
 }
 
@@ -47,6 +48,7 @@ const initialState: UserState = {
     is_deleg_stats_loading: OperationStatus.IDLE,
     is_operator_stats_loading: OperationStatus.IDLE,
     vaults: [],
+    vaults_id_address_map: {},
     vaults_balances: {},
 }
 
@@ -127,6 +129,9 @@ const userSlice = createSlice({
         UPDATE_VAULTS(state, action) {
             state.vaults = action.payload
         },
+        UPDATE_VAULTS_ID_ADDRESS_MAP(state, action) {
+            state.vaults_id_address_map = action.payload
+        },
         UPDATE_VAULTS_BALANCE(state, action) {
             state.vaults_balances = action.payload
         },
@@ -150,6 +155,7 @@ const userSlice = createSlice({
             state.is_deleg_stats_loading = initialState.is_deleg_stats_loading
             state.is_operator_stats_loading = initialState.is_operator_stats_loading
             state.vaults = initialState.vaults
+            state.vaults_id_address_map = initialState.vaults_id_address_map
             state.vaults_balances = initialState.vaults_balances
         },
         QUERY_AND_UPDATE_BALANCE() {},
@@ -189,6 +195,7 @@ export const {
     UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
     UPDATE_VAULTS,
+    UPDATE_VAULTS_ID_ADDRESS_MAP,
     UPDATE_VAULTS_BALANCE,
     RESET_USER_STATE,
 } = userSlice.actions

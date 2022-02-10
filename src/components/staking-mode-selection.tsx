@@ -10,7 +10,6 @@ function StakingModeSelection(props: any) {
     const onSelectStakingMode = (stakingMode: StakingMode) => {
         // set the staking mode in the store
         dispatch(UPDATE_STAKING_MODE(stakingMode));
-        // props.goToDashboard();
     }
 
     return (
@@ -44,7 +43,15 @@ function StakingModeSelection(props: any) {
                             Generate ZILs &amp; BZILs by locking to any nodes.
                         </p>
                         <div>
-                            <button type="button" className="btn btn-user-action" onClick={() => onSelectStakingMode(StakingMode.BZIL)}>Select</button>
+                            <button 
+                                type="button" 
+                                className="btn btn-user-action" 
+                                onClick={() => onSelectStakingMode(StakingMode.BZIL)}
+                                data-toggle="modal"
+                                data-target="#wallet-selection-modal" 
+                                data-keyboard="false">
+                                    Select
+                            </button>
                         </div>
                     </div>
             </div>
