@@ -22,8 +22,8 @@ function CompleteWithdrawModal(props: any) {
     const wallet = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
-    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
     const mode = useAppSelector(state => state.user.staking_mode);
+    const selectedVault = useAppSelector(state => state.user.selected_vault_to_withdraw);
     const { updateData, updateRecentTransactions } = props;
 
     const [txnId, setTxnId] = useState('');
@@ -50,7 +50,7 @@ function CompleteWithdrawModal(props: any) {
         let txParams = {};
 
         if (mode === StakingMode.BZIL) {
-            txParams = ZilTxParser.parseCompleteWithdrawalBZIL(stakeModalData.vaultId, gasPrice, gasLimit);
+            txParams = ZilTxParser.parseCompleteWithdrawalBZIL(selectedVault, gasPrice, gasLimit);
         } else {
             txParams = ZilTxParser.parseCompleteWithdrawal(gasPrice, gasLimit);
         }
@@ -144,7 +144,18 @@ function CompleteWithdrawModal(props: any) {
                             </button>
                         </div>
                         <div className="modal-body">
-                            <p className="mb-4">Are you sure you wish to withdraw all your pending stakes?</p>
+                            {
+                                mode === StakingMode.BZIL
+
+                                ?
+
+                                <p className="mb-4">Are you sure you wish to withdraw all your pending stakes from Vault {selectedVault}?</p>
+
+                                :
+
+                                <p className="mb-4">Are you sure you wish to withdraw all your pending stakes?</p>
+
+                            }
                             <GasSettings
                                 gasOption={gasOption}
                                 gasPrice={gasPrice}

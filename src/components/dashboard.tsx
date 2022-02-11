@@ -55,6 +55,7 @@ import { getEnvironment, getNetworks, NetworkConfig, Networks } from '../util/co
 import { RESET_BLOCKCHAIN_STATE, UPDATE_CHAIN_INFO } from '../store/blockchainSlice';
 import { ZilSigner } from '../zilliqa-signer';
 import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
+import BzilCompleteWithdrawalTable from './bzil/complete-withdrawal-table';
 
 
 function Dashboard(props: any) {
@@ -444,6 +445,14 @@ function Dashboard(props: any) {
                                 {/* complete withdrawal */}
                                 {
                                     (userState.role === Role.DELEGATOR) &&
+
+                                    userState.staking_mode === StakingMode.BZIL 
+                                        
+                                    ?
+
+                                    <BzilCompleteWithdrawalTable />
+
+                                    :
 
                                     <CompleteWithdrawalTable />
                                 }

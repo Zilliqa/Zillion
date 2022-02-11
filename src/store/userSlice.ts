@@ -25,6 +25,8 @@ interface UserState {
     vaults: any [],                                     // JSON array vault_id -> staking data
     vaults_id_address_map: any,                         // JSON map vault_id -> vault_address   
     vaults_balances: any,                               // JSON map; vault address -> Vault Data; stores vault's token balances
+    vaults_pending_withdraw_list: any [],               // JSON array vault_id -> pending withdrawal data 
+    selected_vault_to_withdraw: number,                 // vault id that the user selected that is going to invoke complete withdrawal
 }
 
 const initialState: UserState = {
@@ -50,6 +52,8 @@ const initialState: UserState = {
     vaults: [],
     vaults_id_address_map: {},
     vaults_balances: {},
+    vaults_pending_withdraw_list: [],
+    selected_vault_to_withdraw: -1,
 }
 
 
@@ -135,6 +139,12 @@ const userSlice = createSlice({
         UPDATE_VAULTS_BALANCE(state, action) {
             state.vaults_balances = action.payload
         },
+        UPDATE_VAULTS_PENDING_WITHDRAW_LIST(state, action) {
+            state.vaults_pending_withdraw_list = action.payload
+        },
+        UPDATE_SELECTED_VAULT_TO_WITHDRAW(state, action) {
+            state.selected_vault_to_withdraw = action.payload
+        },
         RESET_USER_STATE(state) {
             state.address_bech32 = initialState.address_bech32
             state.address_base16 = initialState.address_base16
@@ -157,6 +167,8 @@ const userSlice = createSlice({
             state.vaults = initialState.vaults
             state.vaults_id_address_map = initialState.vaults_id_address_map
             state.vaults_balances = initialState.vaults_balances
+            state.vaults_pending_withdraw_list = initialState.vaults_pending_withdraw_list
+            state.selected_vault_to_withdraw = initialState.selected_vault_to_withdraw
         },
         QUERY_AND_UPDATE_BALANCE() {},
         QUERY_AND_UPDATE_GZIL_BALANCE() {},
@@ -189,6 +201,7 @@ export const {
     UPDATE_OPERATOR_STATS,
     UPDATE_PENDING_WITHDRAWAL_LIST,
     UPDATE_ROLE,
+    UPDATE_SELECTED_VAULT_TO_WITHDRAW,
     UPDATE_STAKE_MODAL_DATA,
     UPDATE_STAKING_MODE,
     UPDATE_SWAP_DELEG_MODAL,
@@ -197,6 +210,7 @@ export const {
     UPDATE_VAULTS,
     UPDATE_VAULTS_ID_ADDRESS_MAP,
     UPDATE_VAULTS_BALANCE,
+    UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
     RESET_USER_STATE,
 } = userSlice.actions
 

@@ -1495,7 +1495,8 @@ input:focus {
 #home-ssn-details,
 #dashboard-ssn-details,
 #dashboard-recent-txn,
-#staking-portfolio-details {
+#staking-portfolio-details,
+#vault-pending-withdrawals {
   font-size: 0.85em;
   margin-top: 3em;
 
@@ -1519,7 +1520,8 @@ input:focus {
 #dashboard-ssn-details table tbody,
 #dashboard-recent-txn table tbody,
 #delegator-complete-withdraw-details table tbody,
-#staking-portfolio-details table tbody {
+#staking-portfolio-details table tbody,
+#vault-pending-withdrawals table tbody {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
@@ -1544,7 +1546,8 @@ input:focus {
 #dashboard-ssn-details table tbody tr:nth-child(odd),
 #dashboard-recent-txn table tbody tr:nth-child(odd),
 #delegator-complete-withdraw-details table tbody tr:nth-child(odd),
-#staking-portfolio-details table tbody tr:nth-child(odd) {
+#staking-portfolio-details table tbody tr:nth-child(odd),
+#vault-pending-withdrawals table tbody tr:nth-child(odd) {
   background-color: var(--primary-table-striped-color);
 }
 
@@ -1557,7 +1560,9 @@ input:focus {
 #dashboard-recent-txn .table td,
 #dashboard-recent-txn .table th,
 #staking-portfolio-details .table td,
-#staking-portfolio-details .table th {
+#staking-portfolio-details .table th,
+#vault-pending-withdrawals .table td,
+#vault-pending-withdrawals .table th {
   border: 0;
 }
 
@@ -1565,7 +1570,8 @@ input:focus {
 #dashboard-ssn-details th,
 #dashboard-recent-txn th,
 #delegator-complete-withdraw-details th,
-#staking-portfolio-details th {
+#staking-portfolio-details th,
+#vault-pending-withdrawals th {
   color: var(--primary-color);
   font-size: 0.85em;
   font-weight: 600;
