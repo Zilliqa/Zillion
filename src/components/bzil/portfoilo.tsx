@@ -93,7 +93,8 @@ function BzilPortfolio(props: any) {
                         ssnAddress={row.original.ssnAddress}
                         delegAmt={row.original.delegAmt}
                         rewards={row.original.rewards}
-                        vault={row.original.vault} />
+                        vaultAddress={row.original.vaultAddress} 
+                        vaultId={row.original.vaultId} />
                     </>
             }
         ], []
@@ -115,12 +116,12 @@ function BzilPortfolio(props: any) {
             Object.keys(vaults).length > 0 &&
             vaults.map((vaultInfo, index) => {
                 return (
-                    Object.entries(vaultInfo).map(([vaultAddress, stakingLists]) => {
+                    Object.entries(vaultInfo).map(([vaultId, stakingLists]) => {
                         return (
                             <div key={index}>
-                                <div className="d-block px-4 pb-3 text-left">Vault: {vaultAddress}</div>
-                                <div className="d-block px-4 pb-3 text-left">Vault ZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultAddress]['zilBalance'])} ZIL</div>
-                                <div className="d-block px-4 pb-3 text-left">Vault BZIL Minted: {convertQaToCommaStr(vaultsBalances[vaultAddress]['bzilBalance'])} BZIL</div>
+                                <div className="d-block px-4 pb-3 text-left">Vault: {vaultId}</div>
+                                <div className="d-block px-4 pb-3 text-left">Vault ZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultId]['zilBalance'])} ZIL</div>
+                                <div className="d-block px-4 pb-3 text-left">Vault BZIL Minted: {convertQaToCommaStr(vaultsBalances[vaultId]['bzilBalance'])} BZIL</div>
                                 <Table columns={columns} data={stakingLists} />
                             </div>
                         )

@@ -526,7 +526,7 @@ function Dashboard(props: any) {
                                                         
                                                         ?
 
-                                                        null
+                                                        <BzilPortfolio />
 
                                                         :
 

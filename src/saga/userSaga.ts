@@ -358,8 +358,8 @@ function* populateVaultStakingStats() {
                     ssnAddress: ssnAddressBech32,
                     delegAmt: `${deposit}`,
                     rewards: `${rewards}`,
-                    vault_address: _vault_address,
-                    vault_id: _vault_id
+                    vaultAddress: _vault_address,
+                    vaultId: _vault_id
                 }
                 stakingList.push(stakingStats);
                 console.log("staking stats: ", stakingList);
@@ -384,7 +384,7 @@ function* populateVaultStakingStats() {
             }
 
             vaultInfo[_vault_id] = stakingList;
-            vaultsBalances[_vault_address] = vaultTokenBalances;
+            vaultsBalances[_vault_id] = vaultTokenBalances;
             vaults.push(vaultInfo);
         }
 
@@ -397,6 +397,7 @@ function* populateVaultStakingStats() {
     } catch (e) {
         console.warn("populate vaults failed");
         yield put(UPDATE_VAULTS([]));
+        yield put(UPDATE_VAULTS_ID_ADDRESS_MAP({}));
     }
 }
 

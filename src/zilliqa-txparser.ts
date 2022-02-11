@@ -9,7 +9,7 @@ import store from "./store/store";
 export class ZilTxParser {
 
     /**
-     * [bzil staking] create tx params for delegate
+     * [bzil] create tx params for delegate
      * @param ssnaddr 
      * @param vaultId 
      * @param amount 
@@ -25,8 +25,7 @@ export class ZilTxParser {
         console.log("tag: ", tag);
         console.log("amount: ", amount.toString());
 
-        const params =
-        [
+        const params = [
             {
                 vname: 'ssnaddr',
                 type: 'ByStr20',
@@ -43,7 +42,7 @@ export class ZilTxParser {
     }
 
     /**
-     * [normal staking] create tx params for delegate
+     * [normal] create tx params for delegate
      * @param ssnaddr ByStr20 ssn address
      * @param amount delegate amount in Qa
      * @param gasPrice gas price in Qa
@@ -58,8 +57,7 @@ export class ZilTxParser {
         console.log("tag: ", tag);
         console.log("amount: ", amount.toString());
 
-        const params =
-        [
+        const params = [
             {
                 vname: 'ssnaddr',
                 type: 'ByStr20',
@@ -71,7 +69,7 @@ export class ZilTxParser {
     }
 
     /**
-     * create tx params for withdraw stake
+     * [normal] create tx params for withdraw stake
      * @param ssnaddr ByStr20 ssn address
      * @param amount withdraw amount in Qa
      * @param gasPrice gas price in Qa
@@ -99,7 +97,34 @@ export class ZilTxParser {
     }
 
     /**
-     * create tx params for withdraw rewards
+     * [bzil] create tx params for withdraw rewards
+     * @param ssnaddr 
+     * @param vaultId 
+     * @param gasPrice 
+     * @param gasLimit 
+     */
+    static parseWithdrawStakeRewardsBZIL = (ssnaddr: String, vaultId: Number, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "WithdrawStakeRewards";
+
+        const params = [
+            {
+                vname: 'ssnaddr',
+                type: 'ByStr20',
+                value: `${ssnaddr}`,
+            },
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`,
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
+     * [normal] create tx params for withdraw rewards
      * @param ssnaddr ByStr20 ssn address
      * @param gasPrice gas price in Qa
      * @param gasLimit 

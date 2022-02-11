@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 import Alert from '../alert';
 import { bech32ToChecksum, convertQaToCommaStr, convertQaToZilFull, showWalletsPrompt, validateBalance, isDigits, computeGasFees } from '../../util/utils';
-import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { AccountType, OperationStatus, ProxyCalls, StakingMode, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -25,9 +25,11 @@ function WithdrawRewardModal(props: any) {
     const wallet = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
-    const { updateData, updateRecentTransactions } = props;
+    const mode = useAppSelector(state => state.user.staking_mode);
     const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
 
+    const { updateData, updateRecentTransactions } = props;
+    
     const ssnAddress = stakeModalData.ssnAddress; // bech32
 
     const [txnId, setTxnId] = useState('');
@@ -38,6 +40,7 @@ function WithdrawRewardModal(props: any) {
     const [gasPrice, setGasPrice] = useState<string>(defaultGasPrice);
     const [gasLimit, setGasLimit] = useState<string>(defaultGasLimit);
     const [gasOption, setGasOption] = useState(false);
+
 
     const withdrawReward = async () => {
         if (!ssnAddress) {
@@ -54,14 +57,16 @@ function WithdrawRewardModal(props: any) {
             return null;
         }
 
-        // create tx params
-
-        // toAddr: proxy address
-        const proxyChecksum = bech32ToChecksum(proxy);
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
 
         // gas price, gas limit declared in account.ts
-        let txParams = ZilTxParser.parseWithdrawStakeRewards(ssnChecksumAddress, gasPrice, gasLimit);
+        let txParams = {};
+
+        if (mode === StakingMode.BZIL) {
+            txParams = ZilTxParser.parseWithdrawStakeRewardsBZIL(ssnChecksumAddress, stakeModalData.vaultId, gasPrice, gasLimit);
+        } else {
+            txParams = ZilTxParser.parseWithdrawStakeRewards(ssnChecksumAddress, gasPrice, gasLimit);
+        }
 
         setIsPending(OperationStatus.PENDING);
         
