@@ -119,7 +119,7 @@ function BzilPortfolio(props: any) {
                 return (
                     Object.entries(vaultInfo).map(([vaultId, stakingLists]) => {
                         return (
-                            <div key={index}>
+                            <div key={index} className="mb-4">
                                 <div className="d-block px-4 pb-3 text-left">Vault: {vaultId}, Address: {vaultsIdAddressMap[vaultId]}</div>
                                 <div className="d-block px-4 pb-3 text-left">Vault ZIL Balance: {convertQaToCommaStr(vaultsBalances[vaultId]['zilBalance'])} ZIL</div>
                                 <div className="d-block px-4 pb-3 text-left">Vault BZIL Minted: {convertQaToCommaStr(vaultsBalances[vaultId]['bzilBalance'])} BZIL</div>
