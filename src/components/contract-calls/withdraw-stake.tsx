@@ -156,7 +156,6 @@ function WithdrawStakeModal(props: any) {
         const ssnChecksumAddress = bech32ToChecksum(ssnAddress).toLowerCase();
         const delegAmtQa = stakeModalData.delegAmt;
         const leftOverQa = new BN(delegAmtQa).sub(new BN(withdrawAmtQa));
-        const vaultAddress = stakeModalData.vaultAddress;
 
         let isValidWithdraw = true;
         let alertDialog = {
@@ -199,7 +198,13 @@ function WithdrawStakeModal(props: any) {
         }
 
         // gas price, gas limit declared in account.ts
-        let txParams = ZilTxParser.parseWithdrawStakeAmount(ssnChecksumAddress, withdrawAmtQa, gasPrice, gasLimit);
+        let txParams = {};
+
+        if (mode === StakingMode.BZIL) {
+            txParams = ZilTxParser.parseWithdrawStakeAmountBZIL(ssnChecksumAddress, withdrawAmtQa, stakeModalData.vaultId, gasPrice, gasLimit);
+        } else {
+            txParams = ZilTxParser.parseWithdrawStakeAmount(ssnChecksumAddress, withdrawAmtQa, gasPrice, gasLimit);
+        }
         
         showWalletsPrompt(accountType);
 

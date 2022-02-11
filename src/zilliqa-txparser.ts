@@ -69,6 +69,34 @@ export class ZilTxParser {
     }
 
     /**
+     * [bzil] create tx params for withdraw stake
+     */
+    static parseWithdrawStakeAmountBZIL = (ssnaddr: String, amount: String, vaultId: Number, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "WithdrawStakeAmt";
+
+        const params = [
+            {
+                vname: 'ssnaddr',
+                type: 'ByStr20',
+                value: `${ssnaddr}`,
+            },
+            {
+                vname: 'amt',
+                type: 'Uint128',
+                value: `${amount}`,
+            },
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`,
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, amount, tag, params, gasPrice, gasLimit);
+    }
+
+    /**
      * [normal] create tx params for withdraw stake
      * @param ssnaddr ByStr20 ssn address
      * @param amount withdraw amount in Qa
@@ -146,7 +174,28 @@ export class ZilTxParser {
     }
 
     /**
-     * create tx params for complete withdrawal
+     * [bzil] create tx params for complete withdrawal
+     * @param vaultId 
+     * @param gasPrice 
+     * @param gasLimit 
+     */
+    static parseCompleteWithdrawalBZIL = (vaultId: Number, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "CompleteWithdrawal";
+
+        const params = [
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`,
+            }
+        ];
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
+     * [normal] create tx params for complete withdrawal
      * @param gasPrice gas price in Qa
      * @param gasLimit 
      * @returns tx params JSON obj
@@ -159,7 +208,7 @@ export class ZilTxParser {
     }
 
     /**
-     * create tx params for redelegate
+     * [normal] create tx params for redelegate
      * @param fromSsnAddr ByStr20 from which ssn address to transfer from
      * @param toSsnAddr ByStr20 to which ssn address to transfer to
      * @param amount amount in Qa to redelegate

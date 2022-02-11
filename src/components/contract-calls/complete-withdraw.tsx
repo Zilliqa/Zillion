@@ -3,8 +3,8 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 
 import Alert from '../alert';
-import { bech32ToChecksum, computeGasFees, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
-import { AccountType, OperationStatus, ProxyCalls, TransactionType } from '../../util/enum';
+import { computeGasFees, isDigits, showWalletsPrompt, validateBalance } from '../../util/utils';
+import { AccountType, OperationStatus, StakingMode, TransactionType } from '../../util/enum';
 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
@@ -13,15 +13,17 @@ import { ZilSigner } from '../../zilliqa-signer';
 import { units } from '@zilliqa-js/zilliqa';
 import BigNumber from 'bignumber.js';
 import GasSettings from './gas-settings';
+import { ZilTxParser } from '../../zilliqa-txparser';
+import { StakeModalData } from '../../util/interface';
 
-const { BN } = require('@zilliqa-js/util');
 
 function CompleteWithdrawModal(props: any) {
-    const proxy = useAppSelector(state => state.blockchain.proxy);
     const networkURL = useAppSelector(state => state.blockchain.blockchain);
     const wallet = useAppSelector(state => state.user.address_base16);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
+    const stakeModalData: StakeModalData = useAppSelector(state => state.user.stake_modal_data);
+    const mode = useAppSelector(state => state.user.staking_mode);
     const { updateData, updateRecentTransactions } = props;
 
     const [txnId, setTxnId] = useState('');
@@ -44,21 +46,14 @@ function CompleteWithdrawModal(props: any) {
         }
 
         // create tx params
-
-        // toAddr: proxy address
-        const proxyChecksum = bech32ToChecksum(proxy);
         // gas price, gas limit declared in account.ts
-        let txParams = {
-            toAddr: proxyChecksum,
-            amount: new BN(0),
-            code: "",
-            data: JSON.stringify({
-                _tag: ProxyCalls.COMPLETE_WITHDRAWAL,
-                params: []
-            }),
-            gasPrice: gasPrice,
-            gasLimit: gasLimit,
-        };
+        let txParams = {};
+
+        if (mode === StakingMode.BZIL) {
+            txParams = ZilTxParser.parseCompleteWithdrawalBZIL(stakeModalData.vaultId, gasPrice, gasLimit);
+        } else {
+            txParams = ZilTxParser.parseCompleteWithdrawal(gasPrice, gasLimit);
+        }
 
         setIsPending(OperationStatus.PENDING);
         
