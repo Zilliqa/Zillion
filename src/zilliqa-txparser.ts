@@ -9,6 +9,116 @@ import store from "./store/store";
 export class ZilTxParser {
 
     /**
+     * [bzil] create tx params to request swapping all the stakes of one vault to another
+     * @param newDelegAddr 
+     * @param vaultId 
+     * @param gasPrice 
+     * @param gasLimit 
+     * @returns 
+     */
+    static parseRequestDelegatorSwapBZIL = (newDelegAddr: String, vaultId: Number, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "RequestDelegatorSwap";
+
+        const params = [
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`
+            },
+            {
+                vname: 'new_deleg_addr',
+                type: 'ByStr20',
+                value: `${newDelegAddr}`,
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
+     * [bzil] create tx params to confirm swapping all the stakes of one vault to another
+     * @param requestor 
+     * @param vaultId 
+     * @param gasPrice 
+     * @param gasLimit 
+     */
+    static parseConfirmDelegatorSwapBZIL = (requestor: String, vaultId: Number, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "ConfirmDelegatorSwap";
+
+        const params = [
+            {
+                vname: 'requestor',
+                type: 'ByStr20',
+                value: `${requestor}`,
+            },
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
+     * [bzil] create tx params for vault ownership transfer
+     * @param vaultId 
+     * @param newOwner ByStr20 new owner address
+     * @param gasPrice 
+     * @param gasLimit 
+     */
+    static parseInitVaultTransfer = (newOwner: String, vaultId: Number, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "InitVaultTransfer";
+
+        const params = [
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`,
+            },
+            {
+                vname: 'new_owner',
+                type: 'ByStr20',
+                value: `${newOwner}`,
+            }
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
+     * [bzil] create tx params for complete vault ownership transfer
+     * @param initOwner 
+     * @param vaultId 
+     * @param gasPrice 
+     * @param gasLimit 
+     * @returns 
+     */
+    static parseCompleteVaultTransfer = (initOwner: String, vaultId: Number, gasPrice: String, gasLimit: String) => {
+        const { toAddr } = ZilTxParser.getToAddr();
+        let tag = "CompleteVaultTransfer";
+
+        const params = [
+            {
+                vname: 'init_owner',
+                type: 'ByStr20',
+                value: `${initOwner}`,
+            },
+            {
+                vname: 'vault_id',
+                type: 'Uint128',
+                value: `${vaultId}`,
+            },
+        ]
+
+        return ZilTxParser.createTxParams(toAddr, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
      * [bzil] create tx params for delegate
      * @param ssnaddr 
      * @param vaultId 
