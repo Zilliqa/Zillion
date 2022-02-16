@@ -58,6 +58,7 @@ import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 import BzilCompleteWithdrawalTable from './bzil/complete-withdrawal-table';
 import DummyVaultOpTable from './bzil/dummy-vault-op-table';
 import TransferVaultModal from './contract-calls/transfer-vault';
+import UpdateVaultNameModal from './contract-calls/update-vault-name';
 
 
 function Dashboard(props: any) {
@@ -651,7 +652,12 @@ function Dashboard(props: any) {
 
             <TransferVaultModal
                 updateData={pollData}
-                updateRecentTransactions={updateRecentTransactions} />    
+                updateRecentTransactions={updateRecentTransactions} />
+            
+            <UpdateVaultNameModal 
+                updateData={pollData}
+                updateRecentTransactions={updateRecentTransactions} />
+
         </div>
         </>
     );

@@ -2,6 +2,7 @@ import { BN } from "@zilliqa-js/util";
 import { StakingMode } from "./util/enum";
 import { bech32ToChecksum } from "./util/utils";
 import store from "./store/store";
+import { fromBech32Address, toBech32Address } from "@zilliqa-js/zilliqa";
 
 /**
  * util class to craft the tx params
@@ -18,6 +19,9 @@ export class ZilTxParser {
      */
     static parseUpdateVaultName = (vaultAddress: String, vaultName: String, gasPrice: String, gasLimit: String) => {
         let tag = "UpdateTag";
+
+        vaultAddress = fromBech32Address(toBech32Address(`${vaultAddress}`));
+
         const params = [
             {
                 vname: 'new_tag',
@@ -25,18 +29,22 @@ export class ZilTxParser {
                 value: `${vaultName}`
             }
         ]
+        
         return ZilTxParser.createTxParams(vaultAddress, "0", tag, params, gasPrice, gasLimit);
     }
 
     /**
      * [bzil] create tx params to withdraw native zils from the vault
-     * @param vaultAddress 
+     * @param vaultAddress vault address is base16
      * @param gasPrice 
      * @param gasLimit 
      * @returns 
      */
     static parseWithdrawVaultFunds = (vaultAddress: String, gasPrice: String, gasLimit: String) => {
         let tag = "WithdrawFunds";
+
+        vaultAddress = fromBech32Address(toBech32Address(`${vaultAddress}`));
+        
         return ZilTxParser.createTxParams(vaultAddress, "0", tag, [], gasPrice, gasLimit);
     }
 

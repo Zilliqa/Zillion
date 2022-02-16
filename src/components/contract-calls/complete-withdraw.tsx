@@ -23,7 +23,7 @@ function CompleteWithdrawModal(props: any) {
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const mode = useAppSelector(state => state.user.staking_mode);
-    const selectedVault = useAppSelector(state => state.user.selected_vault_to_withdraw);
+    const selectedVault = useAppSelector(state => state.user.selected_vault);
     const { updateData, updateRecentTransactions } = props;
 
     const [txnId, setTxnId] = useState('');

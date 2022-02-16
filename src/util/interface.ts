@@ -79,7 +79,17 @@ interface SwapDelegModalData {
     requestorList: string[],
 }
 
+interface VaultDataMap {
+    [key: number]: VaultData
+}
+
 interface VaultData {
+    vaultId: number,
+    vaultAddress: string,
+    vaultName: string,
+}
+
+interface VaultTokenBalance {
     bzilBalance: string,
     zilBalance: string,
 }
@@ -134,7 +144,7 @@ export const initialStakeModalData: StakeModalData = {
     vaultId: -1
 }
 
-export const initVaultData: VaultData = {
+export const initVaultData: VaultTokenBalance = {
     bzilBalance: '0',
     zilBalance: '0',
 }
@@ -150,5 +160,7 @@ export type {
     StakeModalData,
     SwapDelegModalData,
     VaultData,
+    VaultDataMap,
+    VaultTokenBalance,
     VaultTransferData,
 }

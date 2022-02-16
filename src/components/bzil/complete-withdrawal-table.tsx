@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useSortBy, useTable } from 'react-table';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { UPDATE_SELECTED_VAULT_TO_WITHDRAW } from '../../store/userSlice';
+import { UPDATE_SELECTED_VAULT } from '../../store/userSlice';
 import { ButtonText, ContractState } from '../../util/enum';
 import { convertQaToCommaStr } from '../../util/utils';
 
@@ -32,7 +32,7 @@ function BzilCompleteWithdrawalTable(props: any) {
 
     const onSelectVault = (vaultId: number) => {
         // store the selected vaultid
-        dispatch(UPDATE_SELECTED_VAULT_TO_WITHDRAW(vaultId));
+        dispatch(UPDATE_SELECTED_VAULT(vaultId));
         console.log("selected vault to withdraw: ", vaultId);
     }
 

@@ -23,10 +23,11 @@ import {
     UPDATE_VAULTS_ID_ADDRESS_MAP,
     UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
     UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST,
-    UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST} from '../store/userSlice';
+    UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST,
+    UPDATE_VAULTS_DATA} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role, StakingMode } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData, VaultTransferData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData, VaultTokenBalance, VaultTransferData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
@@ -330,6 +331,7 @@ function* populateVaultStakingStats() {
         let vaults = [] as any;
         let vaultsBalances: any = {};
         let vaultIdAddrMap: any = {};
+        let vaultsDataMap: any = {};
 
         const vaultIdsList = (response as any)['allocated_user_vault'][address_base16];
 
@@ -371,28 +373,46 @@ function* populateVaultStakingStats() {
             let vaultTokenBalances = {
                 bzilBalance: initVaultData.bzilBalance,
                 zilBalance: initVaultData.zilBalance,
-            } as VaultData;
+            } as VaultTokenBalance;
             const resp2: Object = yield call(ZilSdk.getSmartContractSubState, _vault_address, 'bzil_balance');
             const resp3: Object = yield call(ZilSdk.getBalance, _vault_address);
 
             console.log("resp3: ", resp3);
 
             if (isRespOk(resp2)) {
-                vaultTokenBalances.bzilBalance = String((resp2 as any)['bzil_balance'])
+                vaultTokenBalances.bzilBalance = String((resp2 as any)['bzil_balance']);
             }
 
             if (isRespOk(resp3)) {
                 vaultTokenBalances.zilBalance = String((resp3 as any));
             }
 
+            // fetch vault name
+            let vaultData = {
+                vaultId: _vault_id,
+                vaultAddress: _vault_address,
+                vaultName: '',
+            } as VaultData
+
+            const resp4: Object = yield call(ZilSdk.getSmartContractSubState, _vault_address, 'tag');
+
+            if (isRespOk(resp4)) {
+                vaultData.vaultName = String((resp4 as any)['tag']);
+            }
+
             vaultInfo[_vault_id] = stakingList;
+
             vaultsBalances[_vault_id] = vaultTokenBalances;
+
+            vaultsDataMap[_vault_id] = vaultData;
+
             vaults.push(vaultInfo);
         }
 
         console.log("my vault: ", vaults);
 
         yield put(UPDATE_VAULTS(vaults));
+        yield put(UPDATE_VAULTS_DATA(vaultsDataMap));
         yield put(UPDATE_VAULTS_ID_ADDRESS_MAP(vaultIdAddrMap));
         yield put(UPDATE_VAULTS_BALANCE(vaultsBalances));
         
@@ -400,6 +420,7 @@ function* populateVaultStakingStats() {
         console.warn("populate vaults failed");
         yield put(UPDATE_VAULTS([]));
         yield put(UPDATE_VAULTS_ID_ADDRESS_MAP({}));
+        yield put(UPDATE_VAULTS_DATA({}));
     }
 }
 

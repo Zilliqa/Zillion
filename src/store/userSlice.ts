@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, OperationStatus, Role, StakingMode } from '../util/enum'
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData, VaultTransferData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData, VaultData, VaultDataMap, VaultTransferData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
@@ -26,9 +26,10 @@ interface UserState {
     vaults_id_address_map: any,                                     // JSON map vault_id -> vault_address   
     vaults_balances: any,                                           // JSON map; vault address -> Vault Data; stores vault's token balances
     vaults_pending_withdraw_list: any [],                           // JSON array vault_id -> pending withdrawal data 
-    selected_vault_to_withdraw: number,                             // vault id that the user selected that is going to invoke complete withdrawal
+    selected_vault: number,                                         // vault id that the user selected that is going to invoke complete withdrawal, update vault name
     vaults_ownership_transfer_request_list: VaultTransferData[],    // list of vault transfer request sent 
-    vaults_ownership_transfer_received_list: VaultTransferData[]    // list of vault transfer request received
+    vaults_ownership_transfer_received_list: VaultTransferData[],   // list of vault transfer request received
+    vaults_data_map: VaultDataMap
 }
 
 const initialState: UserState = {
@@ -55,9 +56,10 @@ const initialState: UserState = {
     vaults_id_address_map: {},
     vaults_balances: {},
     vaults_pending_withdraw_list: [],
-    selected_vault_to_withdraw: -1,
+    selected_vault: -1,
     vaults_ownership_transfer_request_list: [],
     vaults_ownership_transfer_received_list: [],
+    vaults_data_map: {},
 }
 
 
@@ -146,14 +148,17 @@ const userSlice = createSlice({
         UPDATE_VAULTS_PENDING_WITHDRAW_LIST(state, action) {
             state.vaults_pending_withdraw_list = action.payload
         },
-        UPDATE_SELECTED_VAULT_TO_WITHDRAW(state, action) {
-            state.selected_vault_to_withdraw = action.payload
+        UPDATE_SELECTED_VAULT(state, action) {
+            state.selected_vault = action.payload
         },
         UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST(state, action) {
             state.vaults_ownership_transfer_request_list = action.payload
         },
         UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST(state, action) {
             state.vaults_ownership_transfer_received_list = action.payload
+        },
+        UPDATE_VAULTS_DATA(state, action) {
+            state.vaults_data_map = action.payload
         },
         RESET_USER_STATE(state) {
             state.address_bech32 = initialState.address_bech32
@@ -178,9 +183,10 @@ const userSlice = createSlice({
             state.vaults_id_address_map = initialState.vaults_id_address_map
             state.vaults_balances = initialState.vaults_balances
             state.vaults_pending_withdraw_list = initialState.vaults_pending_withdraw_list
-            state.selected_vault_to_withdraw = initialState.selected_vault_to_withdraw
+            state.selected_vault = initialState.selected_vault
             state.vaults_ownership_transfer_request_list = initialState.vaults_ownership_transfer_request_list
             state.vaults_ownership_transfer_received_list = initialState.vaults_ownership_transfer_received_list
+            state.vaults_data_map = initialState.vaults_data_map
         },
         QUERY_AND_UPDATE_BALANCE() {},
         QUERY_AND_UPDATE_GZIL_BALANCE() {},
@@ -213,13 +219,14 @@ export const {
     UPDATE_OPERATOR_STATS,
     UPDATE_PENDING_WITHDRAWAL_LIST,
     UPDATE_ROLE,
-    UPDATE_SELECTED_VAULT_TO_WITHDRAW,
+    UPDATE_SELECTED_VAULT,
     UPDATE_STAKE_MODAL_DATA,
     UPDATE_STAKING_MODE,
     UPDATE_SWAP_DELEG_MODAL,
     UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
     UPDATE_VAULTS,
+    UPDATE_VAULTS_DATA,
     UPDATE_VAULTS_ID_ADDRESS_MAP,
     UPDATE_VAULTS_BALANCE,
     UPDATE_VAULTS_PENDING_WITHDRAW_LIST,

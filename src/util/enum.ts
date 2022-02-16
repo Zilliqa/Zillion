@@ -128,6 +128,7 @@ export enum TransactionType {
     CONFIRM_DELEG_SWAP = 11,
     REJECT_DELEG_SWAP = 12,
     REQUEST_VAULT_TRANSFER = 13,
+    UPDATE_VAULT_NAME = 14,
 }
 
 export enum ButtonText {
