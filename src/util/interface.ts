@@ -84,6 +84,13 @@ interface VaultData {
     zilBalance: string,
 }
 
+// transfer vault ownership
+interface VaultTransferData {
+    vaultId: number,
+    initOwner: string,
+    newOwner: string,
+}
+
 export const initialDelegStats: DelegStats = {
     globalAPY: '0',
     zilRewards: '0',
@@ -143,4 +150,5 @@ export type {
     StakeModalData,
     SwapDelegModalData,
     VaultData,
+    VaultTransferData,
 }

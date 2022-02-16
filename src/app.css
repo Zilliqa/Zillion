@@ -1521,7 +1521,8 @@ input:focus {
 #dashboard-recent-txn table tbody,
 #delegator-complete-withdraw-details table tbody,
 #staking-portfolio-details table tbody,
-#vault-pending-withdrawals table tbody {
+#vault-pending-withdrawals table tbody,
+#dummy-vault-op table tbody {
   font-size: 1em;
   font-weight: 500;
   color: var(--primary-table-font-color);
@@ -1547,7 +1548,8 @@ input:focus {
 #dashboard-recent-txn table tbody tr:nth-child(odd),
 #delegator-complete-withdraw-details table tbody tr:nth-child(odd),
 #staking-portfolio-details table tbody tr:nth-child(odd),
-#vault-pending-withdrawals table tbody tr:nth-child(odd) {
+#vault-pending-withdrawals table tbody tr:nth-child(odd),
+#dummy-vault-op table tbody tr:nth-child(odd) {
   background-color: var(--primary-table-striped-color);
 }
 
@@ -1562,7 +1564,9 @@ input:focus {
 #staking-portfolio-details .table td,
 #staking-portfolio-details .table th,
 #vault-pending-withdrawals .table td,
-#vault-pending-withdrawals .table th {
+#vault-pending-withdrawals .table th,
+#dummy-vault-op .table th,
+#dummy-vault-op .table td {
   border: 0;
 }
 
@@ -1571,7 +1575,8 @@ input:focus {
 #dashboard-recent-txn th,
 #delegator-complete-withdraw-details th,
 #staking-portfolio-details th,
-#vault-pending-withdrawals th {
+#vault-pending-withdrawals th,
+#dummy-vault-op th {
   color: var(--primary-color);
   font-size: 0.85em;
   font-weight: 600;

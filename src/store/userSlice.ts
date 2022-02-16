@@ -1,32 +1,34 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, OperationStatus, Role, StakingMode } from '../util/enum'
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData, VaultTransferData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
     address_base16: string,
     account_type: AccountType,
     authenticated: boolean,
-    balance: string,                                    // zils in Qa
+    balance: string,                                                // zils in Qa
     gzil_balance: string,
-    complete_withdrawal_amt: string,                    // amount that is allowed to complete withdraw
+    complete_withdrawal_amt: string,                                // amount that is allowed to complete withdraw
     ledger_index: number,
-    role: Role,                                         // actual role
-    selected_role: Role,                                // role that the user selects when signing in
-    staking_mode: StakingMode,                          // staking option that the user selects during sign in process
-    deleg_stats: DelegStats,                            // track the delegator stats, if user is a delegator
+    role: Role,                                                     // actual role
+    selected_role: Role,                                            // role that the user selects when signing in
+    staking_mode: StakingMode,                                      // staking option that the user selects during sign in process
+    deleg_stats: DelegStats,                                        // track the delegator stats, if user is a delegator
     deleg_staking_portfolio_list: DelegStakingPortfolioStats[],     // list of ssn info that a delegator has staked with
-    operator_stats: OperatorStats,                      // track the operator stats, if user is an operator
-    pending_withdraw_list: PendingWithdrawStats[],      // track pending withdrawals
-    stake_modal_data: StakeModalData,                   // hold info about a selected ssn; for dropdown selection use when choosing whether to stake, transfer, claim etc 
-    swap_deleg_modal_data: SwapDelegModalData,          // hold delegator swap request
-    is_deleg_stats_loading: OperationStatus,            // delegator stats and staking portfolio status indicator
-    is_operator_stats_loading: OperationStatus,         // status indicator for loading operator stats
-    vaults: any [],                                     // JSON array vault_id -> staking data
-    vaults_id_address_map: any,                         // JSON map vault_id -> vault_address   
-    vaults_balances: any,                               // JSON map; vault address -> Vault Data; stores vault's token balances
-    vaults_pending_withdraw_list: any [],               // JSON array vault_id -> pending withdrawal data 
-    selected_vault_to_withdraw: number,                 // vault id that the user selected that is going to invoke complete withdrawal
+    operator_stats: OperatorStats,                                  // track the operator stats, if user is an operator
+    pending_withdraw_list: PendingWithdrawStats[],                  // track pending withdrawals
+    stake_modal_data: StakeModalData,                               // hold info about a selected ssn; for dropdown selection use when choosing whether to stake, transfer, claim etc 
+    swap_deleg_modal_data: SwapDelegModalData,                      // hold delegator swap request
+    is_deleg_stats_loading: OperationStatus,                        // delegator stats and staking portfolio status indicator
+    is_operator_stats_loading: OperationStatus,                     // status indicator for loading operator stats
+    vaults: any [],                                                 // JSON array vault_id -> staking data
+    vaults_id_address_map: any,                                     // JSON map vault_id -> vault_address   
+    vaults_balances: any,                                           // JSON map; vault address -> Vault Data; stores vault's token balances
+    vaults_pending_withdraw_list: any [],                           // JSON array vault_id -> pending withdrawal data 
+    selected_vault_to_withdraw: number,                             // vault id that the user selected that is going to invoke complete withdrawal
+    vaults_ownership_transfer_request_list: VaultTransferData[],    // list of vault transfer request sent 
+    vaults_ownership_transfer_received_list: VaultTransferData[]    // list of vault transfer request received
 }
 
 const initialState: UserState = {
@@ -54,6 +56,8 @@ const initialState: UserState = {
     vaults_balances: {},
     vaults_pending_withdraw_list: [],
     selected_vault_to_withdraw: -1,
+    vaults_ownership_transfer_request_list: [],
+    vaults_ownership_transfer_received_list: [],
 }
 
 
@@ -145,6 +149,12 @@ const userSlice = createSlice({
         UPDATE_SELECTED_VAULT_TO_WITHDRAW(state, action) {
             state.selected_vault_to_withdraw = action.payload
         },
+        UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST(state, action) {
+            state.vaults_ownership_transfer_request_list = action.payload
+        },
+        UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST(state, action) {
+            state.vaults_ownership_transfer_received_list = action.payload
+        },
         RESET_USER_STATE(state) {
             state.address_bech32 = initialState.address_bech32
             state.address_base16 = initialState.address_base16
@@ -169,6 +179,8 @@ const userSlice = createSlice({
             state.vaults_balances = initialState.vaults_balances
             state.vaults_pending_withdraw_list = initialState.vaults_pending_withdraw_list
             state.selected_vault_to_withdraw = initialState.selected_vault_to_withdraw
+            state.vaults_ownership_transfer_request_list = initialState.vaults_ownership_transfer_request_list
+            state.vaults_ownership_transfer_received_list = initialState.vaults_ownership_transfer_received_list
         },
         QUERY_AND_UPDATE_BALANCE() {},
         QUERY_AND_UPDATE_GZIL_BALANCE() {},
@@ -211,6 +223,8 @@ export const {
     UPDATE_VAULTS_ID_ADDRESS_MAP,
     UPDATE_VAULTS_BALANCE,
     UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
+    UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST,
+    UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST,
     RESET_USER_STATE,
 } = userSlice.actions
 

@@ -106,7 +106,7 @@ export enum ProxyCalls {
     UPDATE_RECV_ADDR = "UpdateReceivingAddr",
     WITHDRAW_COMM = "WithdrawComm",
     WITHDRAW_STAKE_AMT = "WithdrawStakeAmt",
-    WITHDRAW_STAKE_REWARDS = "WithdrawStakeRewards",
+    WITHDRAW_STAKE_REWARDS = "WithdrawStakeRewards"
 }
 
 // BZIL Staking
@@ -127,6 +127,7 @@ export enum TransactionType {
     REVOKE_DELEG_SWAP = 10,
     CONFIRM_DELEG_SWAP = 11,
     REJECT_DELEG_SWAP = 12,
+    REQUEST_VAULT_TRANSFER = 13,
 }
 
 export enum ButtonText {

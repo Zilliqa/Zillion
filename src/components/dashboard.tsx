@@ -56,6 +56,8 @@ import { RESET_BLOCKCHAIN_STATE, UPDATE_CHAIN_INFO } from '../store/blockchainSl
 import { ZilSigner } from '../zilliqa-signer';
 import { QUERY_AND_UPDATE_STAKING_STATS } from '../store/stakingSlice';
 import BzilCompleteWithdrawalTable from './bzil/complete-withdrawal-table';
+import DummyVaultOpTable from './bzil/dummy-vault-op-table';
+import TransferVaultModal from './contract-calls/transfer-vault';
 
 
 function Dashboard(props: any) {
@@ -518,6 +520,12 @@ function Dashboard(props: any) {
                                 }
 
                                 {
+                                    userState.role === Role.DELEGATOR &&
+                                    userState.staking_mode === StakingMode.BZIL &&
+                                    <DummyVaultOpTable />
+                                }
+
+                                {
                                     (userState.role === Role.DELEGATOR) &&
                                     <>
                                     {/* delegator portfolio */}
@@ -640,7 +648,10 @@ function Dashboard(props: any) {
             <SwapDelegModal
                 updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
-                
+
+            <TransferVaultModal
+                updateData={pollData}
+                updateRecentTransactions={updateRecentTransactions} />    
         </div>
         </>
     );

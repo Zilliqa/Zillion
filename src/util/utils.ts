@@ -224,6 +224,8 @@ export const getTransactionText = (txnType: TransactionType) => {
             return "Accept Swap Request";
         case TransactionType.REJECT_DELEG_SWAP:
             return "Reject Swap Request";
+        case TransactionType.REQUEST_VAULT_TRANSFER:
+            return "Request Vault Ownership Transfer"
         default:
             return "Error";
     }

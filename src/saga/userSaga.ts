@@ -21,10 +21,12 @@ import {
     UPDATE_VAULTS, 
     UPDATE_VAULTS_BALANCE,
     UPDATE_VAULTS_ID_ADDRESS_MAP,
-    UPDATE_VAULTS_PENDING_WITHDRAW_LIST} from '../store/userSlice';
+    UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
+    UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST,
+    UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role, StakingMode } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData, VaultTransferData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
@@ -496,13 +498,81 @@ function* populateVaultsPendingWithdrawal() {
         }
 
         yield put(UPDATE_VAULTS_PENDING_WITHDRAW_LIST(vaults));
-        // yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: pendingWithdrawList }));
-        // yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: `${totalWithdrawAmt}` }));
     } catch (e) {
         console.warn("populate vaults pending withdrawal failed: ", e);
         yield put(UPDATE_VAULTS_PENDING_WITHDRAW_LIST([]));
-        // yield put(UPDATE_PENDING_WITHDRAWAL_LIST({ pending_withdraw_list: [] }));
-        // yield put(UPDATE_COMPLETE_WITHDRAWAL_AMT({ complete_withdrawal_amt: "0" }));
+    }
+}
+
+/**
+ * populate data for vaults ownership transfer request
+ */
+function* populateVaultsTransferRequest() {
+    try {
+        const { address_base16 } = yield select(getUserState);
+        const { staking_data } = yield select(getBlockchain);
+
+        const resp:Object = yield call(ZilSdk.getSmartContractSubState, staking_data, 'pending_vault_transfer', [address_base16]);
+
+        if (!isRespOk(resp)) {
+            throw new Error("no vaults transfer request");
+        }
+
+        const requestMap = (resp as any)['pending_vault_transfer'][address_base16];
+
+        let requestList: VaultTransferData[] = [];
+
+        for (let [vault_id, new_owner] of Object.entries(requestMap)) {
+            requestList.push({
+                vaultId: Number(vault_id),
+                initOwner: address_base16,
+                newOwner: new_owner,
+            } as VaultTransferData);
+        }
+
+        yield put(UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST(requestList));
+
+    } catch (e) {
+        console.warn("populate vaults ownership transfer sent failed: ", e);
+        yield put(UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST([]));
+    }
+}
+
+/**
+ * populate data for vaults ownership transfer received
+ */
+function* populateVaultsTransferReceived() {
+    try {
+        const { address_base16 } = yield select(getUserState);
+        const { staking_data } = yield select(getBlockchain);
+
+        const resp:Object = yield call(ZilSdk.getSmartContractSubState, staking_data, 'pending_vault_transfer');
+
+        if (!isRespOk(resp)) {
+            throw new Error("no pending vaults transfer");
+        }
+
+        const vaultTransferMap = (resp as any)['pending_vault_transfer'];
+
+        let receivedList: VaultTransferData[] = [];
+
+        for (let [init_owner, request_map] of Object.entries(vaultTransferMap) as [string, any]) {
+            for (let [vault_id, new_owner] of Object.entries(request_map)) {
+                if (new_owner === address_base16) {
+                    receivedList.push({
+                        vaultId: Number(vault_id),
+                        initOwner: init_owner,
+                        newOwner: new_owner,
+                    } as VaultTransferData);
+                }
+            }
+        }
+
+        yield put(UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST(receivedList));
+
+    } catch (e) {
+        console.warn("populate vaults ownership transfer received failed: ", e);
+        yield put(UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST([]));
     }
 }
 
@@ -519,6 +589,8 @@ function* pollDelegatorData() {
         case StakingMode.BZIL:
             yield fork(populateVaultStakingStats)
             yield fork(populateVaultsPendingWithdrawal)
+            yield fork(populateVaultsTransferRequest)
+            yield fork(populateVaultsTransferReceived)
             break;
         case StakingMode.ZIL:
         default:

@@ -9,6 +9,38 @@ import store from "./store/store";
 export class ZilTxParser {
 
     /**
+     * [bzil] create tx params to add a tag for the vault
+     * @param vaultAddress 
+     * @param vaultName 
+     * @param gasPrice 
+     * @param gasLimit 
+     * @returns 
+     */
+    static parseUpdateVaultName = (vaultAddress: String, vaultName: String, gasPrice: String, gasLimit: String) => {
+        let tag = "UpdateTag";
+        const params = [
+            {
+                vname: 'new_tag',
+                type: 'String',
+                value: `${vaultName}`
+            }
+        ]
+        return ZilTxParser.createTxParams(vaultAddress, "0", tag, params, gasPrice, gasLimit);
+    }
+
+    /**
+     * [bzil] create tx params to withdraw native zils from the vault
+     * @param vaultAddress 
+     * @param gasPrice 
+     * @param gasLimit 
+     * @returns 
+     */
+    static parseWithdrawVaultFunds = (vaultAddress: String, gasPrice: String, gasLimit: String) => {
+        let tag = "WithdrawFunds";
+        return ZilTxParser.createTxParams(vaultAddress, "0", tag, [], gasPrice, gasLimit);
+    }
+
+    /**
      * [bzil] create tx params to request swapping all the stakes of one vault to another
      * @param newDelegAddr 
      * @param vaultId 
