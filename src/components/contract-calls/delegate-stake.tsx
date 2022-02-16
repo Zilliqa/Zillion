@@ -9,7 +9,7 @@ import { AccountType, OperationStatus, ProxyCalls, StakingMode, TransactionType 
 import ModalPending from '../contract-calls-modal/modal-pending';
 import ModalSent from '../contract-calls-modal/modal-sent';
 import { useAppSelector } from '../../store/hooks';
-import { StakeModalData } from '../../util/interface';
+import { StakeModalData, VaultDataMap } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
 import { ZilTxParser } from '../../zilliqa-txparser';
 import GasSettings from './gas-settings';
@@ -24,7 +24,7 @@ function DelegateStakeModal(props: any) {
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
     const mode = useAppSelector(state => state.user.staking_mode);
-    const vaultIds = useAppSelector(state => state.user.vaults_id_address_map);
+    const vaultsDataMap: VaultDataMap = useAppSelector(state => state.user.vaults_data_map);
     const minDelegStake = useAppSelector(state => state.staking.min_deleg_stake);
     const balance = useAppSelector(state => state.user.balance); // Qa
     const minDelegStakeDisplay = units.fromQa(new BN(minDelegStake), units.Units.Zil); // for display
@@ -241,8 +241,8 @@ function DelegateStakeModal(props: any) {
                                     className="form-select"
                                     onChange={(e) => onSelectVault(Number(e.target.value))}>
                                     {
-                                        Object.entries(vaultIds).map(([vaultId, vaultAddress]) => {
-                                            return (<option key={vaultId} value={vaultId}>Vault: {vaultId}, Vault Address: {vaultAddress}</option>)
+                                        Object.entries(vaultsDataMap).map(([vaultId, vaultData]) => {
+                                            return (<option key={vaultId} value={vaultId}>Vault: {vaultId}, Vault Address: {vaultData.vaultAddress}</option>)
                                         })
                                     }
                                 </select>

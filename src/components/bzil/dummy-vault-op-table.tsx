@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { trackPromise } from 'react-promise-tracker';
 import { useSortBy, useTable } from 'react-table';
 import { useAppSelector } from '../../store/hooks';
+import { VaultDataMap } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
 import { ZilTxParser } from '../../zilliqa-txparser';
 
@@ -12,7 +13,7 @@ import { ZilTxParser } from '../../zilliqa-txparser';
  * @TODO: modal txn id return for accept vault transfer
  */
 function DummyVaultOpTable(props: any) {
-    const vaultsIdAddressMap = useAppSelector(state => state.user.vaults_id_address_map);
+    const vaultsDataMap: VaultDataMap = useAppSelector(state => state.user.vaults_data_map);
     const vaultsTransferRequestList = useAppSelector(state => state.user.vaults_ownership_transfer_request_list);
     const vaultsTransferReceivedList = useAppSelector(state => state.user.vaults_ownership_transfer_received_list);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
@@ -30,10 +31,10 @@ function DummyVaultOpTable(props: any) {
             {
                 Header: 'vault address',
                 accessor: 'vaultAddress',
-                Cell: ({ row }: any) => <span>{vaultsIdAddressMap[row.original.vaultId]}</span>
+                Cell: ({ row }: any) => <span>{vaultsDataMap[row.original.vaultId] && vaultsDataMap[row.original.vaultId].vaultAddress}</span>
             },
             {
-                Header: 'Pending New Owner',
+                Header: 'Vault Owner',
                 accessor: 'initOwner',
             },
             {
@@ -95,7 +96,7 @@ function DummyVaultOpTable(props: any) {
                                 return (
                                     <div>
                                         <p>Vault Id: {vaultsTransferData.vaultId}</p>
-                                        <p>Vault Address: {vaultsIdAddressMap[vaultsTransferData.vaultId]}</p>
+                                        <p>Vault Address: {vaultsDataMap[vaultsTransferData.vaultId] && vaultsDataMap[vaultsTransferData.vaultId].vaultAddress}</p>
                                         <p>Pending New Owner: {vaultsTransferData.newOwner}</p>
                                     </div>
                                 )

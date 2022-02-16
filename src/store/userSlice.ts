@@ -23,13 +23,12 @@ interface UserState {
     is_deleg_stats_loading: OperationStatus,                        // delegator stats and staking portfolio status indicator
     is_operator_stats_loading: OperationStatus,                     // status indicator for loading operator stats
     vaults: any [],                                                 // JSON array vault_id -> staking data
-    vaults_id_address_map: any,                                     // JSON map vault_id -> vault_address   
     vaults_balances: any,                                           // JSON map; vault address -> Vault Data; stores vault's token balances
     vaults_pending_withdraw_list: any [],                           // JSON array vault_id -> pending withdrawal data 
     selected_vault: number,                                         // vault id that the user selected that is going to invoke complete withdrawal, update vault name
     vaults_ownership_transfer_request_list: VaultTransferData[],    // list of vault transfer request sent 
     vaults_ownership_transfer_received_list: VaultTransferData[],   // list of vault transfer request received
-    vaults_data_map: VaultDataMap
+    vaults_data_map: VaultDataMap                                   // list of vaults' data; vault_id, vault_address, vault_name .etc.
 }
 
 const initialState: UserState = {
@@ -53,7 +52,6 @@ const initialState: UserState = {
     is_deleg_stats_loading: OperationStatus.IDLE,
     is_operator_stats_loading: OperationStatus.IDLE,
     vaults: [],
-    vaults_id_address_map: {},
     vaults_balances: {},
     vaults_pending_withdraw_list: [],
     selected_vault: -1,
@@ -139,9 +137,6 @@ const userSlice = createSlice({
         UPDATE_VAULTS(state, action) {
             state.vaults = action.payload
         },
-        UPDATE_VAULTS_ID_ADDRESS_MAP(state, action) {
-            state.vaults_id_address_map = action.payload
-        },
         UPDATE_VAULTS_BALANCE(state, action) {
             state.vaults_balances = action.payload
         },
@@ -180,7 +175,6 @@ const userSlice = createSlice({
             state.is_deleg_stats_loading = initialState.is_deleg_stats_loading
             state.is_operator_stats_loading = initialState.is_operator_stats_loading
             state.vaults = initialState.vaults
-            state.vaults_id_address_map = initialState.vaults_id_address_map
             state.vaults_balances = initialState.vaults_balances
             state.vaults_pending_withdraw_list = initialState.vaults_pending_withdraw_list
             state.selected_vault = initialState.selected_vault
@@ -227,7 +221,6 @@ export const {
     UPDATE_FETCH_OPERATOR_STATS_STATUS,
     UPDATE_VAULTS,
     UPDATE_VAULTS_DATA,
-    UPDATE_VAULTS_ID_ADDRESS_MAP,
     UPDATE_VAULTS_BALANCE,
     UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
     UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST,

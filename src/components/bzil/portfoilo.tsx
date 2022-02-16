@@ -66,7 +66,6 @@ function BzilPortfolio(props: any) {
     const dispatch = useAppDispatch();
     const vaults = useAppSelector(state => state.user.vaults);
     const vaultsBalances = useAppSelector(state => state.user.vaults_balances);  // vault_address -> { zilBalance, bzilBalance }
-    const vaultsIdAddressMap = useAppSelector(state => state.user.vaults_id_address_map);
     const vaultsDataMap: VaultDataMap = useAppSelector(state => state.user.vaults_data_map);
     const loading: OperationStatus = useAppSelector(state => state.user.is_deleg_stats_loading);
 

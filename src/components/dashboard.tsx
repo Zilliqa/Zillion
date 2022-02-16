@@ -433,7 +433,7 @@ function Dashboard(props: any) {
                                                     
                                                     return (
                                                         <div>
-                                                            <p>Vault ID: {vaultId}, Vault Address: {userState.vaults_id_address_map[vaultId]}</p>
+                                                            <p>Vault ID: {vaultId}, Vault Address: {userState.vaults_data_map[Number(vaultId)] && userState.vaults_data_map[Number(vaultId)].vaultAddress }</p>
                                                             <>{renderVaultStake()}</>
                                                         </div>
                                                     )

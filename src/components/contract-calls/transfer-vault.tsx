@@ -4,6 +4,7 @@ import { trackPromise } from "react-promise-tracker";
 import { toast } from "react-toastify";
 import { useAppSelector } from "../../store/hooks";
 import { OperationStatus, TransactionType } from "../../util/enum";
+import { VaultDataMap } from "../../util/interface";
 import { bech32ToChecksum, showWalletsPrompt } from "../../util/utils";
 import { ZilSigner } from "../../zilliqa-signer";
 import { ZilTxParser } from "../../zilliqa-txparser";
@@ -17,7 +18,7 @@ const { validation } = require('@zilliqa-js/util');
  * transfer vault ownership
  */
 function TransferVaultModal(props: any) {
-    const vaultIds = useAppSelector(state => state.user.vaults_id_address_map);
+    const vaultsDataMap: VaultDataMap = useAppSelector(state => state.user.vaults_data_map);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
 
@@ -141,8 +142,8 @@ function TransferVaultModal(props: any) {
                                     className="form-select"
                                     onChange={(e) => onSelectVault(Number(e.target.value))}>
                                     {
-                                        Object.entries(vaultIds).map(([vaultId, vaultAddress]) => {
-                                            return (<option key={vaultId} value={vaultId}>Vault: {vaultId}, Vault Address: {vaultAddress}</option>)
+                                        Object.entries(vaultsDataMap).map(([vaultId, vaultData]) => {
+                                            return (<option key={vaultId} value={vaultId}>Vault: {vaultId}, Vault Address: {vaultData.vaultAddress}</option>)
                                         })
                                     }
                                 </select>

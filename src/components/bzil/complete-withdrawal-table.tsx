@@ -3,13 +3,14 @@ import { useSortBy, useTable } from 'react-table';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { UPDATE_SELECTED_VAULT } from '../../store/userSlice';
 import { ButtonText, ContractState } from '../../util/enum';
+import { VaultDataMap } from '../../util/interface';
 import { convertQaToCommaStr } from '../../util/utils';
 
 
 function BzilCompleteWithdrawalTable(props: any) {
     const dispatch = useAppDispatch();
     const vaults = useAppSelector(state => state.user.vaults_pending_withdraw_list);
-    const vaultsIdAddressMap = useAppSelector(state => state.user.vaults_id_address_map);
+    const vaultsDataMap: VaultDataMap = useAppSelector(state => state.user.vaults_data_map);
 
     const columns = useMemo(
         () => [
@@ -51,7 +52,7 @@ function BzilCompleteWithdrawalTable(props: any) {
                                     return (
                                         <div key={index}>
                                             <div className="d-block px-4 py-2 pb-3 text-left">
-                                                <div className="my-4">Vault: {vaultId}, Address: {vaultsIdAddressMap[vaultId]}</div>
+                                                <div className="my-4">Vault: {vaultId}, Address: {vaultsDataMap[Number(vaultId)].vaultAddress}</div>
                                                 <div>
                                                     <button
                                                         className="btn btn-user-action" 

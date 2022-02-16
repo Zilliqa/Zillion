@@ -20,7 +20,6 @@ import {
     UPDATE_FETCH_DELEG_STATS_STATUS,
     UPDATE_VAULTS, 
     UPDATE_VAULTS_BALANCE,
-    UPDATE_VAULTS_ID_ADDRESS_MAP,
     UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
     UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST,
     UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST,
@@ -330,7 +329,6 @@ function* populateVaultStakingStats() {
          */
         let vaults = [] as any;
         let vaultsBalances: any = {};
-        let vaultIdAddrMap: any = {};
         let vaultsDataMap: any = {};
 
         const vaultIdsList = (response as any)['allocated_user_vault'][address_base16];
@@ -340,8 +338,6 @@ function* populateVaultStakingStats() {
 
             const _vault_id: number = Number(vault_id);
             const _vault_address: string = vault_address as any;
-
-            vaultIdAddrMap[_vault_id] = _vault_address;
 
             const resp: Object = yield call(ZilSdk.getSmartContractSubState, impl, 'deposit_amt_deleg', [_vault_address]);
             const depositAmtDeleg = (isRespOk(resp) === true) ? (resp as any)['deposit_amt_deleg'][_vault_address] : null;
@@ -413,13 +409,11 @@ function* populateVaultStakingStats() {
 
         yield put(UPDATE_VAULTS(vaults));
         yield put(UPDATE_VAULTS_DATA(vaultsDataMap));
-        yield put(UPDATE_VAULTS_ID_ADDRESS_MAP(vaultIdAddrMap));
         yield put(UPDATE_VAULTS_BALANCE(vaultsBalances));
         
     } catch (e) {
         console.warn("populate vaults failed");
         yield put(UPDATE_VAULTS([]));
-        yield put(UPDATE_VAULTS_ID_ADDRESS_MAP({}));
         yield put(UPDATE_VAULTS_DATA({}));
     }
 }

@@ -79,6 +79,9 @@ interface SwapDelegModalData {
     requestorList: string[],
 }
 
+/**
+ * vault_id -> VaultData
+ */
 interface VaultDataMap {
     [key: number]: VaultData
 }

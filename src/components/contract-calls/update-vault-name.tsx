@@ -3,6 +3,7 @@ import { trackPromise } from 'react-promise-tracker';
 import { toast } from 'react-toastify';
 import { useAppSelector } from '../../store/hooks';
 import { OperationStatus, TransactionType } from '../../util/enum';
+import { VaultDataMap } from '../../util/interface';
 import { ZilSigner } from '../../zilliqa-signer';
 import { ZilTxParser } from '../../zilliqa-txparser';
 import Alert from '../alert';
@@ -11,7 +12,7 @@ import ModalContent from '../modal-contents/modal-content';
 
 function UpdateVaultNameModal(props: any) {
     const selectedVaultId = useAppSelector(state => state.user.selected_vault);
-    const vaultIds = useAppSelector(state => state.user.vaults_id_address_map);
+    const vaultsDataMap: VaultDataMap = useAppSelector(state => state.user.vaults_data_map);
     const ledgerIndex = useAppSelector(state => state.user.ledger_index);
     const accountType = useAppSelector(state => state.user.account_type);
 
@@ -30,7 +31,7 @@ function UpdateVaultNameModal(props: any) {
     }
 
     const onUpdateVaultName = () => {
-        let vaultAddress = vaultIds[selectedVaultId];
+        let vaultAddress = vaultsDataMap[selectedVaultId].vaultAddress;
 
         let txParams = ZilTxParser.parseUpdateVaultName(vaultAddress, newVaultName, defaultGasPrice, defaultGasLimit);
 
@@ -112,7 +113,7 @@ function UpdateVaultNameModal(props: any) {
                                     <strong>Vault</strong>
                                 </div>
                                 <div>
-                                    <span>{vaultIds[selectedVaultId]}</span>
+                                    <span>{vaultsDataMap[selectedVaultId] ? vaultsDataMap[selectedVaultId].vaultAddress : ''}</span>
                                 </div>
                             </div>
                             <div className="mb-4">
