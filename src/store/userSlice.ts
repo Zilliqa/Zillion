@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, OperationStatus, Role, StakingMode } from '../util/enum'
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData, VaultData, VaultDataMap, VaultTransferData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData, VaultData, VaultDataMap, VaultSwapReceivedData, VaultSwapReceivedMap, VaultSwapRequestMap, VaultTransferData } from '../util/interface';
 
 interface UserState {
     address_bech32: string,
@@ -28,7 +28,9 @@ interface UserState {
     selected_vault: number,                                         // vault id that the user selected that is going to invoke complete withdrawal, update vault name
     vaults_ownership_transfer_request_list: VaultTransferData[],    // list of vault transfer request sent 
     vaults_ownership_transfer_received_list: VaultTransferData[],   // list of vault transfer request received
-    vaults_data_map: VaultDataMap                                   // list of vaults' data; vault_id, vault_address, vault_name .etc.
+    vaults_data_map: VaultDataMap,                                  // list of vaults' data; vault_id, vault_address, vault_name .etc.
+    vaults_swap_request_map: VaultSwapRequestMap,                   // list of vault's swap ssn to other vaults
+    vaults_swap_received_list: VaultSwapReceivedData [],            // list of incoming vault swap ssn request
 }
 
 const initialState: UserState = {
@@ -58,6 +60,8 @@ const initialState: UserState = {
     vaults_ownership_transfer_request_list: [],
     vaults_ownership_transfer_received_list: [],
     vaults_data_map: {},
+    vaults_swap_request_map: {},
+    vaults_swap_received_list: [],
 }
 
 
@@ -155,6 +159,12 @@ const userSlice = createSlice({
         UPDATE_VAULTS_DATA(state, action) {
             state.vaults_data_map = action.payload
         },
+        UPDATE_VAULTS_SWAP_REQUEST_MAP(state, action) {
+            state.vaults_swap_request_map = action.payload
+        },
+        UPDATE_VAULTS_SWAP_RECEIVED_LIST(state, action) {
+            state.vaults_swap_received_list = action.payload
+        },
         RESET_USER_STATE(state) {
             state.address_bech32 = initialState.address_bech32
             state.address_base16 = initialState.address_base16
@@ -181,6 +191,7 @@ const userSlice = createSlice({
             state.vaults_ownership_transfer_request_list = initialState.vaults_ownership_transfer_request_list
             state.vaults_ownership_transfer_received_list = initialState.vaults_ownership_transfer_received_list
             state.vaults_data_map = initialState.vaults_data_map
+            state.vaults_swap_received_list = initialState.vaults_swap_received_list
         },
         QUERY_AND_UPDATE_BALANCE() {},
         QUERY_AND_UPDATE_GZIL_BALANCE() {},
@@ -225,6 +236,8 @@ export const {
     UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
     UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST,
     UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST,
+    UPDATE_VAULTS_SWAP_REQUEST_MAP,
+    UPDATE_VAULTS_SWAP_RECEIVED_LIST,
     RESET_USER_STATE,
 } = userSlice.actions
 

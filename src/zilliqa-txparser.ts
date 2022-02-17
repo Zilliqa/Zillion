@@ -50,7 +50,7 @@ export class ZilTxParser {
 
     /**
      * [bzil] create tx params to request swapping all the stakes of one vault to another
-     * @param newDelegAddr 
+     * @param newDelegAddr bech32 format
      * @param vaultId 
      * @param gasPrice 
      * @param gasLimit 
@@ -69,7 +69,7 @@ export class ZilTxParser {
             {
                 vname: 'new_deleg_addr',
                 type: 'ByStr20',
-                value: `${newDelegAddr}`,
+                value: `${fromBech32Address(newDelegAddr.toString())}`,
             }
         ]
 

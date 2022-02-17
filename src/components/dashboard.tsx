@@ -59,6 +59,7 @@ import BzilCompleteWithdrawalTable from './bzil/complete-withdrawal-table';
 import DummyVaultOpTable from './bzil/dummy-vault-op-table';
 import TransferVaultModal from './contract-calls/transfer-vault';
 import UpdateVaultNameModal from './contract-calls/update-vault-name';
+import TransferVaultFundsModal from './contract-calls/transfer-vault-funds';
 
 
 function Dashboard(props: any) {
@@ -651,6 +652,10 @@ function Dashboard(props: any) {
                 updateRecentTransactions={updateRecentTransactions} />
 
             <TransferVaultModal
+                updateData={pollData}
+                updateRecentTransactions={updateRecentTransactions} />
+            
+            <TransferVaultFundsModal
                 updateData={pollData}
                 updateRecentTransactions={updateRecentTransactions} />
             

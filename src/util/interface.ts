@@ -92,6 +92,30 @@ interface VaultData {
     vaultName: string,
 }
 
+/**
+ * vault_id -> new_vault_address
+ */
+interface VaultSwapRequestMap {
+    [key: number]: string
+}
+
+/**
+ * vault_id -> VaultSwapReceivedData
+ */
+interface VaultSwapReceivedMap {
+    [key: number]: VaultSwapReceivedData
+}
+
+/**
+ * vaultId: swap to this vault
+ * requestor: vault address that send the request
+ */
+interface VaultSwapReceivedData {
+    vaultId: number,
+    vaultAddress: string,
+    requestorVault: string,
+}
+
 interface VaultTokenBalance {
     bzilBalance: string,
     zilBalance: string,
@@ -166,4 +190,7 @@ export type {
     VaultDataMap,
     VaultTokenBalance,
     VaultTransferData,
+    VaultSwapRequestMap,
+    VaultSwapReceivedMap,
+    VaultSwapReceivedData,
 }

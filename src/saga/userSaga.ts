@@ -23,10 +23,12 @@ import {
     UPDATE_VAULTS_PENDING_WITHDRAW_LIST,
     UPDATE_VAULTS_OWNERSHIP_REQUEST_LIST,
     UPDATE_VAULTS_OWNERSHIP_RECEIVED_LIST,
-    UPDATE_VAULTS_DATA} from '../store/userSlice';
+    UPDATE_VAULTS_DATA,
+    UPDATE_VAULTS_SWAP_REQUEST_MAP,
+    UPDATE_VAULTS_SWAP_RECEIVED_LIST} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role, StakingMode } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData, VaultTokenBalance, VaultTransferData } from '../util/interface';
+import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData, VaultSwapReceivedData, VaultSwapReceivedMap, VaultSwapRequestMap, VaultTokenBalance, VaultTransferData } from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
@@ -302,11 +304,42 @@ function* populateRewardBlkCountdown() {
     }
 }
 
+function* fetchVaults() {
+    try {
+        const { address_base16 } = yield select(getUserState);
+        const { staking_data } = yield select(getBlockchain);
+
+        const response:Object = yield call(ZilSdk.getSmartContractSubState, staking_data, 'allocated_user_vault', [address_base16]);
+
+        if (!isRespOk(response)) {
+            throw new Error("no vaults");
+        }
+
+        const vaultIdsList = (response as any)['allocated_user_vault'][address_base16];
+
+        // fetch vault staking stats
+        yield fork(populateVaultStakingStats, vaultIdsList);
+
+        // fetch zil and bzil balance of the vault
+        yield fork(populateVaultTokenBalance, vaultIdsList);
+
+        // fetch pending withdrawals
+        yield fork(populateVaultsPendingWithdrawal, vaultIdsList);
+
+        // fetch vault's stakes swap to other vaults
+        yield fork(populateVaultsSwapRequest, vaultIdsList);
+
+
+    } catch (e) {
+        console.warn("fetch vaults failed");
+    }
+}
+
 /**
  * populate vaults tokens balances
- * @param vaultIdsList 
+ * @param vaultIdsList passed from fetchVaults
  */
-function* populateVaultTokenBalance(vaultIdsList: []) {
+ function* populateVaultTokenBalance(vaultIdsList: []) {
 
     let vaultsBalances: any = {};
 
@@ -342,17 +375,10 @@ function* populateVaultTokenBalance(vaultIdsList: []) {
 /**
  * populate users' vault ids and each vault's stake
  */
-function* populateVaultStakingStats() {
+function* populateVaultStakingStats(vaultIdsList: []) {
     try {
-        const { address_base16 } = yield select(getUserState);
-        const { impl, staking_data } = yield select(getBlockchain);
+        const { impl } = yield select(getBlockchain);
         const { ssn_list } = yield select(getStakingState);
-
-        const response:Object = yield call(ZilSdk.getSmartContractSubState, staking_data, 'allocated_user_vault', [address_base16]);
-
-        if (!isRespOk(response)) {
-            throw new Error("no vaults");
-        }
 
         /**
          * [
@@ -366,11 +392,6 @@ function* populateVaultStakingStats() {
          */
         let vaults = [] as any;
         let vaultsDataMap: any = {};
-
-        const vaultIdsList = (response as any)['allocated_user_vault'][address_base16];
-
-        // fetch zil and bzil balance of the vault
-        yield fork(populateVaultTokenBalance, vaultIdsList);
 
 
         // fetch vault staking information
@@ -441,18 +462,9 @@ function* populateVaultStakingStats() {
  * populate vaults' pending withdrawal
  * @TODO combine or refactor with populateVaultStakingStats to reduce repeated codes
  */
-function* populateVaultsPendingWithdrawal() {
+function* populateVaultsPendingWithdrawal(vaultIdsList: []) {
     try {
-        const { address_base16 } = yield select(getUserState);
-        const { impl, staking_data } = yield select(getBlockchain);
-
-        const response:Object = yield call(ZilSdk.getSmartContractSubState, staking_data, 'allocated_user_vault', [address_base16]);
-
-        if (!isRespOk(response)) {
-            throw new Error("no vaults");
-        }
-
-        const vaultIdsList = (response as any)['allocated_user_vault'][address_base16];
+        const { impl } = yield select(getBlockchain);
 
         /**
          * [
@@ -610,6 +622,55 @@ function* populateVaultsTransferReceived() {
     }
 }
 
+/**
+ * populate data for vault's swapping of stakes to other vaults
+ * populate data for incoming swap requests from other vaults to user's vaults
+ * @param vaultIdsList 
+ */
+function* populateVaultsSwapRequest(vaultIdsList: []) {
+    try {
+        const { impl } = yield select(getBlockchain);
+        const { deleg_swap_request } = yield call(ZilSdk.getSmartContractSubState, impl, 'deleg_swap_request');
+
+        // get the list of requestors that is pending for user's vaults to accept
+        // reverse the mapping
+        let reverseMap = Object.keys(deleg_swap_request).reduce((newMap: any, k) => {
+            let receipientAddr = deleg_swap_request[k];
+            newMap[receipientAddr] = newMap[receipientAddr] || [];
+            newMap[receipientAddr].push(k)
+            return newMap;
+        }, {});
+
+        let swapRequestMap: VaultSwapRequestMap = {};
+        let swapReceivedList: VaultSwapReceivedData[] = [];
+
+        for (let [vault_id, vault_address] of Object.entries(vaultIdsList)) {
+            const _vault_id = Number(vault_id);
+
+            if (vault_address in deleg_swap_request) {
+                swapRequestMap[_vault_id] = deleg_swap_request[vault_address];
+            }
+            if (vault_address in reverseMap) {
+                swapReceivedList.push({
+                    vaultId: _vault_id,
+                    vaultAddress: vault_address,
+                    requestorVault: `${reverseMap[vault_address]}`
+                } as VaultSwapReceivedData);
+            }
+        }
+
+        yield put(UPDATE_VAULTS_SWAP_REQUEST_MAP(swapRequestMap));
+        yield put(UPDATE_VAULTS_SWAP_RECEIVED_LIST(swapReceivedList));
+
+    } catch (e) {
+        console.warn("populate vaults swap request failed: ", e);
+        yield put(UPDATE_VAULTS_SWAP_REQUEST_MAP({}));
+        yield put(UPDATE_VAULTS_SWAP_RECEIVED_LIST([]));
+    }
+}
+
+
+
 function* pollDelegatorData() {
     const { staking_mode } = yield select(getUserState);
 
@@ -621,8 +682,7 @@ function* pollDelegatorData() {
     // run via certain staking modes
     switch (staking_mode) {
         case StakingMode.BZIL:
-            yield fork(populateVaultStakingStats)
-            yield fork(populateVaultsPendingWithdrawal)
+            yield fork(fetchVaults)
             yield fork(populateVaultsTransferRequest)
             yield fork(populateVaultsTransferReceived)
             break;
