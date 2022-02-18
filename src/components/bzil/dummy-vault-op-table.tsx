@@ -24,6 +24,27 @@ function DummyVaultOpTable(props: any) {
     const defaultGasPrice = ZilSigner.getDefaultGasPrice();
     const defaultGasLimit = ZilSigner.getDefaultGasLimit();
     
+
+    const onAcceptVaultOwnershipTransfer = (owner: string, vaultId: number) => {
+        let txParams = ZilTxParser.parseCompleteVaultTransfer(owner, vaultId, defaultGasPrice, defaultGasLimit);
+        
+        trackPromise(ZilSigner.sign(accountType, txParams, ledgerIndex)
+            .then((result) => {
+                console.log(result);
+            })
+        );
+    }
+
+    const onAcceptVaultSwap = (requestorVault: string, vaultId: number) => {
+        let txParams = ZilTxParser.parseConfirmDelegatorSwapBZIL(requestorVault, vaultId, defaultGasPrice, defaultGasLimit);
+
+        trackPromise(ZilSigner.sign(accountType, txParams, ledgerIndex)
+            .then((result) => {
+                console.log(result);
+            })
+        );
+    }
+    
     const columns = useMemo(
         () => [
             {
@@ -51,7 +72,7 @@ function DummyVaultOpTable(props: any) {
                         </button>
                     </div>
             }
-        ], []
+        ], [vaultsDataMap, onAcceptVaultOwnershipTransfer]
     );
 
     const swapReceivedColumns = useMemo(
@@ -82,26 +103,6 @@ function DummyVaultOpTable(props: any) {
             }
         ], []
     );
-
-    const onAcceptVaultOwnershipTransfer = (owner: string, vaultId: number) => {
-        let txParams = ZilTxParser.parseCompleteVaultTransfer(owner, vaultId, defaultGasPrice, defaultGasLimit);
-        
-        trackPromise(ZilSigner.sign(accountType, txParams, ledgerIndex)
-            .then((result) => {
-                console.log(result);
-            })
-        );
-    }
-
-    const onAcceptVaultSwap = (requestorVault: string, vaultId: number) => {
-        let txParams = ZilTxParser.parseConfirmDelegatorSwapBZIL(requestorVault, vaultId, defaultGasPrice, defaultGasLimit);
-
-        trackPromise(ZilSigner.sign(accountType, txParams, ledgerIndex)
-            .then((result) => {
-                console.log(result);
-            })
-        );
-    }
 
     return (
         <div id="dummy-vault-op" className="p-4 dashboard-card container-fluid">

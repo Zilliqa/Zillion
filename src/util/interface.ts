@@ -99,12 +99,6 @@ interface VaultSwapRequestMap {
     [key: number]: string
 }
 
-/**
- * vault_id -> VaultSwapReceivedData
- */
-interface VaultSwapReceivedMap {
-    [key: number]: VaultSwapReceivedData
-}
 
 /**
  * vaultId: swap to this vault
@@ -191,6 +185,5 @@ export type {
     VaultTokenBalance,
     VaultTransferData,
     VaultSwapRequestMap,
-    VaultSwapReceivedMap,
     VaultSwapReceivedData,
 }

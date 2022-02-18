@@ -1,6 +1,21 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { AccountType, LedgerIndex, OperationStatus, Role, StakingMode } from '../util/enum'
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialStakeModalData, initialSwapDelegModalData, OperatorStats, PendingWithdrawStats, StakeModalData, SwapDelegModalData, VaultData, VaultDataMap, VaultSwapReceivedData, VaultSwapReceivedMap, VaultSwapRequestMap, VaultTransferData } from '../util/interface';
+import { 
+    DelegStakingPortfolioStats, 
+    DelegStats, 
+    initialDelegStats, 
+    initialOperatorStats, 
+    initialStakeModalData, 
+    initialSwapDelegModalData, 
+    OperatorStats, 
+    PendingWithdrawStats, 
+    StakeModalData, 
+    SwapDelegModalData, 
+    VaultDataMap, 
+    VaultSwapReceivedData, 
+    VaultSwapRequestMap, 
+    VaultTransferData 
+} from '../util/interface';
 
 interface UserState {
     address_bech32: string,

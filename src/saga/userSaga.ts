@@ -28,7 +28,24 @@ import {
     UPDATE_VAULTS_SWAP_RECEIVED_LIST} from '../store/userSlice';
 import { getRefreshRate } from '../util/config-json-helper';
 import { OperationStatus, Role, StakingMode } from '../util/enum';
-import { DelegStakingPortfolioStats, DelegStats, initialDelegStats, initialOperatorStats, initialSwapDelegModalData, initVaultData, LandingStats, OperatorStats, PendingWithdrawStats, SsnStats, SwapDelegModalData, VaultData, VaultSwapReceivedData, VaultSwapReceivedMap, VaultSwapRequestMap, VaultTokenBalance, VaultTransferData } from '../util/interface';
+import { 
+    DelegStakingPortfolioStats, 
+    DelegStats, 
+    initialDelegStats, 
+    initialOperatorStats, 
+    initialSwapDelegModalData, 
+    initVaultData, 
+    LandingStats, 
+    OperatorStats, 
+    PendingWithdrawStats, 
+    SsnStats, 
+    SwapDelegModalData, 
+    VaultData, 
+    VaultSwapReceivedData, 
+    VaultSwapRequestMap, 
+    VaultTokenBalance, 
+    VaultTransferData 
+} from '../util/interface';
 import { logger } from '../util/logger';
 import { computeDelegRewards } from '../util/reward-calculator';
 import { calculateBlockRewardCountdown, isRespOk } from '../util/utils';
