@@ -4,6 +4,7 @@ import Home from './components/home';
 import Dashboard from './components/dashboard';
 import Error404 from './components/error404';
 import Explorer from './components/explorer';
+import Dashboard2 from './components/dashboard/dashboard2';
 
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
       <Route exact path="/" render={(props) => <Home {...props} />} />
       <Route exact path="/address/:address" render={(props) => < Explorer {...props} />} />
       <Route exact path="/dashboard" render={(props) => <Dashboard {...props}/>} />
+      <Route exact path="/dashboard2" render={(props) => <Dashboard2 {...props} />} />
       <Route exact path="/oops" render={(props) => <Error404 {...props}/>} />
       <Route>
         {/* No route match - redirect to home page */}

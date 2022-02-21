@@ -885,8 +885,12 @@ input:focus {
 }
 
 .navbar {
-  background-color: var(--secondary-color);
-  background-color: transparent;
+  /* background-color: var(--secondary-color); */
+  /* background-color: transparent; */
+  background-color: #191a21;
+  border: 1px solid #384053;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
 }
 
 .navbar .btn-sign-out {
@@ -924,6 +928,16 @@ input:focus {
   text-transform: uppercase;
 }
 
+.nav-page-link .btn {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: #555555;
+}
+
+.nav-page-link .active {
+  color: #fff;
+}
+
 .navbar-right li {
   color: var(--hyperlink-color);
   font-size: 0.9em;
@@ -938,10 +952,10 @@ input:focus {
 
 .navbar-title {
   color: #19d1ad;
-  font-size: 0.8em;
-  font-weight: 400;
+  font-size: 0.85em;
+  font-weight: 500;
   letter-spacing: 0.1em;
-  margin-left: 0.5em;
+  margin-left: 0.8em;
 }
 
 .nav-item .wallet-link {
@@ -2084,5 +2098,54 @@ input:focus {
 
 .final-gzil-mint-block {
   color: var(--primary-color);
+  font-weight: 600;
+}
+
+#wrapper {
+  background: rgb(25,26,33);
+  background: -moz-linear-gradient(180deg, rgba(25,26,33,1) 0%, rgba(33,45,62,1) 56%, rgba(31,40,54,1) 100%);
+  background: -webkit-linear-gradient(180deg, rgba(25,26,33,1) 0%, rgba(33,45,62,1) 56%, rgba(31,40,54,1) 100%);
+  background: linear-gradient(180deg, rgba(25,26,33,1) 0%, rgba(33,45,62,1) 56%, rgba(31,40,54,1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#191a21",endColorstr="#1f2836",GradientType=1);
+}
+
+#main h2 {
+  font-size: 1.2em;
+}
+
+#main .tabs {
+  font-size: 1em;
+  font-weight: 500;
+  color: #555555;
+}
+
+#main .active-tabs {
+  color: #fff;
+  border-bottom: 1px solid #fff;
+}
+
+#main .portfolio-item {
+  padding-top: 1.2em;
+  padding-bottom: 0.6em;
+  background: #1F2430;
+  border: 1px solid #384053;
+  border-radius: 4px;
+}
+
+.portfolio-item + .portfolio-item {
+  margin-left: 5%;
+}
+
+.portfolio-item .title {
+  color: #B2B2B2;
+  font-size: 0.6em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: -0.2em;
+}
+
+.portfolio-item .amt {
+  font-size: 1.4em;
   font-weight: 600;
 }

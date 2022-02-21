@@ -109,7 +109,7 @@ function Home(props: any) {
     // add some delay
     await timeout(1000);
     logger("directing to dashboard");
-    props.history.push("/dashboard");
+    props.history.push("/dashboard2");
   }
 
   const goToDashboard = async () => {
@@ -124,7 +124,7 @@ function Home(props: any) {
     $("#wallet-ledger-modal").modal("hide");
 
     logger("directing to dashboard");
-    props.history.push("/dashboard");
+    props.history.push("/dashboard2");
   }
 
   const prevScreen = () => {
