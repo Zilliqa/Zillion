@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import AnimatedNumber from "react-animated-numbers"
+import AnimatedNumber from "animated-number-react";
 import { trackPromise } from 'react-promise-tracker';
 import { useAppSelector } from '../store/hooks';
 import { OperationStatus } from '../util/enum';
@@ -48,6 +48,8 @@ function RewardCountdownTable(props: any) {
             }));
     }, [networkURL]);
 
+    const formatValue = (value: any) => `${Number(value).toFixed(0)}`;
+
     return (
         <div id="stake-rewards-distribution" className="container">
             <div className="row p-4">
@@ -58,28 +60,31 @@ function RewardCountdownTable(props: any) {
                         <div className="d-block stake-rewards-card">
                             <h3>Current Block Num.</h3>
                             <div className="d-flex justify-content-center">
-                                <AnimatedNumber
-                                    fontStyle={{ fontFamily: "Avenir Next LT Pro", fontSize: 22, fontWeight: 600 }}
-                                    animateToNumber={currentBlockNum}
-                                    config={{ tension: 120, friction: 17 }} />
+                                <AnimatedNumber 
+                                    value={currentBlockNum}
+                                    formatValue={formatValue}
+                                    duration={800}
+                                />
                             </div>
                         </div>
                         <div className="d-block stake-rewards-card">
                             <h3>Blocks Until Rewards</h3>
                             <div className="test d-flex justify-content-center">
-                                <AnimatedNumber
-                                    fontStyle={{ fontFamily: "Avenir Next LT Pro", fontSize: 22, fontWeight: 600 }}
-                                    animateToNumber={blockCountToReward}
-                                    config={{ tension: 120, friction: 17 }} />
+                                <AnimatedNumber 
+                                    value={blockCountToReward}
+                                    formatValue={formatValue} 
+                                    duration={800}
+                                />
                             </div>
                         </div>
                         <div className="d-block stake-rewards-card">
                             <h3>Est. Reward Block Num.</h3>
                             <div className="d-flex justify-content-center">
-                                <AnimatedNumber
-                                    fontStyle={{ fontFamily: "Avenir Next LT Pro", fontSize: 22, fontWeight: 600 }}
-                                    animateToNumber={expectedBlockNum}
-                                    config={{ tension: 120, friction: 17 }} />
+                                <AnimatedNumber 
+                                    value={expectedBlockNum}
+                                    formatValue={formatValue} 
+                                    duration={800}
+                                />
                             </div>
                         </div>
                     </div>
