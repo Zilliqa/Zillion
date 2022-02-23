@@ -885,9 +885,9 @@ input:focus {
 }
 
 .navbar {
-  /* background-color: var(--secondary-color); */
+  background-color: var(--secondary-color);
   /* background-color: transparent; */
-  background-color: #191a21;
+  /* background-color: #191a21; */
   border: 1px solid #384053;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
@@ -2102,33 +2102,29 @@ input:focus {
 }
 
 #wrapper {
-  background: rgb(25,26,33);
-  background: -moz-linear-gradient(180deg, rgba(25,26,33,1) 0%, rgba(33,45,62,1) 56%, rgba(31,40,54,1) 100%);
-  background: -webkit-linear-gradient(180deg, rgba(25,26,33,1) 0%, rgba(33,45,62,1) 56%, rgba(31,40,54,1) 100%);
-  background: linear-gradient(180deg, rgba(25,26,33,1) 0%, rgba(33,45,62,1) 56%, rgba(31,40,54,1) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#191a21",endColorstr="#1f2836",GradientType=1);
+  background: var(--secondary-color);
 }
 
-#main h2 {
+.main h2 {
   font-size: 1.2em;
 }
 
-#main .tabs {
+.main .tabs {
   font-size: 1em;
   font-weight: 500;
   color: #555555;
 }
 
-#main .active-tabs {
+.main .active-tabs {
   color: #fff;
   border-bottom: 1px solid #fff;
 }
 
-#main .portfolio-item {
+.main .portfolio-item {
   padding-top: 1.2em;
   padding-bottom: 0.6em;
   background: #1F2430;
-  border: 1px solid #384053;
+  border: 1px solid #525773;
   border-radius: 4px;
 }
 
@@ -2148,4 +2144,83 @@ input:focus {
 .portfolio-item .amt {
   font-size: 1.4em;
   font-weight: 600;
+}
+
+#nodes-table {
+  font-size: 0.85em;
+
+  border-radius: 10px;
+  background-color: var(--primary-section-bg-color);
+
+  border: 1px solid #525773;
+}
+
+#nodes-table table td {
+  padding: 1.2em;
+}
+
+.vault-info {
+  background: #060d21;
+  border: 1px solid #525773;
+  border-radius: 4px;
+
+  -webkit-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  -moz-box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+  box-shadow: 1px -1px 21px 6px var(--dashboard-shadow-color);
+}
+
+.vault-info .stats {
+  color: #B2B2B2;
+  font-size: 0.9em;
+}
+
+.vault-info .stats span {
+  color: #fff;
+}
+
+.vault-title {
+  font-size: 1em;
+  font-weight: 500;
+}
+
+#vault-table {
+  font-size: 0.85em;
+  background: #2B3052;
+  border: 0;
+}
+
+#vault-table tbody,
+.custom-table tbody {
+  font-size: 1em;
+  font-weight: 500;
+  color: var(--primary-table-font-color);
+}
+
+#vault-table .table th,
+#vault-table .table td
+.custom-table .table thead th,
+.custom-table .table td {
+  border: 0;
+  border-spacing: 0px;
+}
+
+.custom-table .table td {
+  vertical-align: middle;
+}
+
+.table thead th {
+  border: 0;
+}
+
+#vault-table th,
+.custom-table th {
+  color: var(--primary-color);
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding-bottom: 1.5em;
+}
+
+.custom-table .table tbody tr:nth-child(odd) {
+  background-color: #131832;
 }
