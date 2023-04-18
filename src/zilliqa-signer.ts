@@ -74,6 +74,9 @@ export class ZilSigner {
             case AccountType.ZILPAY:
                 result = await ZilSigner.zilPaySign(txParams);
                 break;
+            case AccountType.ZEEVES:
+                result = await ZilSigner.zeevesSign(txParams);
+                break;
             case AccountType.KEYSTORE:
             case AccountType.PRIVATEKEY:
             case AccountType.MNEMONIC:
@@ -232,6 +235,34 @@ export class ZilSigner {
             return txn.id || '';
         } catch (err) {
             console.error("error sdk sign - something is wrong with broadcasting the transaction: ", JSON.stringify(err));
+            console.error(err);
+            return OperationStatus.ERROR;
+        }
+    }
+
+    /**
+     * create and sign txn via Zeeves
+     */
+    private static zeevesSign = async (txParams: any) => {
+        const tx = zilliqa.transactions.new(
+            {
+                toAddr: txParams.toAddr,
+                amount: txParams.amount,
+                data: txParams.data,
+                gasPrice: new BN(txParams.gasPrice || gasPrice),
+                gasLimit: Long.fromNumber(Number(txParams.gasLimit || gasLimit)),
+                version: bytes.pack(chainId, msgVersion),
+            },
+            true
+        );
+
+        console.log(tx);
+
+        try {
+            const txn = await (window as any).Zeeves.blockchain.createTransaction(tx);
+            return txn.id || '';
+        } catch (err) {
+            console.error("error Zeeves sign - something is wrong with broadcasting the transaction: ", JSON.stringify(err));
             console.error(err);
             return OperationStatus.ERROR;
         }

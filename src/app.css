@@ -678,7 +678,9 @@ input:focus {
   fill: var(--primary-color);
 }
 
-.icon-ledger-line .cls-1, .icon-zilpay-line .cls-1 {
+.icon-ledger-line .cls-1, 
+.icon-zilpay-line .cls-1,
+.icon-zeeves-line .cls-1 {
   fill: none;
   stroke: var(--primary-color);
   stroke-miterlimit: 10;
@@ -1592,11 +1594,13 @@ input:focus {
   margin-right: 6px;
 }
 
+#zeeves-link.info-link,
 #home-ssn-details .info-link,
 #dashboard-ssn-details .info-link {
   color: var(--hyperlink-color);
 }
 
+#zeeves-link.info-link:hover,
 #home-ssn-details .info-link:hover,
 #dashboard-ssn-details .info-link:hover {
   color: var(--hyperlink-hover-color);
