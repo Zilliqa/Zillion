@@ -4,7 +4,7 @@ FROM node:12.18.3 as build-stage
 ENV NODE_OPTIONS=--max-old-space-size=4096
 WORKDIR /app
 COPY ./package.json ./
-RUN yarn install
+RUN yarn install -E
 COPY . ./
 RUN yarn build
 
