@@ -6,7 +6,7 @@ WORKDIR /app
 COPY ./package.json ./
 RUN yarn install
 COPY . ./
-RUN yarn build
+RUN yarn build --max_old_space_size=8192
 
 FROM nginx:stable-alpine as production-stage
 COPY --from=build-stage /app/build /usr/share/nginx/html
