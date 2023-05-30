@@ -27,7 +27,7 @@ function Error404(props: any) {
                     </div>
                     <footer id="disclaimer" className="align-items-start">
                         <div className="p-2">
-                        <span className="ml-4 mx-3">&copy; 2020 Zilliqa</span> 
+                        <span className="ml-4 mx-3">&copy; 2023 Zilliqa</span> 
                         <button type="button" className="btn" data-toggle="modal" data-target="#disclaimer-modal" data-keyboard="false" data-backdrop="static">Disclaimer</button>
                         </div>
                     </footer>
