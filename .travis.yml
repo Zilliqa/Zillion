@@ -7,7 +7,7 @@ services:
 matrix:
   include:
     - os: linux
-      dist: jammy
+      dist: xenial
 
 addons:
   apt:
@@ -18,7 +18,7 @@ addons:
     - curl
     - zip
     - unzip
-    - awscli
+    # - awscli
 
 before_cache:
   - docker save -o docker_images/images.tar $(docker images -aq)
