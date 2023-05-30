@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo $(pwd)
 
 docker --version
@@ -20,17 +22,17 @@ rm -rf "$application"-artifact
 mkdir -p "$application"-artifact/build/
 
 docker build --build-arg REACT_APP_DEPLOY_ENV="stg" -t "tempimagebuild:$commit" .
-docker create --name extractbuild "tempimagebuild:$commit"
-docker cp extractbuild:/usr/share/nginx/html/. $(pwd)/"$application"-artifact/build/
-docker rm extractbuild
-docker push "$registryURL"
+# docker create --name extractbuild "tempimagebuild:$commit"
+# docker cp extractbuild:/usr/share/nginx/html/. $(pwd)/"$application"-artifact/build/
+# docker rm extractbuild
+# docker push "$registryURL"
 
-cd "$application"-artifact
-cd build
-echo $commit > "$application"-artifact-commit.txt
-zip -r "$application"-artifact.zip .
-aws s3 sync . s3://"$application"-static-artifact --exclude='*' --include=''"$application"'-artifact.zip'
+# cd "$application"-artifact
+# cd build
+# echo $commit > "$application"-artifact-commit.txt
+# zip -r "$application"-artifact.zip .
+# aws s3 sync . s3://"$application"-static-artifact --exclude='*' --include=''"$application"'-artifact.zip'
 
-cd ..
-echo $(date) > date_created.txt
-aws s3 sync . s3://"$application"-static-artifact --exclude='*' --include='date_created.txt'
+# cd ..
+# echo $(date) > date_created.txt
+# aws s3 sync . s3://"$application"-static-artifact --exclude='*' --include='date_created.txt'

@@ -7,7 +7,7 @@ services:
 matrix:
   include:
     - os: linux
-      dist: xenial
+      dist: jammy
 
 addons:
   apt:
@@ -37,4 +37,4 @@ deploy:
   script:
     - ./scripts/ci_build.sh
   on:
-    branch: master
+    branch: oom
