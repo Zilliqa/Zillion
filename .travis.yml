@@ -18,6 +18,7 @@ addons:
     - curl
     - zip
     - unzip
+    - awscli
 
 before_cache:
   - docker save -o docker_images/images.tar $(docker images -aq)
