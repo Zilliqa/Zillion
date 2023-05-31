@@ -20,7 +20,7 @@ echo "$DOCKER_API_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
 rm -rf "$application"-artifact
 mkdir -p "$application"-artifact/build/
 
-docker build --build-arg REACT_APP_DEPLOY_ENV="stg" -t "tempimagebuild:$commit" .
+docker build --build-arg REACT_APP_DEPLOY_ENV="stg" -t "tempimagebuild:$commit" -t "$registryURL_AWS:$commit" .
 docker create --name extractbuild "tempimagebuild:$commit"
 docker cp extractbuild:/usr/share/nginx/html/. $(pwd)/"$application"-artifact/build/
 docker rm extractbuild
