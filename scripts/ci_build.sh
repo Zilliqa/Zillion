@@ -10,9 +10,9 @@ commit=$(git rev-parse --short=7 $TRAVIS_COMMIT)
 
 accountID=$(aws sts get-caller-identity --output text --query 'Account')
 regionID=us-west-2
-application=staking-viewer
+application=stakez
 registryURL="zilliqa/$application"
-registryURL_AWS="$accountID.dkr.ecr.$regionID.amazonaws.com/$application"
+registryURL_AWS="$accountID.dkr.ecr.$regionID.amazonaws.com/staking-viewer"
 
 #eval "$(aws ecr get-login --no-include-email --region $regionID)"
 echo "$DOCKER_API_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
