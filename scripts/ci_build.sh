@@ -10,7 +10,7 @@ commit=$(git rev-parse --short=7 $TRAVIS_COMMIT)
 
 accountID=$(aws sts get-caller-identity --output text --query 'Account')
 regionID=us-west-2
-application=stakez
+application=staking-viewer
 registryURL="zilliqa/$application"
 registryURL_AWS="$accountID.dkr.ecr.$regionID.amazonaws.com/$application"
 
