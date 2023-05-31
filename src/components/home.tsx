@@ -234,6 +234,13 @@ function Home(props: any) {
                 { /* sign in and seed node table */ }
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
                 <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
+                <div 
+                    className="btn btn-sign-in mt-4 mx-3" 
+                    onClick={() => window.location.href = 'https://dapp.avely.fi/'} 
+                    style={{ backgroundColor: '#FF6FAC', color: 'white' }}
+                >
+                  Liquid Staking
+                </div>
 
                 <div className="d-flex justify-content-center h-100">
                   <div className="explorer-search">

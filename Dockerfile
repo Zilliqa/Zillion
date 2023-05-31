@@ -1,10 +1,11 @@
-FROM node:12.18.3 as build-stage
+FROM node:14.20.1 as build-stage
 
 
-
+ENV NODE_OPTIONS=--max-old-space-size=4096
 WORKDIR /app
 COPY ./package.json ./
-RUN yarn install
+COPY ./yarn.lock ./
+RUN yarn install -E
 COPY . ./
 RUN yarn build
 
