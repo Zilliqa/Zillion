@@ -12,6 +12,7 @@ accountID=$(aws sts get-caller-identity --output text --query 'Account')
 regionID=us-west-2
 application=stakez
 registryURL="zilliqa/$application"
+registryURL_AWS="$accountID.dkr.ecr.$regionID.amazonaws.com/$application"
 
 #eval "$(aws ecr get-login --no-include-email --region $regionID)"
 echo "$DOCKER_API_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
@@ -24,6 +25,9 @@ docker create --name extractbuild "tempimagebuild:$commit"
 docker cp extractbuild:/usr/share/nginx/html/. $(pwd)/"$application"-artifact/build/
 docker rm extractbuild
 docker push "$registryURL"
+
+aws ecr get-login-password --region $regionID | docker login --username AWS --password-stdin $registryURL_AWS
+docker push "$registryURL_AWS:$commit"
 
 cd "$application"-artifact
 cd build
