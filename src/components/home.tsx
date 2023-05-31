@@ -232,14 +232,14 @@ function Home(props: any) {
               
               <div className="initial-load">
                 { /* sign in and seed node table */ }
-                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
-                <div className="btn btn-sign-in mt-4 mx-3" onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators&nbsp;&nbsp;</div>
+                <div className="btn btn-sign-in mt-4 mx-3" style={{width: '250px', textAlign: 'center'}} onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
+                <div className="btn btn-sign-in mt-4 mx-3" style={{width: '250px', textAlign: 'center'}} onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
                 <div 
                     className="btn btn-sign-in mt-4 mx-3" 
                     onClick={() => window.location.href = 'https://dapp.avely.fi/'} 
-                    style={{ backgroundColor: '#FF6FAC', color: 'white' }}
+                    style={{ width: '250px', textAlign: 'center', backgroundColor: '#FF6FAC', color: 'white' }}
                 >
-                    Liquid Staking&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Liquid Staking
                 </div>
 
                 <div className="d-flex justify-content-center h-100">
