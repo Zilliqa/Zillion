@@ -383,6 +383,22 @@ input:focus {
   background-color: var(--primary-hover-color);
 }
 
+.btn-logos {
+  cursor: pointer;
+  color: white;
+  border: 2px solid white;
+  background-color: var(--secondary-color);
+  font-size: 1em;
+  font-weight: 500;
+  min-width: 245px;
+  padding-top: 1em;
+  padding-bottom: 0.8em;
+}
+
+.btn-logos:hover {
+  opacity: .7
+}
+
 .btn-theme {
   fill: var(--primary-color);
   padding: 0;
