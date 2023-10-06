@@ -393,6 +393,7 @@ input:focus {
   min-width: 245px;
   padding-top: 1em;
   padding-bottom: 0.8em;
+  border-radius: 4px;
 }
 
 .btn-logos:hover {
