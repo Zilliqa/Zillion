@@ -5,17 +5,16 @@ echo $(pwd)
 docker --version
 aws --version
 
-echo $TRAVIS_COMMIT
-commit=$(git rev-parse --short=7 $TRAVIS_COMMIT)
+echo $COMMIT_SHA
+commit=$(git rev-parse --short=7 $COMMIT_SHA)
 
-accountID=$(aws sts get-caller-identity --output text --query 'Account')
 regionID=us-west-2
 application=stakez
 registryURL="zilliqa/$application"
-registryURL_AWS="$accountID.dkr.ecr.$regionID.amazonaws.com/staking-viewer"
+registryURL_AWS="$AWS_ACCOUNT_ID.dkr.ecr.$regionID.amazonaws.com/staking-viewer"
 
 #eval "$(aws ecr get-login --no-include-email --region $regionID)"
-echo "$DOCKER_API_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
+# echo "$DOCKER_API_TOKEN" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 rm -rf "$application"-artifact
 mkdir -p "$application"-artifact/build/
