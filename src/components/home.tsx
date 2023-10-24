@@ -21,6 +21,9 @@ import ZillionLogo from '../static/zillion.svg';
 import ZillionLightLogo from '../static/light/zillion.svg';
 import LandingStatsTable from './landing-stats-table';
 
+import AvelyLogo from '../static/avely.svg'
+import IgniteLogo from '../static/ignite_dao.png'
+
 import useDarkMode from '../util/use-dark-mode';
 import { ToastContainer } from 'react-toastify';
 import IconSearch from './icons/search';
@@ -75,7 +78,7 @@ function Home(props: any) {
     dispatch(QUERY_AND_UPDATE_USER_STATS());
     await ZilSigner.changeNetwork(chainInfo.blockchain);
 
-    if (accountType === AccountType.LEDGER && typeof(ledgerIndex) !== 'undefined') {
+    if (accountType === AccountType.LEDGER && typeof (ledgerIndex) !== 'undefined') {
       // update ledger index to store if using ledger
       dispatch(UPDATE_LEDGER_INDEX({ ledger_index: ledgerIndex }));
     }
@@ -104,27 +107,27 @@ function Home(props: any) {
     setShowAccessMethod(false);
     setAccessMethod('');
   }
-    
+
   const DisplayAccessMethod = () => {
     switch (accessMethod) {
-      case AccountType.KEYSTORE: 
-        return <WalletKeystore 
-                  onReturnCallback={resetWalletsClicked} 
-                  onWalletLoadingCallback={toggleDirectToDashboard} 
-                  onSuccessCallback={redirectToDashboard} 
-                  role={role} />;
+      case AccountType.KEYSTORE:
+        return <WalletKeystore
+          onReturnCallback={resetWalletsClicked}
+          onWalletLoadingCallback={toggleDirectToDashboard}
+          onSuccessCallback={redirectToDashboard}
+          role={role} />;
       case AccountType.ZILPAY:
-        return <WalletZilPay 
-                  onReturnCallback={resetWalletsClicked} 
-                  onWalletLoadingCallback={toggleDirectToDashboard}
-                  onSuccessCallback={redirectToDashboard}
-                  role={role} />;
+        return <WalletZilPay
+          onReturnCallback={resetWalletsClicked}
+          onWalletLoadingCallback={toggleDirectToDashboard}
+          onSuccessCallback={redirectToDashboard}
+          role={role} />;
       case AccountType.LEDGER:
-        return <WalletLedger 
-                  onReturnCallback={resetWalletsClicked}
-                  onWalletLoadingCallback={toggleDirectToDashboard} 
-                  onSuccessCallback={redirectToDashboard} 
-                  role={role} />;
+        return <WalletLedger
+          onReturnCallback={resetWalletsClicked}
+          onWalletLoadingCallback={toggleDirectToDashboard}
+          onSuccessCallback={redirectToDashboard}
+          role={role} />;
       default:
         return null;
     }
@@ -194,28 +197,28 @@ function Home(props: any) {
       <div className="container-fluid">
         <div className="row align-items-center">
           <div className="cover-content col-12 text-center">
-            
+
             <WarningBanner />
 
-            <div 
-              id="home-mini-navbar" 
+            <div
+              id="home-mini-navbar"
               className={
-                ContractState.IS_PAUSED.toString() === "true" ? 
-                'home-mini-navbar-disabled d-flex align-items-end mr-4' : 
-                'home-mini-navbar-enabled d-flex align-items-end mr-4'}>
+                ContractState.IS_PAUSED.toString() === "true" ?
+                  'home-mini-navbar-disabled d-flex align-items-end mr-4' :
+                  'home-mini-navbar-enabled d-flex align-items-end mr-4'}>
 
               <div>
                 <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>
-                  { 
-                    darkMode.value === true ? 
-                      <IconSun width="20" height="20"/> : 
-                      <IconMoon width="20" height="20"/>
+                  {
+                    darkMode.value === true ?
+                      <IconSun width="20" height="20" /> :
+                      <IconMoon width="20" height="20" />
                   }
                 </button>
               </div>
 
-              { 
-                ( env === Environment.STAGE || env === Environment.PROD ) && 
+              {
+                (env === Environment.STAGE || env === Environment.PROD) &&
                 <span className="mr-2">{selectedNetwork}</span>
               }
 
@@ -225,103 +228,121 @@ function Home(props: any) {
               <>{toggleZillionLogo()}</>
               <p className="tagline">Staking with Zilliqa. Simplified!</p>
             </div>
+            <div className='d-sm-flex justify-content-center pt-5'>
+              <div
+                className='btn-logos d-flex justify-content-center align-items-center mx-2'
+                onClick={() => window.location.href = 'https://dapp.avely.fi/'}
+              >
+                <img className='mr-1' src={AvelyLogo} ></img>
+                <span className='ml-1'>Avely</span>
+              </div>
+              <div
+                className='btn-logos d-flex justify-content-center align-items-center mx-2 mt-3 mt-sm-0'
+                onClick={() => window.location.href = 'https://instantunstaking.ignitedao.io/'}
+              >
+                <img className='mr-1' src={IgniteLogo} width={26} height={26}></img>
+                <span className='ml-1'>IgniteDao</span>
+              </div>
+            </div>
+
+            <div className="d-flex justify-content-center h-100 py-3">
+              <div className="explorer-search">
+                <input type="text" className="explorer-search-input" value={explorerSearchAddress} onKeyDown={handleExplorerKeyPress} onChange={handleExplorerSearchAddress} placeholder="Enter wallet address to check rewards" maxLength={42} />
+                <button type="button" className="btn explorer-search-icon shadow-none" onClick={() => explorerCheckRewards()}><IconSearch width="18" height="18" /></button>
+              </div>
+            </div>
 
             {
               !isShowAccessMethod ?
 
-              
-              <div className="initial-load">
-                { /* sign in and seed node table */ }
-                <div className="btn btn-sign-in mt-4 mx-3" style={{width: '250px', textAlign: 'center'}} onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
-                <div className="btn btn-sign-in mt-4 mx-3" style={{width: '250px', textAlign: 'center'}} onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
-                <div 
+
+                <div className="initial-load">
+                  { /* sign in and seed node table */}
+                  <div className="btn btn-sign-in mt-4 mx-3" style={{ width: '250px', textAlign: 'center' }} onClick={() => handleShowAccessMethod(Role.DELEGATOR.toString())}>Sign in for Delegators</div>
+                  <div className="btn btn-sign-in mt-4 mx-3" style={{ width: '250px', textAlign: 'center' }} onClick={() => handleShowAccessMethod(Role.OPERATOR.toString())}>Sign in for Operators</div>
+                  {/* <div 
                     className="btn btn-sign-in mt-4 mx-3" 
                     onClick={() => window.location.href = 'https://dapp.avely.fi/'} 
                     style={{ width: '250px', textAlign: 'center', backgroundColor: '#FF6FAC', color: 'white' }}
                 >
                     Liquid Staking
-                </div>
+                </div> */}
 
-                <div className="d-flex justify-content-center h-100">
-                  <div className="explorer-search">
-                    <input type="text" className="explorer-search-input" value={explorerSearchAddress} onKeyDown={handleExplorerKeyPress} onChange={handleExplorerSearchAddress} placeholder="Enter wallet address to check rewards" maxLength={42}/>
-                    <button type="button" className="btn explorer-search-icon shadow-none" onClick={() => explorerCheckRewards()}><IconSearch width="18" height="18" /></button>
-                  </div>
-                </div>
 
-                <RewardCountdownTable />
-                <LandingStatsTable />
 
-                <div id="home-ssn-details" className="container">
-                  <div className="row pl-2 pt-4">
-                    <div className="col text-left">
-                      <h2>Staked Seed Nodes</h2>
-                      <p className="info mt-4 mb-0">Please refer to our&nbsp; 
-                          <a className="info-link" href={chainInfo.staking_viewer ? 
-                              chainInfo.staking_viewer : 
-                              "https://zilliqa.com/"} 
-                                target="_blank" 
-                                rel="noopener noreferrer">
-                                   Staking Viewer 
-                          </a> 
-                        &nbsp;for more information on the nodes' statuses.
-                      </p>
+                  <RewardCountdownTable />
+                  <LandingStatsTable />
+
+                  <div id="home-ssn-details" className="container">
+                    <div className="row pl-2 pt-4">
+                      <div className="col text-left">
+                        <h2>Staked Seed Nodes</h2>
+                        <p className="info mt-4 mb-0">Please refer to our&nbsp;
+                          <a className="info-link" href={chainInfo.staking_viewer ?
+                            chainInfo.staking_viewer :
+                            "https://zilliqa.com/"}
+                            target="_blank"
+                            rel="noopener noreferrer">
+                            Staking Viewer
+                          </a>
+                          &nbsp;for more information on the nodes' statuses.
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-12 content">
+                    <div className="row">
+                      <div className="col-12 content">
                         <SsnTable />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              :
+                :
 
-              !accessMethod ?
+                !accessMethod ?
 
-              <>
-                { /* no wallets selected - show wallets to connect */ }
-                <p className="wallet-connect-text animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
-                <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
+                  <>
+                    { /* no wallets selected - show wallets to connect */}
+                    <p className="wallet-connect-text animate__animated animate__fadeIn"><strong>Connect your wallet to start</strong></p>
+                    <div id="wallet-access" className="row align-items-center justify-content-center animate__animated animate__fadeIn mb-4">
 
-                  <div 
-                    className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccountType.KEYSTORE)}>
-                      <IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span>
-                  </div>
+                      <div
+                        className="btn-wallet-access d-block"
+                        onClick={() => handleAccessMethod(AccountType.KEYSTORE)}>
+                        <IconKeystoreLine className="home-icon my-4" height="42px" /><span className="d-block mt-0.5">Keystore</span>
+                      </div>
 
-                  <div 
-                    className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccountType.LEDGER)}>
-                      <IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span>
-                  </div>
+                      <div
+                        className="btn-wallet-access d-block"
+                        onClick={() => handleAccessMethod(AccountType.LEDGER)}>
+                        <IconLedgerLine className="home-icon icon-ledger-line my-4" /><span className="d-block mt-0.5">Ledger</span>
+                      </div>
 
-                  <div 
-                    className="btn-wallet-access d-block" 
-                    onClick={() => handleAccessMethod(AccountType.ZILPAY)} 
-                    data-tip={ env === Environment.PROD ? "Ensure your ZilPay is on Mainnet network" : "Ensure your ZilPay is on Testnet network" }>
-                      <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
-                  </div>
-                  
-                  <ReactTooltip place="bottom" type="light" effect="float" />
-                </div>
-                <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
-              </>
+                      <div
+                        className="btn-wallet-access d-block"
+                        onClick={() => handleAccessMethod(AccountType.ZILPAY)}
+                        data-tip={env === Environment.PROD ? "Ensure your ZilPay is on Mainnet network" : "Ensure your ZilPay is on Testnet network"}>
+                        <IconZilPayLine className="home-icon icon-zilpay-line my-4" /><span className="d-block mt-0.5">ZilPay</span>
+                      </div>
 
-              :
+                      <ReactTooltip place="bottom" type="light" effect="float" />
+                    </div>
+                    <button type="button" className="btn btn-user-action-cancel mt-5 animate__animated animate__fadeIn" onClick={() => resetView()}>Back to Main</button>
+                  </>
 
-              <>
-              {/* wallet selected - show chosen wallet component */}
-              { isDirectDashboard ? 
-              
-              <>{DisplayLoader()}</> 
-              
-              :
-              
-              <>{DisplayAccessMethod()}</> }
-              
-              </>
+                  :
+
+                  <>
+                    {/* wallet selected - show chosen wallet component */}
+                    {isDirectDashboard ?
+
+                      <>{DisplayLoader()}</>
+
+                      :
+
+                      <>{DisplayAccessMethod()}</>}
+
+                  </>
             }
           </div>
           <ToastContainer hideProgressBar={true} />
