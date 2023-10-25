@@ -241,7 +241,7 @@ function Home(props: any) {
                 onClick={() => window.location.href = 'https://instantunstaking.ignitedao.io/'}
               >
                 <img className='mr-1' src={IgniteLogo} width={26} height={26}></img>
-                <span className='ml-1'>IgniteDao</span>
+                <span className='ml-1'>Ignite DAO</span>
               </div>
             </div>
 
