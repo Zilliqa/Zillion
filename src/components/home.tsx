@@ -207,7 +207,7 @@ function Home(props: any) {
                   'home-mini-navbar-disabled d-flex align-items-end mr-4' :
                   'home-mini-navbar-enabled d-flex align-items-end mr-4'}>
 
-              <div>
+              {/* <div>
                 <button type="button" className="btn btn-theme shadow-none mr-3" onClick={toggleTheme}>
                   {
                     darkMode.value === true ?
@@ -215,7 +215,7 @@ function Home(props: any) {
                       <IconMoon width="20" height="20" />
                   }
                 </button>
-              </div>
+              </div> */}
 
               {
                 (env === Environment.STAGE || env === Environment.PROD) &&
