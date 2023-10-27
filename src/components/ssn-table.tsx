@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTable, useSortBy } from 'react-table';
 
 import { SsnStatus, Role, ContractState, OperationStatus } from '../util/enum';
@@ -20,26 +20,26 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
         // deleg view
         // don't sort by stake amount to prevent users from staking the top most everytime
         tempInitialState = {
-            pageIndex: 0, 
+            pageIndex: 0,
             hiddenColumns: hiddenColumns,
             sortBy: [
                 {
                     id: 'name',
                     desc: false
                 }
-            ] 
+            ]
         }
     } else {
         // default sort by stake amt
         tempInitialState = {
-            pageIndex: 0, 
+            pageIndex: 0,
             hiddenColumns: hiddenColumns,
             sortBy: [
                 {
                     id: 'stakeAmt',
                     desc: true
                 }
-            ] 
+            ]
         }
     }
 
@@ -51,45 +51,45 @@ function Table({ columns, data, tableId, hiddenColumns, showStakeBtn }: any) {
         prepareRow,
     } = useTable(
         {
-            columns, 
+            columns,
             data,
             initialState: tempInitialState
         }, useSortBy);
-    
+
     return (
         <>
-        <table id={tableId} className="table table-responsive-lg " {...getTableProps()}>
-            <thead>
-                {headerGroups.map(headerGroup => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                        {headerGroup.headers.map((column, index) => (
-                            <th scope="col" {...column.getHeaderProps()}>
-                                {
-                                    column.render('tipText') === '' ?
-                                    column.render('Header') :
-                                    <span className="ssn-table-header-with-tip" data-for='ssn-table-header-tip' data-tip={column.render('tipText')}>
-                                        {column.render('Header')}
-                                    </span>
-                                }
-                            </th>
-                        ))}
-                    </tr>
-                ))}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-                {rows.map((row, i) => {
-                    prepareRow(row)
-                    return (
-                        <tr {...row.getRowProps()}>
-                            {row.cells.map(cell => {
-                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                            })}
+            <table id={tableId} className="table table-responsive-lg " {...getTableProps()}>
+                <thead>
+                    {headerGroups.map(headerGroup => (
+                        <tr {...headerGroup.getHeaderGroupProps()}>
+                            {headerGroup.headers.map((column, index) => (
+                                <th scope="col" {...column.getHeaderProps()}>
+                                    {
+                                        column.render('tipText') === '' ?
+                                            column.render('Header') :
+                                            <span className="ssn-table-header-with-tip" data-for='ssn-table-header-tip' data-tip={column.render('tipText')}>
+                                                {column.render('Header')}
+                                            </span>
+                                    }
+                                </th>
+                            ))}
                         </tr>
-                    )
-                })}
-            </tbody>
-        </table>
-        <ReactTooltip id="ssn-table-header-tip" place="top" type="dark" effect="solid" />
+                    ))}
+                </thead>
+                <tbody {...getTableBodyProps()}>
+                    {rows.map((row, i) => {
+                        prepareRow(row)
+                        return (
+                            <tr {...row.getRowProps()}>
+                                {row.cells.map(cell => {
+                                    return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+                                })}
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
+            <ReactTooltip id="ssn-table-header-tip" place="top" type="dark" effect="solid" />
         </>
     );
 }
@@ -113,6 +113,12 @@ function SsnTable(props: any) {
         }));
     }
 
+    var array = [...ssnList];
+
+    array= array.sort((a, b) => parseInt(b.stakeAmt) - parseInt(a.stakeAmt));
+
+    console.log({array})
+
     const columns = useMemo(
         () => [
             {
@@ -124,9 +130,9 @@ function SsnTable(props: any) {
                 Header: 'address',
                 accessor: 'address',
                 className: 'ssn-address',
-                Cell: ({ row }: any) => 
+                Cell: ({ row }: any) =>
                     <>
-                    {getTruncatedAddress(row.original.address)}
+                        {getTruncatedAddress(row.original.address)}
                     </>,
                 tipText: ''
             },
@@ -139,9 +145,9 @@ function SsnTable(props: any) {
             {
                 Header: 'stake amount (ZIL)',
                 accessor: 'stakeAmt',
-                Cell: ({ row }: any) => 
+                Cell: ({ row }: any) =>
                     <>
-                    <span>{convertQaToCommaStr(row.original.stakeAmt)} ({computeStakeAmtPercent(row.original.stakeAmt, totalStakeAmt).toFixed(2)}&#37;)</span>
+                        <span>{convertQaToCommaStr(row.original.stakeAmt)} ({computeStakeAmtPercent(row.original.stakeAmt, totalStakeAmt).toFixed(2)}&#37;)</span>
                     </>,
                 tipText: 'Total amount being staked with this operator'
             },
@@ -150,7 +156,7 @@ function SsnTable(props: any) {
                 accessor: 'bufferedDeposits',
                 Cell: ({ row }: any) =>
                     <>
-                    <span>{convertQaToCommaStr(row.original.bufferedDeposits)}</span>
+                        <span>{convertQaToCommaStr(row.original.bufferedDeposits)}</span>
                     </>,
                 tipText: 'Total staked amount deposited in this cycle being considered for rewards in the next cycle'
             },
@@ -164,7 +170,7 @@ function SsnTable(props: any) {
             {
                 Header: 'Comm. Reward (ZIL)',
                 accessor: 'commReward',
-                Cell: ({ row }: any) => 
+                Cell: ({ row }: any) =>
                     <span className="ssn-table-comm-reward">{convertQaToCommaStr(row.original.commReward)}</span>,
                 tipText: 'Number of ZILs earned as commission by the operator'
             },
@@ -176,16 +182,16 @@ function SsnTable(props: any) {
             {
                 Header: 'Status',
                 accessor: 'status',
-                Cell: ({ row }: any) => 
-                        <>
-                        <div className={ row.original.status === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive' }>
+                Cell: ({ row }: any) =>
+                    <>
+                        <div className={row.original.status === SsnStatus.ACTIVE ? 'px-2 py-1 rounded ssn-table-status-active' : 'px-2 py-1 rounded ssn-table-status-inactive'}>
                             {
                                 row.original.status === SsnStatus.INACTIVE ?
-                                <>Below<br/>Min. Stake</> :
-                                row.original.status
+                                    <>Below<br />Min. Stake</> :
+                                    row.original.status
                             }
                         </div>
-                        </>,
+                    </>,
                 tipText: 'Determines whether the operator has met the minnimum stake amount and therefore ready to participate in staking and receive rewards'
             },
             {
@@ -193,23 +199,24 @@ function SsnTable(props: any) {
                 accessor: 'stake',
                 Cell: ({ row }: any) =>
                     <>
-                    <button 
-                        type="button" 
-                        className="btn btn-contract-small shadow-none" 
-                        data-toggle="modal" 
-                        data-target="#delegate-stake-modal" 
-                        data-keyboard="false" 
-                        data-backdrop="static"
-                        onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}
-                        disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
+                        <button
+                            type="button"
+                            className="btn btn-contract-small shadow-none"
+                            data-toggle="modal"
+                            data-target="#delegate-stake-modal"
+                            data-keyboard="false"
+                            data-backdrop="static"
+                            onClick={() => handleStake(row.original.name, row.original.address, row.original.commRate)}
+                            disabled={ContractState.IS_PAUSED.toString() === 'true' ? true : false}>
                             Stake
-                    </button>
+                        </button>
                     </>,
                 tipText: ''
             }
             // eslint-disable-next-line
-        ],[ssnList, role]
+        ], [ssnList, role]
     )
+
 
     const getHiddenColumns = () => {
         // hide redudant info for certain group of users, e.g. commission reward
@@ -227,23 +234,23 @@ function SsnTable(props: any) {
         }
         return hiddenColumns;
     }
-    
+
     return (
         <>
-        { 
-            loading === OperationStatus.PENDING && 
-            <SpinnerNormal class="spinner-border dashboard-spinner mb-4" /> 
-        }
-        {
-            loading === OperationStatus.COMPLETE &&
-            <Table 
-                columns={columns} 
-                data={ssnList} 
-                className={props.tableId} 
-                hiddenColumns={getHiddenColumns()} 
-                showStakeBtn={showStakeBtn}
-             />
-        }
+            {
+                loading === OperationStatus.PENDING &&
+                <SpinnerNormal class="spinner-border dashboard-spinner mb-4" />
+            }
+            {
+                loading === OperationStatus.COMPLETE &&
+                <Table
+                    columns={columns}
+                    data={ssnList}
+                    className={props.tableId}
+                    hiddenColumns={getHiddenColumns()}
+                    showStakeBtn={showStakeBtn}
+                />
+            }
         </>
     );
 }
