@@ -240,7 +240,7 @@ function Home(props: any) {
                 className='btn-logos d-flex justify-content-center align-items-center mx-2 mt-3 mt-sm-0'
                 onClick={() => window.location.href = 'https://instantunstaking.ignitedao.io/'}
               >
-                <img className='mr-1' src={IgniteLogo} width={26} height={26}></img>
+                <img className='mr-1 cover-img' src={IgniteLogo} width={26} height={26}></img>
                 <span className='ml-1'>Ignite DAO</span>
               </div>
             </div>
