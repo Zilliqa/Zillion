@@ -212,7 +212,7 @@ function SsnTable(props: any) {
                 tipText: ''
             }
             // eslint-disable-next-line
-        ], [ssnList, role]
+        ], [array, role]
     )
 
 
@@ -243,7 +243,7 @@ function SsnTable(props: any) {
                 loading === OperationStatus.COMPLETE &&
                 <Table
                     columns={columns}
-                    data={ssnList}
+                    data={array}
                     className={props.tableId}
                     hiddenColumns={getHiddenColumns()}
                     showStakeBtn={showStakeBtn}
