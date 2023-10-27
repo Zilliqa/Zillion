@@ -117,8 +117,6 @@ function SsnTable(props: any) {
 
     array= array.sort((a, b) => parseInt(b.stakeAmt) - parseInt(a.stakeAmt));
 
-    console.log({array})
-
     const columns = useMemo(
         () => [
             {
